@@ -22,3 +22,8 @@ struct SidebarSection: Identifiable, Codable {
     let items: [SidebarSectionItem]
     
 }
+
+struct MainSection: Hashable, Codable, Identifiable {
+    let id = UUID()
+    let name: String
+}

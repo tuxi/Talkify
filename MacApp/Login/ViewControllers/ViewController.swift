@@ -10,10 +10,10 @@ import Cocoa
 
 class ViewController: NSViewController {
     let statusButtonHeight: CGFloat = 15
-    private static let sound = NSSound(named: NSSound.Name.init("登录状态切换的音效.mp3"))
+    private static let sound = NSSound(named: NSSound.Name.init("login_tip.mp3"))
     @IBOutlet weak var accountTextField: LoginAccountTextField!
     @IBOutlet weak var passwordTextField: LoginPasswordTextField!
-    //@IBOutlet weak var loginButton: NSButton!
+
     @IBOutlet weak var loginButton: NSButton!
     
     @IBOutlet weak var qrViewButton: NSButton!
@@ -44,7 +44,7 @@ class ViewController: NSViewController {
     }()
     //状态按钮
     lazy var statusBtn: StatusButton = {
-       let tmpBtn = StatusButton()
+        let tmpBtn = StatusButton()
         tmpBtn.image = #imageLiteral(resourceName: "online_status")
         tmpBtn.translatesAutoresizingMaskIntoConstraints = false
         tmpBtn.isBordered = false
@@ -52,27 +52,29 @@ class ViewController: NSViewController {
         tmpBtn.action = #selector(handleStatus(_:))
         return tmpBtn
     }()
+    
+    deinit {
+        print("ViewController deinit")
+    }
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         
         self.loginButton.contentTintColor = NSColor.blue
         
-        NotificationCenter.default.addObserver(forName: NSText.didChangeNotification, object: nil, queue: OperationQueue.main) { (noti) in
-            self.detectLoginButtonState()
-        }
         //赋值数据
         for i in 1...5 {
             usersData.append(LoginUserItemModel(name: "2_0\(i)" ))
         }
-
+        
         //将二维码视图界面背景改成白色
         qrView.wantsLayer = true
         qrView.layer?.backgroundColor = NSColor.white.cgColor
         //注册Cell
         collectionView.register(NSNib.init(nibNamed: NSNib.Name.init("LoginUserItem"), bundle: nil), forItemWithIdentifier: NSUserInterfaceItemIdentifier.init("LoginUserItem"))
     }
-    //检测登录按钮的状态
-    func detectLoginButtonState() {
+    // 检测登录按钮的状态
+    @objc func detectLoginButtonState() {
         if !self.accountTextField.stringValue.isEmpty && !self.passwordTextField.stringValue.isEmpty {
             self.loginButton.isEnabled = true
         }else {
@@ -96,17 +98,29 @@ class ViewController: NSViewController {
         self.addStatsButton()
         //检测登录按钮的状态
         detectLoginButtonState()
+        
+        NotificationCenter.default.addObserver(self, selector: #selector(windowWillMoveNotification), name: NSWindow.willMoveNotification, object: nil)
+        NotificationCenter.default.addObserver(self, selector: #selector(detectLoginButtonState), name: NSText.didChangeNotification, object: nil)
+    }
+    override func viewDidDisappear() {
+        super.viewDidDisappear()
+        NotificationCenter.default.removeObserver(self)
     }
     override func viewDidAppear() {
         super.viewDidAppear()
         accountTextField.becomeFirstResponder()
-        NotificationCenter.default.addObserver(forName: NSWindow.willMoveNotification, object: nil, queue: OperationQueue.main) { (noti) in
-            if self.showOrhideWindowBtn.state == .off {
-            self.settingWindow.animator().setFrame(NSMakeRect((self.view.window?.frame.origin.x)!, (self.view.window?.frame.origin.y)!+99, (self.view.window?.frame.size.width)!, 1), display: true)
-                self.view.window?.animator().addChildWindow(self.settingWindow, ordered: .below)
+    }
+    
+    @objc func windowWillMoveNotification() {
+        if self.showOrhideWindowBtn.state == .off {
+            guard (self.view.window != nil) else {
+                return
             }
+            self.settingWindow.animator().setFrame(NSMakeRect((self.view.window?.frame.origin.x)!, (self.view.window?.frame.origin.y)!+99, (self.view.window?.frame.size.width)!, 1), display: true)
+            self.view.window?.animator().addChildWindow(self.settingWindow, ordered: .below)
         }
     }
+    
     //状态按钮切换方法
     @objc func handleStatus(_ button: NSButton) {
         if button.image == #imageLiteral(resourceName: "online_status") {
@@ -117,8 +131,8 @@ class ViewController: NSViewController {
     }
     @IBAction func handleCloseButton(_ sender: Any) {
         NSApp.terminate(sender)
-//        NSApp 等于 NSApplication.shared
-//        NSApplication.shared.terminate(sender)
+        //        NSApp 等于 NSApplication.shared
+        //        NSApplication.shared.terminate(sender)
     }
     //点击进入扫描二维码界面
     @IBAction func handleQREvent(_ sender: NSButton) {
@@ -155,7 +169,7 @@ class ViewController: NSViewController {
             }else {
                 
                 view.window?.removeChildWindow(self.settingWindow)
-            self.settingWindow.animator().setFrame(NSMakeRect((self.view.window?.frame.origin.x)!, (self.view.window?.frame.origin.y)!+22, (self.view.window?.frame.size.width)!, 0), display: false)
+                self.settingWindow.animator().setFrame(NSMakeRect((self.view.window?.frame.origin.x)!, (self.view.window?.frame.origin.y)!+22, (self.view.window?.frame.size.width)!, 0), display: false)
             }
         }, completionHandler: nil)
         
@@ -164,7 +178,7 @@ class ViewController: NSViewController {
     
     override var representedObject: Any? {
         didSet {
-        // Update the view, if already loaded.
+            // Update the view, if already loaded.
         }
     }
     //过渡按钮button点击事件

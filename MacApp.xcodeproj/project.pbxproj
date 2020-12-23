@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		D03F454B25934EC00029927D /* login_tip.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = D03F454A25934EC00029927D /* login_tip.mp3 */; };
 		D08C435B2591CAAD00D9EC5D /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = D08C435A2591CAAD00D9EC5D /* AppDelegate.swift */; };
 		D08C435F2591CAAE00D9EC5D /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = D08C435E2591CAAE00D9EC5D /* Assets.xcassets */; };
 		D08C43622591CAAE00D9EC5D /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = D08C43612591CAAE00D9EC5D /* Preview Assets.xcassets */; };
@@ -35,6 +36,7 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		D03F454A25934EC00029927D /* login_tip.mp3 */ = {isa = PBXFileReference; lastKnownFileType = audio.mp3; path = login_tip.mp3; sourceTree = "<group>"; };
 		D08C43572591CAAD00D9EC5D /* MacApp.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = MacApp.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		D08C435A2591CAAD00D9EC5D /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		D08C435E2591CAAE00D9EC5D /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
@@ -76,6 +78,15 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		D03F454925934E410029927D /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+				D03F454A25934EC00029927D /* login_tip.mp3 */,
+				D08C435E2591CAAE00D9EC5D /* Assets.xcassets */,
+			);
+			path = Resources;
+			sourceTree = "<group>";
+		};
 		D08C434E2591CAAD00D9EC5D = {
 			isa = PBXGroup;
 			children = (
@@ -100,7 +111,7 @@
 				D08C43CB2591F85500D9EC5D /* Detail */,
 				D08C43702591D19F00D9EC5D /* Perfs */,
 				D08C435A2591CAAD00D9EC5D /* AppDelegate.swift */,
-				D08C435E2591CAAE00D9EC5D /* Assets.xcassets */,
+				D03F454925934E410029927D /* Resources */,
 				D08C43632591CAAE00D9EC5D /* Main.storyboard */,
 				D08C43662591CAAE00D9EC5D /* Info.plist */,
 				D08C43672591CAAE00D9EC5D /* MacApp.entitlements */,
@@ -273,6 +284,7 @@
 			files = (
 				D08C43652591CAAE00D9EC5D /* Main.storyboard in Resources */,
 				D08C44002593211400D9EC5D /* LoginUserItem.xib in Resources */,
+				D03F454B25934EC00029927D /* login_tip.mp3 in Resources */,
 				D08C43622591CAAE00D9EC5D /* Preview Assets.xcassets in Resources */,
 				D08C435F2591CAAE00D9EC5D /* Assets.xcassets in Resources */,
 				D08C440D259332B600D9EC5D /* LoginWindowController.storyboard in Resources */,
