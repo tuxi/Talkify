@@ -157,6 +157,13 @@ class ViewController: NSViewController {
         self.view.window?.orderOut(self)
     }
     
+    // 其他登陆方式
+    @IBAction func clickOtherLoginBtn(_ sender: Any) {
+        qrViewButton.isHidden = true
+        self.view.addSubview(self.qrView)
+    }
+    
+    
     @IBAction func showOrHideSubWindow(_ sender: NSButton) {
         //每点击此方法播放一下声音
         ViewController.sound?.play()
