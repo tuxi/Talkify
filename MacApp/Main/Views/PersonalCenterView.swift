@@ -29,6 +29,15 @@ struct PersonalCenterView: View {
             }
             .frame(minWidth: 80, maxWidth: 350)
             
+            // 默认显示第一个
+            if sidebarSections.count > 0 {
+                MyCourseListView(model: sidebarSections[0].items[0], items: [
+                    MyCourse(name: "教孩子学习编程", content: "熬过了青葱岁月，走过了懵懂之约，是否可以共赏阳春白雪。", progress: 1.0),
+                    MyCourse(name: "enba", content: "如果我的至尊宝成了别人的齐天大圣，那就炸了他的花果山。", progress: 1.0),
+                    MyCourse(name: "enba", content: "都记住啦，酒能解决的事，绝不能浪费眼泪。", progress: 1.0),
+                ])
+            }
+            
         }
         .listStyle(SidebarListStyle())
         .frame(maxWidth: .infinity, maxHeight: .infinity)

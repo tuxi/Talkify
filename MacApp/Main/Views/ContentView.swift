@@ -24,8 +24,10 @@ struct ContentView: View {
             .listStyle(SidebarListStyle())
             .frame(minWidth: 70, idealWidth: 150, maxWidth: 200, maxHeight: .infinity)
             
-            Text("请先选择左侧的栏目")
-                .frame(maxWidth: .infinity, maxHeight: .infinity)
+//            Text("请先选择左侧的栏目")
+//                .frame(maxWidth: .infinity, maxHeight: .infinity)
+            
+            PersonalCenterView()
         }
         .onAppear() {
             sections = [

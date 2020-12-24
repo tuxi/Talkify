@@ -8,7 +8,7 @@
 import Foundation
 
 struct SidebarSectionItem: Identifiable, Codable {
-    let id = UUID()
+    var id = UUID()
     let title: String
     let icon: String
 }
@@ -16,7 +16,7 @@ struct SidebarSectionItem: Identifiable, Codable {
 // 侧边栏的每一组
 struct SidebarSection: Identifiable, Codable {
     
-    let id = UUID()
+    var id = UUID()
     let title: String
     let icon: String
     let items: [SidebarSectionItem]
@@ -24,12 +24,12 @@ struct SidebarSection: Identifiable, Codable {
 }
 
 struct MainSection: Hashable, Codable, Identifiable {
-    let id = UUID()
+    var id = UUID()
     let name: String
 }
 
 struct MyCourse: Hashable, Codable, Identifiable {
-    let id = UUID()
+    var id = UUID()
     let name: String
     let content: String
     // 学习进度

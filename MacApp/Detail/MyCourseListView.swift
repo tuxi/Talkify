@@ -12,20 +12,25 @@ struct MyCourseListView: View {
     @State var items: [MyCourse] = []
     @State var showComposeWindow = false
     var body: some View {
-        Feed(items: items)
-            .frame(maxWidth: .infinity, maxHeight: .infinity)
-//            .navigationTitle("我的课堂")
-//            .background(Color.white)
-//            .toolbar(content: {
-//                ToolbarItem(placement: .status) {
-//                    Button(action: { self.showComposeWindow = true }, label: {
-//                        Image(systemName: "square.and.pencil")
-//                    })
-//                    .popover(isPresented: $showComposeWindow, content: {
-//                        Compose(showComposeWindow: $showComposeWindow)
-//                    })
-//                }
-//            })
+        if #available(OSX 11.0, *) {
+            Feed(items: items)
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+                .navigationTitle("我的课堂")
+                .background(Color.white)
+                .toolbar(content: {
+                    ToolbarItem(placement: .status) {
+                        Button(action: { self.showComposeWindow = true }, label: {
+                            Image(systemName: "square.and.pencil")
+                        })
+                        .popover(isPresented: $showComposeWindow, content: {
+                            Compose(showComposeWindow: $showComposeWindow)
+                        })
+                    }
+                })
+        } else {
+            Feed(items: items)
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+        }
     }
 }
 
