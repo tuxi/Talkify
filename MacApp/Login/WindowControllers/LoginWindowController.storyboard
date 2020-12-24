@@ -73,20 +73,6 @@
                                             <action selector="showOrHideSubWindow:" target="Hsk-NQ-Fgr" id="tSf-l0-Cnf"/>
                                         </connections>
                                     </button>
-                                    <button translatesAutoresizingMaskIntoConstraints="NO" id="Lez-49-2be">
-                                        <rect key="frame" x="226" y="294" width="15" height="15"/>
-                                        <constraints>
-                                            <constraint firstAttribute="width" constant="15" id="7N2-Dw-C85"/>
-                                            <constraint firstAttribute="height" constant="15" id="HQ1-Gk-IOM"/>
-                                        </constraints>
-                                        <buttonCell key="cell" type="square" bezelStyle="shadowlessSquare" image="qrcode_image" imagePosition="only" alignment="center" imageScaling="proportionallyUpOrDown" inset="2" id="nnQ-J4-5nU">
-                                            <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
-                                            <font key="font" metaFont="system"/>
-                                        </buttonCell>
-                                        <connections>
-                                            <action selector="handleQREvent:" target="Hsk-NQ-Fgr" id="tBp-2e-aYe"/>
-                                        </connections>
-                                    </button>
                                     <scrollView wantsLayer="YES" fixedFrame="YES" borderType="none" autohidesScrollers="YES" horizontalLineScroll="10" horizontalPageScroll="10" verticalLineScroll="10" verticalPageScroll="10" hasHorizontalScroller="NO" usesPredominantAxisScrolling="NO" horizontalScrollElasticity="none" verticalScrollElasticity="none" translatesAutoresizingMaskIntoConstraints="NO" id="wn4-1W-j44">
                                         <rect key="frame" x="45" y="163" width="158" height="100"/>
                                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
@@ -175,10 +161,8 @@
                                     <constraint firstItem="jvZ-0a-ua6" firstAttribute="centerX" secondItem="mzX-Ws-7eJ" secondAttribute="centerX" id="cLt-xU-zzb"/>
                                     <constraint firstItem="dpc-vr-xpw" firstAttribute="top" secondItem="gAC-c7-Die" secondAttribute="bottom" constant="10" id="cNw-uR-z5T"/>
                                     <constraint firstItem="00m-0c-bEd" firstAttribute="centerX" secondItem="mzX-Ws-7eJ" secondAttribute="centerX" id="ckt-XE-Oef"/>
-                                    <constraint firstAttribute="trailing" secondItem="Lez-49-2be" secondAttribute="trailing" constant="7" id="eyy-x7-4GH"/>
                                     <constraint firstItem="dpc-vr-xpw" firstAttribute="leading" secondItem="3SZ-I1-2Qw" secondAttribute="leading" id="gA3-hJ-IIT"/>
                                     <constraint firstItem="3SZ-I1-2Qw" firstAttribute="leading" secondItem="mzX-Ws-7eJ" secondAttribute="leading" constant="34" id="hod-G1-3AI"/>
-                                    <constraint firstItem="Lez-49-2be" firstAttribute="top" secondItem="mzX-Ws-7eJ" secondAttribute="top" constant="7.5" id="jST-QV-n8b"/>
                                     <constraint firstItem="pDK-uj-rG7" firstAttribute="leading" secondItem="dpc-vr-xpw" secondAttribute="leading" id="kaw-By-6zy"/>
                                     <constraint firstItem="gAC-c7-Die" firstAttribute="top" secondItem="Let-tu-A6J" secondAttribute="bottom" id="poV-bM-2Ta"/>
                                     <constraint firstAttribute="width" constant="248" id="rf2-tM-oSr"/>
@@ -199,7 +183,6 @@
                         <outlet property="loginButton" destination="3SZ-I1-2Qw" id="c98-JL-C5e"/>
                         <outlet property="passwordTextField" destination="dpc-vr-xpw" id="5ga-uT-Ek9"/>
                         <outlet property="qrView" destination="CFP-Xb-BzE" id="fx8-TY-FqV"/>
-                        <outlet property="qrViewButton" destination="Lez-49-2be" id="t6D-hx-zCN"/>
                         <outlet property="showOrhideWindowBtn" destination="00m-0c-bEd" id="tJP-1h-NFD"/>
                     </connections>
                 </viewController>
@@ -380,6 +363,5 @@
     <resources>
         <image name="3_02" width="10" height="20"/>
         <image name="Login_down" width="26" height="15"/>
-        <image name="qrcode_image" width="30" height="30"/>
     </resources>
 </document>

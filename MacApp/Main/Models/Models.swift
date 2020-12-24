@@ -27,3 +27,11 @@ struct MainSection: Hashable, Codable, Identifiable {
     let id = UUID()
     let name: String
 }
+
+struct MyCourse: Hashable, Codable, Identifiable {
+    let id = UUID()
+    let name: String
+    let content: String
+    // 学习进度
+    let progress: Double
+}
