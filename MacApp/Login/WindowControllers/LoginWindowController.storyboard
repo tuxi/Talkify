@@ -245,7 +245,7 @@
                                 <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="oZ6-e4-Wl4">
                                     <rect key="frame" x="79" y="269" width="90" height="17"/>
                                     <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="账号密码登陆" id="Lzg-2v-WG4">
-                                        <font key="font" size="14" name=".PingFangSC-Regular"/>
+                                        <font key="font" metaFont="system" size="14"/>
                                         <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
                                         <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
                                     </textFieldCell>
@@ -253,7 +253,7 @@
                                 <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="kEd-B6-wso">
                                     <rect key="frame" x="56" y="64" width="137" height="16"/>
                                     <textFieldCell key="cell" lineBreakMode="clipping" title="我没有账号，立即注册" id="KgQ-oy-Fdc">
-                                        <font key="font" size="13" name=".PingFangSC-Regular"/>
+                                        <font key="font" metaFont="system"/>
                                         <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
                                         <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
                                     </textFieldCell>
@@ -268,7 +268,7 @@
                                 <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="R85-Fu-h5B">
                                     <rect key="frame" x="82" y="38" width="84" height="16"/>
                                     <textFieldCell key="cell" lineBreakMode="clipping" title="同意用户协议" id="wbd-M4-qb9">
-                                        <font key="font" size="13" name=".PingFangSC-Regular"/>
+                                        <font key="font" metaFont="system"/>
                                         <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
                                         <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
                                     </textFieldCell>
