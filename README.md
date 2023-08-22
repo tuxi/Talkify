@@ -1,1 +1,1 @@
-# MacApp
+# Talkify App
