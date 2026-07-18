@@ -1,6 +1,6 @@
 //
 //  AppMenu.swift
-//  CodeAgent
+//  Talkify
 //
 
 #if os(macOS)

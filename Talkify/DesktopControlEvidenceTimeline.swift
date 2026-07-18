@@ -1,6 +1,6 @@
 //
 //  DesktopControlEvidenceTimeline.swift
-//  CodeAgent
+//  Talkify
 //
 //  Product-only Timeline extension. MCP lifecycle and calls belong to the Go
 //  runtime; this extension only projects Agent Wire tool_finished events.

@@ -1,6 +1,6 @@
 //
-//  CodeAgentRootView.swift
-//  CodeAgent
+//  TalkifyRootView.swift
+//  Talkify
 //
 //  Created by xiaoyuan on 2026/6/24.
 //
@@ -12,7 +12,7 @@ import AgentKit
 import CoreKit
 import FeatureAuth
 
-struct CodeAgentRootView: View {
+struct TalkifyRootView: View {
     @Environment(AppContainer.self) private var container
     
     init() {

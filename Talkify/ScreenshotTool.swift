@@ -1,6 +1,6 @@
 //
 //  ScreenshotTool.swift
-//  CodeAgent
+//  Talkify
 //
 //  P1 Demo: 耗时客户端工具 — 屏幕截图（macOS 专用）。
 //  使用 ScreenCaptureKit 原生 API，自动触发系统权限弹窗并等待用户授权。

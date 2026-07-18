@@ -1,6 +1,6 @@
 //
 //  AppCredentialStore.swift
-//  CodeAgent
+//  Talkify
 //
 //  Created by xiaoyuan on 2026/7/12.
 //

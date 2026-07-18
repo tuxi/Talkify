@@ -1,13 +1,13 @@
 //
 //  SettingsView.swift
-//  CodeAgent
+//  Talkify
 //
 
 import SwiftUI
 import AgentKit
 import CoreKit
 
-/// CodeAgent 的桌面设置中心：保持与主工作区一致的双栏信息密度，
+/// Talkify 的桌面设置中心：保持与主工作区一致的双栏信息密度，
 /// 同时将常用偏好收拢为可扫描的卡片。
 public struct SettingsView: View {
     @Environment(AgentManager.self) private var agentManager
@@ -142,7 +142,7 @@ public struct SettingsView: View {
             settingsCard {
                 SettingsToggleRow(
                     title: "默认权限",
-                    description: "默认情况下，CodeAgent 可以读取和编辑其工作空间中的文件；需要时会请求额外访问权限。",
+                    description: "默认情况下，Talkify 可以读取和编辑其工作空间中的文件；需要时会请求额外访问权限。",
                     isOn: $defaultPermission
                 )
                 SettingsToggleRow(
@@ -172,7 +172,7 @@ public struct SettingsView: View {
                 }
                 SettingsToggleRow(
                     title: "在菜单栏中显示",
-                    description: "关闭主窗口后，仍在 macOS 菜单栏中保留 CodeAgent。",
+                    description: "关闭主窗口后，仍在 macOS 菜单栏中保留 Talkify。",
                     isOn: $showInMenuBar
                 )
                 SettingsToggleRow(
@@ -387,7 +387,7 @@ public struct SettingsView: View {
     }
 
     private var accountInitial: String { String(accountName.prefix(1)).uppercased() }
-    private var accountSubtitle: String { agentManager.usage?.tier.rawValue.capitalized ?? "CodeAgent 用户" }
+    private var accountSubtitle: String { agentManager.usage?.tier.rawValue.capitalized ?? "Talkify 用户" }
 
     private var weeklyQuotaText: String {
         guard let usage = agentManager.usage else { return "暂不可用" }

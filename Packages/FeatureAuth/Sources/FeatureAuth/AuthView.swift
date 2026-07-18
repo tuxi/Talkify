@@ -5,12 +5,11 @@
 
 import SwiftUI
 import CoreKit
-import DesignKit
 #if canImport(AuthenticationServices)
 import AuthenticationServices
 #endif
 
-/// 与 CodeAgent 桌面端一致的认证入口。保持认证提供商的真实品牌呈现：
+/// Talkify 的认证入口。保持认证提供商的真实品牌呈现：
 /// Apple 使用系统授权控件，手机验证码沿用现有 Gateway 登录流程。
 public struct AuthView: View {
     @Environment(\.colorScheme) private var colorScheme
@@ -38,7 +37,7 @@ public struct AuthView: View {
                     VStack(spacing: 12) {
                         Text("登录")
                             .font(.system(size: 40, weight: .bold, design: .serif))
-                        Text("登录后即可继续使用 CodeAgent")
+                        Text("登录后即可继续使用 Talkify")
                             .font(.system(size: 15))
                             .foregroundStyle(.secondary)
                     }
@@ -48,12 +47,16 @@ public struct AuthView: View {
 
                     agreementRow
                         .padding(.top, 22)
+                    #if os(macOS)
                         .frame(maxWidth: 540)
+                    #endif
 
                     Spacer(minLength: 70)
                 }
                 .padding(.horizontal, 28)
+#if os(macOS)
                 .frame(maxWidth: .infinity, minHeight: 650)
+#endif
             }
         }
         #if os(macOS)
@@ -79,9 +82,17 @@ public struct AuthView: View {
 }
 
 private extension AuthView {
+    var authSystemBackground: Color {
+        #if os(macOS)
+        Color(nsColor: .windowBackgroundColor)
+        #else
+        Color(uiColor: .systemBackground)
+        #endif
+    }
+
     var authBackground: some View {
         ZStack {
-            Color.systemBackground.ignoresSafeArea()
+            authSystemBackground.ignoresSafeArea()
             Circle()
                 .fill(Color.primary.opacity(colorScheme == .dark ? 0.035 : 0.025))
                 .frame(width: 580, height: 580)
@@ -190,7 +201,7 @@ private extension AuthView {
                 Text(viewModel.isLogging ? "登录中…" : "使用手机号继续")
                     .font(.system(size: 18, weight: .semibold))
             }
-            .foregroundStyle(.white)
+            .foregroundStyle(colorScheme == .dark ? .black : .white)
             .frame(maxWidth: .infinity)
             .frame(height: 54)
             .background(Color.primary, in: RoundedRectangle(cornerRadius: 14, style: .continuous))
@@ -208,7 +219,7 @@ private extension AuthView {
                 .font(.system(size: 12))
                 .foregroundStyle(.secondary)
                 .lineSpacing(2)
-            Spacer(minLength: 0)
+//            Spacer(minLength: 0)
         }
     }
 
@@ -292,7 +303,7 @@ private struct AgreementToggleStyle: ToggleStyle {
     func makeBody(configuration: Configuration) -> some View {
         Button { configuration.isOn.toggle() } label: {
             Image(systemName: configuration.isOn ? "checkmark.circle.fill" : "circle")
-                .font(.system(size: 17))
+                .font(.system(size: 13))
                 .foregroundStyle(configuration.isOn ? Color.accentColor : Color.secondary)
         }
         .buttonStyle(.plain)

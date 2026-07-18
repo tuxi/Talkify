@@ -1,6 +1,6 @@
 //
 //  ConversationNotificationCoordinator.swift
-//  CodeAgent
+//  Talkify
 //
 //  Host-owned local notifications for AgentKit multi-session attention.
 //

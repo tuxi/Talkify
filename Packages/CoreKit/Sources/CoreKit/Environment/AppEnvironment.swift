@@ -45,20 +45,17 @@ public struct AppEnvironmentConfig: Codable, Sendable, Equatable {
     public let environment: AppEnvironment
     public let apiBaseURL: URL
     public let wsURL: URL
-    public let ossBucket: String
     public let isPlaceholder: Bool
 
     public init(
         environment: AppEnvironment,
         apiBaseURL: URL,
         wsURL: URL,
-        ossBucket: String,
         isPlaceholder: Bool = false,
     ) {
         self.environment = environment
         self.apiBaseURL = apiBaseURL
         self.wsURL = wsURL
-        self.ossBucket = ossBucket
         self.isPlaceholder = isPlaceholder
     }
 }
@@ -94,7 +91,6 @@ public extension EnvironmentRegistry {
                 environment: .prod,
                 apiBaseURL: URL(string: "https://api.objc.com/api/v1")!,
                 wsURL: URL(string: "wss://api.objc.com/api/v1/ai/ws")!,
-                ossBucket: "dreamlog",
             )
         ]
         #if DEBUG
@@ -102,7 +98,6 @@ public extension EnvironmentRegistry {
             environment: .local,
             apiBaseURL: URL(string: "http://192.168.1.13:12221/api/v1")!,
             wsURL: URL(string: "ws://127.0.0.1:12210/api/v1/ai/ws")!,
-            ossBucket: "dreamlog",
         )
         #endif
         return EnvironmentRegistry(configs: configs, defaultEnvironment: .prod)
@@ -121,7 +116,7 @@ public final class EnvironmentManager: @unchecked Sendable {
     public init(
         registry: EnvironmentRegistry = .live,
         store: UserDefaults = .standard,
-        storeKey: String = "com.objc.dreamlog.currentEnvironment"
+        storeKey: String = "com.objc.talkify.v2.currentEnvironment"
     ) {
         self.registry = registry
         self.store = store

@@ -107,7 +107,7 @@ public actor OSSV2ClientManager {
         /*
          let ossManager = OSSV2ClientManager(
              region: "cn-beijing",
-             bucket: "dreamlog",
+             bucket: "talkify",
              endpoint: "oss-cn-beijing.aliyuncs.com",
              accessKeyId: "xxx",
              accessKeySecret: "xxx",
@@ -228,7 +228,7 @@ public actor OSSV2ClientManager {
         
         // 拼接地址，如果是自定义域名则用自定义域名
         let domain = "\(self.bucket).oss-\(self.region).aliyuncs.com"
-        // https://dreamlog.oss-cn-beijing.aliyuncs.com/dreams/images/2026/03/13/1/42160c473ea54b4c801222fbfec424c9.png
+        // The server-provided bucket and object key determine the final asset URL.
         let url = URL(string: "https://\(domain)/\(key)")!
         
         return OSSUploadResult(

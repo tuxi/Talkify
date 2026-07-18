@@ -16,15 +16,13 @@ let package = Package(
         ),
     ],
     dependencies: [
-        .package(path: "../CoreKit"),
-        .package(path: "../DesignKit")
+        .package(path: "../CoreKit")
     ],
     targets: [
         .target(
             name: "FeatureAuth",
             dependencies: [
                 "CoreKit",
-                "DesignKit",
             ],
         ),
     ]

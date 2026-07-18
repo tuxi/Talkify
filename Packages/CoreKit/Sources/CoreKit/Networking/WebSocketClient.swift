@@ -143,7 +143,7 @@ public class WebSocketClient: NSObject, @unchecked Sendable {
         if let identifier, !identifier.isEmpty {
             self.identifier = identifier
         } else {
-            self.identifier = "dreamlog.default"
+            self.identifier = "talkify.v2.default"
         }
         super.init()
         

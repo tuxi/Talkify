@@ -1,6 +1,6 @@
 //
 //  DeviceInfoTool.swift
-//  CodeAgent
+//  Talkify
 //
 //  P1 Demo: 客户端工具执行示例。
 //  演示 Go 服务端无法实现、只能在本地执行的工具。

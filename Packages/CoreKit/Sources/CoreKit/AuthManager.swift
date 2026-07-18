@@ -99,8 +99,8 @@ public struct AuthToken: Codable, Sendable {
 public struct AuthTokenStore: @unchecked Sendable {
     private let keychainGroupId: String?
     private let legacyStore: UserDefaults
-    private let keyPrefix = "com.objc.dreamlog.authKey"
-    private let legacyKeyPrefix = "com.objc.dreamlog.authKey"
+    private let keyPrefix = "com.objc.talkify.v2.authKey"
+    private let legacyKeyPrefix = "com.objc.talkify.v2.authKey"
 
     public init(keychainGroupId: String? = nil, legacyStore: UserDefaults = .standard) {
         self.keychainGroupId = keychainGroupId

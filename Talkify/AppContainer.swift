@@ -1,12 +1,8 @@
 //
 //  AppContainer.swift
-//  CodeAgent
+//  Talkify
 //
-//  Example app dependency container.
-//  Demonstrates:
-//    - AgentKit integration (AccountManager, ModelSettingsStore, ToolRegistry)
-//    - Dreamlog business logic (UserManager, BillingManager via ApiProvider)
-//    - Client tool registration for P1 client tool execution.
+//  Talkify dependency container: identity, API services, AgentKit, and client tools.
 //
 
 import Foundation
@@ -96,18 +92,6 @@ final class AppContainer {
     /// Host-owned system notification and notification-click routing state.
     let conversationNotifications: ConversationNotificationCoordinator
 
-    // MARK: - Dreamlog 业务层（示例：如何在真实 App 中集成）
-
-    /// Dreamlog 网络层 —— 基于 Alamofire 的 API 请求。
-    /// 需要 Alamofire 依赖（通过 SPM 或 Xcode 添加）。
-    /// let apiProvider: ApiProvider
-
-    /// 用户资料管理 —— 从后端获取/更新用户信息。
-    /// let userManager: UserManager
-
-    /// 计费/订阅管理 —— 钱包、权益、订阅中心。
-    /// let billingManager: BillingManager
-
     init(authManager: AuthManager,
          environmentManager: EnvironmentManager,
          deviceManager: DeviceManager
@@ -138,18 +122,7 @@ final class AppContainer {
             environment: environmentManager.currentEnvironmentSnapshot
         )
 //        self.billingManager = BillingManager(service: BillingService(apiProvider: apiProvider))
-//        self.conversationWSClient = ConversationWSClient(wsClient: wsClient)
-//        self.conversationStore.configure(
-//            service: ConversationService(apiProvider: apiProvider)
-//        )
-
-//        if let secret = environmentManager.currentConfig.oneTapSecret {
-//            OneTapLoginService.shared.configure(secret: secret)
-//        }
-        
-//        CloudAssetStore.initialize(assetService: makeAssetService())
-        
-        // 创建 AgentKit AccountManager（默认指向本地 Gateway）
+        // AgentKit 账户与用量服务复用 Talkify 的授权 API Provider。
         self.agentManager = AgentManager(apiProvider: apiProvider)
 
         // ModelSettingsStore 管理本地模型偏好。
@@ -180,13 +153,10 @@ final class AppContainer {
         Task {
             await refreshModelList()
         }
-
-        // Dreamlog 业务层集成示例（需要 Alamofire 等依赖时取消注释）：
-        // setupDreamlogServices()
     }
 
     /// 从 Gateway 获取模型列表并注入 ModelSettingsStore。
-    private func refreshModelList() async {
+    func refreshModelList() async {
         // 使用 authClient 直接获取模型列表
         do {
             let response = try await agentManager.fetchModels()
@@ -195,29 +165,6 @@ final class AppContainer {
             print("Failed to fetch models from Gateway: \(error)")
         }
     }
-
-    /// Dreamlog 业务服务初始化（需要 Alamofire + OSS 等依赖）。
-    /// 取消注释以下代码即可启用完整的用户/订阅功能。
-    /*
-    private func setupDreamlogServices() {
-        // 1. 创建 ApiProvider（指向 Dreamlog API）
-        let environment = AppEnvironment.prod
-        let config = EnvironmentRegistry.live.config(for: environment)
-        // let authInterceptor = DreamlogAuthInterceptor(authManager: dreamlogAuthManager)
-        // self.apiProvider = ApiProvider(
-        //     baseURL: config.apiBaseURL,
-        //     interceptor: authInterceptor
-        // )
-
-        // 2. 创建 UserManager
-        // let userService = UserService(apiProvider: apiProvider)
-        // self.userManager = UserManager(service: userService, environment: environment)
-
-        // 3. 创建 BillingManager
-        // let billingService = BillingService(apiProvider: apiProvider)
-        // self.billingManager = BillingManager(service: billingService)
-    }
-    */
 
     private func registerClientTools() {
         Task {
@@ -236,7 +183,7 @@ final class AppContainer {
         // lifecycle 入口显式 await，不能在 SwiftUI body 构建依赖时产生副作用。
         return DefaultAgentClient.fromRuntime(credentialStore: agentCredentialStore)
         #else
-        // macOS: 连接独立运行的 CodeAgent server（127.0.0.1:8797）。
+        // macOS: 连接独立运行的 Talkify Agent runtime（127.0.0.1:8797）。
         let env = RuntimeEnvironment(host: "127.0.0.1", port: 8797)
         return DefaultAgentClient(environment: env, credentialStore: agentCredentialStore)
         #endif

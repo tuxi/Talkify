@@ -21,7 +21,7 @@ public final class AuthViewModel {
     let userManager: UserManager
     private let store = UserDefaults.standard
     private let environment: AppEnvironment
-    private let lastLoginContextKeyPrefix = "com.objc.dreamlog.lastLoginContext"
+    private let lastLoginContextKeyPrefix = "com.objc.talkify.v2.lastLoginContext"
     
     var phoneNumber: String = ""
     var captcha: String = ""

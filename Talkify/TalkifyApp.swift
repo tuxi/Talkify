@@ -1,6 +1,6 @@
 //
-//  CodeAgentApp.swift
-//  CodeAgent
+//  TalkifyApp.swift
+//  Talkify
 //
 //  Created by xiaoyuan on 2026/6/24.
 //
@@ -10,14 +10,14 @@ import AgentKit
 import CoreKit
 import FeatureAuth
 
-let keyChinGroupID = "NKW67GFDHM.com.objc.chat.shared"
+let keychainGroupID = "NKW67GFDHM.com.objc.chat.shared"
 
 @main
 struct TalkifyApp: App {
 
     private var container: AppContainer
     private let environmentManager: EnvironmentManager
-    private let deviceManager = DeviceManager(keychainGroupId: keyChinGroupID)
+    private let deviceManager = DeviceManager(keychainGroupId: keychainGroupID)
     
     init() {
         
@@ -47,7 +47,7 @@ struct TalkifyApp: App {
 
     var body: some Scene {
         WindowGroup {
-            CodeAgentRootView()
+            TalkifyRootView()
                 .environment(container)
                 .environment(container.agentManager)
                 .environment(container.modelSettings)
@@ -58,7 +58,11 @@ struct TalkifyApp: App {
                 .environment(environmentManager)
                 .environment(deviceManager)
                 .onChange(of: container.authManager.isLoggedIn, { oldValue, newValue in
-//                    toggleConnect()
+                    if newValue {
+                        Task {
+                            await container.refreshModelList()
+                        }
+                    }
                 })
                 .onAppear {
                     Task { @MainActor in
@@ -88,7 +92,7 @@ extension ApiProvider {
 
 extension DeviceManager {
 static var deviceInfo: DeviceInfo {
-        let devcice = DeviceManager(keychainGroupId: keyChinGroupID)
+        let devcice = DeviceManager(keychainGroupId: keychainGroupID)
         return try! devcice.getDeviceInfo()
     }
 }

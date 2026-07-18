@@ -14,7 +14,7 @@ public final class UserManager {
     private let service: UserService
     private let store = UserDefaults.standard
     private var environment: AppEnvironment
-    private let cacheKeyPrefix = "com.objc.dreamlog.userProfile"
+    private let cacheKeyPrefix = "com.objc.talkify.v2.userProfile"
     
     public init(service: UserService, environment: AppEnvironment = .prod) {
         self.service = service

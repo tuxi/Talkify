@@ -148,10 +148,10 @@ Authorization: Bearer <access_token>
 {
   "asset_id": 10001,
   "upload_id": "up_xxx",
-  "bucket": "dreamlog",
+  "bucket": "talkify",
   "region": "cn-beijing",
   "endpoint": "oss-cn-beijing.aliyuncs.com",
-  "host": "https://dreamlog.oss-cn-beijing.aliyuncs.com",
+  "host": "https://talkify.oss-cn-beijing.aliyuncs.com",
   "dir": "prod/private/user-upload/user/123/2026/05/15/up_xxx/",
   "object_key": "prod/private/user-upload/user/123/2026/05/15/up_xxx/IMG_0001_abcd.jpg",
   "sts": {
@@ -164,7 +164,7 @@ Authorization: Bearer <access_token>
     "asset_id": 10001,
     "url": "",
     "oss_key": "prod/private/user-upload/user/123/2026/05/15/up_xxx/IMG_0001_abcd.jpg",
-    "bucket": "dreamlog",
+    "bucket": "talkify",
     "asset_class": "user_upload",
     "asset_kind": "image",
     "visibility": "private",
@@ -238,10 +238,10 @@ Authorization: Bearer <access_token>
 ```json
 {
   "asset_id": 10001,
-  "url": "https://dreamlog.oss-cn-beijing.aliyuncs.com/prod/private/...?Expires=...",
+  "url": "https://talkify.oss-cn-beijing.aliyuncs.com/prod/private/...?Expires=...",
   "url_expires_at": "2026-05-15T10:30:00+08:00",
   "oss_key": "prod/private/user-upload/user/123/2026/05/15/up_xxx/IMG_0001_abcd.jpg",
-  "bucket": "dreamlog",
+  "bucket": "talkify",
   "asset_class": "user_upload",
   "asset_kind": "image",
   "visibility": "private",
@@ -282,10 +282,10 @@ Authorization: Bearer <access_token>
   "items": [
     {
       "asset_id": 10001,
-      "url": "https://dreamlog.oss-cn-beijing.aliyuncs.com/prod/private/...?Expires=...",
+      "url": "https://talkify.oss-cn-beijing.aliyuncs.com/prod/private/...?Expires=...",
       "url_expires_at": "2026-05-15T10:30:00+08:00",
       "oss_key": "prod/private/user-upload/user/123/2026/05/15/up_xxx/IMG_0001_abcd.jpg",
-      "bucket": "dreamlog",
+      "bucket": "talkify",
       "asset_class": "user_upload",
       "asset_kind": "image",
       "visibility": "private",

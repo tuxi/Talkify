@@ -1,6 +1,6 @@
 //
 //  CameraCaptureTool.swift
-//  CodeAgent
+//  Talkify
 //
 //  P1 Demo: 摄像头拍照工具（iOS + macOS 双平台）。
 //  使用 AVFoundation AVCaptureSession 程序化拍照，无需 UI 呈现。

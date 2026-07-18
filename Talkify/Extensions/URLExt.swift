@@ -1,6 +1,6 @@
 //
 //  URLExt.swift
-//  CodeAgent
+//  Talkify
 //
 //  Created by xiaoyuan on 2026/3/13.
 //

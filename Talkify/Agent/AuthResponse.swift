@@ -1,8 +1,8 @@
 //
 //  AuthResponse.swift
-//  CodeAgent
+//  Talkify
 //
-//  Dreamlog 账号安全状态和响应类型。从 Dreamlog 迁移。
+//  Talkify 账号安全状态和响应类型。
 //
 
 import Foundation

@@ -17,7 +17,7 @@ public final class DeviceManager {
     // MARK: - 常量定义
     private enum Constants {
         /// Keychain中存储device_id的key
-        static let keychainDeviceIdKey = "com.objc.dreamlog.device_id"
+        static let keychainDeviceIdKey = "com.objc.talkify.v2.deviceId"
     }
     
     // MARK: - 私有属性

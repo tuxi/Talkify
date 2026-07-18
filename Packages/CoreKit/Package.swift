@@ -26,7 +26,10 @@ let package = Package(
                 "Alamofire",
                 .product(name: "AlibabaCloudOSS", package: "alibabacloud-oss-swift-sdk-v2"),
             ],
-            path: "Sources/CoreKit"
+            path: "Sources/CoreKit",
+            exclude: [
+                "OSS/client-oss-asset-integration.md",
+            ]
         ),
         .testTarget(
             name: "CoreKitTests",
