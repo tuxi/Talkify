@@ -3,26 +3,26 @@ import Observation
 /*
  │          用途          │                     推荐 URL                     │
  ├────────────────────────┼──────────────────────────────────────────────────┤
- │ App Store 隐私政策 URL │ https://dreamlog.com/privacy?standalone=1        │
+ │ App Store 隐私政策 URL │ https://objc.com/privacy?standalone=1            │
  ├────────────────────────┼──────────────────────────────────────────────────┤
- │ App Store 用户协议 URL │ https://dreamlog.com/terms?standalone=1          │
+ │ App Store 用户协议 URL │ https://objc.com/terms?standalone=1              │
  ├────────────────────────┼──────────────────────────────────────────────────┤
- │ 内容政策（合规公示）   │ https://dreamlog.com/content-policy?standalone=1 │
+ │ 内容政策（合规公示）   │ https://objc.com/content-policy?standalone=1     │
  ├────────────────────────┼──────────────────────────────────────────────────┤
- │ 英文版隐私政策         │ https://dreamlog.com/en/privacy?standalone=1     │
+ │ 英文版隐私政策         │ https://objc.com/en/privacy?standalone=1         │
  ├────────────────────────┼──────────────────────────────────────────────────┤
- │ 英文版用户协议         │ https://dreamlog.com/en/terms?standalone=1       │
+ │ 英文版用户协议         │ https://objc.com/en/terms?standalone=1           │
  └────────────────────────┴────────────────────────────────────────────
  */
 
 public struct AgreementURLs {
     //  App Store 隐私政策 URL
-    public static let privacy = URL(string: "https://dreamlog.com/privacy?standalone=1")!
-    public static let terms = URL(string: "https://dreamlog.com/terms?standalone=1")!
-    public static let content = URL(string: "https://dreamlog.com/content-policy?standalone=1")!
-    public static let algorithmDisclosure = URL(string: "https://dreamlog.com/algorithm-disclosure?standalone=1")!
-    public static let paid = URL(string: "https://dreamlog.com/pricing-terms?standalone=1")!
-    public static let AIData = URL(string: "https://dreamlog.com/ai-data-processing?standalone=1")!
+    public static let privacy = URL(string: "https://objc.com/privacy?standalone=1")!
+    public static let terms = URL(string: "https://objc.com/terms?standalone=1")!
+    public static let content = URL(string: "https://objc.com/content-policy?standalone=1")!
+    public static let algorithmDisclosure = URL(string: "https://objc.com/algorithm-disclosure?standalone=1")!
+    public static let paid = URL(string: "https://objc.com/pricing-terms?standalone=1")!
+    public static let AIData = URL(string: "https://objc.com/ai-data-processing?standalone=1")!
 }
 
 public enum AppEnvironment: String, CaseIterable, Codable, Sendable, Identifiable {
@@ -88,23 +88,25 @@ public struct EnvironmentRegistry: Sendable {
 }
 
 public extension EnvironmentRegistry {
-    static let live = EnvironmentRegistry(
-        configs: [
-            .local: AppEnvironmentConfig(
-                environment: .local,
-                apiBaseURL: URL(string: "http://192.168.1.13:12221/api/v1")!,
-                wsURL: URL(string: "ws://127.0.0.1:12210/api/v1/ai/ws")!,
-                ossBucket: "dreamlog",
-            ),
+    static let live: EnvironmentRegistry = {
+        var configs: [AppEnvironment: AppEnvironmentConfig] = [
             .prod: AppEnvironmentConfig(
                 environment: .prod,
-                apiBaseURL: URL(string: "https://api.dreamlog.com/api/v1")!,
-                wsURL: URL(string: "wss://api.dreamlog.com/api/v1/ai/ws")!,
+                apiBaseURL: URL(string: "https://api.objc.com/api/v1")!,
+                wsURL: URL(string: "wss://api.objc.com/api/v1/ai/ws")!,
                 ossBucket: "dreamlog",
             )
-        ],
-        defaultEnvironment: .prod
-    )
+        ]
+        #if DEBUG
+        configs[.local] = AppEnvironmentConfig(
+            environment: .local,
+            apiBaseURL: URL(string: "http://192.168.1.13:12221/api/v1")!,
+            wsURL: URL(string: "ws://127.0.0.1:12210/api/v1/ai/ws")!,
+            ossBucket: "dreamlog",
+        )
+        #endif
+        return EnvironmentRegistry(configs: configs, defaultEnvironment: .prod)
+    }()
 }
 
 @Observable
@@ -125,12 +127,17 @@ public final class EnvironmentManager: @unchecked Sendable {
         self.store = store
         self.storeKey = storeKey
 
+        #if DEBUG
         if let rawValue = store.string(forKey: storeKey),
            let environment = AppEnvironment(rawValue: rawValue) {
             self.currentEnvironment = environment
         } else {
             self.currentEnvironment = registry.defaultEnvironment
         }
+        #else
+        // Distribution builds must never inherit a persisted local/LAN environment.
+        self.currentEnvironment = .prod
+        #endif
     }
 
     public var currentEnvironmentSnapshot: AppEnvironment {
@@ -142,13 +149,22 @@ public final class EnvironmentManager: @unchecked Sendable {
     }
 
     public var availableConfigs: [AppEnvironmentConfig] {
+        #if DEBUG
         registry.allConfigs
+        #else
+        [registry.config(for: .prod)]
+        #endif
     }
 
     public func saveCurrentEnvironment(_ environment: AppEnvironment) {
+        #if DEBUG
+        let effectiveEnvironment = environment
+        #else
+        let effectiveEnvironment = AppEnvironment.prod
+        #endif
         lock.withLock {
-            currentEnvironment = environment
-            store.set(environment.rawValue, forKey: storeKey)
+            currentEnvironment = effectiveEnvironment
+            store.set(effectiveEnvironment.rawValue, forKey: storeKey)
         }
     }
 

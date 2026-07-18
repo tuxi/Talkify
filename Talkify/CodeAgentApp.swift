@@ -22,7 +22,11 @@ struct TalkifyApp: App {
     init() {
         
         let environmentManager = EnvironmentManager()
+        #if DEBUG
         environmentManager.saveCurrentEnvironment(.local)
+        #else
+        environmentManager.saveCurrentEnvironment(.prod)
+        #endif
         self.environmentManager = environmentManager
         
         let manager = AuthManager(
