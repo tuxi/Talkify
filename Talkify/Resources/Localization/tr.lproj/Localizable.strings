@@ -1,0 +1,780 @@
+// MARK: Common strings
+"action.cancel" = "İptal Et";
+"action.delete" = "Sil";
+"action.save"  = "Kaydet";
+"action.done" = "Tamamlandı";
+"action.retry" = "Yeniden Dene";
+"action.view.error" = "View error";
+
+"navi.skip.title" = "Atla";
+"action.info" = "Bilgi";
+"action.react" = "Tepki...";
+"action.share" = "Paylaş";
+"action.select.text" = "Metni seç";
+
+
+"alert.button.ok" = "Tamam";
+"alert.error" = "Hata!";
+
+"action.export" = "Dışa Aktar";
+"action.clear" = "Temizle";
+
+"placeholder.loading.long" = "Yükleniyor, Yükleniyor, Yükleniyor ...";
+"placeholder.loading.short" = "Yükleniyor ...";
+
+"see-more" = "Dahasını Gör";
+
+// MARK: Add Account
+"account.add.error.instance-not-supported" = "Bu oluşum şu anda desteklenmiyor.";
+"account.add.navigation-title" = "Hesap Ekle";
+"account.add.sign-in" = "Giriş Yap";
+
+// MARK: Enums
+"enum.avatar-position.leading" = "Önde";
+"enum.avatar-position.top" = "Üstte";
+"enum.avatar-shape.circle" = "Çember";
+"enum.avatar-shape.rounded" = "Yuvarlak";
+"enum.durations.infinite" = "infinite";
+"enum.durations.custom" = "custom";
+"enum.durations.fiveMinutes" = "5 minutes";
+"enum.durations.thirtyMinutes" = "30 minutes";
+"enum.durations.oneHour" = "1 hour";
+"enum.durations.sixHours" = "6 hours";
+"enum.durations.twelveHours" = "12 saat";
+"enum.durations.oneDay" = "1 day";
+"enum.durations.threeDays" = "3 days";
+"enum.durations.sevenDays" = "7 days";
+"enum.status-actions-display.all" = "Hepsi";
+"enum.status-actions-display.no-buttons" = "Butonsuz";
+"enum.status-actions-display.only-buttons" = "Sadece Butonlar";
+"enum.status-display-style.compact" = "Kompakt";
+"enum.status-display-style.large" = "Geniş";
+"enum.status-display-style.medium" = "Medium";
+"enum.swipeactions.icon-with-text" = "Icon with text";
+"enum.swipeactions.icon-only" = "Icon only";
+
+// MARK: Instances
+"instance.info.domains" = "Domainler";
+"instance.info.email" = "Email";
+"instance.info.name" = "İsim";
+"instance.info.navigation-title" = "Oluşum Bilgisi";
+"instance.info.posts" = "Gönderiler";
+"instance.info.section.info" = "Oluşum Bilgisi";
+"instance.info.section.rules" = "Oluşum Kuralları";
+"instance.info.users" = "Kullanıcılar";
+"instance.info.version" = "Versiyon";
+"instance.list.posts-%@" = "%@ gönderiler";
+"instance.list.users-%@" = "%@ kullanıcılar";
+"instance.suggestions" = "Öneriler";
+"instance.url" = "Oluşum URL'si";
+
+// MARK: Menu
+"menu.new-post" = "New post";
+"menu.font" = "Font";
+"menu.font.bigger" = "Bigger";
+"menu.font.smaller" = "Smaller";
+
+// MARK: Settings
+"settings.language" = "Dil";
+"settings.change" = "Değiştir";
+"settings.account.add" = "Hesap Ekle";
+"settings.app.icon" = "Uygulama İkonu";
+"settings.app.icon.navigation-title" = "İkonlar";
+"settings.app.icon.official" = "Official icons";
+"settings.app.icon.designed-by" = "Icons by";
+"settings.app.source" = "Kaynak Kodu (GitHub link)";
+"settings.app.support" = "Uygulamayı Destekleyin";
+"settings.app.about" = "About";
+"settings.display.example-toot" = "Example Post";
+"settings.display.avatar.position" = "Avatar Pozisyonu";
+"settings.display.avatar.shape" = "Avatar Şekli";
+"settings.display.full-username" = "Display full username";
+"settings.display.navigation-title" = "Gösterim Ayarları";
+"settings.display.restore" = "Varsayılan Ayarlara Geri Döndür";
+"settings.display.section.display" = "Gösterim";
+"settings.display.section.theme" = "Tema";
+"settings.display.colors.apply" = "Apply custom colors";
+"settings.display.section.theme.footer" = "Custom colors can only be set if match system color scheme is disabled";
+"settings.display.status.action-buttons" = "Durum Aksiyon Butonları";
+"settings.display.status.media-style" = "Durum Medya Stili";
+"settings.display.translate-button" = "Çeviri Butonunu Göster";
+"settings.display.theme.background" = "Arka Plan Rengi";
+"settings.display.theme.secondary-background" = "İkincil Arka Plan Rengi";
+"settings.display.theme.text-color" = "Text Color";
+"settings.display.theme.tint" = "Tonlama Rengi";
+"settings.display.theme.systemColor" = "Eşleştirme Sistemi";
+"settings.general.browser" = "Tarayıcı";
+"settings.general.browser.in-app" = "Uygulama İçi Tarayıcı";
+"settings.general.browser.system" = "Sistem Tarayıcısı";
+"settings.general.browser.in-app.readerview" = "In-App Browser Reader View";
+"settings.general.display" = "Gösterim Ayarları";
+"settings.general.instance" = "Oluşum Bilgisi";
+"settings.general.push-notifications" = "İleti Bildirimleri";
+"settings.general.remote-timelines" = "Uzak Lokal Zaman";
+"settings.push.boosts" = "Yükseltmeler";
+"settings.push.favorites" = "Favoriler";
+"settings.push.follows" = "Takipler";
+"settings.push.main-toggle" = "İleti Bildirimleri";
+"settings.push.main-toggle.description" = "İleti Bildirimlerini Al";
+"settings.push.mentions" = "Bahsetmeler";
+"settings.push.navigation-title" = "İleti Bildirimleri";
+"settings.push.new-posts" = "Yeni Gönderiler";
+"settings.push.polls" = "Anket Sonuçları";
+"settings.general.content" = "Content Settings";
+"settings.system" = "System Settings";
+"settings.content.navigation-title" = "Content Settings";
+"settings.content.collapse-long-posts" = "Collapse long posts";
+"settings.content.collapse-long-posts-hint" = "Collapsed posts only display a limited number of lines together with a button to show the full post";
+"settings.content.boosts" = "Yükseltmeler";
+"settings.content.hide-repeated-boosts" = "Hide repeated boosts";
+"settings.content.instance-settings" = "Server Content Settings";
+"settings.content.use-instance-settings" = "Use server settings";
+"settings.content.expand-spoilers" = "Always show sensitive posts";
+"settings.content.expand-media" = "Media display";
+"settings.content.default-sensitive" = "Always mark media as sensitive";
+"settings.content.default-visibility" = "Posting visibility";
+"settings.content.media" = "Media";
+"settings.content.media.show.alt" = "Show ALT texts";
+"settings.content.reading" = "Reading";
+"settings.content.posting" = "Posting";
+"enum.expand-media.show" = "Show All";
+"enum.expand-media.hide" = "Hide All";
+"enum.expand-media.hide-sensitive" = "Hide Sensitive";
+"settings.section.accounts" = "Hesaplar";
+"settings.section.app" = "Uygulama";
+"settings.section.app.footer %@" = "Uygulama Versiyonu: %@";
+"settings.section.general" = "Genel";
+"settings.support.alert.error.message" = "Uygulama içi satın alımınızda hata oluştu, lütfen tekrar deneyin.";
+"settings.support.alert.message" = "Abone olduğunuz için teşekkür ederiz! Desteklerinizi takdir ediyoruz. Talkify'ın premium özelliklerinin tadını çıkarın!";
+"settings.support.alert.title" = "Teşekkürler!";
+"settings.support.message-from-dev" = "Merhaba! Benim adım Thomas ve açık kaynak kodlu uygulamalar oluşturmayı seviyorum. Talkify benim şu ana kadarki en çok gurur duyduğum projelerden biri - ve doğrusu, Mastodon ve sosyal medyanın durmadan değişen yapısı nedeniyle en çok bakım gerektireni. Eğer Talkify'u kullanmaktan memnunsanız, ufak bir bağış göndermeyi düşünebilirsiniz. Bu gerçekten günümü güzelleştirir (ve uygulamanın senin için daha da düzgün çalışmasına yardımcı olur). 🚀";
+"settings.support.navigation-title" = "Talkify'u destekleyin";
+"settings.support.one.subtitle" = "Küçük, ama şirin, ve güzel bir tadı var!";
+"settings.support.one.title" = "🍬 Küçük Bağış";
+"settings.support.placeholder.loading-subtitle" = "Altyazılar yükleniyor ...";
+"settings.support.three.subtitle" = "Sen harikasın, çok teşekkürler!";
+"settings.support.three.title" = "🤯 Cömert Bağış";
+"settings.support.two.subtitle" = "Alengirli bir kahvenin tadını severim ❤️";
+"settings.support.two.title" = "☕️ Hoş Bağış";
+"settings.support.four.title" = "👽 Sen de kimsin Bağışı";
+"settings.support.four.subtitle" = "Bu, Talkify'u daha uzun süre devam ettirmemize yardımcı olacak!";
+"settings.support.supporter.title" = " Become a supporter!";
+"settings.support.supporter.subtitle" = "By giving a monthly tip to Talkify, you become a supporter, you'll even get verified badge on your profile. For your 👀 only.";
+"settings.support.supporter.subscribed" = " Thanks for being an Talkify supporter!";
+"settings.support.supporter.subscription-info"= "Subscription are automatically renewed unless you cancel them a day before the next renewal cycle.";
+"settings.support.restore-purchase.button" = "Restore purchase";
+"settings.support.restore-purchase.explanation" = "Restore your supporter subscription if it hasn't been synced automatically.";
+"settings.support.manager-subscriptions.button" = "Abonelikleri Yönet";
+"settings.support.privacy-policy" = "Privacy Policy";
+"settings.support.terms-of-use" = "Terms";
+"settings.timeline.add" = "Yerel bir zaman dilimi ekleyin";
+"settings.navi.title" = "Ayarlar";
+"settings.rate" = "Talkify'u puanlayın";
+"settings.section.other" = "Diğer";
+"settings.other.hide-openai" = "Yardımcıyı 🤖 Aktive Et";
+"settings.other.social-keyboard" = "Sosyal Klavyeyi Aktive Et";
+"settings.other.sound-effect" = "Enable Sound Effects";
+"settings.general.translate" = "Translation Settings";
+"settings.translation.navigation-title" = "Translation";
+"settings.translation.always-deepl" = "Always Translate using DeepL";
+"settings.translation.user-api-key" = "DeepL API Key";
+"settings.translation.api-key-type" = "Type of the Key";
+"settings.translation.needed-message" = "This feature requires a DeepL API key";
+"settings.push.duplicate.title" = "Duplicate notifications fixer";
+"settings.push.duplicate.footer" = "Receiving duplicate notifications? Try this magic button in order to fix it";
+"settings.push.duplicate.button.fix" = "🪄 Fix it";
+"settings.other.autoplay-video" = "Auto Play Videos";
+"settings.display.font" = "Uygulama yazı tipi";
+"settings.other.image-gen" = "Resim oluşturma";
+"settings.display.font.system" = "System";
+"settings.display.font.custom" = "Custom";
+"settings.display.font.scaling-%@" = "Font scaling: %@";
+"settings.display.font.line-spacing-%@" = "Line Spacing: %@";
+"settings.about.built-with" = "Talkify is built with the following Open Source software:";
+"settings.about.title" = "Talkify";
+"settings.account.cached-posts-%@" = "Cached posts: %@";
+"settings.account.action.delete-cache" = "Clear cache";
+
+"settings.general.haptic" = "Haptic Feedback";
+"settings.haptic.navigation-title" = "Haptic Settings";
+"settings.haptic.timeline" = "Timeline";
+"settings.haptic.tab-selection" = "Tab Selection";
+"settings.haptic.buttons" = "Button Press";
+
+"settings.display.show-tab-label" = "Show tab name";
+
+"settings.display.show-ipad-column" = "Enable secondary column";
+
+"settings.general.swipeactions" = "Swipe Actions";
+"settings.swipeactions.navigation-title" = "Swipe Actions";
+"settings.swipeactions.primary" = "Primary Action";
+"settings.swipeactions.secondary" = "Secondary Action";
+"settings.swipeactions.status.action.bookmark" = "Bookmark";
+"settings.swipeactions.status.action.boost" = "Boost";
+"settings.swipeactions.status.action.favorite" = "Favorite";
+"settings.swipeactions.status.action.none" = "None";
+"settings.swipeactions.status.action.quote" = "Quote";
+"settings.swipeactions.status.action.reply" = "Reply";
+"settings.swipeactions.status.explanation" = "Swipe actions are available upon swiping left or right on a post. The secondary action is only available if the primary action is set.";
+"settings.swipeactions.status.leading" = "Swipe Right";
+"settings.swipeactions.status.trailing" = "Swipe Left";
+"settings.swipeactions.status" = "Post";
+"settings.swipeactions.appearance" = "Appearance";
+"settings.swipeactions.use-theme-colors" = "Use Theme Colors";
+"settings.swipeactions.use-theme-colors-explanation" = "Use theme colors instead of default colors";
+"settings.swipeactions.icon-style" = "Icon Style";
+
+"settings.display.section.font" = "Font";
+
+"settings.section.cache" = "Cache";
+"settings.cache-media.clear" = "Clear Media Cache";
+
+"settings.plan.plus.title" = "Plus - Aylık Abonelik";
+"settings.plan.plus.subtitle" = "1 ay boyunca Plus avantajlarından yararlanın!";
+"settings.plan.credits.title" = "Kredi Paketi";
+"settings.plan.credits.subtitle" = "Sohbet sınırlarını genişletmek için kredi satın alın.";
+
+
+"settings.section.help" = "Yardım";
+"settings.help.feedback" = "Yardım & Geri Bildirim";
+
+"settings.section.support" = "Destek";
+"settings.support.Subscription" = "Abonelik";
+"settings.support.discount" = "İndirim kodu";
+
+"settings.section.profile" = "Sen";
+"navi.profile.title" = "Mevcut profiliniz";
+"settings.profile.credits" = "Krediler";
+"settings.profile.role" = "Rol";
+"settings.profile.role.standard" = "Standart";
+"settings.profile.role.plus" = "Artı";
+"settings.section.help.use" = "Nasıl kullanılır";
+"settings.section.help.rateapp" = "Uygulamayı değerlendir";
+
+
+"navi.close" = "Kapat";
+
+// MARK: Tabs
+"tab.explore" = "Keşfet";
+"tab.federated" = "Birleştirilmiş";
+"tab.local" = "Yerel";
+"tab.messages" = "Mesajlar";
+"tab.notifications" = "Bildirimler";
+"tab.settings" = "Ayarlar";
+"tab.home" = "Sohbet";
+"tab.prompt" = "İpucu";
+"tab.admin" = "Admin";
+"tab.profile" = "Profile";
+
+// MARK: Home
+"home.section.title.history" = "Gezmişim";
+"home.no-conversation" = "Henüz bir konuşma yok😊";
+"home.chat.start" = "Başlat";
+"home.navi.title.chat" = "Talkify";
+"home.navi.title.scene" = "Sahne";
+"home.input.placeholder" = "Burada sohbet edin...";
+"home.section.title.suggestions" = "Öneriler";
+"timeline.%@-is-valid" = "%@ geçerli bir oluşum";
+"timeline.add-remote.title" = "Uzak yerel zaman dilimi ekleyin";
+"timeline.add.action.add" = "Ekle";
+"timeline.filter.add-local" = "Zaman Dilimi Ekleyin";
+"timeline.filter.lists" = "Listeler";
+"timeline.filter.local" = "Yerel Zaman Dilimleri";
+"timeline.filter.tags" = "Takip Edilen Etiketler";
+
+// MARK: Package: AppAccount
+"app-account.button.add" = "Hesap Ekle"; // 土耳其语
+
+
+// MARK: Package: Account
+"account.action.add-remove-list" = "Listeye Ekle/Çıkar";
+"account.action.edit-info" = "Bilgiyi Düzenle";
+"account.action.mention" = "Bahset";
+"account.action.message" = "Mesaj Gönder";
+"account.action.notify-enable" = "Enable Notifications";
+"account.action.notify-disable" = "Disable Notifications";
+"account.action.reboosts-show" = "Show Boosts";
+"account.action.reboosts-hide" = "Hide Boosts";
+"account.action.block" = "Engelle";
+"account.action.unblock" = "Engeli Kaldır";
+"account.action.mute" = "Sustur";
+"account.action.unmute" = "Susturmayı Kaldır";
+"account.action.share" = "Share this account";
+"account.boosted-by" = "Tarafından Geliştirildi";
+"account.detail.about" = "Hakkında";
+"account.detail.familiar-followers" = "Şunlar tarafından da takip edilir";
+"account.detail.n-fields %lld" = "%lld alanlar";
+"account.detail.featured-tags-n-posts %lld" = "%lld gönderiler";
+"account.edit.about" = "Hakkında";
+"account.edit.account-settings.bot" = "Bot Hesap";
+"account.edit.account-settings.discoverable" = "Keşfedilebilir";
+"account.edit.account-settings.private" = "Gizli";
+"account.edit.account-settings.section-title" = "Hesap Ayarları";
+"account.edit.display-name" = "Gösterim Adı";
+"account.edit.error.save.message" = "Profilinizi kaydederken bir hata oluştu, lütfen tekrar deneyin.";
+"account.edit.error.save.title" = "Profilinizi kaydederken bir hata oluştu";
+"account.edit.navigation-title" = "Profilinizi Düzenleyin";
+"account.edit.post-settings.privacy" = "Varsayılan gizlilik";
+"account.edit.post-settings.section-title" = "Gönderi ayarları";
+"account.edit.post-settings.sensitive" = "Hassas içerik";
+
+"account.edit.metadata-section-title" = "Profile Metadata";
+"account.edit.metadata-name-placeholder" = "Label";
+"account.edit.metadata-value-placeholder" = "Content";
+"account.edit.add-metadata-button" = "Add a new metadata";
+
+"account.favorited-by" = "Şunlar tarafından favorilendi";
+"account.follow.follow" = "Takip Et";
+"account.follow.following" = "Takip Edilen";
+"account.follow.requested" = "Talep Edilen";
+"account.followers" = "Takipçiler";
+"account.following" = "Takip Edilen";
+"account.list.create" = "Yeni bir liste oluştur";
+"account.list.create.confirm" = "Liste oluştur";
+"account.list.create.description" = "Listeniz için bir isim girin";
+"account.list.delete" = "Listeyi silin";
+"account.list.name" = "Liste ismi";
+"account.post.pinned" = "Sabitlenmiş Gösteri";
+"account.posts" = "Gönderiler";
+"account.relation.follows-you" = "Seni takip ediyor";
+"account.joined" = "Katılındı";
+"account.action.logout" = "Log out account";
+"account.action.more" = "More Settings";
+
+"account.relation.note.edit" = "Edit Note";
+"account.relation.note.edit.placeholder" = "Enter Note text";
+"account.relation.note.edit.error.save.message" = "Error while saving your note, please try again.";
+"account.relation.note.edit.error.save.title" = "Error while saving your note";
+"account.relation.note.label" = "Note:";
+
+// MARK: Package: Conversations
+"conversations.action.delete" = "Sil";
+"conversations.action.mark-read" = "Okundu olarak işaretle";
+"conversations.action.view-detail" = "View detail";
+"conversations.empty.message" = "Sosyal medyada fark edilmek mi istiyorsunuz? Burada tüm direkt mesajlarınızı ve gizli bahsetmelerinizi bulabilirsiniz. Mutlu mesajlaşmalar! 📱❤️";
+"conversations.empty.title" = "Gelen Kutusu Boş";
+"conversations.error.button" = "Tekrar Dene";
+"conversations.error.message" = "Mesajlarınızı yüklerken bir hata oluştu";
+"conversations.error.title" = "Bir hata oluştu";
+"conversations.navigation-title" = "Direkt Mesajlar";
+"conversations.new.message.placeholder" = "Yeni Mesaj";
+"conversations.latest.message" = "Latest Message";
+
+// MARK: Package: DesignSystem
+"design.tag.n-posts-from-n-participants %lld %lld" = "%lld katılımcılar tarafından %lld gönderi";
+"design.theme.navigation-title" = "Tema Seçici";
+"design.theme.toots-preview" = "Toots önizlemesi";
+
+// MARK: Package: Explore
+"explore.navigation-title" = "Keşfet";
+"explore.search.message-%@" = "Bu ekrandan her şeyi aratabilirsiniz %@";
+"explore.search.prompt" = "Kullanıcıları, gönderileri ve etiketleri arayın";
+"explore.search.title" = "Oluşumları arayın";
+"explore.search.empty.message" = "Bu arama hiçbir sonuç döndürmedi, lütfen başka bir şey deneyin.";
+"explore.search.empty.title" = "Arama sonucu yok";
+"explore.section.posts" = "Gönderiler";
+"explore.section.suggested-users" = "Tavsiye Edilen Kullanıcılar";
+"explore.section.tags" = "Etiketler";
+"explore.section.trending.links" = "Yükselişteki Bağlantılar";
+"explore.section.trending.posts" = "Yükselişteki Gönderiler";
+"explore.section.trending.tags" = "Yükselişteki Etiketler";
+"explore.section.users" = "Kullanıcılar";
+
+// MARK: Package: Scene
+"scene.navigation.select.title" = "Öneriyi Seç";
+"scene.list.empty.title" = "Veri Yok!";
+"chat.info.navi.title" = "Sohbet Detayları";
+"chat.info.detail.name" = "Sohbet Adı";
+"chat.info.detail.placeholder" = "Lütfen Girin";
+"chat.info.detail.section.base" = "Temel";
+"chat.info.detail.section.prompt" = "İstem Bilgisi";
+"chat.info.detail.prompt.title" = "İstem";
+"chat.info.detail.desc.title" = "Açıklama";
+"chat.info.detail.prompt.input" = "Giriş İsteği";
+"chat.info.detail.section.parameters" = "Parametreler";
+"chat.info.detail.parameters.model" = "Model*";
+"chat.info.detail.parameters.memerylevel" = "Hafıza Seviyesi*";
+"chat.info.detail.parameters.temperature" = "Sıcaklık*";
+"chat.info.detail.parameters.maxtokens" = "Maksimum Jeton*";
+"chat.info.detail.section.other" = "Diğer";
+"chat.info.detail.other.extension" = "Uzantı";
+
+
+// MARK: Package: Env
+"env.poll-vote-frequency.one" = "Bir oy";
+"env.poll-vote-frequency.multiple" = "Birden fazla oy";
+
+// MARK: Package: Lists
+"lists.add-remove-%@" = "Ekle/Çıkar %@";
+"lists.create" = "Yeni bir liste oluştur";
+"lists.create.confirm" = "Liste oluştur";
+"lists.edit.users-in-list" = "Bu listedeki kullanıcılar";
+"lists.name" = "Liste ismi";
+"lists.name.message" = "Listeniz için bir isim girin";
+
+// MARK: Package: Notifications
+"notifications.empty.message" = "Bildirimler? Ne bildirimi? Bildirim gelen kutunuz boş gözüküyor. Harika olmaya devam edin! 📱😎";
+"notifications.empty.title" = "Yeni bildirim yok";
+"notifications.error.message" = "Bildirimlerinizi yüklerken bir hata oluştu, lütfen tekrar deneyin.";
+"notifications.error.title" = "Bir hata oluştu";
+"notifications.label.favorite %lld" = "favorilendi";
+"notifications.label.follow %lld" = "seni takip etti";
+"notifications.label.follow-request" = "seni takip etmek istiyor";
+"notifications.label.mention %lld" = "senden bahsetti";
+"notifications.label.poll" = "anket sona erdi";
+"notifications.label.reblog %lld" = "yükseltildi";
+"notifications.label.status" = "bir durum paylaştı";
+"notifications.label.update" = "bir gönderiyi düzenledi";
+"notifications.menu-title.favorite" = "Favori";
+"notifications.menu-title.follow" = "Takip Et";
+"notifications.menu-title.follow-request" = "Takip Etme İsteği";
+"notifications.menu-title.mention" = "Bahset";
+"notifications.menu-title.poll" = "Anket";
+"notifications.menu-title.reblog" = "Yükselt";
+"notifications.menu-title.status" = "Gönder";
+"notifications.menu-title.update" = "Gönderi Düzenlendi";
+"notifications.navigation-title" = "Bütün Bildirimler";
+"notifications.tab.all" = "Tamamı";
+"notifications.tab.mentions" = "Bahsetmeler";
+
+"notifications.label.status.push" = "🖊️ Posted: ";
+"notifications.label.reblog.push" = "🚀 Boosted: ";
+"notifications.label.follow.push" = "👋 Followed you: ";
+"notifications.label.follow-request.push" = "🔒 Requested to follow you: ";
+"notifications.label.favorite.push" = "⭐️ Starred: ";
+"notifications.label.poll.push" = "📈 Poll ended: ";
+"notifications.label.update.push" = "Updated: ";
+
+// MARK: Package: Timeline
+"timeline.federated" = "Birleştirilmiş";
+"timeline.latest" = "Jump to Latest";
+"timeline.home" = "Ana Ekran";
+"timeline.local" = "Yerel";
+"timeline.n-recent-from-n-participants %lld %lld" = "%lld katılımcılar tarafından %lld yeni gönderiler";
+"timeline.trending" = "Trending";
+"timeline.add.url" = "Instance URL";
+
+// MARK: Package: Status
+"status.action.translate" = "Tercüme et";
+"status.action.translate-with-deepl" = "Translate with DeepL";
+"status.action.translated-label-%@" = "%@ tarafından tercüme edildi";
+"status.action.translated-label-from-%@-%@" = "Translated from %@ using %@";
+"status.action.bookmark" = "Yer İmi Ekle";
+"status.action.boost" = "Yükselt";
+"status.action.boost-to-followers" = "Boost to Followers";
+"status.action.copy-text" = "Yazıyı Kopyala";
+"status.action.copy-link" = "Copy Link";
+"status.action.delete" = "Sil";
+"status.action.delete.confirm.title" = "Confirm";
+"status.action.delete.confirm.message" = "are you sure you want to delete this post?";
+"status.action.edit" = "Düzenle";
+"status.action.favorite" = "Favori";
+"status.action.mention" = "Bahset";
+"status.action.message" = "Mesaj";
+"status.action.pin" = "Sabitle";
+"status.action.post" = "Gönder";
+"status.action.quote" = "Bu gönderiden bahset";
+"status.action.reply" = "Cevapla";
+"status.action.section.your-post" = "Senin gönderin";
+"status.action.share" = "Bu gönderiyi paylaş";
+"status.action.share-link" = "Share post link";
+"status.action.share-image" = "Share post as image";
+"status.action.share-title" = "Share";
+"status.action.unbookmark" = "Yer İmini Kaldır";
+"status.action.unboost" = "Yükseltmeyi Kaldır";
+"status.action.unfavorite" = "Favoriyi Kaldır";
+"status.action.unpin" = "Sabitlemeyi Kaldır";
+"status.action.view-in-browser" = "Tarayıcıda Göster";
+"status.card.share" = "Share this link";
+"status.card.copy" = "Copy this link";
+"status.draft.delete" = "Taslağı Sil";
+"status.draft.save" = "Taslağı Kaydet";
+"status.editor.ai-prompt.correct" = "Yazıyı Düzelt";
+"status.editor.ai-prompt.add-tags" = "Add #Tags in place";
+"status.editor.ai-prompt.insert-tags" = "Add #Tags after my text";
+"status.editor.ai-prompt.emphasize" = "Yazıyı Vurgula";
+"status.editor.ai-prompt.fit" = "Yazıyı Kısalt";
+"status.editor.description.add" = "Açıklama Ekle";
+"status.editor.description.edit" = "Açıklamayı Düzenle";
+"status.editor.drafts.navigation-title" = "Taslaklar";
+"status.editor.emojis.navigation-title" = "Custom Emojis";
+"status.editor.error.upload" = "Yüklerken Hata Oluştu";
+"status.editor.language-select.navigation-title" = "Dil Seç";
+"status.editor.language-select.recently-used" = "Son Kullanılanlar";
+"status.editor.language-select.confirmation.detected-%@" = "Post in %@ (Detected language)";
+"status.editor.language-select.confirmation.selected-%@" = "Post in %@ (Selected language)";
+"status.editor.media.edit-image" = "Görüntüyü Düzenle";
+"status.editor.media.image-description" = "Görüntü Açıklaması";
+"status.editor.mode.edit" = "Gönderin Düzenleniyor";
+"status.editor.mode.new" = "Yeni Gönderi";
+"status.editor.mode.quote-%@" = "%@'dan alıntılandı";
+"status.editor.mode.reply-%@" = "%@'a cevap veriliyor";
+"status.editor.restore-previous" = "Geçmiş yazıyı geri getir";
+"status.editor.spoiler" = "Spoiler Yazısı";
+"status.editor.text.placeholder" = "Aklında ne var?";
+"status.editor.visibility" = "Görüntü görünürlüğü";
+"status.editor.photo-library" = "Photos Library";
+"status.editor.camera-picker" = "Take Photo";
+"status.editor.browse-file" = "Browse Files";
+"status.error.loading.message" = "Gönderi yüklenirken bir hata oluştu, lütfen tekrar deneyin.";
+"status.error.message" = "Bu gönderi bağlamında bir hata oluştu, lütfen tekrar deneyin.";
+"status.error.title" = "Bir hata oluştu";
+"status.filter.filtered-by-%@" = "Tarafından filtrelendi: %@";
+"status.filter.show-anyway" = "Yine de göster";
+"status.image.alt-text.abbreviation" = "ALT";
+"status.media.content.show" = "Bağlamı göster";
+"status.media.contextmenu.copy" = "Görüntüyü kopyala";
+"status.media.contextmenu.save" = "Görüntüyü kaydet";
+"status.media.contextmenu.share" = "Görüntüyü paylaş";
+"status.media.contextmenu.view-browser" = "Tarayıcıda göster";
+"status.media.sensitive.show" = "Hassas içeriği göster";
+"status.poll.n-votes %lld" = "%lld oy";
+"status.poll.n-votes-voters %lld %lld" = "%lld votes from %lld voters";
+"status.poll.closed" = "Kapandı";
+"status.poll.closes-in" = "Kapanacak ";
+"status.poll.duration" = "Anket Süresi";
+"status.poll.frequency" = "Anket Sıklığı";
+"status.poll.option-n %lld" = "Seçenek %lld";
+"status.poll.send" = "Send Vote";
+"status.post-from-%@" = "Gönderi tarafından %@";
+"status.row.was-boosted" = "yükseltildi";
+"status.row.was-reply" = "Şuna cevap verildi";
+"status.row.you-boosted" = "Yükselttin";
+"status.show-less" = "Daha az göster";
+"status.show-more" = "Daha fazla göster";
+"status.show-full-post" = "Show full post";
+"status.summary.at-time" = " de ";
+"status.summary.edited-time" = "Son düzenleme: ";
+"status.summary.n-replies %lld" = "%lld replies";
+"status.summary.n-boosts %lld" = "%lld yükseltmeler";
+"status.summary.n-favorites %lld" = "%lld favoriler";
+"status.summary.edit-history" = "Edit History";
+"status.visibility.direct" = "Gizli";
+"status.visibility.follower" = "Takipçiler";
+"status.visibility.public" = "Herkes";
+"status.visibility.unlisted" = "Liste dışı";
+
+// MARK: Filters
+"filter.new" = "New Filter";
+"filter.filters" = "Filters";
+"filter.edit.title" = "Filter title";
+"filter.edit.keywords" = "Filter Keywords";
+"filter.edit.keywords.add" = "Add a new keyword";
+"filter.edit.contexts" = "Filter Contexts";
+"filter.edit.action" = "Filter Action";
+"filter.edit.expiry" = "Expiry";
+"filter.edit.expiry.date-time" = "Date/Time";
+"filter.edit.expiry.duration" = "Duration";
+"account.action.edit-filters" = "Edit Filters";
+"filter.contexts.home" = "Home and lists";
+"filter.contexts.notifications" = "Notifications";
+"filter.contexts.public" = "Public timelines";
+"filter.contexts.conversations" = "Conversations";
+"filter.contexts.profiles" = "Profiles";
+"filter.action.warning" = "Hide with a warning";
+"filter.action.hide" = "Hide completely";
+"filter.expired" = "Expired";
+"filter.expiry-%@" = "Expiry: %@";
+
+"enum.expand-media.show" = "Show All";
+"enum.expand-media.hide" = "Hide All";
+"enum.expand-media.hide-sensitive" = "Hide Sensitive";
+
+// MARK: Accessibility
+"accessibility.general.toggle.on" = "On";
+"accessibility.general.toggle.off" = "Off";
+"accessibility.editor.button.attach-photo" = "Attach photo";
+"accessibility.editor.button.poll" = "Poll";
+"accessibility.editor.button.spoiler" = "Spoiler warning";
+"accessibility.editor.button.drafts" = "Drafts";
+"accessibility.editor.button.custom-emojis" = "Custom emojis";
+"accessibility.editor.button.language" = "Language";
+"accessibility.editor.button.ai-prompt" = "AI prompt";
+"accessibility.editor.button.characters-remaining" = "Characters remaining";
+"accessibility.editor.privacy.label" = "Visibility";
+"accessibility.editor.privacy.hint" = "Changes post audience.";
+"accessibility.tabs.timeline.add-account" = "Add account";
+"accessibility.tabs.timeline.new-post.label" = "Compose";
+"accessibility.tabs.timeline.new-post.inputLabel1" = "New";
+"accessibility.tabs.timeline.new-post.inputLabel2" = "Create";
+"accessibility.tabs.timeline.unread-posts.label-%lld" = "%lld new posts";
+"accessibility.tabs.timeline.unread-posts.hint" = "Scrolls the timeline.";
+"accessibility.tabs.timeline.content-link-%@" = "Visit %@";
+"accessibility.tabs.timeline.content-hashtag-%@" = "Hashtag %@";
+"accessibility.app-account.selector.accounts" = "Accounts";
+"accessibility.app-account.selector.accounts.hint" = "Opens options sheet.";
+"accessibility.tabs.profile.options.label" = "Options";
+"accessibility.tabs.profile.options.inputLabel1" = "Settings";
+"accessibility.tabs.profile.options.inputLabel2" = "More";
+"accessibility.tabs.profile.user-avatar.label" = "Profile photo";
+"accessibility.tabs.profile.user-avatar.hint" = "Displays a larger version.";
+"accessibility.tabs.profile.user-avatar.supporter.label" = "Supporter";
+"accessibility.tabs.profile.user.account-bot.label" = "Bot account";
+"accessibility.tabs.profile.user.account-blocked.label" = "Blocked";
+"accessibility.tabs.profile.user.account-muted.label" = "Muted";
+"accessibility.tabs.profile.user.account-private.label" = "Private account";
+"accessibility.tabs.profile.header-image.label" = "Header image";
+"accessibility.tabs.profile.header-image.hint" = "Displays a larger version.";
+"accessibility.tabs.profile.post-count.hint" = "Scrolls to list.";
+"accessibility.tabs.profile.following-count.hint" = "Navigates to list.";
+"accessibility.tabs.profile.follower-count.hint" = "Navigates to list.";
+"accessibility.tabs.profile.picker.statuses" = "Posts";
+"accessibility.tabs.profile.picker.favorites" = "Favorites";
+"accessibility.tabs.profile.picker.bookmarks" = "Bookmarks";
+"accessibility.tabs.profile.picker.followed-tags" = "Tags";
+"accessibility.tabs.profile.picker.posts-and-replies" = "Posts and replies";
+"accessibility.tabs.profile.picker.media" = "Media";
+"accessibility.tabs.profile.picker.lists" = "Lists";
+"accessibility.tabs.profile.user-notifications.label" = "Receive notifications";
+"accessibility.tabs.profile.user-reblogs.label" = "Display boosts";
+"accessibility.tabs.profile.fields.verified.label" = "Verified";
+"accessibility.tabs.profile.fields.container.label" = "User-defined fields";
+"accessibility.status.spoiler-full-content" = "Full Content";
+"accessibility.status.a-boosted-b-%@-%@" = "%@ boosted %@";
+"accessibility.status.a-replied-to-%@" = "%@ replied to";
+"accessibility.image.alt-text-%@" = "Image alt text: %@";
+"accessibility.image.alt-text-more.label" = "More alt text available";
+"accessibility.tabs.messages.unread.label" = "Unread";
+"accessibility.status.poll.option-prefix-%lld-of-%lld" = "Option %lld of %lld";
+"accessibility.status.poll.active.label" = "Active poll";
+"accessibility.status.poll.finished.label" = "Poll results";
+"accessibility.status.poll.selected.label" = "Selected";
+"accessibility.media.supported-type.image.label" = "Image";
+"accessibility.media.supported-type.gifv.label" = "Animated Gif";
+"accessibility.media.supported-type.video.label" = "Video";
+"accessibility.media.supported-type.audio.label" = "Audio";
+"accessibility.status.contains-media.label-%@" = "Contains %@";
+"accessibility.status.application.label" = "App";
+"accessibility.status.media-viewer-action.label" = "Open media viewer";
+
+// MARK: Report
+"report.comment.placeholder" = "Additional Info";
+"report.title" = "Report Post";
+"report.action.send" = "Send";
+"status.action.report" = "Report Post";
+
+"tag.suggested.mentions-%lld" = "%lld mentions";
+
+"action.submit" = "Gönder";
+"input.verification.code" = "Kod";
+"action.title.confirm" = "Onay";
+"action.message.confirm" = "Lütfen gönderinizi onaylayın.";
+"discount.code.desc" = "Bir indirim kodu aldıysanız, buraya girebilirsiniz!";
+"input.discount.code.placeholder" = "İndirim kodunu girin";
+"list.default.empty.title" = "Burada Hiçbir Şey Yok";
+"list.default.empty.message" = "Daha sonra tekrar kontrol edin.🥰☕️";
+"list.default.error.button" = "Tekrar Dene";
+"list.default.error.message" = "Verileriniz yüklenirken hata oluştu";
+"list.default.error.title" = "Bir hata oluştu";
+"user.profile.tip" = "Profiliniz, cihazınız tarafından oluşturulan rastgele bir UUID'den oluşturulmuştur!";
+"menut.settings.chat.new" = "Yeni Sohbet";
+"menut.settings.check.update" = "Güncellemeleri kontrol et...";
+"chat.item.buy" = "Satın Al";
+
+"settings.section.help.review" = "Bir değerlendirme yap";
+"chat.message.hello" = "Merhaba! Bir mesaj gönderebilir ya da önerilerden ilham alabilirsiniz 😝!";
+"chat.message.unlock.body" = "🚫 Yetersiz Kredi 🚫\n\nGörünüşe göre sohbet jetonlarınız tükendi! Sohbeti sorunsuz bir şekilde sürdürmek için lütfen kredinizi yenileyin.\nYeniden yükledikten sonra, kaldığınız yerden kolayca devam edebilirsiniz. Sohbete devam edelim!";
+"action.recharge" = "Şimdi Yükle";
+
+/* Turkish */
+"about.profile.message" = "### Kullanıcı Bilgisi Beyanı\n\n**Neden kullanıcı bilgisine ihtiyacımız var?**\n\n- Uygulamamızda servisimizi kullanan her cihaz benzersizdir. Her kullanıcı için kişiselleştirilmiş bir hizmet sunmayı amaçlıyoruz. Bunun için, bu özel deneyimleri sunabilmek için her kullanıcıyı tanımlama yoluna ihtiyacımız var.\n\n**Kullanıcı nasıl tanımlanır?**\n\n- Uygulamamız, kullanıcı tanımlayıcısı olarak cihazınız tarafından oluşturulan UUID (Evrensel Benzersiz Tanımlayıcı) kullanır. Bu, her kullanıcının benzersizliğini sağlayan teknik bir tanımlayıcıdır.\n\n**UUID ve Kişisel Bilgi**\n\n- UUID, kişisel kimlik bilgilerinizle tamamen ilgisizdir. UUID'den herhangi bir kişisel bilgi alamayız ve bunu denemeyiz. Sadece teknik amaçlar için kullanılan rastgele sayı ve harf kombinasyonudur.\n\n**Gizlilik ve Güvenlik Hakkında**\n\n- Kullanıcılarımızın gizliliğine ve güvenliğine büyük değer veriyoruz. UUID'niz yalnızca uygulama içinde kişiselleştirilmiş hizmetler sunmak için dahili olarak kullanılır. UUID'nizi üçüncü taraflarla asla paylaşmayız veya kişisel veri toplamak için kullanmayız.\n\n**Bizimle İletişime Geçin**\n\n- Herhangi bir şüpheniz veya sorunuz varsa, lütfen bizimle iletişime geçin. Güveniniz ve memnuniyetiniz en büyük motivasyonumuzdur.\n";
+
+"about.profile.title" = "Profil Hakkında";
+"bill.navi.title" = "Fatura";
+"bill.list.title" = "Küçük Krediler, Büyük Kullanımlar";
+"bill.list.message" = "Krediler, AI ile yapılan sohbetler için tokenleri tüketmek için kullanılabilir";
+"bill.type.point-recharge-by-purchase" = "Uygulama içi satın alma ile kredi yükle";
+"bill.type.member-recharge" = "Plus servisi satın al";
+"bill.type.member-expiry" = "Plus servisi sona erdi";
+"bill.type.point-refund" = "Kredi iadesi";
+"bill.type.member-refund" = "Plus iadesi";
+"bill.type.user-register" = "Kullanıcı kaydı";
+"bill.type.invite" = "Kullanıcıyı davet et";
+"bill.type.invited" = "Davet edildiniz";
+"bill.type.point-recharge-by-cdkey" = "CD anahtarıyla kredi yükle";
+"bill.type.point-consumed-by-chat" = "Sohbetle kredi harcandı";
+"bill.type.point-consumed-by-image" = "Resim oluşturma için kredi harcandı";
+"bill.type.point-refund" = "Kredi iadesi";
+
+"update.required.title" = "Talkify için güncelleme gerekiyor";
+"update.required.message" = "iOS için Talkify'ın artık desteklenmeyen eski bir sürümünü kullanıyorsunuz. Tüm en yeni özellikleri almak için güncelleyin.";
+"update.required.button" = "Güncelle";
+
+// MARK: Image
+"Image Options" = "Görüntü Seçenekleri";
+"Image Count" = "Görüntü Sayısı";
+"Aspect Ratio" = "En Boy Oranı";
+"Guidance Scale" = "Yönlendirme Ölçeği";
+"Step Count" = "Adım Sayısı";
+"Advanced" = "Gelişmiş";
+"Model" = "Model";
+"Load Models" = "Modelleri Yükle";
+"Shuffle Prompt" = "Karışık İstemi";
+"Width" = "Genişlik";
+"Height" = "Yükseklik";
+"Prompt" = "İstemi";
+"Random Seed" = "Rastgele Çekirdek";
+"Seed" = "Çekirdek";
+"Choose Style" = "Stil Seç";
+"Style Preset" = "Stil Ön Ayarı";
+"3d model" = "3D model";
+"analog film" = "analog film";
+"anime" = "anime";
+"cinematic" = "sinematik";
+"comic book" = "çizgi roman";
+"digital art" = "dijital sanat";
+"enhance" = "geliştir";
+"fantasy art" = "fantazi sanatı";
+"isometric" = "izometrik";
+"line art" = "çizgi sanat";
+"low poly" = "düşük poli";
+"modeling compound" = "modelleme bileşiği";
+"neon punk" = "neon punk";
+"origami" = "origami";
+"photographic" = "fotografik";
+"pixel art" = "piksel sanatı";
+"tile texture" = "karo dokusu";
+"Created at" = "Oluşturulma tarihi";
+"Updated at" = "Güncelleme tarihi";
+"Optimized Prompt" = "Optimize Edilmiş İstemi";
+"Optimize" = "Optimize Et";
+
+"Sampler" = "Örnekleyici";
+"Clip Guidance Preset" = "Klip Rehberi Ön Ayarı";
+"Negative Prompt" = "Olumsuz İstek";
+"prompt.placeholder" = "Ne görmek istersiniz?";
+"negative.prompt.placeholder" = "Nelerden kaçınmak istersiniz?";
+"No subscriptions available" = "Kullanılabilir abonelik yok";
+"Generate" = "Oluştur";
+"Edit" = "Düzenle";
+"Your Image" = "Resminiz";
+"Image Mode" = "Resim Modu";
+"Image Strength" = "Resim Şiddeti";
+"Step Schedule Start" = "Adım Programı Başlangıcı";
+"Step Schedule End" = "Adım Programı Bitişi";
+"Move and Scale" = "Taşı ve Ölçekle";
+"Scale" = "Ölçek";
+"min" = "min";
+"max" = "maks";
+"alert.button.ok" = "Tamam";
+"action.title.confirm" = "Emin misiniz?";
+"Save your image" = "Resminizi kaydedin";
+"Choose a folder and a name to store the image." = "Resmi depolamak için bir klasör ve ad seçin.";
+"File name:" = "Dosya adı:";
+
+"img-gen.done.alert.title" = "Harika!";
+"img-gen.done.alert.message" = "Sabrınız için teşekkür ederiz. Tüm görevler tamamlandı. Lütfen gözden geçirin.";
+"img-gen.consumption.tip" = "Her eylem (örneğin, oluşturma veya düzenleme) 1 kredi düşer.";
+"Shuffle" = "Karıştır";
+"window.feedback.title" = "Talkify için Geri Bildirim";
+"settings.section.themes" = "Temalar";
+"menu.select" = "Menüyü Seç";
+
+"tab.image" = "Resim";
+
+"alert.reward.new-user.title" = "Tebrikler!";
+"alert.reward.new-user.message" = "Yeni bir kullanıcı ödülü olarak 6 kredi kazandınız. Bu kredileri sohbetler ve çizimler için kullanabilirsiniz. Keşfe başlayın!"; // Turkish
+"Welcome" = "Hoş Geldiniz";
+"new-user.welcome" = "Yeni kullanıcı ödülünüz verildi!";
+
+"command.show-main" = "Ana Pencereyi Göster";

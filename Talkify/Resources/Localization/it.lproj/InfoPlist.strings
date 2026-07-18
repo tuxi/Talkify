@@ -1,0 +1,14 @@
+/* 
+  Localizable.strings
+  Chater
+
+  Created by xiaoyuan on 2023/8/23.
+  
+*/
+
+/* Bundle name */
+"CFBundleName" = "Talkify";
+
+"NSCameraUsageDescription" = "Talkify ha bisogno dell'accesso alla fotocamera per salvare i media catturati e ricevuti.";
+"NSPhotoLibraryAddUsageDescription" = "Talkify ha bisogno dell'accesso alla libreria foto per salvare i media catturati e ricevuti.";
+"NSNetworkClientUsageDescription" = "Talkify ha bisogno dell'accesso alla rete per fornire tutte le sue funzionalità.";

@@ -1,0 +1,782 @@
+// MARK: Common strings
+"action.cancel" = "Відміна";
+"action.delete" = "Видалено";
+"action.save" = "Збережено";
+"action.done" = "Виконано";
+"action.retry" = "Повторити";
+"action.view.error" = "Переглянути помилки";
+
+"navi.skip.title" = "Пропустити";
+"action.info" = "Інфо";
+"action.react" = "Реагувати...";
+"action.share" = "Поділитися";
+"action.select.text" = "Вибрати текст";
+
+
+"alert.button.ok" = "Гаразд";
+"alert.error" = "Халепа!";
+
+"action.export" = "Экспорт";
+"action.clear" = "Очистить";
+
+"placeholder.loading.long" = "Завантаження, завантаження, все ще завантаження ...";
+"placeholder.loading.short" = "Завантаження ...";
+
+"see-more" = "Переглянути більше";
+
+// MARK: Add Account
+"account.add.error.instance-not-supported" = "Цей сервер наразі не підтримується.";
+"account.add.navigation-title" = "Додати підключення";
+"account.add.sign-in" = "Зареєструватися";
+
+// MARK: Enums
+"enum.avatar-position.leading" = "Поряд";
+"enum.avatar-position.top" = "Зверху";
+"enum.avatar-shape.circle" = "Круг";
+"enum.avatar-shape.rounded" = "Закруглені";
+"enum.durations.infinite" = "без обмеження";
+"enum.durations.custom" = "власний";
+"enum.durations.fiveMinutes" = "5 хвилин";
+"enum.durations.thirtyMinutes" = "30 хвилин";
+"enum.durations.oneHour" = "1 година";
+"enum.durations.sixHours" = "6 годин";
+"enum.durations.twelveHours" = "12 годин";
+"enum.durations.oneDay" = "1 день";
+"enum.durations.threeDays" = "3 дні";
+"enum.durations.sevenDays" = "7 днів";
+"enum.status-actions-display.all" = "Усе";
+"enum.status-actions-display.no-buttons" = "Без кнопок";
+"enum.status-actions-display.only-buttons" = "Лише кнопки";
+"enum.status-display-style.compact" = "Компактно";
+"enum.status-display-style.medium" = "Середнє";
+"enum.status-display-style.large" = "Велике";
+"enum.swipeactions.icon-with-text" = "Іконки з текстом";
+"enum.swipeactions.icon-only" = "Лише іконки";
+
+// MARK: Instances
+"instance.info.domains" = "Домени";
+"instance.info.email" = "Електронна пошта";
+"instance.info.name" = "Імʼя";
+"instance.info.navigation-title" = "Статистика сервера";
+"instance.info.posts" = "Дописи";
+"instance.info.section.info" = "Інформація про сервер";
+"instance.info.section.rules" = "Правила сервера";
+"instance.info.users" = "Користувачів";
+"instance.info.version" = "Версія";
+"instance.list.posts-%@" = "%@ дописів";
+"instance.list.users-%@" = "%@ користувачів";
+"instance.suggestions" = "Пропозиції";
+"instance.url" = "URL Сервера";
+
+// MARK: Menu
+"menu.new-post" = "Новий допис";
+"menu.font" = "Шрифт";
+"menu.font.bigger" = "Більше";
+"menu.font.smaller" = "Менше";
+
+// MARK: Settings
+"settings.language" = "Мова";
+"settings.change" = "Змінити";
+"settings.account.add" = "Додати обліковий запис";
+"settings.app.icon" = "Іконка додатку";
+"settings.app.icon.navigation-title" = "Іконки";
+"settings.app.icon.official" = "Офіційні іконки";
+"settings.app.icon.designed-by" = "Розроблено";
+"settings.app.source" = "Посилання (GitHub)";
+"settings.app.support" = "Підтримати додаток";
+"settings.app.about" = "Опис";
+"settings.display.example-toot" = "Приклад допису";
+"settings.display.font" = "Шрифт додатку";
+"settings.other.image-gen" = "Генерація зображень";
+"settings.display.font.system" = "Системний";
+"settings.display.font.custom" = "Власний";
+"settings.display.font.scaling-%@" = "Масштабування шкрифта: %@";
+"settings.display.font.line-spacing-%@" = "Міжрядковий інтервал: %@";
+"settings.display.avatar.position" = "Розташування Аватара";
+"settings.display.avatar.shape" = "Форма Аватара";
+"settings.display.full-username" = "Відображати повне імʼя користувача";
+"settings.display.navigation-title" = "Налаштування відображення";
+"settings.display.restore" = "Відновити налаштування";
+"settings.display.section.display" = "Відображення";
+"settings.display.section.theme" = "Тема";
+"settings.display.colors.apply" = "Застосувати власні кольори";
+"settings.display.section.theme.footer" = "Власна кольорова схема може бути встановлена лише якщо відключено Відповідати системній темі";
+"settings.display.status.action-buttons" = "Кнопки дій статуса";
+"settings.display.status.media-style" = "Стиль медія статуса";
+"settings.display.translate-button" = "Відображати кнопку перекладу";
+"settings.display.theme.background" = "Колір фону";
+"settings.display.theme.secondary-background" = "Додатковий колір фону";
+"settings.display.theme.text-color" = "Колір тексту";
+"settings.display.theme.tint" = "Відтінок кольору";
+"settings.display.theme.systemColor" = "Відповідати системній темі";
+"settings.general.browser" = "Браузер";
+"settings.general.browser.in-app" = "Вбудований браузер";
+"settings.general.browser.in-app.readerview" = "Режим читання для вбудованого браузера";
+"settings.general.browser.system" = "Системний браузер";
+"settings.general.display" = "Налаштування відображення";
+"settings.general.instance" = "Інформація про сервер";
+"settings.general.push-notifications" = "Push сповіщення";
+"settings.general.remote-timelines" = "Віддалена локальна стрічка";
+"settings.push.boosts" = "Поширення";
+"settings.push.favorites" = "Вподобане";
+"settings.push.follows" = "Підписки";
+"settings.push.main-toggle" = "Push сповіщення";
+"settings.push.main-toggle.description" = "Отримувати push сповіщення на нову активність";
+"settings.push.mentions" = "Згадування";
+"settings.push.navigation-title" = "Push сповіщення";
+"settings.push.new-posts" = "Новий допис";
+"settings.push.polls" = "Результат опитування";
+"settings.general.content" = "Налаштування вмісту";
+"settings.system" = "Системні налаштування";
+"settings.content.navigation-title" = "Налаштування вмісту";
+"settings.content.boosts" = "Поширення";
+"settings.content.collapse-long-posts" = "Згортати довгі дописи";
+"settings.content.collapse-long-posts-hint" = "У згорнутих публікаціях відображається лише обмежена кількість рядків разом із кнопкою, щоб показати повну публікацію";
+"settings.content.hide-repeated-boosts" = "Не відображати повторні поширення";
+"settings.content.instance-settings" = "Налаштування відображення сервера";
+"settings.content.use-instance-settings" = "Використовувати налаштування сервера";
+"settings.content.expand-spoilers" = "Дозволити відображати делікатний вміст";
+"settings.content.expand-media" = "Відображення медіа";
+"settings.content.default-sensitive" = "Завжди позначати медія як делікатні";
+"settings.content.default-visibility" = "Видимість допису";
+"settings.content.media" = "Медіа";
+"settings.content.media.show.alt" = "Показати ALT тексти";
+"settings.content.reading" = "Читання";
+"settings.content.posting" = "Публікація";
+"enum.expand-media.show" = "Відобразити все";
+"enum.expand-media.hide" = "Приховати все";
+"enum.expand-media.hide-sensitive" = "Приховувати вміст, позначений як делікатний";
+"settings.section.accounts" = "Профілі";
+"settings.section.app" = "Додаток";
+"settings.section.app.footer %@" = "Версія додатку: %@";
+"settings.section.general" = "Загальне";
+"settings.support.alert.error.message" = "Error processing your in-app purchase, please try again.";
+"settings.support.alert.message" = "Дякуємо за підписку! Ми цінуємо вашу підтримку. Насолоджуйтесь преміальними функціями Talkify!";
+"settings.support.alert.title" = "Thanks!";
+"settings.support.message-from-dev" = "Hi there! My name is Thomas and I absolutely love creating open source apps. Talkify is definitely one of my proudest projects to date - and let's be real, it's also the one that requires the most maintenance due to the ever-changing world of Mastodon and social media. If you're having a blast using Talkify, consider tossing a little tip my way. It'll make my day (and help keep the app running smoothly for you). 🚀";
+"settings.support.navigation-title" = "Підтримка Talkify";
+"settings.support.one.subtitle" = "Small, but cute, and it tastes good!";
+"settings.support.one.title" = "🍬 Small Tip";
+"settings.support.placeholder.loading-subtitle" = "Loading subtitle ...";
+"settings.support.three.subtitle" = "You're insane, thank you so much!";
+"settings.support.three.title" = "🤯 Generous Tip";
+"settings.support.two.subtitle" = "I love the taste of a fancy coffee ❤️";
+"settings.support.two.title" = "☕️ Nice Tip";
+"settings.support.four.title" = "👽 Who are you Tip";
+"settings.support.four.subtitle" = "It'll go a long way to keep Talkify running!";
+"settings.support.supporter.title" = " Become a supporter!";
+"settings.support.supporter.subtitle" = "By giving a monthly tip to Talkify, you become a supporter, you'll even get verified badge on your profile. For your 👀 only.";
+"settings.support.supporter.subscribed" = " Thanks for being an Talkify supporter!";
+"settings.support.supporter.subscription-info"= "Subscription are automatically renewed unless you cancel them a day before the next renewal cycle.";
+"settings.support.restore-purchase.button" = "Restore purchase";
+"settings.support.restore-purchase.explanation" = "Restore your supporter subscription if it hasn't been synced automatically.";
+"settings.support.manager-subscriptions.button" = "Керування підписками";
+"settings.support.privacy-policy" = "Privacy Policy";
+"settings.support.terms-of-use" = "Terms";
+"settings.timeline.add" = "Додати локальну стрічку";
+"settings.navi.title" = "Налаштування";
+"settings.rate" = "Оцінити Talkify";
+"settings.section.other" = "Інше";
+"settings.other.hide-openai" = "Увімкнути 🤖 помічника";
+"settings.other.social-keyboard" = "Увімкнути Social Keyboard";
+"settings.other.sound-effect" = "Увімкнути звукові ефекти";
+"settings.general.translate" = "Налаштування перекладу";
+"settings.translation.navigation-title" = "Переклад";
+"settings.translation.always-deepl" = "Завжди перекладати за допомогою DeepL";
+"settings.translation.user-api-key" = "DeepL API Key";
+"settings.translation.api-key-type" = "Тип ключа";
+"settings.translation.needed-message" = "Ця функція потребує ключа DeepL API key";
+"settings.push.duplicate.title" = "Виправити задвоєння сповіщень";
+"settings.push.duplicate.footer" = "Отримуєте сповіщення двічі? Спробуйте цю чарівну кнопку, щоб виправити це!";
+"settings.push.duplicate.button.fix" = "🪄 Виправити!";
+"settings.other.autoplay-video" = "Автоматичне програвання відео";
+"settings.about.built-with" = "Talkify створено з Open Source продуктами та любовʼю:";
+"settings.about.title" = "Talkify";
+
+"settings.account.cached-posts-%@" = "Кешовано дописів: %@";
+"settings.account.action.delete-cache" = "Очистити кеш";
+
+"settings.general.haptic" = "Гаптика";
+"settings.haptic.navigation-title" = "Налаштування гаптики";
+"settings.haptic.timeline" = "Стрічка";
+"settings.haptic.tab-selection" = "Вибір вкладки";
+"settings.haptic.buttons" = "Натиснення кнопки";
+
+"settings.display.show-tab-label" = "Відображати назву вкладки";
+
+"settings.display.show-ipad-column" = "Увімкнути додаткову колонку";
+
+"settings.general.swipeactions" = "Дії гортання";
+"settings.swipeactions.appearance" = "Вигляд";
+"settings.swipeactions.navigation-title" = "Дії гортання";
+"settings.swipeactions.primary" = "Основна дія";
+"settings.swipeactions.secondary" = "Додаткова дія";
+"settings.swipeactions.status" = "Публікація";
+"settings.swipeactions.status.action.bookmark" = "У закладки";
+"settings.swipeactions.status.action.boost" = "Поширити";
+"settings.swipeactions.status.action.favorite" = "Вподобати";
+"settings.swipeactions.status.action.none" = "Нічого";
+"settings.swipeactions.status.action.quote" = "Цитувати";
+"settings.swipeactions.status.action.reply" = "Відповісти";
+"settings.swipeactions.status.explanation" = "Дії гортання доступні, якщо провести пальцем ліворуч або праворуч по публікації. Додаткова дія доступна, лише якщо встановлено основну дію.";
+"settings.swipeactions.status.leading" = "Рух праворуч";
+"settings.swipeactions.status.trailing" = "Рух ліворуч";
+"settings.swipeactions.use-theme-colors" = "Використовувати колір тему";
+"settings.swipeactions.use-theme-colors-explanation" = "Використовувати колір теми замість стандартних кольорів";
+"settings.swipeactions.icon-style" = "Стиль іконки";
+
+"settings.display.section.font" = "Шрифти";
+
+"settings.section.cache" = "Кеш";
+"settings.cache-media.clear" = "Очистити кеш файлів";
+
+"settings.plan.plus.title" = "Plus - Місячна підписка";
+"settings.plan.plus.subtitle" = "Отримайте переваги Plus на 1 місяць!";
+"settings.plan.credits.title" = "Пакет Кредитів";
+"settings.plan.credits.subtitle" = "Купіть кредити, щоб розширити обмеження чату.";
+
+
+
+"settings.section.help" = "Допомога";
+"settings.help.feedback" = "Допомога та відгук";
+
+"settings.section.support" = "Підтримка";
+"settings.support.Subscription" = "Підписка";
+"settings.support.discount" = "Код знижки";
+
+"settings.section.profile" = "Ви";
+"navi.profile.title" = "Ваш поточний профіль";
+"settings.profile.credits" = "Кредити";
+"settings.profile.role" = "Роль";
+"settings.profile.role.standard" = "Стандарт";
+"settings.profile.role.plus" = "Плюс";
+"settings.section.help.use" = "Як користуватися";
+"settings.section.help.rateapp" = "Оцінити додаток";
+
+
+"navi.close" = "Закрити";
+
+// MARK: Tabs
+"tab.explore" = "Огляд";
+"tab.federated" = "Глобальна";
+"tab.local" = "Локальна";
+"tab.messages" = "Повідомлення";
+"tab.notifications" = "Сповіщення";
+"tab.settings" = "Налаштування";
+"tab.home" = "Стрічка"; // 乌克兰语
+"tab.prompt" = "Запит";
+"tab.admin" = "Admin";
+"tab.profile" = "Профіль";
+
+// MARK: Home
+"home.section.title.history" = "Мої історичні дані";
+"home.no-conversation" = "Ще немає розмови😊";
+"home.chat.start" = "Почати";
+"home.navi.title.chat" = "Talkify";
+"home.navi.title.scene" = "Сцена";
+"home.input.placeholder" = "Чатуйте тут...";
+"home.section.title.suggestions" = "Пропозиції";
+"timeline.%@-is-valid" = "%@ коректний сервер";
+"timeline.add-remote.title" = "Додати віддалену локальну стручку";
+"timeline.add.action.add" = "Додати";
+"timeline.filter.add-local" = "Додати локальну стрічку";
+"timeline.filter.lists" = "Списки";
+"timeline.filter.local" = "Локальна стрічка";
+"timeline.filter.tags" = "Хештеґи";
+
+// MARK: Package: AppAccount
+"app-account.button.add" = "Додати обліковий запис";
+
+// MARK: Package: Account
+"account.action.add-remove-list" = "Додати/Видалити зі списку";
+"account.action.edit-info" = "Редагувати інформацію";
+"account.action.mention" = "Згадати";
+"account.action.message" = "Повідомлення";
+"account.action.notify-enable" = "Увімкнути сповіщення";
+"account.action.notify-disable" = "Вимкнути сповіщення";
+"account.action.reboosts-show" = "Відображати поширення";
+"account.action.reboosts-hide" = "Приховувати поширення";
+"account.action.block" = "Заблокувати";
+"account.action.unblock" = "Розблокувати";
+"account.action.mute" = "Приховати";
+"account.action.unmute" = "Відновити";
+"account.action.share" = "Поширити цей профіль";
+"account.boosted-by" = "Поширено";
+"account.detail.about" = "Про";
+"account.detail.familiar-followers" = "Також відслідковується";
+"account.detail.n-fields %lld" = "%lld полів";
+"account.detail.featured-tags-n-posts %lld" = "%lld дописів";
+"account.edit.about" = "Про";
+"account.edit.account-settings.bot" = "Це обліковий запис бота";
+"account.edit.account-settings.discoverable" = "Оприлюднити обліковий запис у каталозі";
+"account.edit.account-settings.private" = "Зробити обліковий запис приватним";
+"account.edit.account-settings.section-title" = "Налаштування облікового запису";
+"account.edit.display-name" = "Імʼя для відображення";
+"account.edit.error.save.message" = "Помилка збереження вашого облікового запису, спробуйте ще раз.";
+"account.edit.error.save.title" = "Помилка збереження облікового запису";
+"account.edit.navigation-title" = "Редагувати обліковий запис";
+"account.edit.post-settings.privacy" = "Приватність за замовчуванням";
+"account.edit.post-settings.section-title" = "Налаштування допису";
+"account.edit.post-settings.sensitive" = "Делікатний вміст";
+
+"account.edit.metadata-section-title" = "Метадані профілю";
+"account.edit.metadata-name-placeholder" = "Мітка";
+"account.edit.metadata-value-placeholder" = "Вміст";
+"account.edit.add-metadata-button" = "Додати нові метадані";
+
+"account.favorited-by" = "Вподобали";
+"account.follow.follow" = "Підписатися";
+"account.follow.following" = "Підписаний";
+"account.follow.requested" = "Запит надіслано";
+"account.follow-request.accept" = "Прийняти";
+"account.follow-request.reject" = "Відхилити";
+"account.follow-requests.pending-requests" = "Черга запитів";
+"account.follow-requests.instructions" = "Користувачі, які не бачитимуть ваші дописи допоки ви їх не затвердите.";
+"account.followers" = "Підписники";
+"account.following" = "Підписки";
+"account.list.create" = "Створити новий список";
+"account.list.create.confirm" = "Створити список";
+"account.list.create.description" = "Введіть назву для списку";
+"account.list.delete" = "Видалити список";
+"account.list.name" = "Назва списку";
+"account.post.pinned" = "Закріплений допис";
+"account.posts" = "Дописи";
+"account.relation.follows-you" = "Підписується на вас";
+"account.joined" = "Доєднався";
+"account.action.logout" = "Вийти з облікового запису";
+"account.action.more" = "Більше налаштувань";
+
+"account.relation.note.edit" = "Редагувати нотатку";
+"account.relation.note.edit.placeholder" = "Додати нотатку";
+"account.relation.note.edit.error.save.message" = "Помилка збереження вашої нотатки, pспробуйте ще раз.";
+"account.relation.note.edit.error.save.title" = "Помилка збереження нотатки";
+"account.relation.note.label" = "Нотатка:";
+
+// MARK: Package: Conversations
+"conversations.action.delete" = "Видалити";
+"conversations.action.mark-read" = "Позначити прочитаним";
+"conversations.action.view-detail" = "Переглянути деталі";
+"conversations.empty.message" = "Ви знайдете ваші особисті повідомлення та приватні згадки тут. Приємного обміну повідомленнями! 📱❤️";
+"conversations.empty.title" = "Порожня скринька";
+"conversations.error.button" = "Спробувати знову";
+"conversations.error.message" = "Помилка завантаження вашого повідомлення";
+"conversations.error.title" = "Виникла халепа";
+"conversations.navigation-title" = "Особисті повідомлення";
+"conversations.new.message.placeholder" = "Нове повідомлення";
+"conversations.latest.message" = "Останні повідомлення";
+
+// MARK: Package: DesignSystem
+"design.tag.n-posts-from-n-participants %lld %lld" = "%lld дописів від %lld учасників";
+"design.theme.navigation-title" = "Обрати тему";
+"design.theme.toots-preview" = "Перегляд допису";
+
+// MARK: Package: Explore
+"explore.navigation-title" = "Огляд";
+"explore.search.message-%@" = "Ви можете шукати все, що вас цікавить на %@";
+"explore.search.prompt" = "Пошук користувачів, дописів та хештеґів";
+"explore.search.title" = "Пошук на сервері";
+"explore.search.empty.message" = "На цей запит нічого не знайдено, спробуйте інший.";
+"explore.search.empty.title" = "Нічого не знайдено";
+"explore.section.posts" = "Дописи";
+"explore.section.suggested-users" = "Запропоновані користувачі";
+"explore.section.tags" = "Хештеґи";
+"explore.section.trending.links" = "Популярні посилання";
+"explore.section.trending.posts" = "Популярні дописи";
+"explore.section.trending.tags" = "Популярні хештеґи";
+"explore.section.users" = "Користувачі";
+
+// MARK: Package: Scene
+"scene.navigation.select.title" = "Вибрати пропозицію";
+"scene.list.empty.title" = "Даних немає!";
+"chat.info.navi.title" = "Деталі чату";
+"chat.info.detail.name" = "Назва чату";
+"chat.info.detail.placeholder" = "Будь ласка, введіть";
+"chat.info.detail.section.base" = "Базовий";
+"chat.info.detail.section.prompt" = "Інформація для запиту";
+"chat.info.detail.prompt.title" = "Запит";
+"chat.info.detail.desc.title" = "Опис";
+"chat.info.detail.prompt.input" = "Запит на введення";
+"chat.info.detail.section.parameters" = "Параметри";
+"chat.info.detail.parameters.model" = "Модель*";
+"chat.info.detail.parameters.memerylevel" = "Рівень пам'яті*";
+"chat.info.detail.parameters.temperature" = "Температура*";
+"chat.info.detail.parameters.maxtokens" = "Макс. токенів*";
+"chat.info.detail.section.other" = "Інше";
+"chat.info.detail.other.extension" = "Розширення";
+
+
+// MARK: Package: Env
+"env.poll-vote-frequency.one" = "Лише один варіант";
+"env.poll-vote-frequency.multiple" = "Вибір декількох варіантів";
+
+// MARK: Package: Lists
+"lists.add-remove-%@" = "Додати/Видалити %@";
+"lists.create" = "Створити новий список";
+"lists.create.confirm" = "Створити список";
+"lists.edit.users-in-list" = "Користувачі у списку";
+"lists.name" = "Назва списку";
+"lists.name.message" = "Введіть назву для списку";
+
+// MARK: Package: Notifications
+"notifications.empty.message" = "Сповіщення? Які сповіщення? Я не бачив тут жодних сповіщень... 📱😎";
+"notifications.empty.title" = "Немає сповіщень";
+"notifications.error.message" = "Халепа з завантаженням ваших сповіщень, спробуйте ще раз.";
+"notifications.error.title" = "Сталася халепа";
+"notifications.label.favorite %lld" = "уподобано";
+"notifications.label.follow %lld" = "підписка на вас";
+"notifications.label.mention %lld" = "загадано вас";
+"notifications.label.reblog %lld" = "поширено";
+"notifications.label.poll" = "завершення опитування";
+"notifications.label.follow-request" = "запит на підписку";
+"notifications.label.status" = "публікація допису";
+"notifications.label.update" = "зміна допису";
+"notifications.menu-title.favorite" = "Уподобання";
+"notifications.menu-title.follow" = "Підписка";
+"notifications.menu-title.follow-request" = "Запит на підписку";
+"notifications.menu-title.mention" = "Згадування";
+"notifications.menu-title.poll" = "Опитування";
+"notifications.menu-title.reblog" = "Поширення";
+"notifications.menu-title.status" = "Дописи";
+"notifications.menu-title.update" = "Редагування дописів";
+"notifications.navigation-title" = "Усі сповіщення";
+"notifications.tab.all" = "Усі";
+"notifications.tab.mentions" = "Згадування";
+
+"notifications.label.status.push" = "🖊️ Опубліковано: ";
+"notifications.label.reblog.push" = "🚀 Поширено: ";
+"notifications.label.follow.push" = "👋 Підписався: ";
+"notifications.label.follow-request.push" = "🔒 Запит на підписку: ";
+"notifications.label.favorite.push" = "⭐️ Вподобано: ";
+"notifications.label.poll.push" = "📈 Опитування завершено: ";
+"notifications.label.update.push" = "Оновлено: ";
+
+// MARK: Package: Timeline
+"timeline.federated" = "Глобальна";
+"timeline.latest" = "Перейти до нових";
+"timeline.home" = "Домівка";
+"timeline.local" = "Локальна";
+"timeline.n-recent-from-n-participants %lld %lld" = "%lld нових дописів від %lld учасників";
+"timeline.trending" = "Популярне";
+"timeline.add.url" = "URL сервера";
+
+// MARK: Package: Status
+"status.action.translate" = "Перекласти";
+"status.action.translate-with-deepl" = "Перекласти з допомогою DeepL";
+"status.action.translated-label-%@" = "Переклад з допомогою %@";
+"status.action.translated-label-from-%@-%@" = "Переклад з %@ з допомогою %@";
+"status.action.bookmark" = "У закладки";
+"status.action.boost" = "Поширити";
+"status.action.boost-to-followers" = "Поширити Підписникам";
+"status.action.copy-text" = "Копіювати текст";
+"status.action.copy-link" = "Копіювати посилання";
+"status.action.delete" = "Видалити";
+"status.action.delete.confirm.title" = "Підтвердження";
+"status.action.delete.confirm.message" = "ви впевнені, що хочете видалити цей допис?";
+"status.action.edit" = "Редагувати";
+"status.action.favorite" = "Вподобане";
+"status.action.mention" = "Згадки";
+"status.action.message" = "Повідомлення";
+"status.action.pin" = "Закріпити";
+"status.action.post" = "Допис";
+"status.action.quote" = "Цитувати цей допис";
+"status.action.reply" = "Відповісти";
+"status.action.section.your-post" = "Ваш допис";
+"status.action.share" = "Поширити цей допис";
+"status.action.share-link" = "Поширити посилання на допис";
+"status.action.share-image" = "Поширити як зображення";
+"status.action.share-title" = "Поширення";
+"status.action.unbookmark" = "Вилучити із закладок";
+"status.action.unboost" = "Відмінити поширення";
+"status.action.unfavorite" = "Вилучити із вподобаного";
+"status.action.unpin" = "Відкріпити";
+"status.action.view-in-browser" = "Переглянути у браузері";
+"status.card.share" = "Поширити це посилання";
+"status.card.copy" = "Скопіювати це посилання";
+"status.draft.delete" = "Видалити чернетку";
+"status.draft.save" = "Зберегти чернетку";
+"status.editor.ai-prompt.correct" = "Виправити текст";
+"status.editor.ai-prompt.add-tags" = "Додати #Tags за текстом";
+"status.editor.ai-prompt.insert-tags" = "Додати #Tags у кінці";
+"status.editor.ai-prompt.emphasize" = "Розставити акценти";
+"status.editor.ai-prompt.fit" = "Скоротити текст";
+"status.editor.description.add" = "Додати опис";
+"status.editor.description.edit" = "Виправити опис";
+"status.editor.drafts.navigation-title" = "Чернетки";
+"status.editor.emojis.navigation-title" = "Власні Emojis";
+"status.editor.error.upload" = "Помилка завантаження";
+"status.editor.language-select.navigation-title" = "Обрати мову";
+"status.editor.language-select.recently-used" = "Остання обрана";
+"status.editor.language-select.confirmation.detected-%@" = "Опубліковано на %@ (Detected language)";
+"status.editor.language-select.confirmation.selected-%@" = "Опубліковано на %@ (Selected language)";
+"status.editor.media.edit-image" = "Змінити медіа";
+"status.editor.media.image-description" = "Опис медіа";
+"status.editor.mode.edit" = "Змінити ваш допис";
+"status.editor.mode.new" = "Новий допис";
+"status.editor.mode.quote-%@" = "Цитування %@";
+"status.editor.mode.reply-%@" = "У відповідь на %@";
+"status.editor.restore-previous" = "Відновити попередній текст";
+"status.editor.spoiler" = "Спойлер";
+"status.editor.text.placeholder" = "Що у вас на думці?";
+"status.editor.visibility" = "Видимість допису";
+"status.editor.photo-library" = "Бібліотека світлин";
+"status.editor.camera-picker" = "Зробити світлину";
+"status.editor.browse-file" = "Переглянути файли";
+"status.error.loading.message" = "An error occurred while loading posts, please try again.";
+"status.error.message" = "An error occurred in the context of this post, please try again.";
+"status.error.title" = "An error occurred";
+"status.filter.filtered-by-%@" = "Відфільровано: %@";
+"status.filter.show-anyway" = "Всерівно показати";
+"status.image.alt-text.abbreviation" = "ALT";
+"status.media.content.show" = "Показати вміст";
+"status.media.contextmenu.copy" = "Копіювати зображення";
+"status.media.contextmenu.save" = "Зберегти зображення";
+"status.media.contextmenu.share" = "Поділитися цим зображенням";
+"status.media.contextmenu.view-browser" = "Переглянути у браузері";
+"status.media.sensitive.show" = "Показати делікатний вміст";
+"status.poll.n-votes %lld" = "%lld голосів";
+"status.poll.n-votes-voters %lld %lld" = "%lld голосів від %lld опитаних";
+"status.poll.closed" = "Закрито";
+"status.poll.closes-in" = "Завершується в ";
+"status.poll.duration" = "Тривалість опитування";
+"status.poll.frequency" = "Частота опитування";
+"status.poll.option-n %lld" = "Варіант %lld";
+"status.poll.send" = "Проголосувати";
+"status.post-from-%@" = "Допис від %@";
+"status.row.was-boosted" = "поширює";
+"status.row.was-reply" = "Відповідь для";
+"status.row.you-boosted" = "Ви поширили";
+"status.show-less" = "Показати менше";
+"status.show-more" = "Показати більше";
+"status.show-full-post" = "Показати весь допис";
+"status.summary.at-time" = " о ";
+"status.summary.edited-time" = "Востаннє змінено: ";
+"status.summary.n-replies %lld" = "%lld відповідей";
+"status.summary.n-boosts %lld" = "%lld поширень";
+"status.summary.n-favorites %lld" = "%lld вподобань";
+"status.summary.edit-history" = "Журнал змін";
+"status.visibility.direct" = "Особисте";
+"status.visibility.follower" = "Підписникам";
+"status.visibility.public" = "Усім";
+"status.visibility.unlisted" = "Прихований";
+
+// MARK: Filters
+"filter.new" = "Новий фільтр";
+"filter.filters" = "Фільтри";
+"filter.edit.title" = "Назва фільтру";
+"filter.edit.keywords" = "Ключові слова";
+"filter.edit.keywords.add" = "Додати нове слово";
+"filter.edit.contexts" = "Фільтрувати вміст";
+"filter.edit.action" = "Виконати";
+"filter.edit.expiry" = "Завершується";
+"filter.edit.expiry.date-time" = "День/Година";
+"filter.edit.expiry.duration" = "Тривалість";
+"account.action.edit-filters" = "Редагувати фільтри";
+"filter.contexts.home" = "Домівка та список";
+"filter.contexts.notifications" = "Сповіщення";
+"filter.contexts.public" = "Публічна стрічка";
+"filter.contexts.conversations" = "Розмови";
+"filter.contexts.profiles" = "Профілі";
+"filter.action.warning" = "Приховати з попередженням";
+"filter.action.hide" = "Повністю приховати";
+"filter.expired" = "Втратив чинність";
+"filter.expiry-%@" = "Втрачає чинність: %@";
+
+// MARK: Accessibility
+"accessibility.general.toggle.on" = "On";
+"accessibility.general.toggle.off" = "Off";
+"accessibility.editor.button.attach-photo" = "Додати світлину";
+"accessibility.editor.button.poll" = "Опитування";
+"accessibility.editor.button.spoiler" = "Увага! Спойлер.";
+"accessibility.editor.button.drafts" = "Чернетка";
+"accessibility.editor.button.custom-emojis" = "Власні emojis";
+"accessibility.editor.button.language" = "Мова";
+"accessibility.editor.button.ai-prompt" = "AI prompt";
+"accessibility.editor.button.characters-remaining" = "Characters remaining";
+"accessibility.editor.privacy.label" = "Visibility";
+"accessibility.editor.privacy.hint" = "Changes post audience.";
+"accessibility.tabs.timeline.add-account" = "Додати профіль";
+"accessibility.tabs.timeline.new-post.label" = "Compose";
+"accessibility.tabs.timeline.new-post.inputLabel1" = "New";
+"accessibility.tabs.timeline.new-post.inputLabel2" = "Create";
+"accessibility.tabs.timeline.unread-posts.label-%lld" = "%lld new posts";
+"accessibility.tabs.timeline.unread-posts.hint" = "Scrolls the timeline.";
+"accessibility.tabs.timeline.content-link-%@" = "Visit %@";
+"accessibility.tabs.timeline.content-hashtag-%@" = "Hashtag %@";
+"accessibility.app-account.selector.accounts" = "Профілі";
+"accessibility.app-account.selector.accounts.hint" = "Opens options sheet.";
+"accessibility.tabs.profile.options.label" = "Options";
+"accessibility.tabs.profile.options.inputLabel1" = "Settings";
+"accessibility.tabs.profile.options.inputLabel2" = "More";
+"accessibility.tabs.profile.user-avatar.label" = "Profile photo";
+"accessibility.tabs.profile.user-avatar.hint" = "Displays a larger version.";
+"accessibility.tabs.profile.user-avatar.supporter.label" = "Supporter";
+"accessibility.tabs.profile.user.account-bot.label" = "Bot account";
+"accessibility.tabs.profile.user.account-blocked.label" = "Blocked";
+"accessibility.tabs.profile.user.account-muted.label" = "Muted";
+"accessibility.tabs.profile.user.account-private.label" = "Private account";
+"accessibility.tabs.profile.header-image.label" = "Header image";
+"accessibility.tabs.profile.header-image.hint" = "Displays a larger version.";
+"accessibility.tabs.profile.post-count.hint" = "Scrolls to list.";
+"accessibility.tabs.profile.following-count.hint" = "Navigates to list.";
+"accessibility.tabs.profile.follower-count.hint" = "Navigates to list.";
+"accessibility.tabs.profile.picker.statuses" = "Posts";
+"accessibility.tabs.profile.picker.favorites" = "Favorites";
+"accessibility.tabs.profile.picker.bookmarks" = "Bookmarks";
+"accessibility.tabs.profile.picker.followed-tags" = "Tags";
+"accessibility.tabs.profile.picker.posts-and-replies" = "Posts and replies";
+"accessibility.tabs.profile.picker.media" = "Media";
+"accessibility.tabs.profile.picker.lists" = "Lists";
+"accessibility.tabs.profile.user-notifications.label" = "Receive notifications";
+"accessibility.tabs.profile.user-reblogs.label" = "Display boosts";
+"accessibility.tabs.profile.fields.verified.label" = "Verified";
+"accessibility.tabs.profile.fields.container.label" = "User-defined fields";
+"accessibility.status.spoiler-full-content" = "Full Content";
+"accessibility.status.a-boosted-b-%@-%@" = "%@ boosted %@";
+"accessibility.status.a-replied-to-%@" = "%@ replied to";
+"accessibility.image.alt-text-%@" = "Image alt text: %@";
+"accessibility.image.alt-text-more.label" = "More alt text available";
+"accessibility.tabs.messages.unread.label" = "Unread";
+"accessibility.status.poll.option-prefix-%lld-of-%lld" = "Option %lld of %lld";
+"accessibility.status.poll.active.label" = "Active poll";
+"accessibility.status.poll.finished.label" = "Poll results";
+"accessibility.status.poll.selected.label" = "Selected";
+"accessibility.media.supported-type.image.label" = "Image";
+"accessibility.media.supported-type.gifv.label" = "Animated Gif";
+"accessibility.media.supported-type.video.label" = "Video";
+"accessibility.media.supported-type.audio.label" = "Audio";
+"accessibility.status.contains-media.label-%@" = "Contains %@";
+"accessibility.status.application.label" = "App";
+"accessibility.status.media-viewer-action.label" = "Open media viewer";
+
+// MARK: Report
+"report.comment.placeholder" = "Додаткова інформація";
+"report.title" = "Скарга на допис";
+"report.action.send" = "Надіслати";
+"status.action.report" = "Поскаржитися на допис";
+
+"tag.suggested.mentions-%lld" = "%lld згадок";
+
+
+"action.submit" = "Подати";
+"input.verification.code" = "Код";
+"action.title.confirm" = "Підтвердження";
+"action.message.confirm" = "Будь ласка, підтвердіть ваше подання.";
+"discount.code.desc" = "Якщо ви отримали знижковий код, ви можете ввести його тут!";
+"input.discount.code.placeholder" = "Введіть знижковий код";
+"list.default.empty.title" = "Тут Нічого";
+"list.default.empty.message" = "Спробуйте перевірити пізніше.🥰☕️";
+"list.default.error.button" = "Повторити";
+"list.default.error.message" = "Помилка при завантаженні ваших даних";
+"list.default.error.title" = "Сталася помилка";
+"user.profile.tip" = "Ваш профіль генерується на основі випадкового UUID, створеного вашим пристроєм!";
+"menut.settings.chat.new" = "Новий Чат";
+"menut.settings.check.update" = "Перевірити наявність оновлень...";
+"chat.item.buy" = "Купити";
+
+"settings.section.help.review" = "Залишити відгук";
+"chat.message.hello" = "Привіт! Ви можете відправити повідомлення або отримати натхнення від пропозицій 😝!";
+"chat.message.unlock.body" = "🚫 Недостатньо кредитів 🚫\n\nЗдається, у вас закінчилися токени чату! Щоб продовжити розмову безперервно, будь ласка, поповніть свої кредити.\nПісля поповнення ви можете без зусиль продовжити розмову там, де зупинилися. Продовжимо розмову!";
+"action.recharge" = "Поповнити зараз";
+
+"about.profile.message" = "### Заява про інформацію користувача\n\n**Навіщо нам потрібна інформація про користувача?**\n\n- У нашому додатку кожен пристрій, який використовує наш сервіс, є унікальним. Ми прагнемо надавати персоналізовані послуги кожному користувачеві. Для цього нам потрібен спосіб ідентифікації кожного користувача, щоб надавати їм ці індивідуалізовані досвіди.\n\n**Як користувача ідентифіковано?**\n\n- Наш додаток використовує UUID (Універсальний Унікальний Ідентифікатор), який генерується вашим пристроєм, як ідентифікатор користувача. Це технічний ідентифікатор, який гарантує унікальність кожного користувача.\n\n**UUID та особиста інформація**\n\n- UUID абсолютно не пов'язаний з вашою особистою інформацією. Ми не можемо отримати особисту інформацію з UUID і не намагаємося це робити. Це просто випадкова комбінація цифр та літер для технічних цілей.\n\n**Про конфіденційність та безпеку**\n\n- Ми приділяємо велику увагу конфіденційності та безпеці наших користувачів. Ваш UUID використовується лише внутрішньо в додатку для надання персоналізованих послуг. Ми ніколи не ділимося вашим UUID з третіми особами і не використовуємо його для збору особистих даних.\n\n**Зв'яжіться з нами**\n\n- Якщо у вас є сумніви або питання, будь ласка, зв'яжіться з нами. Ваша довіра та задоволеність - наш найбільший стимул.\n";
+
+"about.profile.title" = "Про профіль";
+"bill.navi.title" = "Рахунок";
+"bill.list.title" = "Мало кредитів, велике застосування";
+"bill.list.message" = "Кредити можна використовувати для споживання токенів для розмов з AI";
+"bill.type.point-recharge-by-purchase" = "Поповнення кредитів через внутрішній покупку";
+"bill.type.member-recharge" = "Купівля послуги Plus";
+"bill.type.member-expiry" = "Термін дії послуги Plus закінчився";
+"bill.type.member-refund" = "Повернення Plus";
+"bill.type.user-register" = "Реєстрація користувача";
+"bill.type.invite" = "Запрошення користувача";
+"bill.type.invited" = "Запрошений користувач";
+"bill.type.point-recharge-by-cdkey" = "Поповнення кредитів через CD-ключ";
+"bill.type.point-consumed-by-chat" = "Кредити, витрачені на чат";
+"bill.type.point-consumed-by-image" = "Кредити, витрачені на генерацію зображень";
+"bill.type.point-refund" = "Повернення кредитів";
+
+
+"update.required.title" = "Потрібне оновлення Talkify";
+"update.required.message" = "Ви використовуєте стару версію Talkify для iOS, яка більше не підтримується. Оновіть, щоб отримати всі останні функції.";
+"update.required.button" = "Оновити";
+
+// MARK: Image
+"Image Options" = "Опції зображення";
+"Image Count" = "Кількість зображень";
+"Aspect Ratio" = "Співвідношення сторін";
+"Guidance Scale" = "Шкала напрямків";
+"Step Count" = "Кількість кроків";
+"Advanced" = "Розширений";
+"Model" = "Модель";
+"Load Models" = "Завантажити моделі";
+"Shuffle Prompt" = "Випадковий запит";
+"Width" = "Ширина";
+"Height" = "Висота";
+"Prompt" = "Запит";
+"Random Seed" = "Випадкове насіння";
+"Seed" = "Насіння";
+"Choose Style" = "Оберіть Стиль";
+"Style Preset" = "Попередньо Налаштований Стиль";
+"3d model" = "3D модель";
+"analog film" = "аналоговий фільм";
+"anime" = "аніме";
+"cinematic" = "кінематографічний";
+"comic book" = "комікс";
+"digital art" = "цифрове мистецтво";
+"enhance" = "поліпшити";
+"fantasy art" = "фентезі-арт";
+"isometric" = "ізометричний";
+"line art" = "лінійне малювання";
+"low poly" = "низька полігонність";
+"modeling compound" = "моделювальна маса";
+"neon punk" = "неоновий панк";
+"origami" = "орігамі";
+"photographic" = "фотографічний";
+"pixel art" = "піксельне мистецтво";
+"tile texture" = "текстура плитки";
+"Created at" = "Створено";
+"Updated at" = "Оновлено";
+"Optimized Prompt" = "Оптимізований запит";
+"Optimize" = "Оптимізувати";
+
+"Sampler" = "Зразковий";
+"Clip Guidance Preset" = "Набір настанов для кліпа";
+"Negative Prompt" = "Негативний запит";
+"prompt.placeholder" = "Що ви хочете бачити?";
+"negative.prompt.placeholder" = "Чого ви хочете уникнути?";
+"No subscriptions available" = "Підписок немає";
+"Generate" = "Генерувати";
+"Edit" = "Редагувати";
+"Your Image" = "Ваше зображення";
+"Image Mode" = "Режим зображення";
+"Image Strength" = "Сила зображення";
+"Step Schedule Start" = "Початок кроку графіку";
+"Step Schedule End" = "Кінець кроку графіку";
+"Move and Scale" = "Перемістити та масштабувати";
+"Scale" = "Масштаб";
+"min" = "мін";
+"max" = "макс";
+"alert.button.ok" = "ОК";
+"action.title.confirm" = "Ви впевнені?";
+"Save your image" = "Зберегти ваше зображення";
+"Choose a folder and a name to store the image." = "Виберіть папку та назву для зберігання зображення.";
+"File name:" = "Назва файлу:";
+
+"img-gen.done.alert.title" = "Це чудово!";
+"img-gen.done.alert.message" = "Дякуємо за ваше терпіння. Всі завдання виконані. Будь ласка, перевірте.";
+"img-gen.consumption.tip" = "За кожну дію (наприклад, генерацію або редагування) списується 1 кредит.";
+"Shuffle" = "Перемішати";
+"window.feedback.title" = "Відгуки для Talkify";
+"settings.section.themes" = "Теми";
+"menu.select" = "Вибрати меню";
+
+
+"tab.image" = "Зображення";
+
+"alert.reward.new-user.title" = "Вітаємо!";
+"alert.reward.new-user.message" = "Ви заробили 6 кредитів нового користувача, які можна використовувати для чатів та малюнків. Розпочніть дослідження!"; // Ukrainian
+"Welcome" = "Ласкаво просимо";
+"new-user.welcome" = "Ваш бонус нового користувача видано!";
+
+"command.show-main" = "Показати головне вікно";

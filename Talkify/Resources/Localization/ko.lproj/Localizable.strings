@@ -1,0 +1,782 @@
+// MARK: Common strings
+"action.cancel" = "취소";
+"action.delete" = "삭제";
+"action.save"  = "저장";
+"action.done" = "완료";
+"action.retry" = "다시 시도";
+"action.view.error" = "View 오류";
+
+"navi.skip.title" = "건너뛰기";
+"action.info" = "정보";
+"action.react" = "반응...";
+"action.share" = "공유";
+"action.select.text" = "텍스트 선택";
+
+
+"alert.button.ok" = "확인";
+"alert.error" = "오류";
+
+"action.export" = "내보내기";
+"action.clear" = "지우기";
+
+"placeholder.loading.long" = "로딩, 로딩, 또 로딩...";
+"placeholder.loading.short" = "로드 중...";
+
+"see-more" = "더 보기";
+
+// MARK: Add Account
+"account.add.error.instance-not-supported" = "이 인스턴스는 현재 지원되지 않습니다.";
+"account.add.navigation-title" = "계정 추가";
+"account.add.sign-in" = "로그인";
+
+// MARK: Enums
+"enum.avatar-position.leading" = "본문 옆";
+"enum.avatar-position.top" = "본문 위";
+"enum.avatar-shape.circle" = "원";
+"enum.avatar-shape.rounded" = "둥근 사각형";
+"enum.durations.infinite" = "해제할 때까지";
+"enum.durations.custom" = "직접 설정";
+"enum.durations.fiveMinutes" = "5분";
+"enum.durations.thirtyMinutes" = "30분";
+"enum.durations.oneHour" = "1시간";
+"enum.durations.sixHours" = "6시간";
+"enum.durations.twelveHours" = "12시간";
+"enum.durations.oneDay" = "1일";
+"enum.durations.threeDays" = "3일";
+"enum.durations.sevenDays" = "7일";
+"enum.status-actions-display.all" = "모두 표시";
+"enum.status-actions-display.no-buttons" = "표시하지 않음";
+"enum.status-actions-display.only-buttons" = "버튼만 표시";
+"enum.status-display-style.compact" = "작게";
+"enum.status-display-style.large" = "크게";
+"enum.status-display-style.medium" = "중간";
+"enum.swipeactions.icon-with-text" = "아이콘과 텍스트";
+"enum.swipeactions.icon-only" = "아이콘만";
+
+// MARK: Instances
+"instance.info.domains" = "도메인";
+"instance.info.email" = "이메일";
+"instance.info.name" = "이름";
+"instance.info.navigation-title" = "인스턴스 정보";
+"instance.info.posts" = "글";
+"instance.info.section.info" = "인스턴스 정보";
+"instance.info.section.rules" = "인스턴스 규칙";
+"instance.info.users" = "사용자";
+"instance.info.version" = "버전";
+"instance.list.posts-%@" = "글 %@개";
+"instance.list.users-%@" = "사용자 %@명";
+"instance.suggestions" = "추천";
+"instance.url" = "인스턴스 URL";
+
+// MARK: Menu
+"menu.new-post" = "새 글";
+"menu.font" = "글꼴";
+"menu.font.bigger" = "크게";
+"menu.font.smaller" = "작게";
+
+// MARK: Settings
+"settings.language" = "언어";
+"settings.change" = "변경";
+"settings.account.add" = "계정 추가";
+"settings.app.icon" = "앱 아이콘";
+"settings.app.icon.navigation-title" = "앱 아이콘";
+"settings.app.icon.official" = "공식 앱 아이콘";
+"settings.app.icon.designed-by" = "커뮤니티 앱 아이콘 | 제작:";
+"settings.app.source" = "소스 코드 (GitHub)";
+"settings.app.support" = "이 앱 지원하기";
+"settings.app.about" = "이 앱에 관해";
+"settings.display.example-toot" = "글 미리 보기";
+"settings.display.avatar.position" = "프로필 사진 위치";
+"settings.display.avatar.shape" = "프로필 사진 모양";
+"settings.display.full-username" = "아이디에 인스턴스 URL 표시";
+"settings.display.navigation-title" = "화면 설정";
+"settings.display.restore" = "처음 설정으로 되돌리기";
+"settings.display.section.display" = "화면";
+"settings.display.section.theme" = "테마";
+"settings.display.colors.apply" = "변경한 색상 적용하기";
+"settings.display.section.theme.footer" = "시스템 설정에 맞춤 옵션이 꺼져 있을 때만 색상을 직접 고를 수 있습니다.";
+"settings.display.status.action-buttons" = "글 동작 버튼";
+"settings.display.status.media-style" = "글 미디어 크기";
+"settings.display.translate-button" = "번역 버튼 표시";
+"settings.display.theme.background" = "배경 색상";
+"settings.display.theme.secondary-background" = "보조 배경 색상";
+"settings.display.theme.text-color" = "글자 색상";
+"settings.display.theme.tint" = "강조 색상";
+"settings.display.theme.systemColor" = "시스템 설정에 맞춤";
+"settings.general.browser" = "브라우저";
+"settings.general.browser.in-app" = "인앱 브라우저";
+"settings.general.browser.in-app.readerview" = "인앱 브라우저에서 항상 읽기 도구 사용";
+"settings.general.browser.system" = "시스템 기본 브라우저";
+"settings.general.display" = "화면 설정";
+"settings.general.instance" = "인스턴스 정보";
+"settings.general.push-notifications" = "푸시 알림 설정";
+"settings.general.remote-timelines" = "원격 로컬 타임라인";
+"settings.push.boosts" = "부스트";
+"settings.push.favorites" = "좋아요";
+"settings.push.follows" = "새 팔로워";
+"settings.push.main-toggle" = "푸시 알림";
+"settings.push.main-toggle.description" = "새 활동이 있을 때 푸시 알림을 받습니다.";
+"settings.push.mentions" = "나를 언급";
+"settings.push.navigation-title" = "푸시 알림 설정";
+"settings.push.new-posts" = "새 글";
+"settings.push.polls" = "투표 결과";
+"settings.general.content" = "콘텐츠 설정";
+"settings.system" = "시스템 설정";
+"settings.content.navigation-title" = "콘텐츠 설정";
+"settings.content.boosts" = "부스트";
+"settings.content.collapse-long-posts" = "긴 글을 접힌 상태로 표시";
+"settings.content.collapse-long-posts-hint" = "접힌 글은 일정 줄까지만 내용이 표시됩니다. 함께 표시되는 버튼을 누르면 전체 내용을 볼 수 있습니다.";
+"settings.content.hide-repeated-boosts" = "중복으로 부스트된 글 숨김";
+"settings.content.instance-settings" = "인스턴스 콘텐츠 설정";
+"settings.content.use-instance-settings" = "인스턴스 설정에 맞춤";
+"settings.content.expand-spoilers" = "열람 주의 표시된 글 항상 가리지 않음";
+"settings.content.expand-media" = "표시할 미디어";
+"settings.content.default-sensitive" = "내 미디어 항상 민감함으로 표시";
+"settings.content.default-visibility" = "글 기본 공개 범위";
+"settings.content.media" = "미디어";
+"settings.content.media.show.alt" = "미디어 설명 버튼 표시";
+"settings.content.reading" = "읽을 때";
+"settings.content.posting" = "올릴 때";
+"enum.expand-media.show" = "모두 표시하기";
+"enum.expand-media.hide" = "모두 가리기";
+"enum.expand-media.hide-sensitive" = "민감한 미디어만 가리기";
+"settings.section.accounts" = "계정";
+"settings.section.app" = "앱";
+"settings.section.app.footer %@" = "앱 버전: %@";
+"settings.section.general" = "일반";
+"settings.support.alert.error.message" = "인앱 구매를 완료하지 못했습니다. 다시 시도해주세요.";
+"settings.support.alert.message" = "구독해 주셔서 감사합니다! 여러분의 지원에 감사드립니다. Talkify의 프리미엄 기능을 즐기십시오!";
+"settings.support.alert.title" = "감사합니다!";
+"settings.support.message-from-dev" = "안녕하세요! 저는 Thomas입니다. 저는 오픈 소스 앱을 만드는 걸 정말 좋아해요. Talkify는 제가 가장 자랑스럽게 생각하는 프로젝트 중 하나에요. 동시에 가장 많은 유지·보수가 필요한 프로젝트이기도 하죠. 마스토돈은 끊임없이 업데이트되고, 소셜 미디어의 세계 역시 빠르게 변화하니까요. Talkify를 쓰며 즐거운 시간을 보내고 있나요? 그렇다면, 작은 기부금을 한 번 보내보는 건 어때요? 제 하루가 행복해질 거에요. (그리고 이 앱이 계속 잘 작동하는 데 도움이 될 거에요.) 🚀";
+"settings.support.navigation-title" = "Talkify 지원하기";
+"settings.support.one.subtitle" = "작지만, 귀엽고 달콤해요!";
+"settings.support.one.title" = "🍬 작은 기부금";
+"settings.support.placeholder.loading-subtitle" = "로드 중...";
+"settings.support.three.subtitle" = "뭘 좀 아시는 분이군요, 미리 감사드립니다!";
+"settings.support.three.title" = "🤯 통 큰 기부금";
+"settings.support.two.subtitle" = "기분이 좋아지는 맛있는 커피는 누구나 좋아하니까요 ❤️";
+"settings.support.two.title" = "☕️ 기분 좋아지는 기부금";
+"settings.support.four.title" = "👽 엄청난 기부금";
+"settings.support.four.subtitle" = "Talkify가 계속 발전하는 데 정말 많은 도움이 될 거에요!";
+"settings.support.supporter.title" = " 후원자가 되어 보세요!";
+"settings.support.supporter.subtitle" = "기부금을 매달 보내는 구독을 신청하면, 후원자가 될 수 있습니다. 프로필에 나만 볼 수 있는 자기만족용 인증 마크도 생겨요. 👀";
+"settings.support.supporter.subscribed" = " Talkify의 후원자가 되어 주셔서 감사합니다!";
+"settings.support.supporter.subscription-info"= "정기 결제일 전날까지 구독을 취소하지 않는 한 구독은 자동으로 갱신됩니다.";
+"settings.support.restore-purchase.button" = "구매 내역 불러오기";
+"settings.support.restore-purchase.explanation" = "구매 내역이 자동으로 동기화되지 않았다면 위의 버튼을 눌러 구매 내역을 불러올 수 있습니다.";
+"settings.support.manager-subscriptions.button" = "구독 관리";
+"settings.support.privacy-policy" = "개인정보 처리방침";
+"settings.support.terms-of-use" = "이용 약관";
+"settings.timeline.add" = "원격 로컬 타임라인 추가";
+"settings.navi.title" = "설정";
+"settings.rate" = "Talkify 평가 남기기";
+"settings.section.other" = "기타";
+"settings.other.hide-openai" = "글 작성 도우미 🤖";
+"settings.other.social-keyboard" = "SNS 키보드";
+"settings.other.sound-effect" = "효과음";
+"settings.general.translate" = "번역 설정";
+"settings.translation.navigation-title" = "번역 설정";
+"settings.translation.always-deepl" = "항상 DeepL을 통해 번역";
+"settings.translation.user-api-key" = "DeepL API 키";
+"settings.translation.api-key-type" = "API 키 종류";
+"settings.translation.needed-message" = "이 기능을 사용하려면 DeepL에서 발급받은 API 키가 있어야 합니다.";
+"settings.push.duplicate.title" = "중복 알림 해결사";
+"settings.push.duplicate.footer" = "같은 알림이 여러 번 오나요? 위에 있는 버튼을 누르면 마법처럼 해결될 거에요.";
+"settings.push.duplicate.button.fix" = "🪄 고치기";
+"settings.other.autoplay-video" = "동영상 자동 재생";
+"settings.display.font" = "앱 폰트";
+"settings.other.image-gen" = "이미지 생성";
+"settings.display.font.system" = "시스템 글꼴";
+"settings.display.font.custom" = "직접 설정";
+"settings.display.font.scaling-%@" = "글꼴 크기 조절: %@";
+"settings.display.font.line-spacing-%@" = "줄 간격 조절: %@";
+"settings.about.built-with" = "Talkify는 다음 오픈 소스 소프트웨어를 사용하여 개발되었습니다:";
+"settings.about.title" = "Talkify";
+"settings.account.cached-posts-%@" = "캐시 데이터로 저장된 글: %@개";
+"settings.account.action.delete-cache" = "캐시 데이터 지우기";
+
+"settings.general.haptic" = "햅틱 피드백 설정";
+"settings.haptic.navigation-title" = "햅틱 피드백 설정";
+"settings.haptic.timeline" = "타임라인에서";
+"settings.haptic.tab-selection" = "하단 탭 바를 누를 때";
+"settings.haptic.buttons" = "버튼을 누를 때";
+
+"settings.section.help" = "도움말";
+"settings.help.feedback" = "도움말 및 피드백";
+
+"settings.section.support" = "지원";
+"settings.support.Subscription" = "구독";
+"settings.support.discount" = "할인 코드";
+
+"settings.section.profile" = "당신";
+"navi.profile.title" = "현재 프로필";
+"settings.profile.credits" = "크레딧";
+"settings.profile.role" = "역할";
+"settings.profile.role.standard" = "표준";
+"settings.profile.role.plus" = "플러스";
+"settings.section.help.use" = "사용 방법";
+"settings.section.help.rateapp" = "앱 평가하기";
+
+
+"settings.display.show-tab-label" = "하단 탭 바에 제목 표시";
+
+"settings.display.show-ipad-column" = "보조 열 표시";
+
+"settings.general.swipeactions" = "쓸어넘기기 동작 설정";
+"settings.swipeactions.navigation-title" = "쓸어넘기기 동작 설정";
+"settings.swipeactions.primary" = "주 동작";
+"settings.swipeactions.secondary" = "보조 동작";
+"settings.swipeactions.status.action.bookmark" = "보관함에 추가";
+"settings.swipeactions.status.action.boost" = "부스트";
+"settings.swipeactions.status.action.favorite" = "좋아요";
+"settings.swipeactions.status.action.none" = "설정 안 함";
+"settings.swipeactions.status.action.quote" = "인용";
+"settings.swipeactions.status.action.reply" = "댓글";
+"settings.swipeactions.status.explanation" = "글을 오른쪽 혹은 왼쪽으로 쓸어넘겨 원하는 동작을 실행할 수 있습니다. 보조 동작은 주 동작이 설정되어 있을 때만 추가할 수 있습니다.";
+"settings.swipeactions.status.leading" = "오른쪽으로 쓸어넘길 때";
+"settings.swipeactions.status.trailing" = "왼쪽으로 쓸어넘길 때";
+"settings.swipeactions.status" = "글을";
+"settings.swipeactions.appearance" = "모양";
+"settings.swipeactions.use-theme-colors" = "테마 색상 사용";
+"settings.swipeactions.use-theme-colors-explanation" = "동작의 기본 색상 대신 테마 색상을 사용합니다.";
+"settings.swipeactions.icon-style" = "아이콘 모양";
+
+"settings.display.section.font" = "글꼴";
+
+"settings.section.cache" = "캐시 데이터";
+"settings.cache-media.clear" = "미디어 캐시 데이터 지우기";
+
+"settings.plan.plus.title" = "Plus - 월간 구독";
+"settings.plan.plus.subtitle" = "1개월 동안 Plus 혜택을 받으세요!";
+"settings.plan.credits.title" = "크레딧 팩";
+"settings.plan.credits.subtitle" = "대화 한계를 확장하기 위해 크레딧을 구입하세요.";
+
+
+"navi.close" = "닫기";
+
+// MARK: Tabs
+"tab.explore" = "둘러보기";
+"tab.federated" = "연합";
+"tab.local" = "로컬";
+"tab.messages" = "메시지";
+"tab.notifications" = "알림";
+"tab.settings" = "설정";
+"tab.home" = "채팅";
+"tab.prompt" = "프롬프트";
+"tab.admin" = "관리자";
+"tab.profile" = "프로필";
+
+// MARK: Home
+"home.section.title.history" = "나의 기록";
+"home.no-conversation" = "대화가 없습니다😊";
+"home.chat.start" = "시작";
+"home.navi.title.chat" = "Talkify";
+"home.navi.title.scene" = "장면";
+"home.input.placeholder" = "여기서 채팅하세요...";
+"home.section.title.suggestions" = "건의사항";
+"timeline.%@-is-valid" = "%@ 인스턴스는 사용할 수 있는 인스턴스입니다.";
+"timeline.add-remote.title" = "원격 로컬 타임라인 추가";
+"timeline.add.action.add" = "추가";
+"timeline.filter.add-local" = "원격 로컬 타임라인 추가";
+"timeline.filter.lists" = "리스트";
+"timeline.filter.local" = "원격 로컬 타임라인";
+"timeline.filter.tags" = "팔로우한 태그";
+"timeline-new-posts %lld" = "%lld개 새 글";
+
+// MARK: Package: AppAccount
+"app-account.button.add" = "계정 추가";
+
+// MARK: Package: Account
+"account.action.add-remove-list" = "리스트에서 추가/제거";
+"account.action.edit-info" = "프로필 편집";
+"account.action.mention" = "언급";
+"account.action.message" = "메시지 작성";
+"account.action.notify-enable" = "새 글 알림 켜기";
+"account.action.notify-disable" = "새 글 알림 끄기";
+"account.action.reboosts-show" = "이 사용자가 부스트한 글 표시하기";
+"account.action.reboosts-hide" = "이 사용자가 부스트한 글 숨기기";
+"account.action.block" = "차단";
+"account.action.unblock" = "차단 해제";
+"account.action.mute" = "뮤트";
+"account.action.unmute" = "뮤트 해제";
+"account.action.share" = "공유";
+"account.boosted-by" = "부스트한 사용자";
+"account.detail.about" = "정보";
+"account.detail.familiar-followers" = "내가 아는 팔로워";
+"account.detail.n-fields %lld" = "%lld개 항목";
+"account.detail.featured-tags-n-posts %lld" = "%lld개 글";
+"account.edit.about" = "정보";
+"account.edit.account-settings.bot" = "봇 계정";
+"account.edit.account-settings.discoverable" = "다른 사용자들에게 이 계정 추천";
+"account.edit.account-settings.private" = "팔로우 요청 필요";
+"account.edit.account-settings.section-title" = "계정 설정";
+"account.edit.display-name" = "표시되는 이름";
+"account.edit.error.save.message" = "프로필을 저장하지 못했습니다. 다시 시도해주세요.";
+"account.edit.error.save.title" = "프로필 저장 오류";
+"account.edit.navigation-title" = "프로필 편집";
+"account.edit.post-settings.privacy" = "기본 공개 범위";
+"account.edit.post-settings.section-title" = "글 설정";
+"account.edit.post-settings.sensitive" = "민감한 콘텐츠";
+
+"account.edit.metadata-section-title" = "프로필 메타데이터";
+"account.edit.metadata-name-placeholder" = "제목";
+"account.edit.metadata-value-placeholder" = "내용";
+"account.edit.add-metadata-button" = "새 메타데이터 추가";
+
+"account.favorited-by" = "좋아요한 사용자";
+"account.follow.follow" = "팔로우";
+"account.follow.following" = "팔로우 중";
+"account.follow.requested" = "요청함";
+"account.follow-request.accept" = "수락";
+"account.follow-request.reject" = "거절";
+"account.follow-requests.pending-requests" = "대기 중인 요청";
+"account.follow-requests.instructions" = "팔로우 요청을 수락하기 전까지 이 사용자들은 내가 쓴 팔로워 전용 글을 볼 수 없습니다.";
+"account.followers" = "팔로워";
+"account.following" = "팔로우 중";
+"account.list.create" = "새 리스트 만들기";
+"account.list.create.confirm" = "만들기";
+"account.list.create.description" = "리스트의 이름을 입력해주세요.";
+"account.list.delete" = "리스트 삭제";
+"account.list.name" = "리스트 이름";
+"account.post.pinned" = "고정된 글";
+"account.posts" = "글";
+"account.relation.follows-you" = "나를 팔로우함";
+"account.joined" = "가입";
+"account.action.logout" = "로그아웃";
+"account.action.more" = "계정 설정 더 보기";
+
+"account.relation.note.edit" = "노트 편집";
+"account.relation.note.edit.placeholder" = "나만 볼 수 있는 노트";
+"account.relation.note.edit.error.save.message" = "노트를 저장하지 못했습니다. 다시 시도해주세요.";
+"account.relation.note.edit.error.save.title" = "노트 저장 오류";
+"account.relation.note.label" = "노트";
+
+// MARK: Package: Conversations
+"conversations.action.delete" = "삭제";
+"conversations.action.mark-read" = "읽음으로 표시";
+"conversations.action.view-detail" = "상세 정보 보기";
+"conversations.empty.message" = "메시지를 찾고 있나요? 여기에서 다이렉트 메시지와 비공개 언급을 확인할 수 있어요. 친구에게 메시지를 먼저 보내보세요! 📱❤️";
+"conversations.empty.title" = "메시지 없음";
+"conversations.error.button" = "다시 시도";
+"conversations.error.message" = "메시지를 불러오지 못했습니다.";
+"conversations.error.title" = "오류";
+"conversations.navigation-title" = "다이렉트 메시지";
+"conversations.new.message.placeholder" = "새 메시지";
+"conversations.latest.message" = "가장 최근 메시지를";
+
+// MARK: Package: DesignSystem
+"design.tag.n-posts-from-n-participants %lld %lld" = "%lld개 글 (%lld명이 이야기 중)";
+"design.theme.navigation-title" = "테마 선택";
+"design.theme.toots-preview" = "글 미리 보기";
+
+// MARK: Package: Explore
+"explore.navigation-title" = "둘러보기";
+"explore.search.message-%@" = "이 화면에서 내 인스턴스(%@)에 있는 무엇이든 검색해볼 수 있습니다.";
+"explore.search.prompt" = "사용자, 글, 태그 검색";
+"explore.search.title" = "인스턴스를 탐색해보세요";
+"explore.search.empty.message" = "검색어에 대한 결과가 없습니다. 다른 검색어로 시도해주세요.";
+"explore.search.empty.title" = "검색 결과 없음";
+"explore.section.posts" = "글";
+"explore.section.suggested-users" = "추천 사용자";
+"explore.section.tags" = "태그";
+"explore.section.trending.links" = "뜨고 있는 링크";
+"explore.section.trending.posts" = "뜨고 있는 글";
+"explore.section.trending.tags" = "뜨고 있는 태그";
+"explore.section.users" = "사용자";
+
+// MARK: Package: scene
+"scene.navigation.select.title" = "제안 선택";
+"scene.list.empty.title" = "데이터 없음!";
+"chat.info.navi.title" = "채팅 세부사항";
+"chat.info.detail.name" = "채팅 이름";
+"chat.info.detail.placeholder" = "입력 해주세요";
+"chat.info.detail.section.base" = "기본";
+"chat.info.detail.section.prompt" = "프롬프트 정보";
+"chat.info.detail.prompt.title" = "프롬프트";
+"chat.info.detail.desc.title" = "설명";
+"chat.info.detail.prompt.input" = "입력 프롬프트";
+"chat.info.detail.section.parameters" = "매개 변수";
+"chat.info.detail.parameters.model" = "모델*";
+"chat.info.detail.parameters.memerylevel" = "메모리 레벨*";
+"chat.info.detail.parameters.temperature" = "온도*";
+"chat.info.detail.parameters.maxtokens" = "최대 토큰 수*";
+"chat.info.detail.section.other" = "기타";
+"chat.info.detail.other.extension" = "확장";
+
+
+// MARK: Package: Env
+"env.poll-vote-frequency.one" = "하나만 선택 가능";
+"env.poll-vote-frequency.multiple" = "여러 개 선택 가능";
+
+// MARK: Package: Lists
+"lists.add-remove-%@" = "%@ 추가/제거";
+"lists.create" = "새 리스트 만들기";
+"lists.create.confirm" = "만들기";
+"lists.edit.users-in-list" = "이 리스트에 있는 사용자";
+"lists.name" = "리스트 이름";
+"lists.name.message" = "리스트의 이름을 입력해주세요.";
+
+// MARK: Package: Notifications
+"notifications-others-count %lld" = "님 외 %lld명이 ";
+"notifications.empty.message" = "알림? 무슨 알림이요? 알림 목록이 비어 있어요. 지금처럼 멋지게 하면 알림이 곧 올 거에요. 📱😎";
+"notifications.empty.title" = "알림 없음";
+"notifications.error.message" = "알림을 불러오지 못했습니다. 다시 시도해주세요.";
+"notifications.error.title" = "오류";
+"notifications.label.favorite %lld" = "좋아요함";
+"notifications.label.follow %lld" = "나를 팔로우함";
+"notifications.label.mention %lld" = "님이 나를 언급함";
+"notifications.label.reblog %lld" = "부스트함";
+"notifications.label.poll" = "님의 투표가 끝남";
+"notifications.label.follow-request" = "님이 나에게 팔로우 요청을 보냄";
+"notifications.label.status" = "님의 새 글";
+"notifications.label.update" = "님이 글을 수정함";
+"notifications.menu-title.favorite" = "좋아요";
+"notifications.menu-title.follow" = "새 팔로워";
+"notifications.menu-title.follow-request" = "팔로우 요청";
+"notifications.menu-title.mention" = "나를 언급";
+"notifications.menu-title.poll" = "투표 결과";
+"notifications.menu-title.reblog" = "부스트";
+"notifications.menu-title.status" = "새 글";
+"notifications.menu-title.update" = "수정된 글";
+"notifications.navigation-title" = "모든 알림";
+"notifications.tab.all" = "모든 알림";
+"notifications.tab.mentions" = "언급";
+
+"notifications.label.status.push" = "🖊️ 새 글: ";
+"notifications.label.reblog.push" = "🚀 부스트함: ";
+"notifications.label.follow.push" = "👋 나를 팔로우함: ";
+"notifications.label.follow-request.push" = "🔒 나에게 팔로우 요청을 보냄: ";
+"notifications.label.favorite.push" = "⭐️ 좋아요함: ";
+"notifications.label.poll.push" = "📈 투표가 끝남: ";
+"notifications.label.update.push" = "글을 수정함: ";
+
+// MARK: Package: Timeline
+"timeline.federated" = "연합";
+"timeline.latest" = "최신 타임라인 다시 불러오기";
+"timeline.home" = "홈";
+"timeline.local" = "로컬";
+"timeline.n-recent-from-n-participants %lld %lld" = "%lld개 최근 글 (%lld명이 이야기 중)";
+"timeline.trending" = "뜨고 있는";
+"timeline.add.url" = "인스턴스 URL";
+
+// MARK: Package: Status
+"status.action.translate" = "번역";
+"status.action.translate-with-deepl" = "DeepL 번역";
+"status.action.translated-label-%@" = "%@ 서비스를 통해 번역됨";
+"status.action.translated-label-from-%@-%@" = "%2$@ 서비스를 통해 %1$@에서 번역됨";
+"status.action.bookmark" = "보관함에 추가";
+"status.action.boost" = "부스트";
+"status.action.boost-to-followers" = "팔로워에게만 부스트";
+"status.action.copy-text" = "복사";
+"status.action.copy-link" = "링크 복사";
+"status.action.delete" = "삭제";
+"status.action.delete.confirm.title" = "삭제 확인";
+"status.action.delete.confirm.message" = "이 글을 정말 삭제하시겠습니까?";
+"status.action.edit" = "수정";
+"status.action.favorite" = "좋아요";
+"status.action.mention" = "언급";
+"status.action.message" = "메시지 작성";
+"status.action.pin" = "고정";
+"status.action.post" = "게시";
+"status.action.quote" = "인용";
+"status.action.reply" = "댓글";
+"status.action.section.your-post" = "내 글을";
+"status.action.share" = "링크 및 본문 공유";
+"status.action.share-link" = "링크 공유";
+"status.action.share-image" = "이미지로 공유";
+"status.action.share-title" = "공유";
+"status.action.unbookmark" = "보관함에서 제거";
+"status.action.unboost" = "부스트 취소";
+"status.action.unfavorite" = "좋아요 취소";
+"status.action.unpin" = "고정 해제";
+"status.action.view-in-browser" = "브라우저에서 보기";
+"status.card.share" = "링크 공유";
+"status.card.copy" = "링크 복사";
+"status.draft.delete" = "삭제";
+"status.draft.save" = "임시 보관함에 저장";
+"status.editor.ai-prompt.correct" = "맞게 고치기";
+"status.editor.ai-prompt.add-tags" = "주요 단어 #태그 표시하기";
+"status.editor.ai-prompt.insert-tags" = "글 뒤에 #태그 추가하기";
+"status.editor.ai-prompt.emphasize" = "내용 강조하기";
+"status.editor.ai-prompt.fit" = "간결하게 바꾸기";
+"status.editor.description.add" = "설명 추가";
+"status.editor.description.edit" = "설명 편집";
+"status.editor.drafts.navigation-title" = "임시 보관함";
+"status.editor.emojis.navigation-title" = "커스텀 이모지";
+"status.editor.error.upload" = "전송 오류";
+"status.editor.language-select.navigation-title" = "글 언어 지정";
+"status.editor.language-select.recently-used" = "최근 사용";
+"status.editor.language-select.confirmation.detected-%@" = "%@로 표시하여 게시 (인식된 언어)";
+"status.editor.language-select.confirmation.selected-%@" = "%@로 표시하여 게시 (선택한 언어)";
+"status.editor.media.edit-image" = "미디어 편집";
+"status.editor.media.image-description" = "미디어 설명";
+"status.editor.mode.edit" = "글 수정";
+"status.editor.mode.new" = "새 글";
+"status.editor.mode.quote-%@" = "%@님의 글 인용";
+"status.editor.mode.reply-%@" = "%@님의 글에 댓글";
+"status.editor.restore-previous" = "이전 상태로 되돌리기";
+"status.editor.spoiler" = "열람 주의 문구";
+"status.editor.text.placeholder" = "무슨 생각을 하고 계신가요?";
+"status.editor.visibility" = "글 공개 범위";
+"status.editor.photo-library" = "사진 보관함";
+"status.editor.camera-picker" = "사진 찍기";
+"status.editor.browse-file" = "파일 선택";
+"status.error.loading.message" = "글을 불러오지 못했습니다. 다시 시도해주세요.";
+"status.error.message" = "글의 상세 정보를 불러오지 못했습니다. 다시 시도해주세요.";
+"status.error.title" = "오류";
+"status.filter.filtered-by-%@" = "%@ 필터에 의해 가려짐";
+"status.filter.show-anyway" = "표시하기";
+"status.image.alt-text.abbreviation" = "설명";
+"status.media.content.show" = "내용 표시하기";
+"status.media.contextmenu.copy" = "이미지 복사";
+"status.media.contextmenu.save" = "이미지 저장";
+"status.media.contextmenu.share" = "이미지 공유";
+"status.media.contextmenu.view-browser" = "브라우저에서 보기";
+"status.media.sensitive.show" = "민감한 미디어 표시하기";
+"status.poll.n-votes %lld" = "%lld표";
+"status.poll.n-votes-voters %lld %lld" = "%lld표 (%lld명)";
+"status.poll.closed" = "종료됨";
+"status.poll.closes-in" = "종료까지 ";
+"status.poll.duration" = "투표 기간";
+"status.poll.frequency" = "투표 선택 옵션";
+"status.poll.option-n %lld" = "선택지 %lld";
+"status.poll.send" = "투표";
+"status.post-from-%@" = "%@님의 글";
+"status.row.was-boosted" = "님이 부스트함";
+"status.row.was-reply" = "댓글:";
+"status.row.you-boosted" = "내가 부스트함";
+"status.show-less" = "간략히 보기";
+"status.show-more" = "더 보기";
+"status.show-full-post" = "전체 내용 보기";
+"status.summary.at-time" = " ";
+"status.summary.edited-time" = "마지막 수정: ";
+"status.summary.n-replies %lld" = "댓글 %lld개";
+"status.summary.n-boosts %lld" = "부스트 %lld회";
+"status.summary.n-favorites %lld" = "좋아요 %lld회";
+"status.summary.edit-history" = "글 수정 기록";
+"status.visibility.direct" = "언급된 사용자만";
+"status.visibility.follower" = "팔로워만";
+"status.visibility.public" = "공개";
+"status.visibility.unlisted" = "공개 타임라인에서만 숨김";
+
+// MARK: Filters
+"filter.new" = "새 필터 만들기";
+"filter.filters" = "필터";
+"filter.edit.title" = "필터 이름";
+"filter.edit.keywords" = "거를 단어";
+"filter.edit.keywords.add" = "새 단어 추가";
+"filter.edit.contexts" = "적용할 곳";
+"filter.edit.action" = "가릴 방식";
+"filter.edit.expiry" = "가릴 기간";
+"filter.edit.expiry.date-time" = "날짜 및 시간";
+"filter.edit.expiry.duration" = "기간";
+"account.action.edit-filters" = "필터 편집";
+"filter.contexts.home" = "홈 및 리스트";
+"filter.contexts.notifications" = "알림";
+"filter.contexts.public" = "공개 타임라인";
+"filter.contexts.conversations" = "대화";
+"filter.contexts.profiles" = "프로필";
+"filter.action.warning" = "경고 표시하고 글 가림";
+"filter.action.hide" = "완전히 숨김";
+"filter.expired" = "기간 종료됨";
+"filter.expiry-%@" = "%@까지 가림";
+
+// MARK: Accessibility
+"accessibility.general.toggle.on" = "켜짐";
+"accessibility.general.toggle.off" = "꺼짐";
+"accessibility.editor.button.attach-photo" = "미디어 첨부";
+"accessibility.editor.button.poll" = "투표";
+"accessibility.editor.button.spoiler" = "열람 주의 문구";
+"accessibility.editor.button.drafts" = "임시 보관함";
+"accessibility.editor.button.custom-emojis" = "커스텀 이모지";
+"accessibility.editor.button.language" = "글 언어 지정";
+"accessibility.editor.button.ai-prompt" = "글 작성 도우미";
+"accessibility.editor.button.characters-remaining" = "더 작성할 수 있는 글자 수";
+"accessibility.editor.privacy.label" = "글 공개 범위";
+"accessibility.editor.privacy.hint" = "글을 볼 수 있는 대상을 변경합니다.";
+"accessibility.tabs.timeline.add-account" = "계정 추가";
+"accessibility.tabs.timeline.new-post.label" = "작성";
+"accessibility.tabs.timeline.new-post.inputLabel1" = "새 글";
+"accessibility.tabs.timeline.new-post.inputLabel2" = "작성";
+"accessibility.tabs.timeline.unread-posts.label-%lld" = "%lld개 새 글";
+"accessibility.tabs.timeline.unread-posts.hint" = "타임라인을 스크롤합니다.";
+"accessibility.tabs.timeline.content-link-%@" = "다음 링크 방문: %@";
+"accessibility.tabs.timeline.content-hashtag-%@" = "해시태그 %@";
+"accessibility.app-account.selector.accounts" = "계정";
+"accessibility.app-account.selector.accounts.hint" = "옵션 창을 엽니다.";
+"accessibility.tabs.profile.options.label" = "옵션";
+"accessibility.tabs.profile.options.inputLabel1" = "설정";
+"accessibility.tabs.profile.options.inputLabel2" = "더 보기";
+"accessibility.tabs.profile.user-avatar.label" = "프로필 사진";
+"accessibility.tabs.profile.user-avatar.hint" = "더 큰 버전을 표시합니다.";
+"accessibility.tabs.profile.user-avatar.supporter.label" = "후원자";
+"accessibility.tabs.profile.user.account-bot.label" = "봇 계정";
+"accessibility.tabs.profile.user.account-blocked.label" = "차단한 계정";
+"accessibility.tabs.profile.user.account-muted.label" = "뮤트한 계정";
+"accessibility.tabs.profile.user.account-private.label" = "팔로우 요청이 필요한 계정";
+"accessibility.tabs.profile.header-image.label" = "헤더 사진";
+"accessibility.tabs.profile.header-image.hint" = "더 큰 버전을 표시합니다.";
+"accessibility.tabs.profile.post-count.hint" = "글 목록으로 스크롤합니다.";
+"accessibility.tabs.profile.following-count.hint" = "목록을 엽니다.";
+"accessibility.tabs.profile.follower-count.hint" = "목록을 엽니다.";
+"accessibility.tabs.profile.picker.statuses" = "글";
+"accessibility.tabs.profile.picker.favorites" = "좋아요한 글";
+"accessibility.tabs.profile.picker.bookmarks" = "보관함에 추가한 글";
+"accessibility.tabs.profile.picker.followed-tags" = "팔로우한 태그";
+"accessibility.tabs.profile.picker.posts-and-replies" = "글 및 댓글";
+"accessibility.tabs.profile.picker.media" = "미디어가 있는 글";
+"accessibility.tabs.profile.picker.lists" = "리스트";
+"accessibility.tabs.profile.user-notifications.label" = "새 글 알림 켜기";
+"accessibility.tabs.profile.user-reblogs.label" = "이 사용자가 부스트한 글 타임라인에 표시하기";
+"accessibility.tabs.profile.fields.verified.label" = "인증된 링크";
+"accessibility.tabs.profile.fields.container.label" = "이 사용자의 프로필 메타데이터";
+"accessibility.status.spoiler-full-content" = "전체 내용";
+"accessibility.status.a-boosted-b-%@-%@" = "%@ 님이 다음 글을 부스트함: %@";
+"accessibility.status.a-replied-to-%@" = "%@ 님이 다음 사용자의 글에 댓글을 남김: ";
+"accessibility.image.alt-text-%@" = "미디어 설명: %@";
+"accessibility.image.alt-text-more.label" = "더 많은 미디어 설명 사용 가능";
+"accessibility.tabs.messages.unread.label" = "읽지 않음";
+"accessibility.status.poll.option-prefix-%lld-of-%lld" = "%2$lld개 선택지 중 %1$lld-번";
+"accessibility.status.poll.active.label" = "진행 중인 투표";
+"accessibility.status.poll.finished.label" = "투표 결과";
+"accessibility.status.poll.selected.label" = "선택함";
+"accessibility.media.supported-type.image.label" = "이미지";
+"accessibility.media.supported-type.gifv.label" = "움직이는 GIF";
+"accessibility.media.supported-type.video.label" = "동영상";
+"accessibility.media.supported-type.audio.label" = "오디오";
+"accessibility.status.contains-media.label-%@" = "%@ 첨부됨";
+"accessibility.status.application.label" = "글 작성에 사용한 앱";
+"accessibility.status.media-viewer-action.label" = "미디어 열기";
+
+// MARK: Report
+"report.comment.placeholder" = "추가 정보";
+"report.title" = "신고";
+"report.action.send" = "제출";
+"status.action.report" = "글 신고";
+
+"tag.suggested.mentions-%lld" = "%lld개 글";
+
+"action.submit" = "제출";
+"input.verification.code" = "코드";
+"action.title.confirm" = "확인";
+"action.message.confirm" = "제출 내용을 확인해 주세요.";
+"discount.code.desc" = "할인 코드를 받으셨다면 여기에 입력하실 수 있습니다!";
+"input.discount.code.placeholder" = "할인 코드 입력";
+"list.default.empty.title" = "데이터 없음";
+"list.default.empty.message" = "나중에 다시 확인해 주세요.🥰☕️";
+"list.default.error.button" = "다시 시도";
+"list.default.error.message" = "데이터를 로딩하는 중에 오류가 발생했습니다";
+"list.default.error.title" = "오류 발생";
+"user.profile.tip" = "프로필은 장치에서 생성된 랜덤 UUID로 생성됩니다!";
+"menut.settings.chat.new" = "새로운 채팅";
+"menut.settings.check.update" = "업데이트 확인...";
+"chat.item.buy" = "구매";
+
+"settings.section.help.review" = "리뷰 남기기";
+"chat.message.hello" = "안녕하세요! 메시지를 보내거나 제안에서 영감을 얻을 수 있습니다 😝!";
+"chat.message.unlock.body" = "🚫 크레딧 부족 🚫\n\n채팅 토큰이 떨어진 것 같습니다! 대화를 원활하게 계속하려면 크레딧을 충전해주세요.\n충전한 후에는 어려움 없이 대화를 계속할 수 있습니다. 계속 대화해요!";
+"action.recharge" = "지금 충전하기";
+
+"about.profile.message" = "---\n### 사용자 정보 성명서\n\n**왜 사용자 정보가 필요한가요?**\n\n- 우리 앱에서는 서비스를 사용하는 모든 장치가 독립적입니다. 우리는 각 사용자에게 개인화된 서비스를 제공하기 위해 노력하고 있습니다. 이를 위해 각 사용자를 식별할 방법이 필요합니다.\n\n**사용자는 어떻게 식별되나요?**\n\n- 우리 앱은 사용자 식별자로 장치에서 생성된 UUID (Universally Unique Identifier)를 사용합니다. 이것은 각 사용자의 고유성을 보장하는 기술적인 식별자입니다.\n\n**UUID와 개인 정보**\n\n- UUID는 개인 신원 정보와 전혀 관련이 없습니다. 우리는 UUID에서 어떠한 개인 정보도 얻을 수 없으며, 그렇게 시도하지도 않습니다. 기술적인 목적을 위한 무작위로 생성된 숫자와 문자의 조합일 뿐입니다.\n\n**개인 정보 보호와 안전에 대하여**\n\n- 우리는 사용자의 개인 정보 보호와 안전을 매우 중요하게 생각합니다. 귀하의 UUID는 앱 내에서만 개인화된 서비스를 제공하기 위해 사용됩니다. 우리는 귀하의 UUID를 제3자와 공유하거나 개인 정보 수집을 위해 사용하지 않습니다.\n\n**문의하기**\n\n- 어떠한 의심이나 질문이 있으시면 언제든지 저희에게 연락해 주세요. 여러분의 신뢰와 만족은 저희의 가장 큰 동기입니다.\n---";
+
+"about.profile.title" = "프로필 정보";
+"bill.navi.title" = "청구서";
+"bill.list.title" = "소량 크레딧, 큰 활용";
+"bill.list.message" = "크레딧은 AI와의 대화 토큰을 소모하는 데 사용할 수 있습니다";
+"bill.type.point-recharge-by-purchase" = "인앱 구매로 크레딧 충전";
+"bill.type.member-recharge" = "Plus 서비스 구매";
+"bill.type.member-expiry" = "Plus 서비스 만료";
+"bill.type.member-refund" = "Plus 환불";
+"bill.type.user-register" = "사용자 등록";
+"bill.type.invite" = "사용자 초대";
+"bill.type.invited" = "초대받은 사용자";
+
+"bill.type.point-recharge-by-cdkey" = "CD 키로 크레딧 충전";
+"bill.type.point-consumed-by-chat" = "채팅으로 크레딧 사용";
+"bill.type.point-consumed-by-image" = "이미지 생성에 대한 크레딧 사용";
+"bill.type.point-refund" = "크레딧 환불";
+
+
+
+"update.required.title" = "Talkify 업데이트 필요";
+"update.required.message" = "더 이상 지원되지 않는 iOS용 Talkify의 오래된 버전을 사용 중입니다. 최신 기능을 얻으려면 업데이트하세요.";
+"update.required.button" = "업데이트";
+
+// MARK: Image
+"Image Options" = "이미지 옵션";
+"Image Count" = "이미지 수";
+"Aspect Ratio" = "가로 세로 비율";
+"Guidance Scale" = "지침 스케일";
+"Step Count" = "단계 수";
+"Advanced" = "고급";
+"Model" = "모델";
+"Load Models" = "모델 불러오기";
+"Shuffle Prompt" = "셔플 프롬프트";
+"Width" = "너비";
+"Height" = "높이";
+"Prompt" = "프롬프트";
+"Random Seed" = "무작위 시드";
+"Seed" = "시드";
+"Choose Style" = "스타일 선택";
+"Style Preset" = "스타일 프리셋";
+"3d model" = "3D 모델";
+"analog film" = "아날로그 필름";
+"anime" = "애니메이션";
+"cinematic" = "시네마틱";
+"comic book" = "만화책";
+"digital art" = "디지털 아트";
+"enhance" = "향상";
+"fantasy art" = "판타지 아트";
+"isometric" = "등각";
+"line art" = "라인 아트";
+"low poly" = "로우 폴리";
+"modeling compound" = "모델링 복합체";
+"neon punk" = "네온 펑크";
+"origami" = "접지";
+"photographic" = "사진";
+"pixel art" = "픽셀 아트";
+"tile texture" = "타일 텍스처";
+"Created at" = "생성 일";
+"Updated at" = "업데이트된 일";
+"Optimized Prompt" = "최적화 프롬프트";
+"Optimize" = "최적화";
+
+"Sampler" = "샘플러";
+"Clip Guidance Preset" = "클립 지침 프리셋";
+"Negative Prompt" = "부정적 프롬프트";
+"prompt.placeholder" = "무엇을 보고 싶나요?";
+"negative.prompt.placeholder" = "피하고 싶은 것은 무엇인가요?";
+"No subscriptions available" = "사용 가능한 구독 없음";
+"Generate" = "생성";
+"Edit" = "편집";
+"Your Image" = "당신의 이미지";
+"Image Mode" = "이미지 모드";
+"Image Strength" = "이미지 강도";
+"Step Schedule Start" = "단계 일정 시작";
+"Step Schedule End" = "단계 일정 종료";
+"Move and Scale" = "이동 및 크기 조정";
+"Scale" = "크기 조정";
+"min" = "최소";
+"max" = "최대";
+"alert.button.ok" = "확인";
+"action.title.confirm" = "확실해요?";
+"Save your image" = "이미지 저장";
+"Choose a folder and a name to store the image." = "이미지를 저장할 폴더와 이름을 선택하세요.";
+"File name:" = "파일 이름:";
+
+"img-gen.done.alert.title" = "훌륭해요!";
+"img-gen.done.alert.message" = "기다려 주셔서 감사합니다. 모든 작업이 완료되었습니다. 확인해 주세요.";
+"img-gen.consumption.tip" = "각 작업(예: 생성 또는 편집)마다 1 크레딧이 차감됩니다.";
+"Shuffle" = "셔플";
+"window.feedback.title" = "Talkify 피드백";
+"settings.section.themes" = "테마";
+"menu.select" = "메뉴 선택";
+
+
+"tab.image" = "이미지";
+
+"alert.reward.new-user.title" = "축하합니다!";
+"alert.reward.new-user.message" = "새로운 사용자 보상으로 6 크레딧을 획득했습니다. 채팅 및 그림에 사용할 수 있습니다. 탐험을 시작하세요!"; // Korean
+"Welcome" = "환영합니다";
+"new-user.welcome" = "신규 사용자 보너스가 지급되었습니다!";
+"command.show-main" = "주 창 표시";

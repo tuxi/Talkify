@@ -1,0 +1,14 @@
+/* 
+  Localizable.strings
+  Chater
+
+  Created by xiaoyuan on 2023/8/23.
+  
+*/
+
+/* Bundle name */
+"CFBundleName" = "Talkify";
+
+"NSCameraUsageDescription" = "Talkify патрабуе доступу да камеры для захавання захопленых і атрыманых мультымедыйных файлаў.";
+"NSPhotoLibraryAddUsageDescription" = "Talkify патрабуе доступу да фотабібліятэкі для захавання захопленых і атрыманых мультымедыйных файлаў.";
+"NSNetworkClientUsageDescription" = "Talkify патрабуе доступу да сеткі для паўнага функцыянавання.";
