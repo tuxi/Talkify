@@ -92,6 +92,13 @@ final class AppContainer {
     /// Host-owned system notification and notification-click routing state.
     let conversationNotifications: ConversationNotificationCoordinator
 
+    /// AgentKit host bridges for private Gateway-managed user images.
+    let userAssetPicker: TalkifyUserAssetPicker
+    let userAssetUploader: TalkifyUserAssetUploader
+    let userAssetPreviewResolver: TalkifyUserAssetPreviewResolver
+    private let userAssetFileStore: ManagedUserAssetFileStore
+    private let userAssetLocalStateStore: ManagedUserAssetLocalStateStore
+
     init(authManager: AuthManager,
          environmentManager: EnvironmentManager,
          deviceManager: DeviceManager
@@ -117,6 +124,42 @@ final class AppContainer {
             commonHeaders: baseHeaders
         )
         self.apiProvider = apiProvider
+
+        #if !DEBUG
+        precondition(
+            environmentManager.currentConfig.apiBaseURL.scheme == "https",
+            "Release builds require an HTTPS Gateway"
+        )
+        #endif
+        let userAssetFileStore: ManagedUserAssetFileStore
+        do {
+            userAssetFileStore = try ManagedUserAssetFileStore()
+        } catch {
+            fatalError("Unable to initialize the managed user asset store")
+        }
+        self.userAssetFileStore = userAssetFileStore
+        self.userAssetLocalStateStore = ManagedUserAssetLocalStateStore(fileStore: userAssetFileStore)
+        let accountScope: @Sendable () -> String = { [authManager] in
+            authManager.currentUserId.map(String.init) ?? "signed-out"
+        }
+        let userAssetAPI = UserAssetAPI(
+            baseURL: environmentManager.currentConfig.apiBaseURL,
+            authorization: authManager
+        )
+        self.userAssetPicker = TalkifyUserAssetPicker(
+            fileStore: userAssetFileStore,
+            normalizer: UserImageNormalizer(fileStore: userAssetFileStore),
+            accountScope: accountScope
+        )
+        self.userAssetUploader = TalkifyUserAssetUploader(
+            normalizer: UserImageNormalizer(fileStore: userAssetFileStore),
+            api: userAssetAPI,
+            accountScope: accountScope
+        )
+        self.userAssetPreviewResolver = TalkifyUserAssetPreviewResolver(
+            api: userAssetAPI,
+            accountScope: accountScope
+        )
         self.userManager = UserManager(
             service: UserService(apiProvider: apiProvider),
             environment: environmentManager.currentEnvironmentSnapshot
@@ -152,6 +195,9 @@ final class AppContainer {
         // 改为由宿主 App 主动获取并调用 setAvailableModels()。
         Task {
             await refreshModelList()
+        }
+        Task.detached(priority: .utility) { [userAssetFileStore] in
+            userAssetFileStore.removeExpiredFiles()
         }
     }
 
@@ -204,6 +250,12 @@ final class AppContainer {
                 try? await AgentRuntime.shared.reconfigure(with: credentialStore)
                 #endif
             },
+            localStateStore: userAssetLocalStateStore,
+            userAssetPicker: { [userAssetPicker] in
+                try await userAssetPicker.pick()
+            },
+            userAssetUploader: userAssetUploader,
+            userAssetPreviewResolver: userAssetPreviewResolver,
             onAttentionEvent: { [conversationNotifications] event in
                 conversationNotifications.handle(event)
             }

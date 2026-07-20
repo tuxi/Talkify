@@ -18,7 +18,7 @@ import UIKit
 /// 摄像头拍照工具 — 使用 AVFoundation 原生 API。
 /// iOS 使用后置/前置摄像头，macOS 使用内置 FaceTime 摄像头。
 /// 程序化捕获，无需 UI — 适合 Agent 在工作流中自动调用。
-struct CameraCaptureTool: ClientTool {
+struct CameraCaptureTool: StructuredClientTool {
     let name = "capture_photo"
     let description = """
 使用设备摄像头拍摄一张照片并保存到临时 JPEG 文件。返回照片文件的完整路径、文件大小和分辨率。
@@ -47,7 +47,7 @@ struct CameraCaptureTool: ClientTool {
         ])
     }
 
-    func execute(args: JSONValue?) async throws -> String {
+    func executeResult(args: JSONValue?) async throws -> ClientToolExecutionResult {
         // 解析参数
         var useFrontCamera = false
         var outputPath: String
@@ -195,7 +195,7 @@ struct CameraCaptureTool: ClientTool {
             resolution = "未知"
         }
 
-        return """
+        let content = """
         photo_captured: true
         file_path: \(outputPath)
         file_size: \(fileSize)
@@ -204,6 +204,19 @@ struct CameraCaptureTool: ClientTool {
         saved_to_gallery: \(savedToGallery)
         elapsed_seconds: \(String(format: "%.1f", elapsed))
         """
+
+        let asset = AgentAssetRef(
+            id: "capture_photo_\(formatter.string(from: Date()))",
+            kind: "image",
+            displayName: filename,
+            absolutePath: outputPath,
+            mimeType: "image/jpeg"
+        )
+
+        return ClientToolExecutionResult(
+            content: content,
+            assets: [asset]
+        )
     }
 }
 

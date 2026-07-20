@@ -780,3 +780,14 @@
 "new-user.welcome" = "你的新人奖励已发放！";
 
 "command.show-main" = "显示主窗口";
+
+/* User Assets */
+"user-assets.picker.message" = "最多选择 4 张图片";
+"user-assets.error.format" = "图片格式不支持。";
+"user-assets.error.too-large" = "图片过大。";
+"user-assets.error.dimensions" = "图片尺寸不支持。";
+"user-assets.error.upload" = "图片上传失败，请重试。";
+"user-assets.error.expired" = "图片已失效。";
+"user-assets.error.unavailable" = "无法读取图片。";
+"user-assets.error.unsupported-model" = "当前模型不支持图片。";
+"user-assets.error.network" = "网络连接不可用。";

@@ -781,3 +781,14 @@
 "Welcome" = "Welcome";
 "new-user.welcome" = "Your new user reward has been granted!";
 "command.show-main" = "Show Main Window";
+
+/* User Assets */
+"user-assets.picker.message" = "Choose up to 4 images";
+"user-assets.error.format" = "This image format is not supported.";
+"user-assets.error.too-large" = "The image is too large.";
+"user-assets.error.dimensions" = "The image dimensions are not supported.";
+"user-assets.error.upload" = "Image upload failed. Please try again.";
+"user-assets.error.expired" = "This image is no longer available.";
+"user-assets.error.unavailable" = "The image could not be read.";
+"user-assets.error.unsupported-model" = "The current model does not support images.";
+"user-assets.error.network" = "The network connection is unavailable.";

@@ -16,7 +16,7 @@ import AgentKit
 
 /// 屏幕截图工具 — 使用 ScreenCaptureKit 原生 API。
 /// 执行时间 2-3 秒（含权限等待），用于验证异步工具执行 + UI running 状态。
-struct ScreenshotTool: ClientTool {
+struct ScreenshotTool: StructuredClientTool {
     let name = "take_screenshot"
     let description = "截取当前 Mac 主屏幕的完整截图并保存到临时 PNG 文件。返回截图文件的完整路径、大小和分辨率。适用场景：用户要求截图、屏幕捕获、保存当前屏幕内容。注意：首次使用会弹出系统权限对话框，用户需在系统设置中授予「屏幕录制」权限后重试。"
 
@@ -33,7 +33,7 @@ struct ScreenshotTool: ClientTool {
         ])
     }
 
-    func execute(args: JSONValue?) async throws -> String {
+    func executeResult(args: JSONValue?) async throws -> ClientToolExecutionResult {
         var outputPath: String
         if case .object(let dict) = args,
            case .string(let customPath) = dict["save_path"] {
@@ -49,8 +49,8 @@ struct ScreenshotTool: ClientTool {
         let startTime = Date()
 
         // 使用 ScreenCaptureKit — macOS 14+ 原生 API，自动触发权限弹窗
-        let content = try await SCShareableContent.excludingDesktopWindows(false, onScreenWindowsOnly: true)
-        guard let display = content.displays.first else {
+        let contentObj = try await SCShareableContent.excludingDesktopWindows(false, onScreenWindowsOnly: true)
+        guard let display = contentObj.displays.first else {
             throw ScreenshotError.noDisplayFound
         }
 
@@ -102,13 +102,28 @@ struct ScreenshotTool: ClientTool {
         let width = cgImage.width
         let height = cgImage.height
 
-        return """
+        let content = """
         screenshot_captured: true
         file_path: \(outputPath)
         file_size: \(fileSize)
         resolution: \(width)x\(height)
         elapsed_seconds: \(String(format: "%.1f", elapsed))
         """
+
+        let formatter = ISO8601DateFormatter()
+        formatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
+        let asset = AgentAssetRef(
+            id: "take_screenshot_\(formatter.string(from: Date()))",
+            kind: "image",
+            displayName: URL(fileURLWithPath: outputPath).lastPathComponent,
+            absolutePath: outputPath,
+            mimeType: "image/png"
+        )
+
+        return ClientToolExecutionResult(
+            content: content,
+            assets: [asset]
+        )
     }
 }
 

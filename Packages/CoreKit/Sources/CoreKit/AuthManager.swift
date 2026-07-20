@@ -389,6 +389,20 @@ public final class AuthManager: Sendable {
         state.currentToken?.refreshToken
     }
 
+    /// Returns a stable, non-secret account scope for account-bound caches/files.
+    nonisolated public var currentUserId: Int? {
+        state.currentToken?.userId
+    }
+
+    /// Refreshes credentials after a server-side 401 even when the JWT's local
+    /// expiry says it is still valid (for example, after server revocation).
+    @MainActor
+    public func refreshAfterUnauthorized() async throws {
+        guard let currentToken = token else { throw AuthError.notLoggedIn }
+        let refreshed = try await refreshTokenHandler(currentToken)
+        updateLoginState(token: refreshed)
+    }
+
     // MARK: - 拦截器专用接口 (Non-isolated)
     
     nonisolated public func addWaiterAndCheckRefresh(_ completion: @escaping @Sendable (RetryResult) -> Void) -> Bool {
@@ -486,8 +500,8 @@ extension AuthManager {
                 Task {
                     do {
                         // 调用主线程的 worker 逻辑，它现在不再自锁了
-                        let token = try await self.ensureValidToken()
-                        DLLog("AuthManager.Token 有效，通知大家去拿新 Token 重试自己的接口:", token)
+                        _ = try await self.ensureValidToken()
+                        DLLog("AuthManager: Token 刷新完成，通知等待请求重试")
                         // 刷新成功：通知所有等待者 .retry (去拿新 token)
                         self.handleRefreshResult(.retry)
                     } catch {

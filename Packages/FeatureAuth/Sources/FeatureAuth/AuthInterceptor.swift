@@ -73,8 +73,9 @@ public final class AuthInterceptor: RequestInterceptor, @unchecked Sendable {
         if authManager.addWaiterAndCheckRefresh(completion) {
             Task {
                 do {
-                    // 触发刷新逻辑
-                    _ = try await authManager.ensureValidToken()
+                    // 401 means the server rejected the credential even if its
+                    // local exp has not elapsed, so force one refresh.
+                    try await authManager.refreshAfterUnauthorized()
                     authManager.handleRefreshResult(.retry)
                 } catch {
                     authManager.handleRefreshResult(.doNotRetry)

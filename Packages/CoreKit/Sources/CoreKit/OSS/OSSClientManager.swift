@@ -209,7 +209,7 @@ public actor OSSV2ClientManager {
     ///   - fileURL: 本地文件路径
     ///   - key: OSS 存储路径
     @discardableResult
-    public func uploadFile(from fileURL: URL, key: String, isForbidOerwrite: Bool = true, onProgress: (@Sendable (Double) -> Void)? = nil) async throws -> OSSUploadResult {
+    public func uploadFile(from fileURL: URL, key: String, contentType: String? = nil, isForbidOerwrite: Bool = true, onProgress: (@Sendable (Double) -> Void)? = nil) async throws -> OSSUploadResult {
         // V2 SDK 使用 Body.file 包装
         var request = PutObjectRequest(
             bucket: self.bucket,
@@ -218,7 +218,7 @@ public actor OSSV2ClientManager {
         )
         
         // 自动根据后缀设置 Content-Type
-        request.contentType = mimeType(for: fileURL.pathExtension)
+        request.contentType = contentType ?? mimeType(for: fileURL.pathExtension)
         let internalDelegate = InternalProgressDelegate(handler: onProgress)
         request.progress = internalDelegate
         

@@ -64,6 +64,9 @@ struct TalkifyApp: App {
                         }
                     }
                 })
+                .onChange(of: container.authManager.token?.userId) { _, _ in
+                    Task { await container.userAssetPreviewResolver.clearCache() }
+                }
                 .onAppear {
                     Task { @MainActor in
                         await container.authManager.ensureInitialIdentity()

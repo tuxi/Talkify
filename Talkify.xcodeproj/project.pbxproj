@@ -7,12 +7,26 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		A10000000000000000000001 /* UserAssetsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000000000000000000002 /* UserAssetsTests.swift */; };
+		A10000000000000000000003 /* AgentKit in Frameworks */ = {isa = PBXBuildFile; productRef = D0962064300B1D160005EBC6 /* AgentKit */; };
 		D096205E300B19610005EBC6 /* CoreKit in Frameworks */ = {isa = PBXBuildFile; productRef = D096205D300B19610005EBC6 /* CoreKit */; };
 		D0962061300B19920005EBC6 /* FeatureAuth in Frameworks */ = {isa = PBXBuildFile; productRef = D0962060300B19920005EBC6 /* FeatureAuth */; };
 		D0962065300B1D160005EBC6 /* AgentKit in Frameworks */ = {isa = PBXBuildFile; productRef = D0962064300B1D160005EBC6 /* AgentKit */; };
 /* End PBXBuildFile section */
 
+/* Begin PBXContainerItemProxy section */
+		A10000000000000000000005 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = D0962001300B17250005EBC6 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = D0962008300B17250005EBC6;
+			remoteInfo = Talkify;
+		};
+/* End PBXContainerItemProxy section */
+
 /* Begin PBXFileReference section */
+		A10000000000000000000002 /* UserAssetsTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserAssetsTests.swift; sourceTree = "<group>"; };
+		A10000000000000000000004 /* TalkifyTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = TalkifyTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		D0962009300B17250005EBC6 /* Talkify.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Talkify.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
@@ -25,6 +39,14 @@
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
+		A10000000000000000000006 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				A10000000000000000000003 /* AgentKit in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		D0962006300B17250005EBC6 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
@@ -38,10 +60,19 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		A10000000000000000000007 /* TalkifyTests */ = {
+			isa = PBXGroup;
+			children = (
+				A10000000000000000000002 /* UserAssetsTests.swift */,
+			);
+			path = TalkifyTests;
+			sourceTree = "<group>";
+		};
 		D0962000300B17250005EBC6 = {
 			isa = PBXGroup;
 			children = (
 				D096200B300B17250005EBC6 /* Talkify */,
+				A10000000000000000000007 /* TalkifyTests */,
 				D096200A300B17250005EBC6 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -50,6 +81,7 @@
 			isa = PBXGroup;
 			children = (
 				D0962009300B17250005EBC6 /* Talkify.app */,
+				A10000000000000000000004 /* TalkifyTests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -57,6 +89,27 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
+		A10000000000000000000008 /* TalkifyTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = A10000000000000000000009 /* Build configuration list for PBXNativeTarget "TalkifyTests" */;
+			buildPhases = (
+				A1000000000000000000000A /* Sources */,
+				A10000000000000000000006 /* Frameworks */,
+				A1000000000000000000000B /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				A1000000000000000000000C /* PBXTargetDependency */,
+			);
+			name = TalkifyTests;
+			packageProductDependencies = (
+				D0962064300B1D160005EBC6 /* AgentKit */,
+			);
+			productName = TalkifyTests;
+			productReference = A10000000000000000000004 /* TalkifyTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
 		D0962008300B17250005EBC6 /* Talkify */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = D0962014300B17270005EBC6 /* Build configuration list for PBXNativeTarget "Talkify" */;
@@ -92,6 +145,10 @@
 				LastSwiftUpdateCheck = 2630;
 				LastUpgradeCheck = 2630;
 				TargetAttributes = {
+					A10000000000000000000008 = {
+						CreatedOnToolsVersion = 26.3;
+						TestTargetID = D0962008300B17250005EBC6;
+					};
 					D0962008300B17250005EBC6 = {
 						CreatedOnToolsVersion = 26.3;
 					};
@@ -135,11 +192,19 @@
 			projectRoot = "";
 			targets = (
 				D0962008300B17250005EBC6 /* Talkify */,
+				A10000000000000000000008 /* TalkifyTests */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
+		A1000000000000000000000B /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		D0962007300B17250005EBC6 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -150,6 +215,14 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
+		A1000000000000000000000A /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				A10000000000000000000001 /* UserAssetsTests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		D0962005300B17250005EBC6 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -159,7 +232,53 @@
 		};
 /* End PBXSourcesBuildPhase section */
 
+/* Begin PBXTargetDependency section */
+		A1000000000000000000000C /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = D0962008300B17250005EBC6 /* Talkify */;
+			targetProxy = A10000000000000000000005 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
 /* Begin XCBuildConfiguration section */
+		A1000000000000000000000D /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = NKW67GFDHM;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.6;
+				MACOSX_DEPLOYMENT_TARGET = 15.6;
+				PRODUCT_BUNDLE_IDENTIFIER = com.objc.chatTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = auto;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator macosx";
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Talkify.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/Talkify";
+			};
+			name = Debug;
+		};
+		A1000000000000000000000E /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = NKW67GFDHM;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.6;
+				MACOSX_DEPLOYMENT_TARGET = 15.6;
+				PRODUCT_BUNDLE_IDENTIFIER = com.objc.chatTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = auto;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator macosx";
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Talkify.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/Talkify";
+			};
+			name = Release;
+		};
 		D0962012300B17270005EBC6 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -375,6 +494,15 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
+		A10000000000000000000009 /* Build configuration list for PBXNativeTarget "TalkifyTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				A1000000000000000000000D /* Debug */,
+				A1000000000000000000000E /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
 		D0962004300B17250005EBC6 /* Build configuration list for PBXProject "Talkify" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (

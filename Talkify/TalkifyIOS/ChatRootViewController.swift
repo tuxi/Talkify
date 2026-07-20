@@ -1,0 +1,292 @@
+//
+//  ChatRootViewController.swift
+//  Talkify
+//
+//  Created by xiaoyuan on 2026/7/19.
+//
+
+#if os(iOS)
+import UIKit
+import AgentKit
+import Observation
+
+/// Root container that implements the ChatGPT-style drawer layout.
+///
+/// - `DrawerViewController` is the persistent left drawer.
+/// - `ChatViewController` is the right detail pane that slides to reveal the drawer.
+///
+/// Uses **frame-based** animation (not `CGAffineTransform`) because `UIHostingController`
+/// subviews use Auto Layout internally, and setting `frame` on a view with an active
+/// transform produces undefined behaviour.
+///
+/// Conversation selection is driven by a shared `WorkspaceStore` — when the user
+/// taps a conversation in the drawer the store updates, `ConversationDetailView`
+/// reacts automatically, and the drawer closes.
+final class ChatRootViewController: UIViewController {
+
+    private let store: WorkspaceStore
+    private let dependencies: AgentDependencies
+
+    private let drawerVC: DrawerViewController
+    private let chatVC: ChatViewController
+
+    private let drawerWidth: CGFloat = 320
+    private let maxMaskAlpha: CGFloat = 0.3
+    private var isDrawerOpen = false
+
+    /// Invisible view that sits below `chatVC.view` and carries its shadow.
+    /// Separated because `chatVC.view` uses `masksToBounds` for corner clipping,
+    /// which would also clip the shadow.
+    private let chatShadowView: UIView = {
+        let view = UIView()
+        view.backgroundColor = .clear
+        view.layer.shadowColor = UIColor.black.cgColor
+        view.layer.shadowOffset = CGSize(width: -8, height: 0)
+        view.layer.shadowRadius = 24
+        view.layer.shadowOpacity = 0
+        view.layer.masksToBounds = false
+        return view
+    }()
+
+    private lazy var panGesture = UIPanGestureRecognizer(
+        target: self,
+        action: #selector(handlePan(_:))
+    )
+
+    /// Pan on the exposed drawer area to close it by swiping left.
+    private lazy var drawerPanGesture: UIPanGestureRecognizer = {
+        let gesture = UIPanGestureRecognizer(target: self, action: #selector(handleDrawerPan(_:)))
+        gesture.delegate = self
+        return gesture
+    }()
+
+    // MARK: - Init
+
+    init(store: WorkspaceStore, dependencies: AgentDependencies) {
+        self.store = store
+        self.dependencies = dependencies
+        self.drawerVC = DrawerViewController(store: store)
+        self.chatVC = ChatViewController(store: store, dependencies: dependencies)
+        super.init(nibName: nil, bundle: nil)
+    }
+
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+
+    // MARK: - Lifecycle
+
+    override func viewDidLoad() {
+        super.viewDidLoad()
+
+//        view.backgroundColor = .black
+
+        // Drawer (behind, stationary)
+        addChild(drawerVC)
+        view.addSubview(drawerVC.view)
+        drawerVC.didMove(toParent: self)
+        drawerVC.view.addGestureRecognizer(drawerPanGesture)
+
+        // Shadow layer — sits between drawer and chat, mirrors chat's frame.
+        view.addSubview(chatShadowView)
+
+        // Chat detail (above, slides right)
+        addChild(chatVC)
+        view.addSubview(chatVC.view)
+        chatVC.didMove(toParent: self)
+
+        chatVC.view.layer.cornerRadius = 36
+        chatVC.view.layer.masksToBounds = true
+        chatVC.view.addGestureRecognizer(panGesture)
+        
+        drawerVC.onSelectedConversation = { [weak self] in
+            self?.setDrawer(open: false, animated: true)
+        }
+
+        chatVC.onMenuTap = { [weak self] in
+            self?.setDrawer(open: self?.isDrawerOpen == false, animated: true)
+        }
+        
+        chatVC.onMaskTap = { [weak self] in
+            if self?.isDrawerOpen == true {
+                self?.setDrawer(open: false, animated: true)
+            }
+        }
+
+        // Auto-close drawer when a conversation is selected via the store.
+//        beginObservingSelection()
+    }
+
+    override func viewDidLayoutSubviews() {
+        super.viewDidLayoutSubviews()
+
+        drawerVC.view.frame = view.bounds
+        applyChatFrame(animated: false)
+    }
+
+    // MARK: - Frame Management
+
+    /// Computes the target frame for the chat view given the drawer state.
+    private func chatFrame(open: Bool) -> CGRect {
+        if open {
+            return view.bounds.offsetBy(dx: drawerWidth, dy: 0)
+        } else {
+            return view.bounds
+        }
+    }
+
+    /// Applies the chat view's frame, optionally with spring animation.
+    ///
+    /// When `animated` is `false` this is safe to call from `viewDidLayoutSubviews`
+    /// — it just snaps to the correct position without disturbing an in-flight
+    /// animation (the animation system continues to use its presentation layer).
+    private func applyChatFrame(animated: Bool) {
+        let targetFrame = chatFrame(open: isDrawerOpen)
+        let cornerRadius: CGFloat = isDrawerOpen ? 36 : 0
+        let maskAlpha: CGFloat = isDrawerOpen ? maxMaskAlpha : 0
+        let shadowOpacity: Float = isDrawerOpen ? 0.35 : 0
+
+        let changes = {
+            self.chatVC.view.frame = targetFrame
+            self.chatVC.view.layer.cornerRadius = cornerRadius
+            self.chatVC.maskView.alpha = maskAlpha
+
+            self.chatShadowView.frame = targetFrame
+            self.chatShadowView.layer.cornerRadius = cornerRadius
+            self.chatShadowView.layer.shadowOpacity = shadowOpacity
+        }
+
+        if animated {
+            UIView.animate(
+                withDuration: 0.28,
+                delay: 0,
+                usingSpringWithDamping: 0.9,
+                initialSpringVelocity: 0.6,
+                options: [.curveEaseOut, .allowUserInteraction],
+                animations: changes
+            )
+        } else {
+            changes()
+        }
+        
+        let feedback = UISelectionFeedbackGenerator()
+        feedback.selectionChanged()
+    }
+
+    // MARK: - Drawer Toggle
+
+    private func setDrawer(open: Bool, animated: Bool) {
+        guard isDrawerOpen != open else { return }
+        isDrawerOpen = open
+
+        // Dismiss keyboard before sliding, so it doesn't linger over the drawer.
+        chatVC.view.endEditing(true)
+
+        applyChatFrame(animated: animated)
+    }
+
+    // MARK: - Pan-Time Updates
+
+    /// Called during pan gestures to update the chat view position, corner radius,
+    /// mask alpha, and shadow without animation (real-time tracking).
+    private func updateChatToOffset(_ offset: CGFloat) {
+        let progress = offset / drawerWidth
+        let offsetFrame = view.bounds.offsetBy(dx: offset, dy: 0)
+
+        chatVC.view.frame = offsetFrame
+        chatVC.view.layer.cornerRadius = progress * 36
+        chatVC.maskView.alpha = progress * maxMaskAlpha
+
+        chatShadowView.frame = offsetFrame
+        chatShadowView.layer.cornerRadius = progress * 36
+        chatShadowView.layer.shadowOpacity = Float(progress * 0.35)
+    }
+
+    // MARK: - Chat Pan Gesture (on chatVC.view)
+
+    /// Handles swipe-left / swipe-right on the chat detail view.
+    @objc private func handlePan(_ gesture: UIPanGestureRecognizer) {
+        let translationX = gesture.translation(in: view).x
+        let currentOffset = isDrawerOpen ? drawerWidth : 0
+        let nextOffset = min(max(currentOffset + translationX, 0), drawerWidth)
+
+        switch gesture.state {
+        case .began:
+            chatVC.view.endEditing(true)
+
+        case .changed:
+            updateChatToOffset(nextOffset)
+
+        case .ended, .cancelled:
+            let velocityX = gesture.velocity(in: view).x
+            isDrawerOpen = nextOffset > drawerWidth * 0.45 || velocityX > 600
+            applyChatFrame(animated: true)
+            gesture.setTranslation(.zero, in: view)
+
+        default:
+            break
+        }
+    }
+
+    // MARK: - Drawer Pan Gesture (on drawerVC.view)
+
+    /// Handles swipe-left on the exposed drawer area to close it.
+    @objc private func handleDrawerPan(_ gesture: UIPanGestureRecognizer) {
+        let translationX = gesture.translation(in: view).x
+        // When drawer is open the chat offset starts at drawerWidth; dragging left
+        // (negative translationX) decreases the offset to close the drawer.
+        let nextOffset = min(max(drawerWidth + translationX, 0), drawerWidth)
+
+        switch gesture.state {
+        case .began:
+            chatVC.view.endEditing(true)
+
+        case .changed:
+            updateChatToOffset(nextOffset)
+
+        case .ended, .cancelled:
+            let velocityX = gesture.velocity(in: view).x
+            // Close if dragged more than 55 % of the way or flicked left fast enough.
+            isDrawerOpen = nextOffset > drawerWidth * 0.55 && velocityX > -300
+            applyChatFrame(animated: true)
+            gesture.setTranslation(.zero, in: view)
+
+        default:
+            break
+        }
+    }
+
+    // MARK: - Observation
+
+    /// Watches `store.selectedConversation` changes and auto-closes the drawer
+    /// when the user picks a conversation.
+//    private func beginObservingSelection() {
+//        withObservationTracking {
+//            _ = store.selectedConversation
+//        } onChange: { [weak self] in
+//            DispatchQueue.main.async {
+//                self?.setDrawer(open: false, animated: true)
+//                self?.beginObservingSelection()
+//            }
+//        }
+//    }
+}
+
+// MARK: - UIGestureRecognizerDelegate
+
+extension ChatRootViewController: UIGestureRecognizerDelegate {
+
+    /// Only claim the drawer pan when the drawer is open AND the swipe is
+    /// primarily horizontal (moving left to close). Vertical swipes pass
+    /// through to the drawer's native scroll view.
+    func gestureRecognizerShouldBegin(_ gestureRecognizer: UIGestureRecognizer) -> Bool {
+        guard isDrawerOpen,
+              let pan = gestureRecognizer as? UIPanGestureRecognizer else {
+            return false
+        }
+        let velocity = pan.velocity(in: view)
+        return abs(velocity.x) > abs(velocity.y) && velocity.x < 0
+    }
+}
+
+#endif
