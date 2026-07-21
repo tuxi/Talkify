@@ -1,7 +1,7 @@
 import Foundation
 
 public struct UserProfile: Codable, Sendable {
-    public let userId: Int
+    public let userId: String
     public let username: String
     public let nickname: String?
     public let avatarURL: String?
@@ -31,7 +31,7 @@ public struct UserProfile: Codable, Sendable {
     }
     
     public init(
-        userId: Int,
+        userId: String,
         username: String,
         nickname: String,
         avatarURL: String?,
