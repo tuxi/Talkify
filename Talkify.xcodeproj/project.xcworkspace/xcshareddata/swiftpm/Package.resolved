@@ -20,12 +20,12 @@
       }
     },
     {
-      "identity" : "kingfisher",
+      "identity" : "clienttoolprotocol",
       "kind" : "remoteSourceControl",
-      "location" : "https://github.com/onevcat/Kingfisher",
+      "location" : "https://github.com/tuxi/ClientToolProtocol",
       "state" : {
-        "revision" : "ac632bd26a1c00f139ff62fd01806f21cf67325e",
-        "version" : "8.10.0"
+        "revision" : "a39c4e6b8226fed3f0da65b83a485f05a2cf5eea",
+        "version" : "0.1.0"
       }
     },
     {

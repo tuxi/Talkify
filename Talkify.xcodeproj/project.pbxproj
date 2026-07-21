@@ -9,6 +9,7 @@
 /* Begin PBXBuildFile section */
 		A10000000000000000000001 /* UserAssetsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000000000000000000002 /* UserAssetsTests.swift */; };
 		A10000000000000000000003 /* AgentKit in Frameworks */ = {isa = PBXBuildFile; productRef = D0962064300B1D160005EBC6 /* AgentKit */; };
+		D0935524300EEFCF006C3962 /* ClientToolsKit in Frameworks */ = {isa = PBXBuildFile; productRef = D0935523300EEFCF006C3962 /* ClientToolsKit */; };
 		D096205E300B19610005EBC6 /* CoreKit in Frameworks */ = {isa = PBXBuildFile; productRef = D096205D300B19610005EBC6 /* CoreKit */; };
 		D0962061300B19920005EBC6 /* FeatureAuth in Frameworks */ = {isa = PBXBuildFile; productRef = D0962060300B19920005EBC6 /* FeatureAuth */; };
 		D0962065300B1D160005EBC6 /* AgentKit in Frameworks */ = {isa = PBXBuildFile; productRef = D0962064300B1D160005EBC6 /* AgentKit */; };
@@ -53,6 +54,7 @@
 			files = (
 				D096205E300B19610005EBC6 /* CoreKit in Frameworks */,
 				D0962061300B19920005EBC6 /* FeatureAuth in Frameworks */,
+				D0935524300EEFCF006C3962 /* ClientToolsKit in Frameworks */,
 				D0962065300B1D160005EBC6 /* AgentKit in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -68,11 +70,19 @@
 			path = TalkifyTests;
 			sourceTree = "<group>";
 		};
+		D0935522300EEFCF006C3962 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
 		D0962000300B17250005EBC6 = {
 			isa = PBXGroup;
 			children = (
 				D096200B300B17250005EBC6 /* Talkify */,
 				A10000000000000000000007 /* TalkifyTests */,
+				D0935522300EEFCF006C3962 /* Frameworks */,
 				D096200A300B17250005EBC6 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -130,6 +140,7 @@
 				D096205D300B19610005EBC6 /* CoreKit */,
 				D0962060300B19920005EBC6 /* FeatureAuth */,
 				D0962064300B1D160005EBC6 /* AgentKit */,
+				D0935523300EEFCF006C3962 /* ClientToolsKit */,
 			);
 			productName = Talkify;
 			productReference = D0962009300B17250005EBC6 /* Talkify.app */;
@@ -185,6 +196,7 @@
 				D096205C300B19610005EBC6 /* XCLocalSwiftPackageReference "Packages/CoreKit" */,
 				D096205F300B19920005EBC6 /* XCLocalSwiftPackageReference "Packages/FeatureAuth" */,
 				D0962062300B1D160005EBC6 /* XCLocalSwiftPackageReference "../AgentKit" */,
+				D0935521300EEF17006C3962 /* XCLocalSwiftPackageReference "../ClientToolsKit" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = D096200A300B17250005EBC6 /* Products */;
@@ -248,8 +260,8 @@
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = NKW67GFDHM;
 				GENERATE_INFOPLIST_FILE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 18.6;
-				MACOSX_DEPLOYMENT_TARGET = 15.6;
+				IPHONEOS_DEPLOYMENT_TARGET = 18;
+				MACOSX_DEPLOYMENT_TARGET = 15;
 				PRODUCT_BUNDLE_IDENTIFIER = com.objc.chatTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = auto;
@@ -267,8 +279,8 @@
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = NKW67GFDHM;
 				GENERATE_INFOPLIST_FILE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 18.6;
-				MACOSX_DEPLOYMENT_TARGET = 15.6;
+				IPHONEOS_DEPLOYMENT_TARGET = 18;
+				MACOSX_DEPLOYMENT_TARGET = 15;
 				PRODUCT_BUNDLE_IDENTIFIER = com.objc.chatTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = auto;
@@ -402,7 +414,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = Talkify/Talkify.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 37;
+				CURRENT_PROJECT_VERSION = 38;
 				DEVELOPMENT_TEAM = NKW67GFDHM;
 				ENABLE_APP_SANDBOX = YES;
 				ENABLE_HARDENED_RUNTIME = YES;
@@ -422,10 +434,10 @@
 				"INFOPLIST_KEY_UIStatusBarStyle[sdk=iphonesimulator*]" = UIStatusBarStyleDefault;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
-				IPHONEOS_DEPLOYMENT_TARGET = 18.6;
+				IPHONEOS_DEPLOYMENT_TARGET = 18;
 				LD_RUNPATH_SEARCH_PATHS = "@executable_path/Frameworks";
 				"LD_RUNPATH_SEARCH_PATHS[sdk=macosx*]" = "@executable_path/../Frameworks";
-				MACOSX_DEPLOYMENT_TARGET = 15.6;
+				MACOSX_DEPLOYMENT_TARGET = 15;
 				MARKETING_VERSION = 2.0.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.objc.chat;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -450,7 +462,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = Talkify/Talkify.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 37;
+				CURRENT_PROJECT_VERSION = 38;
 				DEVELOPMENT_TEAM = NKW67GFDHM;
 				ENABLE_APP_SANDBOX = YES;
 				ENABLE_HARDENED_RUNTIME = YES;
@@ -470,10 +482,10 @@
 				"INFOPLIST_KEY_UIStatusBarStyle[sdk=iphonesimulator*]" = UIStatusBarStyleDefault;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
-				IPHONEOS_DEPLOYMENT_TARGET = 18.6;
+				IPHONEOS_DEPLOYMENT_TARGET = 18;
 				LD_RUNPATH_SEARCH_PATHS = "@executable_path/Frameworks";
 				"LD_RUNPATH_SEARCH_PATHS[sdk=macosx*]" = "@executable_path/../Frameworks";
-				MACOSX_DEPLOYMENT_TARGET = 15.6;
+				MACOSX_DEPLOYMENT_TARGET = 15;
 				MARKETING_VERSION = 2.0.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.objc.chat;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -524,6 +536,10 @@
 /* End XCConfigurationList section */
 
 /* Begin XCLocalSwiftPackageReference section */
+		D0935521300EEF17006C3962 /* XCLocalSwiftPackageReference "../ClientToolsKit" */ = {
+			isa = XCLocalSwiftPackageReference;
+			relativePath = ../ClientToolsKit;
+		};
 		D096205C300B19610005EBC6 /* XCLocalSwiftPackageReference "Packages/CoreKit" */ = {
 			isa = XCLocalSwiftPackageReference;
 			relativePath = Packages/CoreKit;
@@ -539,6 +555,11 @@
 /* End XCLocalSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
+		D0935523300EEFCF006C3962 /* ClientToolsKit */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = D0935521300EEF17006C3962 /* XCLocalSwiftPackageReference "../ClientToolsKit" */;
+			productName = ClientToolsKit;
+		};
 		D096205D300B19610005EBC6 /* CoreKit */ = {
 			isa = XCSwiftPackageProductDependency;
 			productName = CoreKit;

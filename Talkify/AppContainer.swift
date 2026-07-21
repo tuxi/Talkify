@@ -9,6 +9,7 @@ import Foundation
 import AgentKit
 import CoreKit
 import FeatureAuth
+import ClientToolsKit
 
 struct BaseHeader: Encodable, Sendable {
     let deviceId: String
@@ -168,9 +169,9 @@ final class AppContainer {
         // AgentKit 账户与用量服务复用 Talkify 的授权 API Provider。
         self.agentManager = AgentManager(apiProvider: apiProvider)
 
-        // ModelSettingsStore 管理本地模型偏好。
-        // 模型列表由宿主 App 在启动时通过 setAvailableModels() 注入。
-        self.modelSettings = ModelSettingsStore()
+        // ModelSettingsStore 通过 GatewayService 主动获取模型列表。
+        // agentManager 实现 GatewayService 协议，提供 Gateway API 访问。
+        self.modelSettings = ModelSettingsStore(service: agentManager)
 
         self.toolRegistry = ToolRegistry()
         self.conversationNotifications = ConversationNotificationCoordinator()
@@ -190,25 +191,12 @@ final class AppContainer {
         // P1: 注册客户端工具（Go 服务端无法执行的本地工具）
         registerClientTools()
 
-        // 从 Gateway 获取模型列表 → 注入 ModelSettingsStore。
-        // 注意：fetchFromGateway() 已从 ModelSettingsStore 移除，
-        // 改为由宿主 App 主动获取并调用 setAvailableModels()。
+        // 通过 ModelSettingsStore 从 Gateway 获取模型列表
         Task {
-            await refreshModelList()
+            await modelSettings.refreshModels()
         }
         Task.detached(priority: .utility) { [userAssetFileStore] in
             userAssetFileStore.removeExpiredFiles()
-        }
-    }
-
-    /// 从 Gateway 获取模型列表并注入 ModelSettingsStore。
-    func refreshModelList() async {
-        // 使用 authClient 直接获取模型列表
-        do {
-            let response = try await agentManager.fetchModels()
-            modelSettings.setAvailableModels(response.models, defaultModel: response.defaultModel)
-        } catch {
-            print("Failed to fetch models from Gateway: \(error)")
         }
     }
 

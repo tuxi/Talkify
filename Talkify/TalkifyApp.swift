@@ -60,7 +60,7 @@ struct TalkifyApp: App {
                 .onChange(of: container.authManager.isLoggedIn, { oldValue, newValue in
                     if newValue {
                         Task {
-                            await container.refreshModelList()
+                            await container.modelSettings.refreshModels()
                         }
                     }
                 })
