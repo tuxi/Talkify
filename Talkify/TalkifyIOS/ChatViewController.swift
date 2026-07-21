@@ -17,7 +17,11 @@ private struct ChatDetailWrapper: View {
     let store: WorkspaceStore
     let dependencies: AgentDependencies
     let onMenuTapped: () -> Void
+    /// AgentKit 的 FileContentProvider，用于 InspectorNavigationView
+    let fileProvider: (any AgentKit.FileContentProvider)?
+
     @State private var router = AgentRouter()
+    @State private var showInspector = false
 
     var body: some View {
         NavigationStack(path: $router.path) {
@@ -32,12 +36,33 @@ private struct ChatDetailWrapper: View {
                                 .font(.system(size: 16))
                                 .clipShape(Circle())
                         }
+                    }
 
+                    ToolbarItem(placement: .topBarTrailing) {
+                        Button {
+                            showInspector = true
+                        } label: {
+                            Image(systemName: "sidebar.trailing")
+                                .font(.system(size: 16))
+                        }
+                        .disabled(store.inspectorSelection == nil)
                     }
                 }
         }
+        .sheet(isPresented: $showInspector) {
+            InspectorNavigationView(
+                initialSelection: store.inspectorSelection,
+                fileProvider: fileProvider
+            )
+            .presentationDetents([.medium, .large])
+            .presentationDragIndicator(.visible)
+            .environment(store)
+        }
         .withAgentSheetDestinations(sheetDestinations: $router.presentedSheet, dependencies: dependencies)
         .withAgentCoverDestinations(coverDestinations: $router.presentedCover, dependencies: dependencies)
+        .onChange(of: showInspector) { _, presented in
+            store.isInspectorPresented = presented
+        }
         .environment(router)
         .environment(store)
     }
@@ -52,11 +77,13 @@ final class ChatViewController: UIViewController {
 
     var onMenuTap: (() -> Void)?
     var onMaskTap: (() -> Void)?
-    
+    /// AgentKit 的 FileContentProvider，注入到 ChatDetailWrapper 用于 InspectorNavigationView
+    var fileProvider: (any AgentKit.FileContentProvider)?
+
     private let store: WorkspaceStore
     private let dependencies: AgentDependencies
     private var hostingController: UIHostingController<ChatDetailWrapper>?
-    
+
     /// Semi-transparent overlay that dims the chat area when the drawer is open.
     /// Tap gesture is on the mask itself — when `alpha == 0` the gesture is
     /// automatically ignored, so ChatView content remains interactive.
@@ -87,7 +114,7 @@ final class ChatViewController: UIViewController {
         super.viewDidLoad()
 
         view.backgroundColor = UIColor(red: 0.10, green: 0.10, blue: 0.10, alpha: 1)
-        
+
         embedDetailView()
 
         // Mask sits above SwiftUI content but below the menu button.
@@ -101,18 +128,15 @@ final class ChatViewController: UIViewController {
         maskView.frame = view.bounds
     }
 
-    // MARK: - Actions
-
-    @objc private func menuTapped() {
-        onMenuTap?()
-    }
-
     // MARK: - Embed
 
     private func embedDetailView() {
-        let detailView = ChatDetailWrapper(store: store, dependencies: dependencies) {
-            self.onMenuTap?()
-        }
+        let detailView = ChatDetailWrapper(
+            store: store,
+            dependencies: dependencies,
+            onMenuTapped: { [weak self] in self?.onMenuTap?() },
+            fileProvider: fileProvider
+        )
         let host = UIHostingController(rootView: detailView)
         host.view.backgroundColor = .clear
         addChild(host)
@@ -120,8 +144,8 @@ final class ChatViewController: UIViewController {
         host.didMove(toParent: self)
         hostingController = host
     }
-    
-    
+
+
     @objc func onTapMaskGes(_ tap: UITapGestureRecognizer) {
         onMaskTap?()
     }

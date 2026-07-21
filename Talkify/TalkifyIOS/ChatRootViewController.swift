@@ -11,10 +11,11 @@ import AgentKit
 import Observation
 import SwiftUI
 import CoreKit
+import FileViewerKit
 
 /// Root container that implements the ChatGPT-style drawer layout.
 ///
-/// - `DrawerViewController` is the persistent left drawer.
+/// - `WorkspaceHubViewController` is the persistent left drawer.
 /// - `ChatViewController` is the right detail pane that slides to reveal the drawer.
 ///
 /// Uses **frame-based** animation (not `CGAffineTransform`) because `UIHostingController`
@@ -29,7 +30,7 @@ final class ChatRootViewController: UIViewController {
     private let store: WorkspaceStore
     private let dependencies: AgentDependencies
 
-    private let drawerVC: DrawerViewController
+    private let drawerVC: WorkspaceHubViewController
     private let chatVC: ChatViewController
 
     private let drawerWidth: CGFloat = 320
@@ -37,6 +38,9 @@ final class ChatRootViewController: UIViewController {
     private var isDrawerOpen = false
     
     private let container: AppContainer
+
+    /// 桥接层：将 WorkspaceStore 数据适配到 FileViewerKit 和 AgentKit 的协议。
+    private lazy var fileProvider = WorkspaceFileContentProvider(store: store)
 
     /// Invisible view that sits below `chatVC.view` and carries its shadow.
     /// Separated because `chatVC.view` uses `masksToBounds` for corner clipping,
@@ -70,7 +74,7 @@ final class ChatRootViewController: UIViewController {
         self.store = store
         self.container = container
         self.dependencies = dependencies
-        self.drawerVC = DrawerViewController(store: store)
+        self.drawerVC = WorkspaceHubViewController(store: store)
         self.chatVC = ChatViewController(store: store, dependencies: dependencies)
         super.init(nibName: nil, bundle: nil)
     }
@@ -85,6 +89,12 @@ final class ChatRootViewController: UIViewController {
         super.viewDidLoad()
 
         view.backgroundColor = .clear
+
+        // 必须在 addChild / access view 之前注入 provider，
+        // 否则 WorkspaceHubViewController.viewDidLoad 中创建的
+        // WorkspaceHubView 会拿到 nil 的 fileProvider。
+        drawerVC.fileProvider = fileProvider
+        chatVC.fileProvider = fileProvider
 
         // Drawer (behind, stationary)
         addChild(drawerVC)
@@ -107,9 +117,17 @@ final class ChatRootViewController: UIViewController {
         drawerVC.onSelectedConversation = { [weak self] in
             self?.setDrawer(open: false, animated: true)
         }
-        
+
         drawerVC.onSettingsTap = { [weak self] in
             self?.handleSettingsTap()
+        }
+
+        drawerVC.onWorkspaceBrowserRequested = { [weak self] in
+            self?.showWorkspaceBrowser()
+        }
+
+        drawerVC.onFileSelected = { [weak self] path in
+            self?.showFilePreview(path: path)
         }
 
         chatVC.onMenuTap = { [weak self] in
@@ -126,6 +144,17 @@ final class ChatRootViewController: UIViewController {
 //        beginObservingSelection()
         
         observeAuthState()
+    }
+    
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        
+        navigationController?.setNavigationBarHidden(true, animated: true)
+    }
+    
+    override func viewDidDisappear(_ animated: Bool) {
+        super.viewDidDisappear(animated)
+        navigationController?.setNavigationBarHidden(false, animated: true)
     }
 
     override func viewDidLayoutSubviews() {
@@ -276,6 +305,55 @@ final class ChatRootViewController: UIViewController {
             .environment(container.userManager)
         let settingsVC = UIHostingController(rootView: settingsView)
         self.present(settingsVC, animated: true)
+    }
+
+    // MARK: - Workspace Browser
+
+    /// Presents the full-screen workspace browser (FileViewerKit).
+    private func showWorkspaceBrowser() {
+        let browserView = FileViewerKit.WorkspaceBrowserView(
+            workspaces: fileProvider.buildWorkspaceItems(),
+            fileProvider: fileProvider,
+            onSelectWorkspace: { [weak self] item in
+                // 选择工作区 → 关闭浏览器 + 切换工作区上下文
+                self?.dismiss(animated: true) {
+                    self?.store.selectWorkspace(.init(url: URL(fileURLWithPath: item.rootPath)))
+                }
+            },
+            onSelectFile: { [weak self] filePath in
+                self?.dismiss(animated: true) {
+                    self?.showFilePreview(path: filePath)
+                }
+            },
+            onViewConversations: { [weak self] workspaceID in
+                self?.dismiss(animated: true) {
+                    self?.store.selectWorkspace(.init(url: URL(fileURLWithPath: workspaceID)))
+                    self?.setDrawer(open: true, animated: true)
+                }
+            }
+        )
+
+        let browserVC = UIHostingController(rootView: browserView)
+        browserVC.modalPresentationStyle = .fullScreen
+        self.present(browserVC, animated: true)
+    }
+
+    // MARK: - File Preview
+
+    /// Pushes file preview with UIKit slide animation. The pushed VC carries its own
+    /// NavigationStack for the back button, so UINavigationController's bar stays hidden.
+    private func showFilePreview(path: String) {
+        let previewWithNav = NavigationStack {
+            FilePreviewHost(
+                filePath: path,
+                fileName: (path as NSString).lastPathComponent,
+                provider: fileProvider,
+                showDiff: false
+            )
+        }
+
+        let previewVC = UIHostingController(rootView: previewWithNav)
+        navigationController?.pushViewController(previewVC, animated: true)
     }
 
     // MARK: - Observation

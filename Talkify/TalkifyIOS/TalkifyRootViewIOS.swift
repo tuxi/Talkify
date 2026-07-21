@@ -104,11 +104,14 @@ private struct ChatRootViewRepresentable: UIViewControllerRepresentable {
     let dependencies: AgentDependencies
     let container: AppContainer
 
-    func makeUIViewController(context: Context) -> ChatRootViewController {
-        ChatRootViewController(store: store, container: container, dependencies: dependencies)
+    func makeUIViewController(context: Context) -> UINavigationController {
+        let root = ChatRootViewController(store: store, container: container, dependencies: dependencies)
+        let nav = UINavigationController(rootViewController: root)
+        nav.setNavigationBarHidden(true, animated: false)
+        return nav
     }
 
-    func updateUIViewController(_ uiViewController: ChatRootViewController, context: Context) {}
+    func updateUIViewController(_ uiViewController: UINavigationController, context: Context) {}
 }
 
 // MARK: - TalkifyRootView

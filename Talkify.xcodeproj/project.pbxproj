@@ -10,6 +10,7 @@
 		A10000000000000000000001 /* UserAssetsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000000000000000000002 /* UserAssetsTests.swift */; };
 		A10000000000000000000003 /* AgentKit in Frameworks */ = {isa = PBXBuildFile; productRef = D0962064300B1D160005EBC6 /* AgentKit */; };
 		D0935524300EEFCF006C3962 /* ClientToolsKit in Frameworks */ = {isa = PBXBuildFile; productRef = D0935523300EEFCF006C3962 /* ClientToolsKit */; };
+		D093565A300F7080006C3962 /* FileViewerKit in Frameworks */ = {isa = PBXBuildFile; productRef = D0935659300F7080006C3962 /* FileViewerKit */; };
 		D096205E300B19610005EBC6 /* CoreKit in Frameworks */ = {isa = PBXBuildFile; productRef = D096205D300B19610005EBC6 /* CoreKit */; };
 		D0962061300B19920005EBC6 /* FeatureAuth in Frameworks */ = {isa = PBXBuildFile; productRef = D0962060300B19920005EBC6 /* FeatureAuth */; };
 		D0962065300B1D160005EBC6 /* AgentKit in Frameworks */ = {isa = PBXBuildFile; productRef = D0962064300B1D160005EBC6 /* AgentKit */; };
@@ -56,6 +57,7 @@
 				D0962061300B19920005EBC6 /* FeatureAuth in Frameworks */,
 				D0935524300EEFCF006C3962 /* ClientToolsKit in Frameworks */,
 				D0962065300B1D160005EBC6 /* AgentKit in Frameworks */,
+				D093565A300F7080006C3962 /* FileViewerKit in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -141,6 +143,7 @@
 				D0962060300B19920005EBC6 /* FeatureAuth */,
 				D0962064300B1D160005EBC6 /* AgentKit */,
 				D0935523300EEFCF006C3962 /* ClientToolsKit */,
+				D0935659300F7080006C3962 /* FileViewerKit */,
 			);
 			productName = Talkify;
 			productReference = D0962009300B17250005EBC6 /* Talkify.app */;
@@ -197,6 +200,7 @@
 				D096205F300B19920005EBC6 /* XCLocalSwiftPackageReference "Packages/FeatureAuth" */,
 				D0962062300B1D160005EBC6 /* XCLocalSwiftPackageReference "../AgentKit" */,
 				D0935521300EEF17006C3962 /* XCLocalSwiftPackageReference "../ClientToolsKit" */,
+				D093553C300F63FC006C3962 /* XCLocalSwiftPackageReference "../FileViewerKit" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = D096200A300B17250005EBC6 /* Products */;
@@ -540,6 +544,10 @@
 			isa = XCLocalSwiftPackageReference;
 			relativePath = ../ClientToolsKit;
 		};
+		D093553C300F63FC006C3962 /* XCLocalSwiftPackageReference "../FileViewerKit" */ = {
+			isa = XCLocalSwiftPackageReference;
+			relativePath = ../FileViewerKit;
+		};
 		D096205C300B19610005EBC6 /* XCLocalSwiftPackageReference "Packages/CoreKit" */ = {
 			isa = XCLocalSwiftPackageReference;
 			relativePath = Packages/CoreKit;
@@ -559,6 +567,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = D0935521300EEF17006C3962 /* XCLocalSwiftPackageReference "../ClientToolsKit" */;
 			productName = ClientToolsKit;
+		};
+		D0935659300F7080006C3962 /* FileViewerKit */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = D093553C300F63FC006C3962 /* XCLocalSwiftPackageReference "../FileViewerKit" */;
+			productName = FileViewerKit;
 		};
 		D096205D300B19610005EBC6 /* CoreKit */ = {
 			isa = XCSwiftPackageProductDependency;
