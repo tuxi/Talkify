@@ -16,6 +16,7 @@ class DrawerViewController: UIViewController {
     var searchText: String = ""
     
     var onSelectedConversation: (() -> Void)?
+    var onSettingsTap: (() -> Void)?
     
     init(store: WorkspaceStore) {
         self.store = store
@@ -30,7 +31,7 @@ class DrawerViewController: UIViewController {
         super.viewDidLoad()
 
 //        view.backgroundColor = UIColor(red: 0.06, green: 0.06, blue: 0.06, alpha: 1)
-
+        
         let listView = ConversationListView(
             viewModel: store.listViewModel,
             selected: .init(get: {
@@ -45,17 +46,77 @@ class DrawerViewController: UIViewController {
         let rootController = UIHostingController(rootView: AnyView(listView))
 //        rootController.view.backgroundColor = .clear
 
-        self.addChild(rootController)
+        addChild(rootController)
         rootController.didMove(toParent: self)
 
         self.view.addSubview(rootController.view)
         rootController.view.translatesAutoresizingMaskIntoConstraints = false
-        rootController.view.leadingAnchor.constraint(equalTo: self.view.leadingAnchor).isActive = true
-        rootController.view.trailingAnchor.constraint(equalTo: self.view.trailingAnchor).isActive = true
-        rootController.view.topAnchor.constraint(equalTo: self.view.topAnchor).isActive = true
-        rootController.view.bottomAnchor.constraint(equalTo: self.view.bottomAnchor).isActive = true
+        rootController.view.leadingAnchor.constraint(equalTo: view.leadingAnchor).isActive = true
+        rootController.view.trailingAnchor.constraint(equalTo: view.trailingAnchor).isActive = true
+        rootController.view.topAnchor.constraint(equalTo: view.topAnchor).isActive = true
+        rootController.view.bottomAnchor.constraint(equalTo: view.bottomAnchor).isActive = true
+        
+        
+        let bottomBar = UIHostingController(rootView: BottomBar(onNewChatAction: {  [weak self] in
+            self?.store.beginDraft()
+            self?.onSelectedConversation?()
+        }, onSettingsAction: { [weak self] in
+            self?.onSettingsTap?()
+        }))
+        bottomBar.view.translatesAutoresizingMaskIntoConstraints = false
+        addChild(bottomBar)
+        view.addSubview(bottomBar.view)
+        bottomBar.didMove(toParent: self)
+        NSLayoutConstraint.activate([
+            bottomBar.view.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 30),
+            bottomBar.view.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -30),
+            bottomBar.view.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -8),
+            bottomBar.view.heightAnchor.constraint(equalToConstant: 50)
+        ])
+        
     }
     
+}
+
+private struct BottomBar: View {
+    
+    let onNewChatAction: () -> Void
+    let onSettingsAction: () -> Void
+    
+    
+    var body: some View {
+        HStack {
+            Button {
+                onNewChatAction()
+            } label: {
+                HStack {
+                    Image(systemName: "square.and.pencil")
+                    Text("聊天")
+                }
+                .foregroundColor(.white) // 避免文字与黑色背景冲突
+                .padding(.horizontal, 16) // 增加聊天按钮内边距
+                .padding(.vertical, 8)
+                .background(Color.primary)
+                .clipShape(RoundedRectangle(cornerRadius: 15))
+            }
+            
+            Spacer(minLength: 30)
+            
+            Button {
+                onSettingsAction()
+            } label: {
+                Image(systemName: "gearshape")
+                    .foregroundColor(.primary) // 设置齿轮颜色
+                    .frame(width: 40, height: 40) // 固定等宽高以确保是正圆
+                    .background(Color(.systemGray5)) // 灰色背景
+                    .clipShape(Circle()) // 裁剪为正圆
+            }
+        }
+        .padding(.horizontal, 30)
+        .padding(.vertical, 15) // 为底部栏增加上下间距
+        .background(Color(.systemBackground)) // 底部栏背景色
+        .clipShape(RoundedRectangle(cornerRadius: 20)) // 整个底部栏的圆角
+    }
 }
 
 

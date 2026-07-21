@@ -9,6 +9,7 @@
 import UIKit
 import AgentKit
 import Observation
+import SwiftUI
 
 /// Root container that implements the ChatGPT-style drawer layout.
 ///
@@ -33,6 +34,8 @@ final class ChatRootViewController: UIViewController {
     private let drawerWidth: CGFloat = 320
     private let maxMaskAlpha: CGFloat = 0.3
     private var isDrawerOpen = false
+    
+    private let container: AppContainer
 
     /// Invisible view that sits below `chatVC.view` and carries its shadow.
     /// Separated because `chatVC.view` uses `masksToBounds` for corner clipping,
@@ -62,8 +65,9 @@ final class ChatRootViewController: UIViewController {
 
     // MARK: - Init
 
-    init(store: WorkspaceStore, dependencies: AgentDependencies) {
+    init(store: WorkspaceStore, container: AppContainer, dependencies: AgentDependencies) {
         self.store = store
+        self.container = container
         self.dependencies = dependencies
         self.drawerVC = DrawerViewController(store: store)
         self.chatVC = ChatViewController(store: store, dependencies: dependencies)
@@ -102,6 +106,10 @@ final class ChatRootViewController: UIViewController {
         drawerVC.onSelectedConversation = { [weak self] in
             self?.setDrawer(open: false, animated: true)
         }
+        
+        drawerVC.onSettingsTap = { [weak self] in
+            self?.handleSettingsTap()
+        }
 
         chatVC.onMenuTap = { [weak self] in
             self?.setDrawer(open: self?.isDrawerOpen == false, animated: true)
@@ -120,7 +128,7 @@ final class ChatRootViewController: UIViewController {
     override func viewDidLayoutSubviews() {
         super.viewDidLayoutSubviews()
 
-        drawerVC.view.frame = view.bounds
+        drawerVC.view.frame = CGRect(x: 0, y: 0, width: drawerWidth, height: view.bounds.size.height)
         applyChatFrame(animated: false)
     }
 
@@ -254,6 +262,15 @@ final class ChatRootViewController: UIViewController {
         default:
             break
         }
+    }
+    
+    private func handleSettingsTap() {
+        let settingsView = SettingsView()
+            .environment(container.authManager)
+            .environment(container.agentManager)
+            .environment(container.userManager)
+        let settingsVC = UIHostingController(rootView: settingsView)
+        self.present(settingsVC, animated: true)
     }
 
     // MARK: - Observation

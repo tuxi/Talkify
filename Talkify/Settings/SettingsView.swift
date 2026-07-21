@@ -23,6 +23,8 @@ public struct SettingsView: View {
     @AppStorage("settings.fullDiskAccess") private var fullDiskAccess = false
     @AppStorage("settings.showInMenuBar") private var showInMenuBar = true
     @AppStorage("settings.showBottomPanel") private var showBottomPanel = true
+    
+    @State var router = SettingsRouter()
 
     public init(onClose: @escaping () -> Void = {}) {
         self.onClose = onClose

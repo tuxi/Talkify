@@ -43,7 +43,7 @@ private struct ChatDrawerWorkspace: View {
     // MARK: - Body
 
     var body: some View {
-        ChatRootViewRepresentable(store: store, dependencies: dependencies)
+        ChatRootViewRepresentable(store: store, dependencies: dependencies, container: container)
             .ignoresSafeArea()
             .task {
                 store.startLifecycleNetworkMonitor()
@@ -102,9 +102,10 @@ private struct ChatRootViewRepresentable: UIViewControllerRepresentable {
 
     let store: WorkspaceStore
     let dependencies: AgentDependencies
+    let container: AppContainer
 
     func makeUIViewController(context: Context) -> ChatRootViewController {
-        ChatRootViewController(store: store, dependencies: dependencies)
+        ChatRootViewController(store: store, container: container, dependencies: dependencies)
     }
 
     func updateUIViewController(_ uiViewController: ChatRootViewController, context: Context) {}
