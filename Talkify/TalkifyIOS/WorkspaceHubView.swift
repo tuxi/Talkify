@@ -71,7 +71,7 @@ struct WorkspaceHubView: View {
             tabContent
             bottomBar
         }
-        .background(.ultraThinMaterial)
+        .background(Color(uiColor: UIColor(red: 0.10, green: 0.10, blue: 0.10, alpha: 1)))
     }
 
     // MARK: - Workspace Header
@@ -161,26 +161,20 @@ struct WorkspaceHubView: View {
                         selectedTab = tab
                     }
                 } label: {
-                    VStack(spacing: 5) {
+                    VStack(spacing: 4) {
                         Image(systemName: tab.icon)
-                            .font(.system(size: 15, weight: .medium))
+                            .font(.system(size: 16, weight: .medium))
                         Text(tab.title)
                             .font(.system(size: 11, weight: .medium))
                     }
                     .foregroundStyle(selectedTab == tab ? Color.accentColor : Color.secondary)
                     .frame(maxWidth: .infinity)
-                    .padding(.vertical, 10)
+                    .padding(.vertical, 8)
                     .contentShape(Rectangle())
                 }
                 .buttonStyle(.plain)
             }
         }
-        .padding(.horizontal, 12)
-        .background(
-            Rectangle()
-                .fill(Color.primary.opacity(0.06))
-                .clipShape(RoundedRectangle(cornerRadius: 12))
-        )
         .padding(.horizontal, 16)
         .padding(.bottom, 8)
     }
@@ -196,7 +190,6 @@ struct WorkspaceHubView: View {
                     selected: $selectedConversation,
                     searchText: searchText
                 )
-                .background(.ultraThinMaterial)
 
             case .quickFiles:
                 ScrollView {
@@ -204,7 +197,16 @@ struct WorkspaceHubView: View {
                 }
 
             case .search:
-                GlobalSearchPlaceholderView()
+                GlobalSearchView(
+                    store: store,
+                    fileProvider: fileProvider,
+                    onSelectConversation: { ref in
+                        selectedConversation = ref
+                    },
+                    onSelectFile: { path in
+                        onFileSelected?(path)
+                    }
+                )
             }
         }
         .frame(maxHeight: .infinity)
@@ -246,11 +248,11 @@ struct WorkspaceHubView: View {
                     Image(systemName: "square.and.pencil")
                     Text("聊天")
                 }
+                .font(.system(size: 15, weight: .medium))
                 .foregroundColor(.white)
-                .padding(.horizontal, 16)
-                .padding(.vertical, 8)
-                .background(Color.accentColor)
-                .clipShape(RoundedRectangle(cornerRadius: 15))
+                .padding(.horizontal, 18)
+                .padding(.vertical, 9)
+                .background(Color.accentColor, in: Capsule())
             }
 
             Spacer(minLength: 30)
@@ -259,15 +261,13 @@ struct WorkspaceHubView: View {
                 onSettings?()
             } label: {
                 Image(systemName: "gearshape")
-                    .foregroundColor(.primary)
+                    .font(.system(size: 18))
+                    .foregroundStyle(.secondary)
                     .frame(width: 40, height: 40)
-                    .background(Color(.systemGray5))
-                    .clipShape(Circle())
             }
         }
-        .padding(.horizontal, 30)
-        .padding(.vertical, 15)
-        .clipShape(RoundedRectangle(cornerRadius: 20))
+        .padding(.horizontal, 38)
+        .padding(.vertical, 12)
     }
 }
 
@@ -284,15 +284,117 @@ private extension ConversationActivityState {
     }
 }
 
-// MARK: - Global Search Placeholder
+// MARK: - Global Search
 
-private struct GlobalSearchPlaceholderView: View {
+private struct GlobalSearchView: View {
+
+    let store: WorkspaceStore
+    let fileProvider: WorkspaceFileContentProvider?
+    var onSelectConversation: ((ConversationRef) -> Void)?
+    var onSelectFile: ((String) -> Void)?
+
+    @State private var query = ""
+    @State private var fileResults: [any FileViewerKit.FileNode] = []
+
+    private var conversationResults: [ConversationRef] {
+        let q = query.trimmingCharacters(in: .whitespaces)
+        guard !q.isEmpty else { return [] }
+        return store.listViewModel.conversations.filter { ref in
+            (ref.name ?? "").localizedCaseInsensitiveContains(q) ||
+            ref.id.localizedCaseInsensitiveContains(q)
+        }
+    }
+
     var body: some View {
-        ContentUnavailableView(
-            "搜索",
-            systemImage: "magnifyingglass",
-            description: Text("跨会话和文件搜索即将上线")
-        )
+        VStack(spacing: 0) {
+            // Search field
+            HStack(spacing: 8) {
+                Image(systemName: "magnifyingglass")
+                    .foregroundStyle(.secondary)
+                TextField("搜索会话或文件...", text: $query)
+                    .textFieldStyle(.plain)
+                    .onChange(of: query) { _, newValue in
+                        searchFiles(newValue)
+                    }
+                if !query.isEmpty {
+                    Button {
+                        query = ""
+                        fileResults = []
+                    } label: {
+                        Image(systemName: "xmark.circle.fill")
+                            .foregroundStyle(.secondary)
+                    }
+                }
+            }
+            .padding(10)
+            .background(Color.primary.opacity(0.08), in: RoundedRectangle(cornerRadius: 10))
+            .padding(.horizontal, 16)
+            .padding(.vertical, 10)
+
+            // Results
+            if query.trimmingCharacters(in: .whitespaces).isEmpty {
+                Spacer()
+            } else if conversationResults.isEmpty && fileResults.isEmpty {
+                ContentUnavailableView.search(text: query)
+            } else {
+                List {
+                    if !conversationResults.isEmpty {
+                        Section("会话") {
+                            ForEach(conversationResults) { ref in
+                                Button {
+                                    onSelectConversation?(ref)
+                                } label: {
+                                    HStack(spacing: 8) {
+                                        Image(systemName: "bubble.left")
+                                            .foregroundStyle(.secondary)
+                                        Text(ref.name ?? ref.id)
+                                            .lineLimit(1)
+                                            .foregroundStyle(.primary)
+                                        Spacer()
+                                        Image(systemName: "chevron.right")
+                                            .font(.caption)
+                                            .foregroundStyle(.tertiary)
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    if !fileResults.isEmpty {
+                        Section("文件") {
+                            ForEach(fileResults, id: \.id) { file in
+                                Button {
+                                    onSelectFile?(file.path)
+                                } label: {
+                                    HStack(spacing: 8) {
+                                        Image(systemName: file.systemImageName)
+                                            .foregroundStyle(.secondary)
+                                        Text(file.name)
+                                            .lineLimit(1)
+                                            .foregroundStyle(.primary)
+                                        Spacer()
+                                        Image(systemName: "chevron.right")
+                                            .font(.caption)
+                                            .foregroundStyle(.tertiary)
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+                .listStyle(.plain)
+                .scrollContentBackground(.hidden)
+            }
+        }
+    }
+
+    private func searchFiles(_ q: String) {
+        let trimmed = q.trimmingCharacters(in: .whitespaces)
+        guard !trimmed.isEmpty, let provider = fileProvider else {
+            fileResults = []
+            return
+        }
+        fileResults = provider.searchFiles(matching: trimmed)
     }
 }
 #endif

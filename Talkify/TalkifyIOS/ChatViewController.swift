@@ -38,15 +38,6 @@ private struct ChatDetailWrapper: View {
                         }
                     }
 
-                    ToolbarItem(placement: .topBarTrailing) {
-                        Button {
-                            showInspector = true
-                        } label: {
-                            Image(systemName: "sidebar.trailing")
-                                .font(.system(size: 16))
-                        }
-                        .disabled(store.inspectorSelection == nil)
-                    }
                 }
         }
         .sheet(isPresented: $showInspector) {
@@ -62,6 +53,9 @@ private struct ChatDetailWrapper: View {
         .withAgentCoverDestinations(coverDestinations: $router.presentedCover, dependencies: dependencies)
         .onChange(of: showInspector) { _, presented in
             store.isInspectorPresented = presented
+        }
+        .onChange(of: store.isInspectorPresented) { _, presented in
+            if showInspector != presented { showInspector = presented }
         }
         .environment(router)
         .environment(store)

@@ -334,6 +334,35 @@ extension WorkspaceFileContentProvider {
     }
 }
 
+// MARK: - File Search
+
+extension WorkspaceFileContentProvider {
+
+    /// 在 workspace 根目录下递归搜索匹配的文件名。
+    func searchFiles(matching query: String) -> [any FileViewerKit.FileNode] {
+        guard let root = workspaceRoot else { return [] }
+        let lowerQuery = query.lowercased()
+        guard !lowerQuery.isEmpty else { return [] }
+
+        let url = URL(fileURLWithPath: root)
+        guard let enumerator = fileManager.enumerator(
+            at: url,
+            includingPropertiesForKeys: [.fileSizeKey, .contentModificationDateKey],
+            options: [.skipsHiddenFiles]
+        ) else { return [] }
+
+        var results: [WorkspaceFileNode] = []
+        for case let fileURL as URL in enumerator {
+            let name = fileURL.lastPathComponent.lowercased()
+            if name.contains(lowerQuery) {
+                results.append(WorkspaceFileNode(url: fileURL, workspaceRoot: root))
+            }
+            if results.count >= 30 { break }
+        }
+        return results
+    }
+}
+
 // MARK: - Quick File List Helpers
 
 extension WorkspaceFileContentProvider {

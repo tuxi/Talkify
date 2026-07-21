@@ -29,6 +29,36 @@ public struct WorkspaceView: View {
     
     @State private var showSettings = false
 
+    #if os(iOS)
+    private var fileProvider: WorkspaceFileContentProvider {
+        WorkspaceFileContentProvider(store: store)
+    }
+    #endif
+
+    /// 跨平台 FileContentProvider：iOS 提供 WorkspaceFileContentProvider，macOS 暂无。
+    private var fileProviderForInspector: (any AgentKit.FileContentProvider)? {
+        #if os(iOS)
+        return fileProvider
+        #else
+        return nil
+        #endif
+    }
+
+    /// Inspector 内容视图。iOS 用 NavigationStack 容器，macOS 用平铺切换。
+    /// macOS 上的 NavigationStack 会与 NavigationSplitView 的 inspector 列导航状态冲突，
+    /// 导致 `comparisonTypeMismatch` 崩溃，暂时回退到 InspectorView。
+    @ViewBuilder
+    private var inspectorContent: some View {
+        #if os(iOS)
+        InspectorNavigationView(
+            initialSelection: store.inspectorSelection,
+            fileProvider: fileProviderForInspector
+        )
+        #else
+        InspectorView(selection: store.inspectorSelection)
+        #endif
+    }
+
     public init(dependencies: AgentDependencies) {
         self.dependencies = dependencies
         self._store = State(initialValue: Self.makeStore(dependencies: dependencies))
@@ -107,7 +137,7 @@ public struct WorkspaceView: View {
                         }
                     }
                     .inspector(isPresented: $store.isInspectorPresented) {
-                        InspectorView(selection: store.inspectorSelection)
+                        inspectorContent
                     }
                 }
         }
@@ -171,7 +201,7 @@ public struct WorkspaceView: View {
                         .withAgentNavigationDestinations(router: router, dependencies: dependencies)
                 }
                 .inspector(isPresented: $store.isInspectorPresented) {
-                    InspectorView(selection: store.inspectorSelection)
+                    inspectorContent
                         .platformInspectorColumnWidth()
                 }
             }
