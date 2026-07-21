@@ -328,9 +328,9 @@ public struct SettingsDetailView: View {
             Text(accountInitial)
                 .font(.system(size: 34, weight: .medium))
                 .foregroundStyle(.white)
-                .frame(width: 148, height: 148)
+                .frame(width: 128, height: 128)
                 .background(Color.accentColor, in: Circle())
-                .padding(.top, 86)
+                .padding(.top, 66)
 
             Text(accountName)
                 .font(.system(size: 32, weight: .regular))

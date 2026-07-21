@@ -40,6 +40,7 @@ class DrawerViewController: UIViewController {
             }),
             searchText: searchText
         )
+        .background(.ultraThinMaterial)
         .environment(store)
         let rootController = UIHostingController(rootView: AnyView(listView))
 
@@ -54,13 +55,17 @@ class DrawerViewController: UIViewController {
         rootController.view.bottomAnchor.constraint(equalTo: view.bottomAnchor).isActive = true
         
         
-        let bottomBar = UIHostingController(rootView: BottomBar(onNewChatAction: {  [weak self] in
-            self?.store.beginDraft()
-            self?.onSelectedConversation?()
-        }, onSettingsAction: { [weak self] in
-            self?.onSettingsTap?()
-        }))
+        let bottomBar = UIHostingController(
+            rootView:
+                BottomBar(onNewChatAction: {  [weak self] in
+                    self?.store.beginDraft()
+                    self?.onSelectedConversation?()
+                }, onSettingsAction: { [weak self] in
+                    self?.onSettingsTap?()
+                })
+        )
         bottomBar.view.translatesAutoresizingMaskIntoConstraints = false
+        bottomBar.view.backgroundColor = .clear
         addChild(bottomBar)
         view.addSubview(bottomBar.view)
         bottomBar.didMove(toParent: self)
@@ -90,7 +95,7 @@ private struct BottomBar: View {
                     Image(systemName: "square.and.pencil")
                     Text("聊天")
                 }
-                .foregroundColor(.primary) // 避免文字与黑色背景冲突
+                .foregroundColor(.white) // 避免文字与黑色背景冲突
                 .padding(.horizontal, 16) // 增加聊天按钮内边距
                 .padding(.vertical, 8)
                 .background(Color.accentColor)
@@ -111,7 +116,7 @@ private struct BottomBar: View {
         }
         .padding(.horizontal, 30)
         .padding(.vertical, 15) // 为底部栏增加上下间距
-        .background(Color(.systemBackground)) // 底部栏背景色
+//        .background(Color(.systemBackground)) // 底部栏背景色
         .clipShape(RoundedRectangle(cornerRadius: 20)) // 整个底部栏的圆角
     }
 }
