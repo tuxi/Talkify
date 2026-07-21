@@ -10,6 +10,7 @@ import UIKit
 import AgentKit
 import Observation
 import SwiftUI
+import CoreKit
 
 /// Root container that implements the ChatGPT-style drawer layout.
 ///
@@ -83,7 +84,7 @@ final class ChatRootViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
 
-//        view.backgroundColor = .black
+        view.backgroundColor = .clear
 
         // Drawer (behind, stationary)
         addChild(drawerVC)
@@ -123,6 +124,8 @@ final class ChatRootViewController: UIViewController {
 
         // Auto-close drawer when a conversation is selected via the store.
 //        beginObservingSelection()
+        
+        observeAuthState()
     }
 
     override func viewDidLayoutSubviews() {
@@ -265,7 +268,9 @@ final class ChatRootViewController: UIViewController {
     }
     
     private func handleSettingsTap() {
-        let settingsView = SettingsView()
+        let settingsView = SettingsView { [weak self] in
+            self?.dismiss(animated: true)
+        }
             .environment(container.authManager)
             .environment(container.agentManager)
             .environment(container.userManager)
@@ -274,6 +279,21 @@ final class ChatRootViewController: UIViewController {
     }
 
     // MARK: - Observation
+    
+    private func observeAuthState() {
+        withObservationTracking {
+            _ = container.authManager.isLoggedIn // 建立追踪
+        } onChange: { [weak self] in
+            DispatchQueue.main.async {
+                guard let self else { return }
+                if self.presentedViewController != nil {
+                    self.dismiss(animated: true)
+                }
+                self.observeAuthState() // 必须重新注册观察，这是一次性的
+            }
+        }
+
+    }
 
     /// Watches `store.selectedConversation` changes and auto-closes the drawer
     /// when the user picks a conversation.

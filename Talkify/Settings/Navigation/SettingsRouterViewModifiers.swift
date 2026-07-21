@@ -14,7 +14,7 @@ extension View {
             router: SettingsRouter,
     ) -> some View {
         navigationDestination(for: SettingsNavigationDestination.self) { destination in
-            
+            SettingsDetailView(section: destination.section)
         }
     }
     

@@ -16,12 +16,25 @@ import AgentKit
 private struct ChatDetailWrapper: View {
     let store: WorkspaceStore
     let dependencies: AgentDependencies
+    let onMenuTapped: () -> Void
     @State private var router = AgentRouter()
 
     var body: some View {
         NavigationStack(path: $router.path) {
             ConversationDetailView(conversation: store.selectedConversation)
                 .withAgentNavigationDestinations(router: router, dependencies: dependencies)
+                .toolbar {
+                    ToolbarItem(placement: .topBarLeading) {
+                        Button {
+                            onMenuTapped()
+                        } label: {
+                            Image(systemName: "line.3.horizontal")
+                                .font(.system(size: 16))
+                                .clipShape(Circle())
+                        }
+
+                    }
+                }
         }
         .withAgentSheetDestinations(sheetDestinations: $router.presentedSheet, dependencies: dependencies)
         .withAgentCoverDestinations(coverDestinations: $router.presentedCover, dependencies: dependencies)
@@ -43,7 +56,6 @@ final class ChatViewController: UIViewController {
     private let store: WorkspaceStore
     private let dependencies: AgentDependencies
     private var hostingController: UIHostingController<ChatDetailWrapper>?
-    private let menuButton = UIButton(type: .system)
     
     /// Semi-transparent overlay that dims the chat area when the drawer is open.
     /// Tap gesture is on the mask itself — when `alpha == 0` the gesture is
@@ -75,30 +87,16 @@ final class ChatViewController: UIViewController {
         super.viewDidLoad()
 
         view.backgroundColor = UIColor(red: 0.10, green: 0.10, blue: 0.10, alpha: 1)
-
-        menuButton.setImage(UIImage(systemName: "line.3.horizontal"), for: .normal)
-//        menuButton.tintColor = .white
-        menuButton.addTarget(self, action: #selector(menuTapped), for: .touchUpInside)
-        view.addSubview(menuButton)
         
         embedDetailView()
 
         // Mask sits above SwiftUI content but below the menu button.
         view.addSubview(maskView)
-        view.bringSubviewToFront(menuButton)
-
     }
 
     override func viewDidLayoutSubviews() {
         super.viewDidLayoutSubviews()
 
-        let safeArea = view.safeAreaInsets
-        menuButton.frame = CGRect(
-            x: 24,
-            y: safeArea.top,
-            width: 48,
-            height: 48
-        )
         hostingController?.view.frame = view.bounds
         maskView.frame = view.bounds
     }
@@ -112,7 +110,9 @@ final class ChatViewController: UIViewController {
     // MARK: - Embed
 
     private func embedDetailView() {
-        let detailView = ChatDetailWrapper(store: store, dependencies: dependencies)
+        let detailView = ChatDetailWrapper(store: store, dependencies: dependencies) {
+            self.onMenuTap?()
+        }
         let host = UIHostingController(rootView: detailView)
         host.view.backgroundColor = .clear
         addChild(host)

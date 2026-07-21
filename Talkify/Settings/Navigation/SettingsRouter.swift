@@ -6,11 +6,10 @@
 //
 
 import Foundation
-import CoreKit
 import AgentKit
 
-public typealias SettingsRouter = RouterPath<
-    AgentNavigationDestination,
-    AgentSheetDestination,
-    AgentCoverDestination
+typealias SettingsRouter = RouterPath<
+    SettingsNavigationDestination,
+    SettingsSheetDestination,
+    SettingsCoverDestination
 >

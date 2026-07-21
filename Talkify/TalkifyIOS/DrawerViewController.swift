@@ -29,8 +29,6 @@ class DrawerViewController: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-
-//        view.backgroundColor = UIColor(red: 0.06, green: 0.06, blue: 0.06, alpha: 1)
         
         let listView = ConversationListView(
             viewModel: store.listViewModel,
@@ -44,7 +42,6 @@ class DrawerViewController: UIViewController {
         )
         .environment(store)
         let rootController = UIHostingController(rootView: AnyView(listView))
-//        rootController.view.backgroundColor = .clear
 
         addChild(rootController)
         rootController.didMove(toParent: self)
@@ -93,10 +90,10 @@ private struct BottomBar: View {
                     Image(systemName: "square.and.pencil")
                     Text("聊天")
                 }
-                .foregroundColor(.white) // 避免文字与黑色背景冲突
+                .foregroundColor(.primary) // 避免文字与黑色背景冲突
                 .padding(.horizontal, 16) // 增加聊天按钮内边距
                 .padding(.vertical, 8)
-                .background(Color.primary)
+                .background(Color.accentColor)
                 .clipShape(RoundedRectangle(cornerRadius: 15))
             }
             

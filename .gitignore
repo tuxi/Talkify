@@ -96,3 +96,5 @@ iOSInjectionProject/
 
 .mcp.json
 .codeagent
+.claude
+.codeagent/settings.local.json

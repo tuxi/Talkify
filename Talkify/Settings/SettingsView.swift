@@ -7,12 +7,17 @@ import SwiftUI
 import AgentKit
 import CoreKit
 
-/// Talkify 的桌面设置中心：保持与主工作区一致的双栏信息密度，
-/// 同时将常用偏好收拢为可扫描的卡片。
+/// Talkify 的设置中心：跨平台自适应布局。
+///
+/// - **iPhone (compact)**：NavigationStack — 侧栏为根视图，点击行 push 详情。
+/// - **iPad / macOS (regular)**：NavigationSplitView — 侧栏 + 详情并排。
+///
+/// 两种布局均通过 SettingsRouter 驱动导航。
 public struct SettingsView: View {
     @Environment(AgentManager.self) private var agentManager
     @Environment(UserManager.self) private var userManager
     @Environment(AuthManager.self) private var authManager
+    @Environment(\.horizontalSizeClass) private var horizontalSizeClass
 
     private let onClose: () -> Void
     @State private var selection: SettingsSection = .general
@@ -31,51 +36,114 @@ public struct SettingsView: View {
     }
 
     public var body: some View {
-        NavigationSplitView {
-            settingsSidebar
-                .navigationSplitViewColumnWidth(min: 250, ideal: 300, max: 350)
-        } detail: {
-            detailContent
+        Group {
+            if horizontalSizeClass == .compact {
+                compactLayout
+            } else {
+                regularLayout
+            }
         }
-        .navigationSplitViewStyle(.balanced)
         .task {
             if authManager.isLoggedIn {
                 agentManager.fetchUsage()
             }
         }
+        .onChange(of: authManager.isLoggedIn) { _, newValue in
+            if !newValue {
+                onClose()
+            }
+        }
     }
 
-    private var settingsSidebar: some View {
-        VStack(spacing: 0) {
-            Button(action: onClose) {
-                Label("返回应用", systemImage: "arrow.left")
-                    .font(.system(size: 15, weight: .medium))
-                    .foregroundStyle(.secondary)
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .padding(.horizontal, 16)
-                    .padding(.vertical, 14)
-                    .contentShape(Rectangle())
-            }
-            .buttonStyle(.plain)
+    // MARK: - Compact (iPhone) — NavigationStack
 
-            HStack(spacing: 9) {
-                Image(systemName: "magnifyingglass")
-                    .foregroundStyle(.secondary)
-                TextField("搜索设置…", text: $searchText)
-                    .textFieldStyle(.plain)
-                    .font(.system(size: 15))
+    private var compactLayout: some View {
+        NavigationStack(path: $router.path) {
+            settingsSidebar(navigateWithRouter: true)
+                .withSettingsNavigationDestinations(router: router)
+                .toolbar {
+                    #if os(iOS)
+                    ToolbarItem(placement: .topBarTrailing) {
+                        Button {
+                            onClose()
+                        } label: {
+                            Image(systemName: "xmark")
+                                .font(.system(size: 16))
+                                .clipShape(Circle())
+                        }
+
+                    }
+                    #endif
+                }
+        }
+        .withSettingsSheetDestinations(sheetDestinations: $router.presentedSheet)
+        .withSettingsCoverDestinations(coverDestinations: $router.presentedCover)
+    }
+
+    // MARK: - Regular (iPad / macOS) — NavigationSplitView
+
+    private var regularLayout: some View {
+        NavigationSplitView {
+            settingsSidebar(navigateWithRouter: false)
+                .navigationSplitViewColumnWidth(min: 250, ideal: 300, max: 350)
+        } detail: {
+            NavigationStack(path: $router.path) {
+                SettingsDetailView(section: selection)
+                    .withSettingsNavigationDestinations(router: router)
             }
-            .padding(.horizontal, 12)
-            .padding(.vertical, 9)
-            .background(Color.primary.opacity(0.06), in: RoundedRectangle(cornerRadius: 12, style: .continuous))
-            .overlay {
-                RoundedRectangle(cornerRadius: 12, style: .continuous)
-                    .stroke(Color.primary.opacity(0.10), lineWidth: 1)
+            .withSettingsSheetDestinations(sheetDestinations: $router.presentedSheet)
+            .withSettingsCoverDestinations(coverDestinations: $router.presentedCover)
+        }
+        .navigationSplitViewStyle(.balanced)
+    }
+
+    // MARK: - Sidebar
+
+    private func settingsSidebar(navigateWithRouter: Bool) -> some View {
+        VStack(spacing: 0) {
+            if horizontalSizeClass == .regular {
+                Button(action: onClose) {
+                    Label("返回应用", systemImage: "arrow.left")
+                        .font(.system(size: 15, weight: .medium))
+                        .foregroundStyle(.secondary)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .padding(.horizontal, 16)
+                        .padding(.vertical, 14)
+                        .contentShape(Rectangle())
+                }
+                .buttonStyle(.plain)
+                HStack(spacing: 9) {
+                    Image(systemName: "magnifyingglass")
+                        .foregroundStyle(.secondary)
+                    TextField("搜索设置…", text: $searchText)
+                        .textFieldStyle(.plain)
+                        .font(.system(size: 15))
+                }
+                .padding(.horizontal, 12)
+                .padding(.vertical, 9)
+                .background(Color.primary.opacity(0.06), in: RoundedRectangle(cornerRadius: 12, style: .continuous))
+                .overlay {
+                    RoundedRectangle(cornerRadius: 12, style: .continuous)
+                        .stroke(Color.primary.opacity(0.10), lineWidth: 1)
+                }
+                .padding(.horizontal, 14)
+                .padding(.bottom, 16)
             }
-            .padding(.horizontal, 14)
-            .padding(.bottom, 16)
+            
 
             ScrollView(showsIndicators: false) {
+                VStack {
+                    Text(accountInitial)
+                        .font(.system(size: 34, weight: .medium))
+                        .foregroundStyle(.white)
+                        .frame(width: 80, height: 80)
+                        .background(Color.accentColor, in: Circle())
+                        .padding(.top, 30)
+
+                    Text(accountName)
+                        .font(.system(size: 23, weight: .regular))
+                        .padding(.top, 10)
+                }
                 LazyVStack(alignment: .leading, spacing: 2) {
                     ForEach(SettingsSection.Group.allCases, id: \.self) { group in
                         let sections = filteredSections(in: group)
@@ -88,13 +156,41 @@ public struct SettingsView: View {
                                 .padding(.bottom, 5)
 
                             ForEach(sections) { section in
-                                Button { selection = section } label: {
-                                    SettingsSidebarRow(section: section, isSelected: selection == section)
+                                Button {
+                                    if navigateWithRouter {
+                                        router.navigate(to: .detail(section))
+                                    } else {
+                                        selection = section
+                                    }
+                                } label: {
+                                    let isSelected: Bool = {
+                                        if navigateWithRouter {
+                                            if case .detail(let s) = router.path.last, s == section {
+                                                return true
+                                            }
+                                            return false
+                                        }
+                                        return selection == section
+                                    }()
+                                    SettingsSidebarRow(section: section, isSelected: isSelected)
                                         .contentShape(Rectangle())
                                 }
                                 .buttonStyle(.plain)
                             }
                         }
+                    }
+                    if horizontalSizeClass == .compact {
+                        Button(role: .destructive) {
+                            authManager.logout()
+                        } label: {
+                            Label("退出登录", systemImage: "rectangle.portrait.and.arrow.right")
+                                .font(.system(size: 15, weight: .medium))
+                                .frame(maxWidth: .infinity, alignment: .leading)
+                                .padding(.horizontal, 16)
+                                .padding(.vertical, 15)
+                        }
+                        .buttonStyle(.plain)
+                        .foregroundStyle(.red)
                     }
                 }
                 .padding(.bottom, 20)
@@ -103,11 +199,44 @@ public struct SettingsView: View {
         .background(.ultraThinMaterial)
     }
 
-    @ViewBuilder
-    private var detailContent: some View {
+    // MARK: - Helpers
+
+    private func filteredSections(in group: SettingsSection.Group) -> [SettingsSection] {
+        let query = searchText.trimmingCharacters(in: .whitespacesAndNewlines)
+        return SettingsSection.allCases.filter {
+            $0.group == group && (query.isEmpty || $0.title.localizedCaseInsensitiveContains(query))
+        }
+    }
+    
+    private var accountName: String {
+        guard authManager.isLoggedIn else { return "未登录" }
+        return authManager.displayNickname ?? userManager.profile?.nickname ?? "Unknow"
+    }
+
+    private var accountInitial: String { String(accountName.prefix(1)).uppercased() }
+
+}
+
+// MARK: - SettingsDetailView
+
+/// 每个设置分区的内容视图，独立提取以便在 NavigationStack 和 NavigationSplitView 中复用。
+public struct SettingsDetailView: View {
+    @Environment(AgentManager.self) private var agentManager
+    @Environment(UserManager.self) private var userManager
+    @Environment(AuthManager.self) private var authManager
+
+    let section: SettingsSection
+
+    @AppStorage("settings.defaultPermission") private var defaultPermission = true
+    @AppStorage("settings.autoApproval") private var autoApproval = true
+    @AppStorage("settings.fullDiskAccess") private var fullDiskAccess = false
+    @AppStorage("settings.showInMenuBar") private var showInMenuBar = true
+    @AppStorage("settings.showBottomPanel") private var showBottomPanel = true
+
+    public var body: some View {
         ScrollView(showsIndicators: false) {
             VStack(alignment: .leading, spacing: 0) {
-                switch selection {
+                switch section {
                 case .general:
                     generalSettings
                 case .profile:
@@ -127,7 +256,7 @@ public struct SettingsView: View {
         }
         .background(Color.primary.opacity(0.018))
         .toolbar {
-            if selection == .profile {
+            if section == .profile {
                 ToolbarItemGroup(placement: .primaryAction) {
                     Button("分享", systemImage: "square.and.arrow.up") {}
                     Button("私有", systemImage: "lock") {}
@@ -136,6 +265,8 @@ public struct SettingsView: View {
             }
         }
     }
+
+    // MARK: - General
 
     private var generalSettings: some View {
         VStack(alignment: .leading, spacing: 0) {
@@ -186,6 +317,8 @@ public struct SettingsView: View {
         }
     }
 
+    // MARK: - Profile
+
     private var profileSettings: some View {
         VStack(spacing: 0) {
             Text("个人资料")
@@ -235,7 +368,7 @@ public struct SettingsView: View {
             }
         }
     }
-    
+
     @ViewBuilder
     private var profileActivity: some View {
         if let usage = agentManager.usage {
@@ -263,6 +396,8 @@ public struct SettingsView: View {
             .frame(maxWidth: .infinity, alignment: .leading)
         }
     }
+
+    // MARK: - Account
 
     private var accountSettings: some View {
         VStack(alignment: .leading, spacing: 0) {
@@ -292,6 +427,8 @@ public struct SettingsView: View {
             }
         }
     }
+
+    // MARK: - Usage & Billing
 
     private var usageBillingSettings: some View {
         VStack(alignment: .leading, spacing: 0) {
@@ -343,15 +480,19 @@ public struct SettingsView: View {
         }
     }
 
+    // MARK: - Unavailable
+
     private var unavailableSettings: some View {
         VStack(alignment: .leading, spacing: 12) {
-            settingsTitle(selection.title)
-            Text("此设置项正在准备中。你可以先在“常规”和“账户”中调整当前可用的偏好。")
+            settingsTitle(section.title)
+            Text("此设置项正在准备中。你可以先在\"常规\"和\"账户\"中调整当前可用的偏好。")
                 .font(.system(size: 16))
                 .foregroundStyle(.secondary)
                 .padding(.top, 8)
         }
     }
+
+    // MARK: - Shared UI helpers
 
     private func settingsTitle(_ title: String) -> some View {
         Text(title)
@@ -375,16 +516,10 @@ public struct SettingsView: View {
             .padding(.bottom, 88)
     }
 
-    private func filteredSections(in group: SettingsSection.Group) -> [SettingsSection] {
-        let query = searchText.trimmingCharacters(in: .whitespacesAndNewlines)
-        return SettingsSection.allCases.filter {
-            $0.group == group && (query.isEmpty || $0.title.localizedCaseInsensitiveContains(query))
-        }
-    }
+    // MARK: - Computed properties
 
     private var accountName: String {
         guard authManager.isLoggedIn else { return "未登录" }
-        
         return authManager.displayNickname ?? userManager.profile?.nickname ?? "Unknow"
     }
 
@@ -413,33 +548,16 @@ public struct SettingsView: View {
     }
 }
 
-private enum SettingsSection: String, CaseIterable, Identifiable {
-    enum Group: CaseIterable { case personal, integrations, development
-        var title: String { switch self { case .personal: "个人"; case .integrations: "集成"; case .development: "编码" } }
-    }
+// MARK: - SettingsNavigationDestination + Section
 
-    case general, profile, appearance, voice, configuration, personalization, pets, shortcuts, usage, account
-    case appSnapshots, plugins, browser, computerControl, hooks, connections, git, environment
-
-    var id: String { rawValue }
-    var group: Group {
-        switch self {
-        case .general, .profile, .appearance, .voice, .configuration, .personalization, .pets, .shortcuts, .usage, .account: .personal
-        case .appSnapshots, .plugins, .browser, .computerControl: .integrations
-        case .hooks, .connections, .git, .environment: .development
-        }
-    }
-    var title: String {
-        switch self {
-        case .general: "常规"; case .profile: "个人资料"; case .appearance: "外观"; case .voice: "语音"; case .configuration: "配置"; case .personalization: "个性化"; case .pets: "宠物"; case .shortcuts: "键盘快捷键"; case .usage: "使用情况和计费"; case .account: "账户"; case .appSnapshots: "应用快照"; case .plugins: "插件"; case .browser: "浏览器"; case .computerControl: "电脑操控"; case .hooks: "钩子"; case .connections: "连接"; case .git: "Git"; case .environment: "环境"
-        }
-    }
-    var icon: String {
-        switch self {
-        case .general: "gearshape"; case .profile: "person.crop.circle"; case .appearance: "sun.max"; case .voice: "mic"; case .configuration: "shield"; case .personalization: "dial.medium"; case .pets: "pawprint"; case .shortcuts: "command"; case .usage: "chart.bar"; case .account: "person.badge.key"; case .appSnapshots: "viewfinder"; case .plugins: "puzzlepiece"; case .browser: "rectangle"; case .computerControl: "cursorarrow.and.square.on.square.dashed"; case .hooks: "anchor"; case .connections: "globe"; case .git: "point.3.connected.trianglepath.dotted"; case .environment: "laptopcomputer"
-        }
+extension SettingsNavigationDestination {
+    var section: SettingsSection {
+        if case .detail(let section) = self { return section }
+        return .general
     }
 }
+
+// MARK: - Sidebar Row
 
 private struct SettingsSidebarRow: View {
     let section: SettingsSection
@@ -462,6 +580,8 @@ private struct SettingsSidebarRow: View {
         .padding(.horizontal, 8)
     }
 }
+
+// MARK: - Settings Row Components
 
 private struct SettingsToggleRow: View {
     let title: String
@@ -602,3 +722,4 @@ private extension View {
         .overlay { Capsule().stroke(Color.primary.opacity(0.10), lineWidth: 1) }
     }
 }
+

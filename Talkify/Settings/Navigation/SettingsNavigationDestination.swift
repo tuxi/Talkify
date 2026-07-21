@@ -8,21 +8,12 @@
 import Foundation
 
 enum SettingsNavigationDestination: Identifiable, Hashable {
-    case general
-    case profile
-    case usage
-    case account
+    case detail(SettingsSection)
     
     var id: String {
         switch self {
-        case .general:
-            return "general"
-        case .profile:
-            return "profile"
-        case .usage:
-            return "usage"
-        case .account:
-            return "account"
+        case .detail(let section):
+            return section.rawValue
         }
     }
 }

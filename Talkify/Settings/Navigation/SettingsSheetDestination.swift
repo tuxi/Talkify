@@ -7,7 +7,7 @@
 
 import SwiftUI
 
-enum SettingsSheetDestination: Identifiable, Hashable {
+enum SettingsSheetDestination: Identifiable, Equatable {
     case demo
     
     var id: String {
@@ -16,9 +16,13 @@ enum SettingsSheetDestination: Identifiable, Hashable {
             return "demo"
         }
     }
+
+    static func == (lhs: SettingsSheetDestination, rhs: SettingsSheetDestination) -> Bool {
+        lhs.id == rhs.id
+    }
 }
 
-enum SettingsCoverDestination: Identifiable, Hashable {
+enum SettingsCoverDestination: Identifiable, Equatable {
     case demo
     
     var id: String {
@@ -26,5 +30,9 @@ enum SettingsCoverDestination: Identifiable, Hashable {
         case .demo:
             return "demo"
         }
+    }
+
+    static func == (lhs: SettingsCoverDestination, rhs: SettingsCoverDestination) -> Bool {
+        lhs.id == rhs.id
     }
 }
