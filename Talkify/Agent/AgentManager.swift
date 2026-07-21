@@ -106,6 +106,14 @@ public final class AgentManager {
     }
 }
 
+// MARK: - GatewayService
+
+extension AgentManager: GatewayService {
+    public func refreshModels() async throws -> ModelsResponse {
+        try await fetchModels()
+    }
+}
+
 /// 核销结果的字段由网关演进；客户端只需确认 `data` 是有效对象，随后刷新 usage。
 private struct ResetCardRedeemResponse: Codable, Sendable {}
 
