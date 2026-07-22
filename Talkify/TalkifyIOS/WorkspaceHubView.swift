@@ -47,6 +47,9 @@ struct WorkspaceHubView: View {
     @State private var isNewWorkspacePresented = false
     @State private var newWorkspaceName = "New Project"
     @State private var isImporterPresented = false
+    @State private var isWorkspaceContentImporterPresented = false
+    @State private var isImportingWorkspaceContent = false
+    @State private var workspaceFilesRevision = 0
     @State private var pendingImportURL: URL?
     @State private var importName = ""
     @State private var isImportNamePresented = false
@@ -139,6 +142,12 @@ struct WorkspaceHubView: View {
             allowedContentTypes: [.folder],
             allowsMultipleSelection: false,
             onCompletion: handleImport
+        )
+        .fileImporter(
+            isPresented: $isWorkspaceContentImporterPresented,
+            allowedContentTypes: [.item],
+            allowsMultipleSelection: true,
+            onCompletion: handleWorkspaceContentImport
         )
         .alert("新建工作区", isPresented: $isNewWorkspacePresented) {
             TextField("工作区名称", text: $newWorkspaceName)
@@ -245,6 +254,29 @@ struct WorkspaceHubView: View {
             } catch {
                 acquisitionError = error.localizedDescription
             }
+        }
+    }
+
+    private func handleWorkspaceContentImport(_ result: Result<[URL], Error>) {
+        switch result {
+        case .success(let urls):
+            guard !urls.isEmpty, let fileProvider else { return }
+            isImportingWorkspaceContent = true
+            Task {
+                defer { isImportingWorkspaceContent = false }
+                do {
+                    try await fileProvider.importItems(urls)
+                    workspaceFilesRevision += 1
+                } catch {
+                    acquisitionError = error.localizedDescription
+                }
+            }
+        case .failure(let error):
+            let nsError = error as NSError
+            guard !(nsError.domain == NSCocoaErrorDomain && nsError.code == NSUserCancelledError) else {
+                return
+            }
+            acquisitionError = error.localizedDescription
         }
     }
 
@@ -434,15 +466,20 @@ struct WorkspaceHubView: View {
                     conversations: workspaceContext.conversations(in: store),
                     selected: $selectedConversation,
                     workspaceName: currentWorkspaceName,
-                    workspaceGroupingID: workspaceContext.activeGroupingID
+                    workspaceGroupingID: workspaceContext.activeGroupingID,
+                    onCreateConversation: { onNewChat?() }
                 )
 
             case .files:
                 WorkspaceFilesView(
                     workspace: workspaceContext.activeWorkspace,
                     provider: fileProvider,
+                    refreshRevision: workspaceFilesRevision,
+                    isImporting: isImportingWorkspaceContent,
                     onSelectFile: { onFileSelected?($0) },
-                    onOpenBrowser: { onWorkspaceBrowserRequested?() }
+                    onOpenBrowser: { onWorkspaceBrowserRequested?() },
+                    onStartConversation: { onNewChat?() },
+                    onImportItems: { isWorkspaceContentImporterPresented = true }
                 )
 
             case .search:
@@ -880,6 +917,7 @@ private struct WorkspaceConversationListView: View {
     @Binding var selected: ConversationRef?
     let workspaceName: String
     let workspaceGroupingID: String?
+    let onCreateConversation: () -> Void
 
     @State private var renameTarget: ConversationRef?
     @State private var renameText = ""
@@ -911,10 +949,13 @@ private struct WorkspaceConversationListView: View {
             .padding(.vertical, 8)
 
             if conversations.isEmpty && !store.listViewModel.isLoading {
-                ContentUnavailableView(
-                    "还没有会话",
-                    systemImage: "bubble.left.and.bubble.right",
-                    description: Text("在 \(workspaceName) 中创建一个新对话")
+                WorkspaceSectionEmptyState(
+                    icon: "bubble.left.and.bubble.right",
+                    title: "开始第一次对话",
+                    description: "描述你想在 \(workspaceName) 中构建或修改的内容，CodeAgent 会直接在这个工作区中工作。",
+                    primaryTitle: "开始对话",
+                    primaryIcon: "square.and.pencil",
+                    primaryAction: onCreateConversation
                 )
             } else {
                 List(conversations, id: \.id) { conversation in
@@ -1249,8 +1290,12 @@ private struct ArchivedWorkspaceConversationsView: View {
 private struct WorkspaceFilesView: View {
     let workspace: Workspace?
     let provider: WorkspaceFileContentProvider?
+    let refreshRevision: Int
+    let isImporting: Bool
     let onSelectFile: (String) -> Void
     let onOpenBrowser: () -> Void
+    let onStartConversation: () -> Void
+    let onImportItems: () -> Void
 
     @State private var directoryPath = ""
     @State private var directoryTitles: [String] = []
@@ -1303,6 +1348,30 @@ private struct WorkspaceFilesView: View {
                     }
                 }
 
+                Button(action: onImportItems) {
+                    Image(systemName: "square.and.arrow.down")
+                        .font(.caption.weight(.semibold))
+                        .frame(width: 30, height: 30)
+                        .background(Color.primary.opacity(0.055), in: Circle())
+                }
+                .buttonStyle(.plain)
+                .foregroundStyle(.secondary)
+                .disabled(isImporting)
+                .accessibilityLabel("导入文件")
+
+                Button {
+                    Task { await loadDirectory() }
+                } label: {
+                    Image(systemName: "arrow.clockwise")
+                        .font(.caption.weight(.semibold))
+                        .frame(width: 30, height: 30)
+                        .background(Color.primary.opacity(0.055), in: Circle())
+                }
+                .buttonStyle(.plain)
+                .foregroundStyle(.secondary)
+                .disabled(isLoading || isImporting)
+                .accessibilityLabel("刷新文件")
+
                 Button(action: onOpenBrowser) {
                     Image(systemName: "arrow.up.right.square")
                         .font(.caption.weight(.semibold))
@@ -1319,18 +1388,38 @@ private struct WorkspaceFilesView: View {
                 Divider().opacity(0.35)
             }
 
-            if isLoading {
+            if isLoading || isImporting {
                 Spacer()
-                ProgressView()
+                VStack(spacing: 10) {
+                    ProgressView()
+                    if isImporting {
+                        Text("正在复制到 \(workspace?.name ?? "工作区")…")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                    }
+                }
                 Spacer()
             } else if let errorMessage {
-                ContentUnavailableView(
-                    "无法读取文件",
-                    systemImage: "exclamationmark.triangle",
-                    description: Text(errorMessage)
+                WorkspaceSectionEmptyState(
+                    icon: "exclamationmark.triangle",
+                    title: "无法读取文件",
+                    description: errorMessage,
+                    primaryTitle: "重试",
+                    primaryIcon: "arrow.clockwise",
+                    primaryAction: { Task { await loadDirectory() } }
                 )
             } else if nodes.isEmpty {
-                ContentUnavailableView("没有文件", systemImage: "folder")
+                WorkspaceSectionEmptyState(
+                    icon: "folder",
+                    title: "工作区还是空的",
+                    description: "让 CodeAgent 根据你的想法创建文件，或者从“文件”App 复制已有内容。",
+                    primaryTitle: "让 CodeAgent 创建",
+                    primaryIcon: "sparkles",
+                    primaryAction: onStartConversation,
+                    secondaryTitle: "导入文件",
+                    secondaryIcon: "square.and.arrow.down",
+                    secondaryAction: onImportItems
+                )
             } else {
                 List(nodes) { node in
                     Button {
@@ -1364,7 +1453,7 @@ private struct WorkspaceFilesView: View {
                 .refreshable { await loadDirectory() }
             }
         }
-        .task(id: workspace?.id) {
+        .task(id: "\(workspace?.id ?? "none"):\(refreshRevision)") {
             guard let workspace else { return }
             directoryPath = workspace.url.path
             directoryPaths = [workspace.url.path]
@@ -1407,6 +1496,67 @@ private struct WorkspaceFilesView: View {
             errorMessage = error.localizedDescription
         }
         isLoading = false
+    }
+}
+
+private struct WorkspaceSectionEmptyState: View {
+    let icon: String
+    let title: String
+    let description: String
+    let primaryTitle: String
+    let primaryIcon: String
+    let primaryAction: () -> Void
+    var secondaryTitle: String?
+    var secondaryIcon: String?
+    var secondaryAction: (() -> Void)?
+
+    var body: some View {
+        VStack(spacing: 14) {
+            Spacer(minLength: 20)
+
+            Image(systemName: icon)
+                .font(.system(size: 25, weight: .semibold))
+                .foregroundStyle(Color.accentColor)
+                .frame(width: 52, height: 52)
+                .background(Color.accentColor.opacity(0.11), in: RoundedRectangle(cornerRadius: 16))
+
+            VStack(spacing: 6) {
+                Text(title)
+                    .font(.system(size: 17, weight: .semibold))
+                Text(description)
+                    .font(.system(size: 13))
+                    .foregroundStyle(.secondary)
+                    .multilineTextAlignment(.center)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+
+            VStack(spacing: 9) {
+                Button(action: primaryAction) {
+                    Label(primaryTitle, systemImage: primaryIcon)
+                        .font(.system(size: 14, weight: .semibold))
+                        .foregroundStyle(.white)
+                        .frame(maxWidth: .infinity, minHeight: 42)
+                        .background(Color.accentColor, in: RoundedRectangle(cornerRadius: 13))
+                }
+                .buttonStyle(.plain)
+
+                if let secondaryTitle, let secondaryIcon, let secondaryAction {
+                    Button(action: secondaryAction) {
+                        Label(secondaryTitle, systemImage: secondaryIcon)
+                            .font(.system(size: 14, weight: .semibold))
+                            .foregroundStyle(.primary)
+                            .frame(maxWidth: .infinity, minHeight: 42)
+                            .background(Color.primary.opacity(0.06), in: RoundedRectangle(cornerRadius: 13))
+                    }
+                    .buttonStyle(.plain)
+                }
+            }
+            .frame(maxWidth: 280)
+
+            Spacer(minLength: 20)
+        }
+        .padding(.horizontal, 22)
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
 }
 

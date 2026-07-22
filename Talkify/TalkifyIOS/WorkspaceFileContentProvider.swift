@@ -94,6 +94,63 @@ final class WorkspaceFileContentProvider {
         return root + separator + filePath
     }
 
+    // MARK: - Workspace Content Import
+
+    /// 将文件选择器返回的文件或文件夹 copy-in 到当前工作区根目录。
+    /// 名称冲突时保留两份并追加序号，绝不覆盖工作区已有内容。
+    func importItems(_ sourceURLs: [URL]) async throws {
+        guard let workspaceRoot else {
+            throw WorkspaceContentImportError.noActiveWorkspace
+        }
+        guard !sourceURLs.isEmpty else { return }
+
+        let destinationRoot = URL(fileURLWithPath: workspaceRoot, isDirectory: true)
+        try await Task.detached(priority: .userInitiated) {
+            let fileManager = FileManager.default
+            for sourceURL in sourceURLs {
+                try Task.checkCancellation()
+                let hasAccess = sourceURL.startAccessingSecurityScopedResource()
+                defer { if hasAccess { sourceURL.stopAccessingSecurityScopedResource() } }
+
+                let destination = Self.uniqueImportDestination(
+                    for: sourceURL,
+                    in: destinationRoot,
+                    fileManager: fileManager
+                )
+                try fileManager.copyItem(at: sourceURL, to: destination)
+            }
+        }.value
+    }
+
+    nonisolated private static func uniqueImportDestination(
+        for sourceURL: URL,
+        in root: URL,
+        fileManager: FileManager
+    ) -> URL {
+        let originalName = sourceURL.lastPathComponent.isEmpty ? "Imported" : sourceURL.lastPathComponent
+        let initial = root.appendingPathComponent(originalName)
+        guard fileManager.fileExists(atPath: initial.path) else { return initial }
+
+        let values = try? sourceURL.resourceValues(forKeys: [.isDirectoryKey])
+        let isDirectory = values?.isDirectory == true
+        let fileExtension = isDirectory ? "" : sourceURL.pathExtension
+        let baseName = isDirectory || fileExtension.isEmpty
+            ? originalName
+            : sourceURL.deletingPathExtension().lastPathComponent
+
+        var suffix = 2
+        while true {
+            let candidateName = fileExtension.isEmpty
+                ? "\(baseName) \(suffix)"
+                : "\(baseName) \(suffix).\(fileExtension)"
+            let candidate = root.appendingPathComponent(candidateName)
+            if !fileManager.fileExists(atPath: candidate.path) {
+                return candidate
+            }
+            suffix += 1
+        }
+    }
+
     // MARK: - FileType Detection
 
     private enum DetectedType {
@@ -117,6 +174,17 @@ final class WorkspaceFileContentProvider {
             return .text
         default:
             return .binary
+        }
+    }
+}
+
+private enum WorkspaceContentImportError: LocalizedError {
+    case noActiveWorkspace
+
+    var errorDescription: String? {
+        switch self {
+        case .noActiveWorkspace:
+            return "请先选择一个工作区。"
         }
     }
 }
