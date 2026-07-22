@@ -8,6 +8,7 @@
 #if os(iOS)
 import SwiftUI
 import UIKit
+import UniformTypeIdentifiers
 import AgentKit
 import FileViewerKit
 
@@ -43,7 +44,22 @@ struct WorkspaceHubView: View {
 
     @State private var selectedTab: HubTab = .conversations
     @State private var isWorkspaceSwitcherPresented = false
+    @State private var isNewWorkspacePresented = false
+    @State private var newWorkspaceName = "New Project"
+    @State private var isImporterPresented = false
+    @State private var pendingImportURL: URL?
+    @State private var importName = ""
+    @State private var isImportNamePresented = false
+    @State private var isGitClonePresented = false
+    @State private var pendingAcquisitionAction: WorkspaceAcquisitionAction?
+    @State private var acquisitionError: String?
     @Namespace private var tabSelectionNamespace
+
+    private enum WorkspaceAcquisitionAction {
+        case create
+        case importFolder
+        case cloneGit
+    }
 
     enum HubTab: String, CaseIterable {
         case conversations
@@ -70,15 +86,29 @@ struct WorkspaceHubView: View {
     // MARK: - Body
 
     var body: some View {
-        VStack(spacing: 0) {
-            workspaceHeader
-            tabBar
-            tabContent
-                .safeAreaPadding(.bottom, 68)
+        Group {
+            if workspaceContext.activeWorkspace == nil {
+                WorkspaceProjectLauncher(
+                    canImport: store.projects.isAvailable,
+                    canClone: store.supportsPublicGitClone,
+                    isPreparing: store.isPreparingWorkspace,
+                    onCreate: { requestAcquisition(.create) },
+                    onImport: { requestAcquisition(.importFolder) },
+                    onClone: { requestAcquisition(.cloneGit) },
+                    onSettings: { onSettings?() }
+                )
+            } else {
+                VStack(spacing: 0) {
+                    workspaceHeader
+                    tabBar
+                    tabContent
+                        .safeAreaPadding(.bottom, 68)
+                }
+                .overlay(alignment: .bottom, content: {
+                    bottomBar
+                })
+            }
         }
-        .overlay(alignment: .bottom, content: {
-            bottomBar
-        })
         .sheet(isPresented: $isWorkspaceSwitcherPresented) {
             WorkspaceSwitcherView(
                 workspaces: workspaceContext.availableWorkspaces(in: store),
@@ -86,14 +116,149 @@ struct WorkspaceHubView: View {
                 onSelect: { workspace in
                     workspaceContext.activate(workspace, in: store)
                     isWorkspaceSwitcherPresented = false
-                }
+                },
+                onCreate: { requestAcquisition(.create) },
+                onImport: { requestAcquisition(.importFolder) },
+                onClone: store.supportsPublicGitClone
+                    ? { requestAcquisition(.cloneGit) }
+                    : nil
             )
             .presentationDetents([.medium, .large])
             .presentationDragIndicator(.visible)
         }
+        .sheet(isPresented: $isGitClonePresented) {
+            WorkspaceGitCloneSheet(
+                projectsRoot: store.runtimeProjectsRoot,
+                onCancel: { isGitClonePresented = false },
+                onClone: cloneWorkspace
+            )
+            .interactiveDismissDisabled(store.isPreparingWorkspace)
+        }
+        .fileImporter(
+            isPresented: $isImporterPresented,
+            allowedContentTypes: [.folder],
+            allowsMultipleSelection: false,
+            onCompletion: handleImport
+        )
+        .alert("新建工作区", isPresented: $isNewWorkspacePresented) {
+            TextField("工作区名称", text: $newWorkspaceName)
+            Button("取消", role: .cancel) { }
+            Button("创建") { createWorkspace() }
+                .disabled(newWorkspaceName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
+        } message: {
+            Text("将在 App 的 Documents 中创建一个空白工作区。")
+        }
+        .alert("导入工作区", isPresented: $isImportNamePresented) {
+            TextField("工作区名称", text: $importName)
+            Button("取消", role: .cancel) { pendingImportURL = nil }
+            Button("导入") { importWorkspace() }
+                .disabled(importName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
+        } message: {
+            Text("文件夹会复制到 App 中，原始文件不会被修改。")
+        }
+        .alert("无法准备工作区", isPresented: Binding(
+            get: { acquisitionError != nil },
+            set: { if !$0 { acquisitionError = nil } }
+        )) {
+            Button("好", role: .cancel) { acquisitionError = nil }
+        } message: {
+            Text(acquisitionError ?? "未知错误")
+        }
+        .onAppear {
+            store.projects.reload()
+            if workspaceContext.activeWorkspace == nil {
+                store.beginDraft()
+                workspaceContext.synchronize(with: nil, in: store)
+            }
+        }
+        .onChange(of: isWorkspaceSwitcherPresented) { _, isPresented in
+            guard !isPresented, let action = pendingAcquisitionAction else { return }
+            pendingAcquisitionAction = nil
+            Task { @MainActor in
+                await Task.yield()
+                presentAcquisition(action)
+            }
+        }
         .onChange(of: selectedConversation?.id) { _, _ in
             workspaceContext.synchronize(with: selectedConversation, in: store)
         }
+    }
+
+    // MARK: - Workspace Acquisition
+
+    private func requestAcquisition(_ action: WorkspaceAcquisitionAction) {
+        if isWorkspaceSwitcherPresented {
+            pendingAcquisitionAction = action
+            isWorkspaceSwitcherPresented = false
+        } else {
+            presentAcquisition(action)
+        }
+    }
+
+    private func presentAcquisition(_ action: WorkspaceAcquisitionAction) {
+        switch action {
+        case .create:
+            newWorkspaceName = "New Project"
+            isNewWorkspacePresented = true
+        case .importFolder:
+            isImporterPresented = true
+        case .cloneGit:
+            isGitClonePresented = true
+        }
+    }
+
+    private func createWorkspace() {
+        do {
+            store.beginDraft()
+            try store.createAndSelectProject(named: newWorkspaceName)
+            finishWorkspaceAcquisition(opensComposer: true)
+        } catch {
+            acquisitionError = error.localizedDescription
+        }
+    }
+
+    private func handleImport(_ result: Result<[URL], Error>) {
+        switch result {
+        case .success(let urls):
+            guard let url = urls.first else { return }
+            pendingImportURL = url
+            importName = ProjectsStore.suggestedName(forImporting: url)
+            isImportNamePresented = true
+        case .failure(let error):
+            let nsError = error as NSError
+            guard !(nsError.domain == NSCocoaErrorDomain && nsError.code == NSUserCancelledError) else {
+                return
+            }
+            acquisitionError = error.localizedDescription
+        }
+    }
+
+    private func importWorkspace() {
+        guard let sourceURL = pendingImportURL else { return }
+        pendingImportURL = nil
+        let name = importName
+        Task {
+            do {
+                store.beginDraft()
+                try await store.importAndSelectProject(from: sourceURL, named: name)
+                finishWorkspaceAcquisition(opensComposer: true)
+            } catch {
+                acquisitionError = error.localizedDescription
+            }
+        }
+    }
+
+    private func cloneWorkspace(_ request: PublicGitCloneRequest) async throws {
+        store.beginDraft()
+        try await store.cloneAndSelectProject(request: request)
+        isGitClonePresented = false
+        finishWorkspaceAcquisition(opensComposer: true)
+    }
+
+    private func finishWorkspaceAcquisition(opensComposer: Bool) {
+        workspaceContext.synchronize(with: nil, in: store)
+        guard opensComposer else { return }
+        onNewChat?()
     }
 
     // MARK: - Workspace Header
@@ -367,6 +532,9 @@ private struct WorkspaceSwitcherView: View {
     let workspaces: [Workspace]
     let selectedWorkspaceID: String?
     let onSelect: (Workspace) -> Void
+    let onCreate: () -> Void
+    let onImport: () -> Void
+    let onClone: (() -> Void)?
 
     @State private var query = ""
 
@@ -382,8 +550,24 @@ private struct WorkspaceSwitcherView: View {
     var body: some View {
         NavigationStack {
             List {
+                Section("添加工作区") {
+                    Button(action: onCreate) {
+                        Label("新建空白工作区", systemImage: "folder.badge.plus")
+                    }
+                    Button(action: onImport) {
+                        Label("从文件 App 导入", systemImage: "square.and.arrow.down")
+                    }
+                    if let onClone {
+                        Button(action: onClone) {
+                            Label("克隆 Git 仓库", systemImage: "arrow.down.circle")
+                        }
+                    }
+                }
+
                 if filteredWorkspaces.isEmpty {
-                    ContentUnavailableView.search(text: query)
+                    if !query.isEmpty {
+                        ContentUnavailableView.search(text: query)
+                    }
                 } else {
                     Section("项目") {
                         ForEach(filteredWorkspaces) { workspace in
@@ -434,6 +618,257 @@ private struct WorkspaceSwitcherView: View {
                 ToolbarItem(placement: .topBarTrailing) {
                     Button("完成") { dismiss() }
                 }
+            }
+        }
+    }
+}
+
+// MARK: - First-run Workspace Launcher
+
+private struct WorkspaceProjectLauncher: View {
+    @Environment(\.colorScheme) private var colorScheme
+
+    let canImport: Bool
+    let canClone: Bool
+    let isPreparing: Bool
+    let onCreate: () -> Void
+    let onImport: () -> Void
+    let onClone: () -> Void
+    let onSettings: () -> Void
+
+    var body: some View {
+        VStack(spacing: 0) {
+            HStack {
+                VStack(alignment: .leading, spacing: 3) {
+                    Text("CodeAgent")
+                        .font(.system(size: 17, weight: .semibold))
+                    Text("创建你的第一个工作区")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                }
+                Spacer()
+                Button(action: onSettings) {
+                    Image(systemName: "gearshape")
+                        .font(.system(size: 16, weight: .medium))
+                        .foregroundStyle(.secondary)
+                        .frame(width: 38, height: 38)
+                        .background(
+                            Color.primary.opacity(colorScheme == .dark ? 0.08 : 0.05),
+                            in: RoundedRectangle(cornerRadius: 11, style: .continuous)
+                        )
+                }
+                .buttonStyle(.plain)
+                .accessibilityLabel("设置")
+            }
+            .padding(.horizontal, 18)
+            .padding(.top, 16)
+
+            ScrollView {
+                VStack(alignment: .leading, spacing: 22) {
+                    VStack(alignment: .leading, spacing: 9) {
+                        Image(systemName: "folder.fill.badge.plus")
+                            .font(.system(size: 29, weight: .semibold))
+                            .foregroundStyle(Color.accentColor)
+                            .frame(width: 58, height: 58)
+                            .background(
+                                Color.accentColor.opacity(colorScheme == .dark ? 0.18 : 0.11),
+                                in: RoundedRectangle(cornerRadius: 18, style: .continuous)
+                            )
+
+                        Text("从一个想法开始")
+                            .font(.system(size: 27, weight: .bold, design: .rounded))
+                        Text("不需要先准备代码或文件。创建一个空白工作区，告诉 CodeAgent 你想构建什么。")
+                            .font(.system(size: 15))
+                            .foregroundStyle(.secondary)
+                            .fixedSize(horizontal: false, vertical: true)
+                    }
+
+                    Button(action: onCreate) {
+                        Label("创建空白工作区", systemImage: "sparkles")
+                            .font(.system(size: 16, weight: .semibold))
+                            .foregroundStyle(.white)
+                            .frame(maxWidth: .infinity, minHeight: 50)
+                            .background(
+                                Color.accentColor,
+                                in: RoundedRectangle(cornerRadius: 15, style: .continuous)
+                            )
+                    }
+                    .buttonStyle(.plain)
+
+                    VStack(alignment: .leading, spacing: 10) {
+                        Text("也可以从已有内容开始")
+                            .font(.caption.weight(.semibold))
+                            .foregroundStyle(.secondary)
+                            .textCase(.uppercase)
+
+                        if canClone {
+                            launcherOption(
+                                title: "克隆 Git 仓库",
+                                subtitle: "输入公开 HTTPS 仓库地址",
+                                icon: "arrow.down.circle",
+                                action: onClone
+                            )
+                        }
+
+                        if canImport {
+                            launcherOption(
+                                title: "导入文件夹",
+                                subtitle: "从“文件”App 复制现有项目",
+                                icon: "square.and.arrow.down",
+                                action: onImport
+                            )
+                        }
+                    }
+
+                    Text("工作区保存在这台 iPhone 上。导入时只会复制内容，不会修改原始文件。")
+                        .font(.caption)
+                        .foregroundStyle(.tertiary)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+                .padding(.horizontal, 18)
+                .padding(.top, 40)
+                .padding(.bottom, 28)
+            }
+
+            if isPreparing {
+                HStack(spacing: 9) {
+                    ProgressView().controlSize(.small)
+                    Text("正在准备工作区…")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                }
+                .padding(.bottom, 14)
+            }
+        }
+    }
+
+    private func launcherOption(
+        title: String,
+        subtitle: String,
+        icon: String,
+        action: @escaping () -> Void
+    ) -> some View {
+        Button(action: action) {
+            HStack(spacing: 12) {
+                Image(systemName: icon)
+                    .font(.system(size: 16, weight: .semibold))
+                    .foregroundStyle(Color.accentColor)
+                    .frame(width: 38, height: 38)
+                    .background(
+                        Color.accentColor.opacity(colorScheme == .dark ? 0.16 : 0.09),
+                        in: RoundedRectangle(cornerRadius: 11, style: .continuous)
+                    )
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(title)
+                        .font(.system(size: 15, weight: .semibold))
+                        .foregroundStyle(.primary)
+                    Text(subtitle)
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                }
+                Spacer()
+                Image(systemName: "chevron.right")
+                    .font(.caption.weight(.semibold))
+                    .foregroundStyle(.tertiary)
+            }
+            .padding(12)
+            .background(
+                Color.primary.opacity(colorScheme == .dark ? 0.065 : 0.035),
+                in: RoundedRectangle(cornerRadius: 15, style: .continuous)
+            )
+            .overlay {
+                RoundedRectangle(cornerRadius: 15, style: .continuous)
+                    .stroke(Color.primary.opacity(0.055), lineWidth: 0.5)
+            }
+        }
+        .buttonStyle(.plain)
+        .disabled(isPreparing)
+    }
+}
+
+private struct WorkspaceGitCloneSheet: View {
+    let projectsRoot: String?
+    let onCancel: () -> Void
+    let onClone: (PublicGitCloneRequest) async throws -> Void
+
+    @State private var repositoryURL = ""
+    @State private var branch = ""
+    @State private var projectName = ""
+    @State private var clonesFullHistory = false
+    @State private var isCloning = false
+    @State private var errorMessage: String?
+
+    private var trimmedURL: String {
+        repositoryURL.trimmingCharacters(in: .whitespacesAndNewlines)
+    }
+
+    var body: some View {
+        NavigationStack {
+            Form {
+                Section("公开 Git 仓库") {
+                    TextField("https://github.com/owner/repo.git", text: $repositoryURL)
+                        .textInputAutocapitalization(.never)
+                        .autocorrectionDisabled()
+                        .keyboardType(.URL)
+                    TextField("分支或 Tag（可选）", text: $branch)
+                        .textInputAutocapitalization(.never)
+                        .autocorrectionDisabled()
+                    TextField("工作区名称（可选）", text: $projectName)
+                }
+
+                Section {
+                    Toggle("克隆完整历史", isOn: $clonesFullHistory)
+                } footer: {
+                    Text("默认使用浅克隆，更适合移动网络。仅支持无需登录的 HTTPS 仓库。")
+                }
+
+                if let projectsRoot {
+                    Section("保存位置") {
+                        Text(projectsRoot)
+                            .font(.caption.monospaced())
+                            .foregroundStyle(.secondary)
+                    }
+                }
+
+                if let errorMessage {
+                    Section {
+                        Label(errorMessage, systemImage: "exclamationmark.triangle")
+                            .foregroundStyle(.red)
+                    }
+                }
+            }
+            .navigationTitle("克隆 Git 仓库")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) {
+                    Button("取消", action: onCancel)
+                        .disabled(isCloning)
+                }
+                ToolbarItem(placement: .confirmationAction) {
+                    Button(isCloning ? "克隆中…" : "克隆") { startClone() }
+                        .disabled(trimmedURL.isEmpty || isCloning)
+                }
+            }
+        }
+    }
+
+    private func startClone() {
+        guard !trimmedURL.isEmpty, !isCloning else { return }
+        isCloning = true
+        errorMessage = nil
+        let request = PublicGitCloneRequest(
+            requestID: UUID().uuidString,
+            url: trimmedURL,
+            ref: branch,
+            name: projectName,
+            depth: clonesFullHistory ? 0 : 1
+        )
+        Task {
+            do {
+                try await onClone(request)
+            } catch {
+                errorMessage = error.localizedDescription
+                isCloning = false
             }
         }
     }
