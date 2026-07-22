@@ -15,14 +15,15 @@ import FileViewerKit
 ///
 /// 替代原有的 `DrawerViewController`，内部从单一 `ConversationListView` 升级为
 /// 多 Tab 的 `WorkspaceHubView`：
-/// - [💬 会话] → ConversationListView (AgentKit)
-/// - [📄 快捷文件] → FileViewerKit.QuickFileList
-/// - [🔍 搜索] → GlobalSearchPlaceholderView
+/// - [💬 会话] → 当前项目的扁平会话列表
+/// - [📄 文件] → 当前工作目录的文件浏览
+/// - [🔍 搜索] → 当前项目内的会话与文件搜索
 ///
-/// WorkspaceHeader 提供工作区切换入口 → 触发 `onWorkspaceBrowserRequested` 回调。
+/// WorkspaceHeader 的主区域切换项目，右侧按钮进入当前项目的完整浏览器。
 final class WorkspaceHubViewController: UIViewController {
 
     var store: WorkspaceStore
+    let workspaceContext: IOSWorkspaceContext
     var searchText: String = ""
     var fileProvider: WorkspaceFileContentProvider?
 
@@ -33,8 +34,9 @@ final class WorkspaceHubViewController: UIViewController {
 
     // MARK: - Init
 
-    init(store: WorkspaceStore) {
+    init(store: WorkspaceStore, workspaceContext: IOSWorkspaceContext) {
         self.store = store
+        self.workspaceContext = workspaceContext
         super.init(nibName: nil, bundle: nil)
     }
 
@@ -51,18 +53,26 @@ final class WorkspaceHubViewController: UIViewController {
             selectedConversation: .init(
                 get: { [weak self] in self?.store.selectedConversation },
                 set: { [weak self] in
-                    self?.store.selectedConversation = $0
-                    self?.onSelectedConversation?()
+                    guard let self else { return }
+                    self.store.selectedConversation = $0
+                    self.workspaceContext.synchronize(with: $0, in: self.store)
+                    self.onSelectedConversation?()
                 }
             ),
             searchText: searchText,
             fileProvider: fileProvider,
+            workspaceContext: workspaceContext,
             onWorkspaceBrowserRequested: { [weak self] in
                 self?.onWorkspaceBrowserRequested?()
             },
             onNewChat: { [weak self] in
-                self?.store.beginDraft()
-                self?.onSelectedConversation?()
+                guard let self else { return }
+                if let workspace = self.workspaceContext.activeWorkspace {
+                    self.workspaceContext.activate(workspace, in: self.store)
+                } else {
+                    self.store.beginDraft()
+                }
+                self.onSelectedConversation?()
             },
             onSettings: { [weak self] in
                 self?.onSettingsTap?()

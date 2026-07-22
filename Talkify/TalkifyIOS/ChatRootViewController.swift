@@ -29,6 +29,7 @@ final class ChatRootViewController: UIViewController {
 
     private let store: WorkspaceStore
     private let dependencies: AgentDependencies
+    private let workspaceContext: IOSWorkspaceContext
 
     private let drawerVC: WorkspaceHubViewController
     private let chatVC: ChatViewController
@@ -40,7 +41,10 @@ final class ChatRootViewController: UIViewController {
     private let container: AppContainer
 
     /// 桥接层：将 WorkspaceStore 数据适配到 FileViewerKit 和 AgentKit 的协议。
-    private lazy var fileProvider = WorkspaceFileContentProvider(store: store)
+    private lazy var fileProvider = WorkspaceFileContentProvider(
+        store: store,
+        workspaceContext: workspaceContext
+    )
 
     /// Invisible view that sits below `chatVC.view` and carries its shadow.
     /// Separated because `chatVC.view` uses `masksToBounds` for corner clipping,
@@ -74,7 +78,11 @@ final class ChatRootViewController: UIViewController {
         self.store = store
         self.container = container
         self.dependencies = dependencies
-        self.drawerVC = WorkspaceHubViewController(store: store)
+        self.workspaceContext = IOSWorkspaceContext(store: store)
+        self.drawerVC = WorkspaceHubViewController(
+            store: store,
+            workspaceContext: workspaceContext
+        )
         self.chatVC = ChatViewController(store: store, dependencies: dependencies)
         super.init(nibName: nil, bundle: nil)
     }
@@ -312,7 +320,7 @@ final class ChatRootViewController: UIViewController {
 
     /// Resolves the current workspace to a `WorkspaceItem` for use as `initialWorkspace`.
     private func currentWorkspaceItem() -> FileViewerKit.WorkspaceItem? {
-        guard let root = fileProvider.currentWorkspaceRoot() else { return nil }
+        guard let root = workspaceContext.activeWorkspace?.url.path else { return nil }
         return fileProvider.buildWorkspaceItems().first(where: { $0.rootPath == root })
     }
 
@@ -326,7 +334,11 @@ final class ChatRootViewController: UIViewController {
             onSelectWorkspace: { [weak self] item in
                 // 选择工作区 → 关闭浏览器 + 切换工作区上下文
                 self?.dismiss(animated: true) {
-                    self?.store.selectWorkspace(.init(url: URL(fileURLWithPath: item.rootPath)))
+                    guard let self else { return }
+                    self.workspaceContext.activate(
+                        .init(url: URL(fileURLWithPath: item.rootPath)),
+                        in: self.store
+                    )
                 }
             },
             onSelectFile: { [weak self] filePath in
@@ -336,8 +348,12 @@ final class ChatRootViewController: UIViewController {
             },
             onViewConversations: { [weak self] workspaceID in
                 self?.dismiss(animated: true) {
-                    self?.store.selectWorkspace(.init(url: URL(fileURLWithPath: workspaceID)))
-                    self?.setDrawer(open: true, animated: true)
+                    guard let self else { return }
+                    self.workspaceContext.activate(
+                        .init(url: URL(fileURLWithPath: workspaceID)),
+                        in: self.store
+                    )
+                    self.setDrawer(open: true, animated: true)
                 }
             }
         )

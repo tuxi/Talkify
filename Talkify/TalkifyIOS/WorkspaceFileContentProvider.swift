@@ -48,30 +48,43 @@ private struct WorkspaceFileNode: FileViewerKit.FileNode {
 final class WorkspaceFileContentProvider {
 
     private let store: WorkspaceStore
+    private let workspaceContext: IOSWorkspaceContext
     private let fileManager: FileManager
 
-    init(store: WorkspaceStore, fileManager: FileManager = .default) {
+    init(
+        store: WorkspaceStore,
+        workspaceContext: IOSWorkspaceContext,
+        fileManager: FileManager = .default
+    ) {
         self.store = store
+        self.workspaceContext = workspaceContext
         self.fileManager = fileManager
+    }
+
+    /// Legacy inspector bridge used by the split-view shell. The drawer path injects
+    /// and retains its context explicitly; this fallback derives one from the store.
+    convenience init(store: WorkspaceStore, fileManager: FileManager = .default) {
+        self.init(
+            store: store,
+            workspaceContext: IOSWorkspaceContext(store: store),
+            fileManager: fileManager
+        )
     }
 
     // MARK: - Workspace Path Resolution
 
-    /// 从当前选中会话推断工作区根路径。
+    /// 当前 Hub 工作区的实际文件根；Managed Worktree 会话优先使用其 checkout。
     /// 公开当前工作区根路径，供外部（如 deep link）使用。
     func currentWorkspaceRoot() -> String? { workspaceRoot }
 
     private var workspaceRoot: String? {
-        if let path = store.selectedConversation?.workspacePath, !path.isEmpty {
+        if let conversation = store.selectedConversation,
+           workspaceContext.contains(conversation),
+           !conversation.workspacePath.isEmpty {
+            let path = conversation.workspacePath
             return path
         }
-        if let first = store.recentWorkspaces.workspaces.first {
-            return first.url.path
-        }
-        if let first = store.projects.projects.first {
-            return first.url.path
-        }
-        return nil
+        return workspaceContext.activeWorkspace?.url.path
     }
 
     private func resolveAbsolutePath(_ filePath: String) -> String {
