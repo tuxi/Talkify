@@ -7,14 +7,15 @@
 
 #if os(iOS)
 import SwiftUI
+import UIKit
 import AgentKit
 import FileViewerKit
 
 /// 抽屉内部的工作区枢纽视图。
 ///
 /// 结构：
-/// - WorkspaceHeader：当前工作区名 + 状态 + [›] 进入全屏浏览器
-/// - Tab Segment：[💬 会话] [📄 快捷文件] [🔍 搜索]
+/// - WorkspaceHeader：切换当前项目 + 独立入口进入完整浏览器
+/// - Tab Segment：[💬 会话] [📄 文件] [🔍 搜索]
 /// - Content：根据 selectedTab 切换
 /// - BottomBar：[💬 新对话] [⚙️ 设置]
 struct WorkspaceHubView: View {
@@ -42,6 +43,7 @@ struct WorkspaceHubView: View {
 
     @State private var selectedTab: HubTab = .conversations
     @State private var isWorkspaceSwitcherPresented = false
+    @Namespace private var tabSelectionNamespace
 
     enum HubTab: String, CaseIterable {
         case conversations
@@ -72,7 +74,7 @@ struct WorkspaceHubView: View {
             workspaceHeader
             tabBar
             tabContent
-                .safeAreaPadding(.bottom, 50)
+                .safeAreaPadding(.bottom, 68)
         }
         .overlay(alignment: .bottom, content: {
             bottomBar
@@ -97,16 +99,21 @@ struct WorkspaceHubView: View {
     // MARK: - Workspace Header
 
     private var workspaceHeader: some View {
-        HStack(spacing: 8) {
+        HStack(spacing: 10) {
             Button {
                 isWorkspaceSwitcherPresented = true
             } label: {
-                HStack(spacing: 8) {
+                HStack(spacing: 10) {
                     Image(systemName: "folder.fill")
-                        .font(.system(size: 15, weight: .medium))
-                        .foregroundStyle(.secondary)
+                        .font(.system(size: 15, weight: .semibold))
+                        .foregroundStyle(Color.accentColor)
+                        .frame(width: 34, height: 34)
+                        .background(
+                            Color.accentColor.opacity(colorScheme == .dark ? 0.18 : 0.12),
+                            in: RoundedRectangle(cornerRadius: 10, style: .continuous)
+                        )
 
-                    VStack(alignment: .leading, spacing: 2) {
+                    VStack(alignment: .leading, spacing: 3) {
                         Text(currentWorkspaceName)
                             .font(.system(size: 16, weight: .semibold))
                             .foregroundStyle(.primary)
@@ -118,7 +125,7 @@ struct WorkspaceHubView: View {
                     Spacer(minLength: 8)
 
                     Image(systemName: "chevron.up.chevron.down")
-                        .font(.system(size: 10, weight: .bold))
+                        .font(.system(size: 9, weight: .bold))
                         .foregroundStyle(.tertiary)
                 }
                 .contentShape(Rectangle())
@@ -130,19 +137,26 @@ struct WorkspaceHubView: View {
                 onWorkspaceBrowserRequested?()
             } label: {
                 Image(systemName: "arrow.up.right.square")
-                    .font(.system(size: 15, weight: .medium))
+                    .font(.system(size: 15, weight: .semibold))
                     .foregroundStyle(.secondary)
-                    .frame(width: 36, height: 36)
-                    .background(Color.primary.opacity(0.06), in: Circle())
+                    .frame(width: 38, height: 38)
+                    .background(
+                        Color.primary.opacity(colorScheme == .dark ? 0.08 : 0.05),
+                        in: RoundedRectangle(cornerRadius: 11, style: .continuous)
+                    )
+                    .overlay {
+                        RoundedRectangle(cornerRadius: 11, style: .continuous)
+                            .stroke(Color.primary.opacity(0.06), lineWidth: 0.5)
+                    }
             }
             .buttonStyle(.plain)
             .disabled(workspaceContext.activeWorkspace == nil)
             .accessibilityLabel("查看当前项目")
         }
-        .padding(.leading, 20)
-        .padding(.trailing, 14)
-        .padding(.top, 16)
-        .padding(.bottom, 12)
+        .padding(.horizontal, 16)
+        .padding(.top, 14)
+        .padding(.bottom, 13)
+        .background(Color.primary.opacity(0.012))
     }
 
     private var currentWorkspaceName: String {
@@ -151,53 +165,97 @@ struct WorkspaceHubView: View {
 
     @ViewBuilder
     private var workspaceSubtitle: some View {
-        let activeCount = activeConversationCount
-        HStack(spacing: 5) {
+        HStack(spacing: 6) {
             if let branch = workspaceContext.activeWorkspace?.branch {
-                Text(branch)
+                Label(branch, systemImage: "arrow.triangle.branch")
             }
-            if activeCount > 0 {
-                if workspaceContext.activeWorkspace?.branch != nil { Text("·") }
-                Text("\(activeCount) 个运行中")
-                    .foregroundStyle(.green)
+            if let workspaceStatus {
+                if workspaceContext.activeWorkspace?.branch != nil {
+                    Text("·").foregroundStyle(.tertiary)
+                }
+                HStack(spacing: 4) {
+                    Circle()
+                        .fill(workspaceStatus.color)
+                        .frame(width: 5, height: 5)
+                    Text(workspaceStatus.title)
+                }
+            } else if workspaceContext.activeWorkspace?.branch == nil {
+                Text("本地工作区")
             }
         }
         .font(.system(size: 11))
         .foregroundStyle(.secondary)
+        .lineLimit(1)
     }
 
-    private var activeConversationCount: Int {
-        workspaceContext.conversations(in: store).filter {
+    private var workspaceStatus: (title: String, color: Color)? {
+        let conversations = workspaceContext.conversations(in: store)
+        let waitingCount = conversations.filter {
+            let activity = store.supervisor.activity(for: $0)
+            return activity == .waitingForApproval || activity == .waitingForClientTool
+        }.count
+        if waitingCount > 0 {
+            return ("\(waitingCount) 个待处理", .orange)
+        }
+
+        let activeCount = conversations.filter {
             store.supervisor.activity(for: $0).isActive
         }.count
+        if activeCount > 0 {
+            return ("\(activeCount) 个运行中", .green)
+        }
+        if store.draft != nil {
+            return ("草稿", .orange)
+        }
+        return nil
     }
 
     // MARK: - Tab Bar
 
     private var tabBar: some View {
-        HStack(spacing: 0) {
+        HStack(spacing: 3) {
             ForEach(HubTab.allCases, id: \.self) { tab in
                 Button {
-                    withAnimation(.easeInOut(duration: 0.18)) {
+                    UISelectionFeedbackGenerator().selectionChanged()
+                    withAnimation(.snappy(duration: 0.24, extraBounce: 0.04)) {
                         selectedTab = tab
                     }
                 } label: {
-                    VStack(spacing: 4) {
+                    HStack(spacing: 5) {
                         Image(systemName: tab.icon)
-                            .font(.system(size: 16, weight: .medium))
+                            .font(.system(size: 13, weight: .semibold))
                         Text(tab.title)
-                            .font(.system(size: 11, weight: .medium))
+                            .font(.system(size: 12, weight: .semibold))
                     }
                     .foregroundStyle(selectedTab == tab ? Color.accentColor : Color.secondary)
                     .frame(maxWidth: .infinity)
                     .padding(.vertical, 8)
+                    .background {
+                        if selectedTab == tab {
+                            RoundedRectangle(cornerRadius: 9, style: .continuous)
+                                .fill(Color.accentColor.opacity(colorScheme == .dark ? 0.18 : 0.12))
+                                .matchedGeometryEffect(
+                                    id: "workspace-hub-tab-selection",
+                                    in: tabSelectionNamespace
+                                )
+                        }
+                    }
                     .contentShape(Rectangle())
                 }
                 .buttonStyle(.plain)
             }
         }
+        .padding(4)
+        .background(
+            Color.primary.opacity(colorScheme == .dark ? 0.065 : 0.045),
+            in: RoundedRectangle(cornerRadius: 13, style: .continuous)
+        )
+        .overlay {
+            RoundedRectangle(cornerRadius: 13, style: .continuous)
+                .stroke(Color.primary.opacity(0.05), lineWidth: 0.5)
+        }
         .padding(.horizontal, 16)
-        .padding(.bottom, 8)
+        .padding(.bottom, 10)
     }
 
     // MARK: - Tab Content
@@ -236,53 +294,56 @@ struct WorkspaceHubView: View {
                 )
             }
         }
+        .id(selectedTab)
+        .transition(.opacity)
+        .animation(.easeInOut(duration: 0.16), value: selectedTab)
         .frame(maxHeight: .infinity)
     }
 
     // MARK: - Bottom Bar
     private var bottomBar: some View {
-        HStack {
-            // "聊天" 按钮 - 药丸形状 (Capsule)
+        HStack(spacing: 10) {
             Button {
                 onNewChat?()
             } label: {
-                HStack(spacing: 6) {
+                HStack(spacing: 7) {
                     Image(systemName: "square.and.pencil")
-                    Text("聊天")
+                    Text(store.draft == nil ? "新对话" : "继续草稿")
                 }
-                .font(.system(size: 15, weight: .medium))
-                .foregroundColor(.white)
-                .padding(.horizontal, 18)
-                .padding(.vertical, 9)
-                // 使用 accentColor，并加上阴影
-                .background(Color.accentColor, in: Capsule())
-                // **核心修改：添加阴影以增强层次感**
-                // 根据颜色模式调整阴影颜色，确保在深色模式下也能清晰可见
-                .shadow(color: colorScheme == .dark ? Color.black.opacity(0.4) : Color.accentColor.opacity(0.2),
-                        radius: 5, x: 0, y: 2)
+                .font(.system(size: 15, weight: .semibold))
+                .foregroundStyle(.white)
+                .padding(.horizontal, 14)
+                .frame(maxWidth: .infinity, minHeight: 42)
+                .background(
+                    Color.accentColor,
+                    in: RoundedRectangle(cornerRadius: 13, style: .continuous)
+                )
+                .shadow(color: Color.accentColor.opacity(0.18), radius: 8, y: 3)
             }
+            .buttonStyle(.plain)
 
-            Spacer(minLength: 30)
-
-            // "设置" 按钮 - 圆形 (Circle)
             Button {
                 onSettings?()
             } label: {
                 Image(systemName: "gearshape")
-                    .font(.system(size: 18))
-                    .foregroundStyle(colorScheme == .dark ? .white : .black)
-                    .frame(width: 40, height: 40)
-                    // 使用系统材质作为圆底，深色模式下会自动呈现出自带高级感的悬浮灰色
-                    .background(.ultraThinMaterial, in: Circle())
-                    .overlay(
-                        Circle()
-                            .stroke(Color.primary.opacity(0.08), lineWidth: 0.5)
+                    .font(.system(size: 17, weight: .medium))
+                    .foregroundStyle(.secondary)
+                    .frame(width: 42, height: 42)
+                    .background(
+                        Color.primary.opacity(colorScheme == .dark ? 0.09 : 0.055),
+                        in: RoundedRectangle(cornerRadius: 13, style: .continuous)
                     )
-                    .shadow(color: Color.black.opacity(0.2), radius: 6, x: 0, y: 3)
             }
+            .buttonStyle(.plain)
+            .accessibilityLabel("设置")
         }
-        .padding(.horizontal, 38)
-        .padding(.vertical, 12)
+        .padding(.horizontal, 16)
+        .padding(.top, 10)
+        .padding(.bottom, 12)
+//        .background(.ultraThinMaterial)
+        .overlay(alignment: .top) {
+            Divider().opacity(0.45)
+        }
     }
 }
 
@@ -331,8 +392,13 @@ private struct WorkspaceSwitcherView: View {
                             } label: {
                                 HStack(spacing: 12) {
                                     Image(systemName: "folder")
-                                        .foregroundStyle(.secondary)
-                                        .frame(width: 24)
+                                        .font(.system(size: 14, weight: .semibold))
+                                        .foregroundStyle(Color.accentColor)
+                                        .frame(width: 32, height: 32)
+                                        .background(
+                                            Color.accentColor.opacity(0.12),
+                                            in: RoundedRectangle(cornerRadius: 9, style: .continuous)
+                                        )
                                     VStack(alignment: .leading, spacing: 2) {
                                         Text(workspace.name)
                                             .foregroundStyle(.primary)
@@ -351,6 +417,12 @@ private struct WorkspaceSwitcherView: View {
                                     }
                                 }
                             }
+                            .buttonStyle(.plain)
+                            .listRowBackground(
+                                workspace.id == selectedWorkspaceID
+                                    ? Color.accentColor.opacity(0.07)
+                                    : Color.clear
+                            )
                         }
                     }
                 }
@@ -417,10 +489,12 @@ private struct WorkspaceConversationListView: View {
                         WorkspaceConversationRow(
                             conversation: conversation,
                             activity: store.supervisor.activity(for: conversation),
-                            queueReason: store.supervisor.queueReason(for: conversation.id)
+                            queueReason: store.supervisor.queueReason(for: conversation.id),
+                            isSelected: selected?.id == conversation.id
                         )
                     }
                     .buttonStyle(.plain)
+                    .listRowInsets(.init(top: 1, leading: 12, bottom: 1, trailing: 12))
                     .listRowSeparator(.hidden)
                     .listRowBackground(Color.clear)
                     .swipeActions(edge: .trailing) {
@@ -594,16 +668,18 @@ private struct WorkspaceConversationListView: View {
 }
 
 private struct WorkspaceConversationRow: View {
+    @Environment(\.colorScheme) private var colorScheme
+
     let conversation: ConversationRef
     let activity: ConversationActivityState
     let queueReason: String?
+    let isSelected: Bool
 
     var body: some View {
         HStack(spacing: 10) {
-            Image(systemName: activityIcon)
-                .font(.system(size: 14, weight: .medium))
-                .foregroundStyle(activityColor)
-                .frame(width: 20)
+            Circle()
+                .fill(showsStatusIndicator ? activityColor : Color.clear)
+                .frame(width: 7, height: 7)
             VStack(alignment: .leading, spacing: 3) {
                 Text(conversation.name ?? conversation.id)
                     .font(.system(size: 15, weight: .medium))
@@ -617,12 +693,36 @@ private struct WorkspaceConversationRow: View {
                 }
             }
             Spacer(minLength: 8)
-            Image(systemName: "chevron.right")
-                .font(.caption2.weight(.semibold))
-                .foregroundStyle(.tertiary)
+            if activity == .connecting {
+                ProgressView().controlSize(.mini)
+            }
         }
-        .padding(.vertical, 6)
+        .padding(.horizontal, 10)
+        .padding(.vertical, 9)
+        .background(
+            rowBackgroundColor,
+            in: RoundedRectangle(cornerRadius: 10, style: .continuous)
+        )
+        .overlay {
+            if isSelected {
+                RoundedRectangle(cornerRadius: 10, style: .continuous)
+                    .stroke(Color.accentColor.opacity(0.2), lineWidth: 0.5)
+            }
+        }
         .contentShape(Rectangle())
+        .accessibilityElement(children: .combine)
+        .accessibilityAddTraits(isSelected ? [.isSelected] : [])
+        .accessibilityHint(isSelected ? "当前会话" : "打开会话")
+    }
+
+    private var rowBackgroundColor: Color {
+        if isSelected {
+            return Color.accentColor.opacity(colorScheme == .dark ? 0.13 : 0.09)
+        }
+        if activity.isActive {
+            return Color.accentColor.opacity(0.045)
+        }
+        return .clear
     }
 
     private var detailText: String? {
@@ -640,17 +740,8 @@ private struct WorkspaceConversationRow: View {
         }
     }
 
-    private var activityIcon: String {
-        switch activity {
-        case .running, .connecting: return "circle.dotted"
-        case .queued: return "clock"
-        case .waitingForApproval, .waitingForClientTool: return "exclamationmark.circle.fill"
-        case .paused: return "pause.circle"
-        case .succeeded: return "checkmark.circle"
-        case .failed: return "xmark.circle"
-        case .cancelled: return "slash.circle"
-        case .idle: return "bubble.left"
-        }
+    private var showsStatusIndicator: Bool {
+        activity != .idle && activity != .succeeded && activity != .cancelled
     }
 
     private var activityColor: Color {
@@ -739,21 +830,59 @@ private struct WorkspaceFilesView: View {
                 if directoryPaths.count > 1 {
                     Button { navigateBack() } label: {
                         Image(systemName: "chevron.left")
+                            .font(.caption.weight(.bold))
+                            .frame(width: 28, height: 28)
+                            .background(Color.primary.opacity(0.055), in: Circle())
+                    }
+                    .buttonStyle(.plain)
+                }
+
+                ScrollViewReader { proxy in
+                    ScrollView(.horizontal) {
+                        HStack(spacing: 5) {
+                            ForEach(directoryTitles.indices, id: \.self) { index in
+                                if index > 0 {
+                                    Image(systemName: "chevron.right")
+                                        .font(.system(size: 8, weight: .bold))
+                                        .foregroundStyle(.tertiary)
+                                }
+                                Button {
+                                    navigate(to: index)
+                                } label: {
+                                    Text(directoryTitles[index])
+                                        .font(.caption.weight(index == directoryTitles.count - 1 ? .semibold : .regular))
+                                        .foregroundStyle(index == directoryTitles.count - 1 ? .primary : .secondary)
+                                        .lineLimit(1)
+                                }
+                                .buttonStyle(.plain)
+                                .id(index)
+                            }
+                        }
+                    }
+                    .scrollIndicators(.hidden)
+                    .onChange(of: directoryTitles.count) { _, count in
+                        guard count > 0 else { return }
+                        withAnimation(.easeOut(duration: 0.18)) {
+                            proxy.scrollTo(count - 1, anchor: .trailing)
+                        }
                     }
                 }
-                Text(directoryTitles.last ?? workspace?.name ?? "文件")
-                    .font(.caption.weight(.semibold))
-                    .lineLimit(1)
-                Spacer()
+
                 Button(action: onOpenBrowser) {
-                    Label("完整浏览", systemImage: "arrow.up.right.square")
-                        .font(.caption)
+                    Image(systemName: "arrow.up.right.square")
+                        .font(.caption.weight(.semibold))
+                        .frame(width: 30, height: 30)
+                        .background(Color.primary.opacity(0.055), in: Circle())
                 }
                 .buttonStyle(.plain)
                 .foregroundStyle(.secondary)
+                .accessibilityLabel("完整浏览")
             }
-            .padding(.horizontal, 18)
-            .padding(.vertical, 8)
+            .padding(.horizontal, 16)
+            .padding(.vertical, 7)
+            .overlay(alignment: .bottom) {
+                Divider().opacity(0.35)
+            }
 
             if isLoading {
                 Spacer()
@@ -821,6 +950,14 @@ private struct WorkspaceFilesView: View {
         directoryPaths.removeLast()
         directoryTitles.removeLast()
         directoryPath = directoryPaths.last ?? workspace?.url.path ?? ""
+        Task { await loadDirectory() }
+    }
+
+    private func navigate(to index: Int) {
+        guard directoryPaths.indices.contains(index), index < directoryPaths.count - 1 else { return }
+        directoryPaths = Array(directoryPaths.prefix(index + 1))
+        directoryTitles = Array(directoryTitles.prefix(index + 1))
+        directoryPath = directoryPaths[index]
         Task { await loadDirectory() }
     }
 
