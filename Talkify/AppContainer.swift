@@ -90,6 +90,10 @@ final class AppContainer {
     /// Product-specific additions to AgentKit's otherwise generic Timeline.
     let timelineExtensions: [any TimelineExtension]
 
+    /// Deep link: set by `TalkifyApp.handleDeepLink`, consumed by `ChatRootViewController`
+    /// to open WorkspaceBrowser directly at a specific workspace.
+    var pendingDeepLinkWorkspacePath: String?
+
     /// Host-owned system notification and notification-click routing state.
     let conversationNotifications: ConversationNotificationCoordinator
 
@@ -300,5 +304,23 @@ final class AppContainer {
         )
         self.apiProvider = apiProvider
         return apiProvider
+    }
+    
+    // MARK: - Factory
+
+    static func makeWorkspaceStore(dependencies: AgentDependencies) -> WorkspaceStore {
+        WorkspaceStore(
+            client: dependencies.client,
+            toolRegistry: dependencies.toolRegistry,
+            timelineExtensions: dependencies.timelineExtensions,
+            conversationRendererMode: dependencies.conversationRendererMode,
+            onAuthExpired: dependencies.onAuthExpired,
+            localStateStore: dependencies.localStateStore,
+            userAssetPicker: dependencies.userAssetPicker,
+            userAssetUploader: dependencies.userAssetUploader,
+            userAssetPreviewResolver: dependencies.userAssetPreviewResolver,
+            attentionReadStore: dependencies.attentionReadStore,
+            onAttentionEvent: dependencies.onAttentionEvent
+        )
     }
 }

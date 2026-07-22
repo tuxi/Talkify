@@ -329,7 +329,7 @@ final class UserAssetDependencyInjectionTests: XCTestCase {
             userAssetUploader: StubAssetUploader(),
             userAssetPreviewResolver: StubPreviewResolver()
         )
-        let store = WorkspaceView.makeStore(dependencies: dependencies)
+        let store = AppContainer.makeWorkspaceStore(dependencies: dependencies)
         XCTAssertTrue(store.canSelectUserAssets)
         XCTAssertNotNil(store.userAssetPreviewResolver)
     }

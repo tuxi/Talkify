@@ -58,6 +58,9 @@ final class WorkspaceFileContentProvider {
     // MARK: - Workspace Path Resolution
 
     /// 从当前选中会话推断工作区根路径。
+    /// 公开当前工作区根路径，供外部（如 deep link）使用。
+    func currentWorkspaceRoot() -> String? { workspaceRoot }
+
     private var workspaceRoot: String? {
         if let path = store.selectedConversation?.workspacePath, !path.isEmpty {
             return path

@@ -61,27 +61,10 @@ public struct WorkspaceView: View {
 
     public init(dependencies: AgentDependencies) {
         self.dependencies = dependencies
-        self._store = State(initialValue: Self.makeStore(dependencies: dependencies))
+        self._store = State(initialValue: AppContainer.makeWorkspaceStore(dependencies: dependencies))
     }
 
-    /// Kept as one mapping point so host capability injection cannot silently
-    /// regress when WorkspaceStore gains new dependencies.
-    static func makeStore(dependencies: AgentDependencies) -> WorkspaceStore {
-        WorkspaceStore(
-            client: dependencies.client,
-            toolRegistry: dependencies.toolRegistry,
-            timelineExtensions: dependencies.timelineExtensions,
-            conversationRendererMode: dependencies.conversationRendererMode,
-            onAuthExpired: dependencies.onAuthExpired,
-            localStateStore: dependencies.localStateStore,
-            userAssetPicker: dependencies.userAssetPicker,
-            userAssetUploader: dependencies.userAssetUploader,
-            userAssetPreviewResolver: dependencies.userAssetPreviewResolver,
-            attentionReadStore: dependencies.attentionReadStore,
-            onAttentionEvent: dependencies.onAttentionEvent
-        )
-    }
-
+  
     public var body: some View {
         content
             .task {

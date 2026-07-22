@@ -123,7 +123,7 @@ final class ChatRootViewController: UIViewController {
         }
 
         drawerVC.onWorkspaceBrowserRequested = { [weak self] in
-            self?.showWorkspaceBrowser()
+            self?.showWorkspaceBrowser(initialWorkspace: self?.currentWorkspaceItem())
         }
 
         drawerVC.onFileSelected = { [weak self] path in
@@ -144,6 +144,7 @@ final class ChatRootViewController: UIViewController {
 //        beginObservingSelection()
         
         observeAuthState()
+        observeDeepLink()
     }
     
     override func viewWillAppear(_ animated: Bool) {
@@ -309,11 +310,19 @@ final class ChatRootViewController: UIViewController {
 
     // MARK: - Workspace Browser
 
+    /// Resolves the current workspace to a `WorkspaceItem` for use as `initialWorkspace`.
+    private func currentWorkspaceItem() -> FileViewerKit.WorkspaceItem? {
+        guard let root = fileProvider.currentWorkspaceRoot() else { return nil }
+        return fileProvider.buildWorkspaceItems().first(where: { $0.rootPath == root })
+    }
+
     /// Presents the full-screen workspace browser (FileViewerKit).
-    private func showWorkspaceBrowser() {
+    /// Pass `initialWorkspace` to skip the list and go directly to workspace detail.
+    private func showWorkspaceBrowser(initialWorkspace: FileViewerKit.WorkspaceItem? = nil) {
         let browserView = FileViewerKit.WorkspaceBrowserView(
             workspaces: fileProvider.buildWorkspaceItems(),
             fileProvider: fileProvider,
+            initialWorkspace: initialWorkspace,
             onSelectWorkspace: { [weak self] item in
                 // 选择工作区 → 关闭浏览器 + 切换工作区上下文
                 self?.dismiss(animated: true) {
@@ -371,6 +380,23 @@ final class ChatRootViewController: UIViewController {
             }
         }
 
+    }
+
+    private func observeDeepLink() {
+        withObservationTracking {
+            _ = container.pendingDeepLinkWorkspacePath
+        } onChange: { [weak self] in
+            DispatchQueue.main.async {
+                guard let self, let path = self.container.pendingDeepLinkWorkspacePath else { return }
+                self.container.pendingDeepLinkWorkspacePath = nil
+                let item = self.fileProvider.buildWorkspaceItems().first(where: {
+                    let current = $0.rootPath.resolvingCurrentSandboxPath
+                    return current == path
+                })
+                self.showWorkspaceBrowser(initialWorkspace: item)
+                self.observeDeepLink()
+            }
+        }
     }
 
     /// Watches `store.selectedConversation` changes and auto-closes the drawer

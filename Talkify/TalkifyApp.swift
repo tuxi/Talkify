@@ -9,6 +9,7 @@ import SwiftUI
 import AgentKit
 import CoreKit
 import FeatureAuth
+import FileViewerKit
 
 let keychainGroupID = "NKW67GFDHM.com.objc.chat.shared"
 
@@ -18,6 +19,7 @@ struct TalkifyApp: App {
     private var container: AppContainer
     private let environmentManager: EnvironmentManager
     private let deviceManager = DeviceManager(keychainGroupId: keychainGroupID)
+    @State private var pendingWorkspaceItem: WorkspaceItem?
     
     init() {
         
@@ -77,7 +79,29 @@ struct TalkifyApp: App {
                         }
                     }
                 }
+                .environment(\.openURL, OpenURLAction(handler: { url in
+                    return handleDeepLink(url)
+                }))
         }
+    }
+    
+    private func handleDeepLink(_ url: URL) -> OpenURLAction.Result {
+        // talkify://workspace?path=/Users/xxx/my-project
+        if url.scheme == "talkify" || url.scheme == "codeagent" {
+            if let components = URLComponents(url: url, resolvingAgainstBaseURL: false),
+               let pathItem = components.queryItems?.first(where: {
+                   $0.name == "path"
+               }),
+               let path = pathItem.value,
+               let path = path.removingPercentEncoding {
+                #if os(macOS)
+                openFolderInFinder(path: path)
+                #endif
+                container.pendingDeepLinkWorkspacePath = path.resolvingCurrentSandboxPath
+            }
+            return .handled // 阻止系统弹窗或外部浏览器打开
+        }
+        return .systemAction
     }
 }
 

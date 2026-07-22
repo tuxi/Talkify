@@ -37,7 +37,7 @@ private struct ChatDrawerWorkspace: View {
 
     init(dependencies: AgentDependencies) {
         self.dependencies = dependencies
-        self._store = State(initialValue: Self.makeStore(dependencies: dependencies))
+        self._store = State(initialValue: AppContainer.makeWorkspaceStore(dependencies: dependencies))
     }
 
     // MARK: - Body
@@ -77,23 +77,6 @@ private struct ChatDrawerWorkspace: View {
             }
     }
 
-    // MARK: - Factory
-
-    private static func makeStore(dependencies: AgentDependencies) -> WorkspaceStore {
-        WorkspaceStore(
-            client: dependencies.client,
-            toolRegistry: dependencies.toolRegistry,
-            timelineExtensions: dependencies.timelineExtensions,
-            conversationRendererMode: dependencies.conversationRendererMode,
-            onAuthExpired: dependencies.onAuthExpired,
-            localStateStore: dependencies.localStateStore,
-            userAssetPicker: dependencies.userAssetPicker,
-            userAssetUploader: dependencies.userAssetUploader,
-            userAssetPreviewResolver: dependencies.userAssetPreviewResolver,
-            attentionReadStore: dependencies.attentionReadStore,
-            onAttentionEvent: dependencies.onAttentionEvent
-        )
-    }
 }
 
 // MARK: - UIViewControllerRepresentable

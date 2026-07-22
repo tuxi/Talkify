@@ -71,7 +71,6 @@ struct WorkspaceHubView: View {
             tabContent
             bottomBar
         }
-        .background(Color(uiColor: UIColor(red: 0.10, green: 0.10, blue: 0.10, alpha: 1)))
     }
 
     // MARK: - Workspace Header
@@ -110,6 +109,10 @@ struct WorkspaceHubView: View {
     }
 
     private var currentWorkspaceName: String {
+        // 草稿的 workspace 优先：反映新建聊天将使用的目录
+        if let draftWorkspace = store.draft?.workspace {
+            return draftWorkspace.name
+        }
         if let conversation = store.selectedConversation, !conversation.workspacePath.isEmpty {
             return URL(fileURLWithPath: conversation.workspacePath).lastPathComponent
         }
@@ -122,20 +125,14 @@ struct WorkspaceHubView: View {
     @ViewBuilder
     private var workspaceSubtitle: some View {
         let activeCount = activeConversationCount
-        let workspaceCount = totalWorkspaceCount
-        if activeCount > 0 || workspaceCount > 0 {
-            HStack(spacing: 6) {
-                if activeCount > 0 {
-                    Label("\(activeCount) 活跃", systemImage: "circle.fill")
-                        .font(.system(size: 11))
-                        .foregroundStyle(.green)
-                }
-                if workspaceCount > 1 {
-                    Text("\(workspaceCount) 个工作区")
-                        .font(.system(size: 11))
-                        .foregroundStyle(.tertiary)
-                }
-            }
+        if store.draft != nil {
+            Label("草稿", systemImage: "pencil.line")
+                .font(.system(size: 11))
+                .foregroundStyle(.orange)
+        } else if activeCount > 0 {
+            Label("\(activeCount) 活跃", systemImage: "circle.fill")
+                .font(.system(size: 11))
+                .foregroundStyle(.green)
         }
     }
 
@@ -143,12 +140,6 @@ struct WorkspaceHubView: View {
         store.listViewModel.conversations.filter {
             store.supervisor.activity(for: $0).isActive
         }.count
-    }
-
-    private var totalWorkspaceCount: Int {
-        let recent = store.recentWorkspaces.workspaces.count
-        let projects = store.projects.projects.count
-        return max(recent, projects)
     }
 
     // MARK: - Tab Bar
