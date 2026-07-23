@@ -9,7 +9,7 @@
 /* Begin PBXBuildFile section */
 		A10000000000000000000001 /* UserAssetsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000000000000000000002 /* UserAssetsTests.swift */; };
 		A10000000000000000000003 /* AgentKit in Frameworks */ = {isa = PBXBuildFile; productRef = D0962064300B1D160005EBC6 /* AgentKit */; };
-		B20000000000000000000001 /* TalkifyShareExtension.appex in Embed App Extensions */ = {isa = PBXBuildFile; fileRef = B20000000000000000000003 /* TalkifyShareExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		B20000000000000000000001 /* TalkifyShareExtension.appex in Embed App Extensions */ = {isa = PBXBuildFile; fileRef = B20000000000000000000003 /* TalkifyShareExtension.appex */; platformFilter = ios; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		D0935524300EEFCF006C3962 /* ClientToolsKit in Frameworks */ = {isa = PBXBuildFile; productRef = D0935523300EEFCF006C3962 /* ClientToolsKit */; };
 		D093565A300F7080006C3962 /* FileViewerKit in Frameworks */ = {isa = PBXBuildFile; productRef = D0935659300F7080006C3962 /* FileViewerKit */; };
 		D096205E300B19610005EBC6 /* CoreKit in Frameworks */ = {isa = PBXBuildFile; productRef = D096205D300B19610005EBC6 /* CoreKit */; };
@@ -44,6 +44,7 @@
 				B20000000000000000000001 /* TalkifyShareExtension.appex in Embed App Extensions */,
 			);
 			name = "Embed App Extensions";
+			platformFilter = ios;
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXCopyFilesBuildPhase section */
@@ -348,6 +349,7 @@
 		};
 		B20000000000000000000012 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
+			platformFilter = ios;
 			target = B20000000000000000000010 /* TalkifyShareExtension */;
 			targetProxy = B20000000000000000000002 /* PBXContainerItemProxy */;
 		};
