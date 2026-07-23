@@ -87,7 +87,12 @@ struct TalkifyApp: App {
     
     private func handleDeepLink(_ url: URL) -> OpenURLAction.Result {
         // talkify://workspace?path=/Users/xxx/my-project
-        if url.scheme == "talkify" || url.scheme == "codeagent" {
+        if url.scheme == "talkifyapp" || url.scheme == "talkify" || url.scheme == "codeagent" {
+            // Share Extension 只负责唤醒主 App；ChatRootViewController 会从
+            // App Group Inbox 读取并展示工作区确认页。
+            if url.host == "shared-import" {
+                return .handled
+            }
             if let components = URLComponents(url: url, resolvingAgainstBaseURL: false),
                let pathItem = components.queryItems?.first(where: {
                    $0.name == "path"

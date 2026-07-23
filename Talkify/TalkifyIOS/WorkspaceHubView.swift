@@ -39,6 +39,8 @@ struct WorkspaceHubView: View {
     var onSettings: (() -> Void)?
     /// 预览文件 → 关闭抽屉 + 打开 FilePreviewHost
     var onFileSelected: ((String) -> Void)?
+    /// 工作区 ZIP 准备完成 → 由宿主展示系统分享面板
+    var onWorkspaceExportReady: ((URL) -> Void)?
 
     // MARK: - Local State
 
@@ -50,6 +52,8 @@ struct WorkspaceHubView: View {
     @State private var isWorkspaceContentImporterPresented = false
     @State private var isImportingWorkspaceContent = false
     @State private var workspaceFilesRevision = 0
+    @State private var isExportingWorkspace = false
+    @State private var workspaceExportError: String?
     @State private var pendingImportURL: URL?
     @State private var importName = ""
     @State private var isImportNamePresented = false
@@ -173,6 +177,14 @@ struct WorkspaceHubView: View {
         } message: {
             Text(acquisitionError ?? "未知错误")
         }
+        .alert("无法导出工作区", isPresented: Binding(
+            get: { workspaceExportError != nil },
+            set: { if !$0 { workspaceExportError = nil } }
+        )) {
+            Button("好", role: .cancel) { workspaceExportError = nil }
+        } message: {
+            Text(workspaceExportError ?? "未知错误")
+        }
         .onAppear {
             store.projects.reload()
             if workspaceContext.activeWorkspace == nil {
@@ -293,6 +305,23 @@ struct WorkspaceHubView: View {
         onNewChat?()
     }
 
+    private func exportWorkspace() {
+        guard !isExportingWorkspace, let fileProvider else { return }
+        isExportingWorkspace = true
+        workspaceExportError = nil
+        Task {
+            defer { isExportingWorkspace = false }
+            do {
+                let archiveURL = try await fileProvider.exportWorkspaceArchive()
+                onWorkspaceExportReady?(archiveURL)
+            } catch is CancellationError {
+                return
+            } catch {
+                workspaceExportError = error.localizedDescription
+            }
+        }
+    }
+
     // MARK: - Workspace Header
 
     private var workspaceHeader: some View {
@@ -329,6 +358,33 @@ struct WorkspaceHubView: View {
             }
             .buttonStyle(.plain)
             .accessibilityLabel("切换项目")
+
+            Button {
+                exportWorkspace()
+            } label: {
+                Group {
+                    if isExportingWorkspace {
+                        ProgressView()
+                            .controlSize(.small)
+                    } else {
+                        Image(systemName: "square.and.arrow.up")
+                            .font(.system(size: 15, weight: .semibold))
+                    }
+                }
+                .foregroundStyle(.secondary)
+                .frame(width: 38, height: 38)
+                .background(
+                    Color.primary.opacity(colorScheme == .dark ? 0.08 : 0.05),
+                    in: RoundedRectangle(cornerRadius: 11, style: .continuous)
+                )
+                .overlay {
+                    RoundedRectangle(cornerRadius: 11, style: .continuous)
+                        .stroke(Color.primary.opacity(0.06), lineWidth: 0.5)
+                }
+            }
+            .buttonStyle(.plain)
+            .disabled(isExportingWorkspace || fileProvider == nil)
+            .accessibilityLabel(isExportingWorkspace ? "正在导出项目" : "导出项目")
 
             Button {
                 onWorkspaceBrowserRequested?()

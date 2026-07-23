@@ -122,6 +122,19 @@ final class WorkspaceFileContentProvider {
         }.value
     }
 
+    /// 将当前实际浏览根（主工作区或当前会话 Worktree）导出为 ZIP。
+    func exportWorkspaceArchive() async throws -> URL {
+        guard let workspaceRoot else {
+            throw WorkspaceContentImportError.noActiveWorkspace
+        }
+        let displayName = workspaceContext.activeWorkspace?.name
+            ?? URL(fileURLWithPath: workspaceRoot).lastPathComponent
+        return try await WorkspaceArchiveExporter.export(
+            workspaceURL: URL(fileURLWithPath: workspaceRoot, isDirectory: true),
+            displayName: displayName
+        )
+    }
+
     nonisolated private static func uniqueImportDestination(
         for sourceURL: URL,
         in root: URL,

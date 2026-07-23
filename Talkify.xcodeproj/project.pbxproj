@@ -9,6 +9,7 @@
 /* Begin PBXBuildFile section */
 		A10000000000000000000001 /* UserAssetsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000000000000000000002 /* UserAssetsTests.swift */; };
 		A10000000000000000000003 /* AgentKit in Frameworks */ = {isa = PBXBuildFile; productRef = D0962064300B1D160005EBC6 /* AgentKit */; };
+		B20000000000000000000001 /* TalkifyShareExtension.appex in Embed App Extensions */ = {isa = PBXBuildFile; fileRef = B20000000000000000000003 /* TalkifyShareExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		D0935524300EEFCF006C3962 /* ClientToolsKit in Frameworks */ = {isa = PBXBuildFile; productRef = D0935523300EEFCF006C3962 /* ClientToolsKit */; };
 		D093565A300F7080006C3962 /* FileViewerKit in Frameworks */ = {isa = PBXBuildFile; productRef = D0935659300F7080006C3962 /* FileViewerKit */; };
 		D096205E300B19610005EBC6 /* CoreKit in Frameworks */ = {isa = PBXBuildFile; productRef = D096205D300B19610005EBC6 /* CoreKit */; };
@@ -24,15 +25,55 @@
 			remoteGlobalIDString = D0962008300B17250005EBC6;
 			remoteInfo = Talkify;
 		};
+		B20000000000000000000002 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = D0962001300B17250005EBC6 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = B20000000000000000000010;
+			remoteInfo = TalkifyShareExtension;
+		};
 /* End PBXContainerItemProxy section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		B20000000000000000000008 /* Embed App Extensions */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 13;
+			files = (
+				B20000000000000000000001 /* TalkifyShareExtension.appex in Embed App Extensions */,
+			);
+			name = "Embed App Extensions";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
 		A10000000000000000000002 /* UserAssetsTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserAssetsTests.swift; sourceTree = "<group>"; };
 		A10000000000000000000004 /* TalkifyTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = TalkifyTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		B20000000000000000000003 /* TalkifyShareExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = TalkifyShareExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		D0962009300B17250005EBC6 /* Talkify.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Talkify.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
+/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		B20000000000000000000015 /* Exceptions for "TalkifyShareExtension" folder in "TalkifyShareExtension" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+			);
+			target = B20000000000000000000010 /* TalkifyShareExtension */;
+		};
+/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
+
 /* Begin PBXFileSystemSynchronizedRootGroup section */
+		B20000000000000000000004 /* TalkifyShareExtension */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				B20000000000000000000015 /* Exceptions for "TalkifyShareExtension" folder in "TalkifyShareExtension" target */,
+			);
+			path = TalkifyShareExtension;
+			sourceTree = "<group>";
+		};
 		D096200B300B17250005EBC6 /* Talkify */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			path = Talkify;
@@ -46,6 +87,13 @@
 			buildActionMask = 2147483647;
 			files = (
 				A10000000000000000000003 /* AgentKit in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		B20000000000000000000005 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -83,6 +131,7 @@
 			isa = PBXGroup;
 			children = (
 				D096200B300B17250005EBC6 /* Talkify */,
+				B20000000000000000000004 /* TalkifyShareExtension */,
 				A10000000000000000000007 /* TalkifyTests */,
 				D0935522300EEFCF006C3962 /* Frameworks */,
 				D096200A300B17250005EBC6 /* Products */,
@@ -93,6 +142,7 @@
 			isa = PBXGroup;
 			children = (
 				D0962009300B17250005EBC6 /* Talkify.app */,
+				B20000000000000000000003 /* TalkifyShareExtension.appex */,
 				A10000000000000000000004 /* TalkifyTests.xctest */,
 			);
 			name = Products;
@@ -122,6 +172,28 @@
 			productReference = A10000000000000000000004 /* TalkifyTests.xctest */;
 			productType = "com.apple.product-type.bundle.unit-test";
 		};
+		B20000000000000000000010 /* TalkifyShareExtension */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = B20000000000000000000011 /* Build configuration list for PBXNativeTarget "TalkifyShareExtension" */;
+			buildPhases = (
+				B20000000000000000000007 /* Sources */,
+				B20000000000000000000005 /* Frameworks */,
+				B20000000000000000000006 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			fileSystemSynchronizedGroups = (
+				B20000000000000000000004 /* TalkifyShareExtension */,
+			);
+			name = TalkifyShareExtension;
+			packageProductDependencies = (
+			);
+			productName = TalkifyShareExtension;
+			productReference = B20000000000000000000003 /* TalkifyShareExtension.appex */;
+			productType = "com.apple.product-type.app-extension";
+		};
 		D0962008300B17250005EBC6 /* Talkify */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = D0962014300B17270005EBC6 /* Build configuration list for PBXNativeTarget "Talkify" */;
@@ -129,10 +201,12 @@
 				D0962005300B17250005EBC6 /* Sources */,
 				D0962006300B17250005EBC6 /* Frameworks */,
 				D0962007300B17250005EBC6 /* Resources */,
+				B20000000000000000000008 /* Embed App Extensions */,
 			);
 			buildRules = (
 			);
 			dependencies = (
+				B20000000000000000000012 /* PBXTargetDependency */,
 			);
 			fileSystemSynchronizedGroups = (
 				D096200B300B17250005EBC6 /* Talkify */,
@@ -162,6 +236,9 @@
 					A10000000000000000000008 = {
 						CreatedOnToolsVersion = 26.3;
 						TestTargetID = D0962008300B17250005EBC6;
+					};
+					B20000000000000000000010 = {
+						CreatedOnToolsVersion = 26.3;
 					};
 					D0962008300B17250005EBC6 = {
 						CreatedOnToolsVersion = 26.3;
@@ -209,12 +286,20 @@
 			targets = (
 				D0962008300B17250005EBC6 /* Talkify */,
 				A10000000000000000000008 /* TalkifyTests */,
+				B20000000000000000000010 /* TalkifyShareExtension */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
 		A1000000000000000000000B /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		B20000000000000000000006 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -239,6 +324,13 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		B20000000000000000000007 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		D0962005300B17250005EBC6 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -253,6 +345,11 @@
 			isa = PBXTargetDependency;
 			target = D0962008300B17250005EBC6 /* Talkify */;
 			targetProxy = A10000000000000000000005 /* PBXContainerItemProxy */;
+		};
+		B20000000000000000000012 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = B20000000000000000000010 /* TalkifyShareExtension */;
+			targetProxy = B20000000000000000000002 /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 
@@ -292,6 +389,66 @@
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Talkify.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/Talkify";
+			};
+			name = Release;
+		};
+		B20000000000000000000013 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				APPLICATION_EXTENSION_API_ONLY = YES;
+				CODE_SIGN_ENTITLEMENTS = TalkifyShareExtension/TalkifyShareExtension.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 38;
+				DEVELOPMENT_TEAM = NKW67GFDHM;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = TalkifyShareExtension/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 18;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 2.0.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.objc.chat.ShareExtension;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SKIP_INSTALL = YES;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		B20000000000000000000014 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				APPLICATION_EXTENSION_API_ONLY = YES;
+				CODE_SIGN_ENTITLEMENTS = TalkifyShareExtension/TalkifyShareExtension.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 38;
+				DEVELOPMENT_TEAM = NKW67GFDHM;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = TalkifyShareExtension/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 18;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 2.0.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.objc.chat.ShareExtension;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SKIP_INSTALL = YES;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
 			};
 			name = Release;
 		};
@@ -448,13 +605,13 @@
 				REGISTER_APP_GROUPS = YES;
 				SDKROOT = auto;
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
-				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator macosx";
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator macosx xros xrsimulator";
 				SUPPORTS_MACCATALYST = NO;
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
 				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
+				TARGETED_DEVICE_FAMILY = "1,2,7";
 				XROS_DEPLOYMENT_TARGET = 26.0;
 			};
 			name = Debug;
@@ -496,13 +653,13 @@
 				REGISTER_APP_GROUPS = YES;
 				SDKROOT = auto;
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
-				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator macosx";
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator macosx xros xrsimulator";
 				SUPPORTS_MACCATALYST = NO;
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
 				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
+				TARGETED_DEVICE_FAMILY = "1,2,7";
 				XROS_DEPLOYMENT_TARGET = 26.0;
 			};
 			name = Release;
@@ -515,6 +672,15 @@
 			buildConfigurations = (
 				A1000000000000000000000D /* Debug */,
 				A1000000000000000000000E /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		B20000000000000000000011 /* Build configuration list for PBXNativeTarget "TalkifyShareExtension" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				B20000000000000000000013 /* Debug */,
+				B20000000000000000000014 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;

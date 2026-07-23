@@ -31,6 +31,7 @@ final class WorkspaceHubViewController: UIViewController {
     var onSettingsTap: (() -> Void)?
     var onWorkspaceBrowserRequested: (() -> Void)?
     var onFileSelected: ((String) -> Void)?
+    var onWorkspaceExportReady: ((URL) -> Void)?
 
     // MARK: - Init
 
@@ -79,6 +80,9 @@ final class WorkspaceHubViewController: UIViewController {
             },
             onFileSelected: { [weak self] path in
                 self?.onFileSelected?(path)
+            },
+            onWorkspaceExportReady: { [weak self] url in
+                self?.onWorkspaceExportReady?(url)
             }
         )
         .environment(store)

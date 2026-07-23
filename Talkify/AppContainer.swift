@@ -209,6 +209,15 @@ final class AppContainer {
             await toolRegistry.register(DeviceInfoTool())
             await toolRegistry.register(CameraCaptureTool())
             await toolRegistry.register(DownloadFileTool())
+            await toolRegistry.register(AnalyzeLocalImageTool())
+            await toolRegistry.register(ReadPDFTool())
+            await toolRegistry.register(RenderPDFPagesTool())
+            await toolRegistry.register(RecordAudioTool())
+            await toolRegistry.register(TranscribeAudioTool())
+            await toolRegistry.register(ExtractArchiveTool())
+#if os(iOS)
+            await toolRegistry.register(ScanDocumentTool())
+#endif
 #if os(macOS)
             await toolRegistry.register(ScreenshotTool())
 #endif

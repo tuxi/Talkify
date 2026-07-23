@@ -37,6 +37,7 @@ final class ChatRootViewController: UIViewController {
     private let drawerWidth: CGFloat = 320
     private let maxMaskAlpha: CGFloat = 0.3
     private var isDrawerOpen = false
+    private var isSharedImportPromptPresented = false
     
     private let container: AppContainer
 
@@ -138,6 +139,10 @@ final class ChatRootViewController: UIViewController {
             self?.showFilePreview(path: path)
         }
 
+        drawerVC.onWorkspaceExportReady = { [weak self] archiveURL in
+            self?.shareWorkspaceArchive(archiveURL)
+        }
+
         chatVC.onMenuTap = { [weak self] in
             self?.setDrawer(open: self?.isDrawerOpen == false, animated: true)
         }
@@ -153,12 +158,23 @@ final class ChatRootViewController: UIViewController {
         
         observeAuthState()
         observeDeepLink()
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(handleAppDidBecomeActive),
+            name: UIApplication.didBecomeActiveNotification,
+            object: nil
+        )
     }
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         
         navigationController?.setNavigationBarHidden(true, animated: true)
+    }
+
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        presentNextSharedImportIfNeeded()
     }
     
     override func viewDidDisappear(_ animated: Bool) {
@@ -316,6 +332,88 @@ final class ChatRootViewController: UIViewController {
         self.present(settingsVC, animated: true)
     }
 
+    // MARK: - Workspace Export
+
+    private func shareWorkspaceArchive(_ archiveURL: URL) {
+        setDrawer(open: false, animated: true)
+
+        let activityController = UIActivityViewController(
+            activityItems: [archiveURL],
+            applicationActivities: nil
+        )
+        activityController.completionWithItemsHandler = { _, _, _, _ in
+            try? FileManager.default.removeItem(at: archiveURL.deletingLastPathComponent())
+        }
+        if let popover = activityController.popoverPresentationController {
+            popover.sourceView = view
+            popover.sourceRect = CGRect(
+                x: view.bounds.midX,
+                y: view.bounds.maxY - view.safeAreaInsets.bottom,
+                width: 1,
+                height: 1
+            )
+        }
+        present(activityController, animated: true)
+    }
+
+    // MARK: - Shared Import Inbox
+
+    @objc private func handleAppDidBecomeActive() {
+        presentNextSharedImportIfNeeded()
+    }
+
+    private func presentNextSharedImportIfNeeded() {
+        guard viewIfLoaded?.window != nil,
+              !isSharedImportPromptPresented,
+              presentedViewController == nil,
+              let request = SharedImportInbox.pendingRequests().first
+        else { return }
+
+        isSharedImportPromptPresented = true
+        let confirmation = SharedImportConfirmationView(
+            request: request,
+            onCreate: { [weak self] workspaceName in
+                guard let self else { throw SharedImportHandlingError.missingPayload }
+                let claim = try SharedImportInbox.claim(request)
+                do {
+                    let sourceURL = try SharedImportInbox.workspaceSourceURL(for: claim)
+                    self.store.beginDraft()
+                    try await self.store.importAndSelectProject(
+                        from: sourceURL,
+                        named: workspaceName
+                    )
+                    self.workspaceContext.synchronize(with: nil, in: self.store)
+                    SharedImportInbox.complete(claim)
+                } catch {
+                    SharedImportInbox.restore(claim)
+                    throw error
+                }
+            },
+            onFinished: { [weak self] result in
+                guard let self else { return }
+                self.isSharedImportPromptPresented = false
+                switch result {
+                case .created:
+                    self.setDrawer(open: false, animated: true)
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                        self.presentNextSharedImportIfNeeded()
+                    }
+                case .deferred:
+                    SharedImportInbox.deferRequest(request)
+                case .discarded:
+                    SharedImportInbox.discard(request)
+                }
+            }
+        )
+        let controller = UIHostingController(rootView: confirmation)
+        controller.modalPresentationStyle = .pageSheet
+        if let sheet = controller.sheetPresentationController {
+            sheet.detents = [.medium(), .large()]
+            sheet.prefersGrabberVisible = true
+        }
+        present(controller, animated: true)
+    }
+
     // MARK: - Workspace Browser
 
     /// Resolves the current workspace to a `WorkspaceItem` for use as `initialWorkspace`.
@@ -427,6 +525,12 @@ final class ChatRootViewController: UIViewController {
 //            }
 //        }
 //    }
+}
+
+private enum SharedImportHandlingError: LocalizedError {
+    case missingPayload
+
+    var errorDescription: String? { "共享资料已不存在，请重新分享。" }
 }
 
 // MARK: - UIGestureRecognizerDelegate
