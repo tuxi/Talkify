@@ -15,12 +15,13 @@ import CoreKit
 /// - macOS：标准侧栏布局，列表支持 selection 绑定。
 /// - iOS：支持搜索过滤、滑动删除，列表点选后自动 push 到详情。
 public struct SidebarView: View {
-
+    
     @Environment(WorkspaceStore.self) private var store
     @Environment(AuthManager.self) private var authManager
     @Environment(AgentManager.self) private var agentManager
     @Environment(UserManager.self) private var userManager
     @State private var searchText = ""
+    @State private var showAccountPopover = false
     @Binding var showSettings: Bool
 
     public var body: some View {
@@ -34,10 +35,8 @@ public struct SidebarView: View {
                 selected: $store.selectedConversation,
                 searchText: searchText
             )
-            #if os(macOS)
             Divider()
             footer
-            #endif
         }
         .background(.ultraThinMaterial)
         .navigationTitle(store.selectedTab.title)
@@ -61,6 +60,11 @@ public struct SidebarView: View {
         #endif
     }
 
+    // MARK: - Footer (Account Menu)
+
+    /// 平台适配的账户菜单入口：
+    /// - macOS：`AppMenu`（NSPopover），跟随触发视图锚定。
+    /// - iOS (iPad)：`Button` + SwiftUI `.popover`。
     private var footer: some View {
         #if os(macOS)
         AppMenu(
@@ -73,45 +77,78 @@ public struct SidebarView: View {
                 isRedeemingResetCard: agentManager.isRedeemingResetCard,
                 usageError: agentManager.usageError,
                 onContentSizeChange: resizeMenu,
-                onRefreshUsage: {
-                    agentManager.fetchUsage() 
-                },
+                onRefreshUsage: { agentManager.fetchUsage() },
                 onRefreshCards: { agentManager.refreshResetCards() },
                 onRedeemResetCard: { agentManager.redeemResetCard($0) },
                 onSettings: { showSettings = true },
                 onLogout: { authManager.logout() }
             )
         } label: {
-            HStack(spacing: 10) {
-                Text(accountInitial)
-                    .font(.system(size: 11, weight: .bold))
-                    .foregroundStyle(.white)
-                    .frame(width: 24, height: 24)
-                    .background(Color.accentColor, in: Circle())
-
-                Text(accountName)
-                    .font(.system(size: 14, weight: .medium))
-                    .lineLimit(1)
-                    .truncationMode(.tail)
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .layoutPriority(1)
-
-            }
-            .frame(maxWidth: .infinity, alignment: .leading)
-            .contentShape(Rectangle())
+            accountLabel
         }
         .frame(maxWidth: .infinity)
         .padding(.horizontal, 16)
         .padding(.vertical, 13)
         .accessibilityLabel("账户：\(accountName)")
-        .task {
-            guard authManager.isLoggedIn, authManager.isRegistered else { return }
-            await userManager.refreshProfileIfNeeded()
-            agentManager.fetchUsage()
-        }
+        .task { await loadAccountDataIfNeeded() }
         #else
-        EmptyView()
+        Button {
+            showAccountPopover = true
+        } label: {
+            accountLabel
+        }
+        .buttonStyle(.plain)
+        .frame(maxWidth: .infinity)
+        .padding(.horizontal, 16)
+        .padding(.vertical, 13)
+        .accessibilityLabel("账户：\(accountName)")
+        .popover(isPresented: $showAccountPopover) {
+            AccountMenuContent(
+                accountName: accountName,
+                accountInitial: accountInitial,
+                usage: agentManager.usage,
+                isRedeemingResetCard: agentManager.isRedeemingResetCard,
+                usageError: agentManager.usageError,
+                onContentSizeChange: { _ in },
+                onRefreshUsage: { agentManager.fetchUsage() },
+                onRefreshCards: { agentManager.refreshResetCards() },
+                onRedeemResetCard: { agentManager.redeemResetCard($0) },
+                onSettings: {
+                    showSettings = true
+                    showAccountPopover = false
+                },
+                onLogout: { authManager.logout() }
+            )
+        }
+        .task { await loadAccountDataIfNeeded() }
         #endif
+    }
+
+    /// 公共账户标签：头像首字母 + 昵称。
+    private var accountLabel: some View {
+        HStack(spacing: 10) {
+            Text(accountInitial)
+                .font(.system(size: 11, weight: .bold))
+                .foregroundStyle(.white)
+                .frame(width: 24, height: 24)
+                .background(Color.accentColor, in: Circle())
+
+            Text(accountName)
+                .font(.system(size: 14, weight: .medium))
+                .lineLimit(1)
+                .truncationMode(.tail)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .layoutPriority(1)
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .contentShape(Rectangle())
+    }
+
+    /// 登录后加载账户资料与用量。
+    private func loadAccountDataIfNeeded() async {
+        guard authManager.isLoggedIn, authManager.isRegistered else { return }
+        await userManager.refreshProfileIfNeeded()
+        agentManager.fetchUsage()
     }
 
     private var newTaskButton: some View {
@@ -178,7 +215,6 @@ public struct SidebarView: View {
     }
 }
 
-#if os(macOS)
 private struct AccountMenuContent: View {
     @Environment(\.dismiss) private var dismiss
 
@@ -439,4 +475,3 @@ private struct ResetCardSheet: View {
         return date.formatted(.dateTime.month(.abbreviated).day())
     }
 }
-#endif

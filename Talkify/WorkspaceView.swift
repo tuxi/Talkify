@@ -16,66 +16,66 @@ import AgentKit
 ///
 /// 平台 Root 视图只需 `WorkspaceView(dependencies:)` 一行接入。
 public struct WorkspaceView: View {
-
+    
     private let dependencies: AgentDependencies
-
+    
     @Environment(AppContainer.self) private var container
     @Environment(\.horizontalSizeClass) private var horizontalSizeClass
     @Environment(\.scenePhase) private var scenePhase
-
+    
     @State private var router = AgentRouter()
     @State private var store: WorkspaceStore
     @State private var columnVisibility: NavigationSplitViewVisibility = .all
     
     @State private var showSettings = false
-
-    #if os(iOS)
+    
+#if os(iOS)
     private var fileProvider: WorkspaceFileContentProvider {
         WorkspaceFileContentProvider(store: store)
     }
-    #endif
-
+#endif
+    
     /// 跨平台 FileContentProvider：iOS 提供 WorkspaceFileContentProvider，macOS 暂无。
     private var fileProviderForInspector: (any AgentKit.FileContentProvider)? {
-        #if os(iOS)
+#if os(iOS)
         return fileProvider
-        #else
+#else
         return nil
-        #endif
+#endif
     }
-
+    
     /// Inspector 内容视图。iOS 用 NavigationStack 容器，macOS 用平铺切换。
     /// macOS 上的 NavigationStack 会与 NavigationSplitView 的 inspector 列导航状态冲突，
     /// 导致 `comparisonTypeMismatch` 崩溃，暂时回退到 InspectorView。
     @ViewBuilder
     private var inspectorContent: some View {
-        #if os(iOS)
+#if os(iOS)
         InspectorNavigationView(
             initialSelection: store.inspectorSelection,
             fileProvider: fileProviderForInspector
         )
         .environment(\.workflowStore, store.workflowStore)
         .environment(\.runtimeClient, store.client)
-        #else
+#else
         InspectorView(selection: store.inspectorSelection)
             .environment(\.workflowStore, store.workflowStore)
             .environment(\.runtimeClient, store.client)
-        #endif
+#endif
     }
-
+    
     public init(dependencies: AgentDependencies) {
         self.dependencies = dependencies
         self._store = State(initialValue: AppContainer.makeWorkspaceStore(dependencies: dependencies))
     }
-
-  
+    
+    
     public var body: some View {
         content
             .task {
-                #if os(iOS)
+#if os(iOS)
                 store.startLifecycleNetworkMonitor()
                 await container.ensureAgentRuntimeStarted()
-                #endif
+#endif
                 await store.handleAppBecameActive()
             }
             .onChange(of: scenePhase) { _, newValue in
@@ -98,7 +98,7 @@ public struct WorkspaceView: View {
                 Task { await openNotificationSession(sessionID) }
             }
     }
-
+    
     @ViewBuilder
     private var content: some View {
         if horizontalSizeClass == .compact {
@@ -107,9 +107,9 @@ public struct WorkspaceView: View {
             standardLayout
         }
     }
-
+    
     // MARK: - iPhone (compact) — NavigationStack
-
+    
     @ViewBuilder
     private var iOSCompactLayout: some View {
         NavigationStack(path: $router.path) {
@@ -150,28 +150,28 @@ public struct WorkspaceView: View {
         .environment(router)
         .environment(store)
     }
-
+    
     /// 仅在当前 path 为空时 push（避免重复压栈）。
     private func pushToDetailIfNeeded(_ destination: AgentNavigationDestination) {
         guard router.path.isEmpty else { return }
         router.navigate(to: destination)
     }
-
+    
     private func openNotificationSession(_ sessionID: String) async {
         if !store.listViewModel.conversations.contains(where: { $0.id == sessionID }) {
             await store.listViewModel.refresh()
         }
         store.selectConversation(sessionID: sessionID)
         guard let conversation = store.selectedConversation, conversation.id == sessionID else { return }
-
+        
         if horizontalSizeClass == .compact {
             router.path = [.conversationDetail(conversation: conversation)]
         }
         container.conversationNotifications.consumePendingSessionID(sessionID)
     }
-
+    
     // MARK: - iPad / macOS (regular) — NavigationSplitView
-
+    
     @ViewBuilder
     private var standardLayout: some View {
         if showSettings {
@@ -186,6 +186,25 @@ public struct WorkspaceView: View {
                 NavigationStack(path: $router.path) {
                     ConversationDetailView(conversation: store.selectedConversation)
                         .withAgentNavigationDestinations(router: router, dependencies: dependencies)
+#if os(iOS) // iPad 上关闭sidebar 后增加显示侧栏的按钮
+                        .toolbar {
+                            ToolbarItem(placement: .topBarLeading) {
+                                if columnVisibility == .detailOnly {
+                                    Button {
+                                        columnVisibility = .all
+                                    } label: {
+                                        Image(systemName: "sidebar.left")
+                                            .accessibilityLabel("显示侧栏")
+                                    }
+                                }
+                            }
+                        }
+#endif
+#if os(macOS)
+                        .frame(maxWidth: 800)
+                        .frame(minWidth: 230)
+#endif
+                        .navigationTitle(store.activeConversationViewModel?.conversation?.name ?? "")
                 }
                 .inspector(isPresented: $store.isInspectorPresented) {
                     inspectorContent
@@ -206,20 +225,21 @@ private extension View {
     /// 跨平台的侧栏列宽：macOS 用 min/max 范围，iOS 用固定值。
     @ViewBuilder
     func platformSidebarColumnWidth() -> some View {
-        #if os(iOS)
-        self.navigationSplitViewColumnWidth(320)
-        #else
+#if os(iOS)
+//        self.navigationSplitViewColumnWidth(320) // iPhone
+        self.navigationSplitViewColumnWidth(min: 200, ideal: 260, max: 330) // iPad
+#else
         self.navigationSplitViewColumnWidth(min: 200, ideal: 260, max: 360)
-        #endif
+#endif
     }
-
+    
     /// 跨平台的 inspector 列宽：macOS 用 min/max 范围，iOS 用固定值。
     @ViewBuilder
     func platformInspectorColumnWidth() -> some View {
-        #if os(iOS)
+#if os(iOS)
         self.inspectorColumnWidth(320)
-        #else
+#else
         self.inspectorColumnWidth(min: 280, ideal: 320, max: 480)
-        #endif
+#endif
     }
 }

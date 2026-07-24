@@ -99,13 +99,24 @@ private struct ChatRootViewRepresentable: UIViewControllerRepresentable {
 
 // MARK: - TalkifyRootView
 
+/// iOS 平台根视图：按 size class 分流 iPad 与 iPhone 两套布局。
+///
+/// - **iPad (regular)**：使用 `WorkspaceView`，与 macOS 一致的
+///   `NavigationSplitView` 三栏 SideBar 布局。
+/// - **iPhone (compact)**：使用 `ChatDrawerWorkspace`，以 UIKit 驱动的
+///   抽屉式架构（ChatGPT 风格滑出侧栏）。
 struct TalkifyRootView: View {
 
     @Environment(AppContainer.self) private var container
+    @Environment(\.horizontalSizeClass) private var horizontalSizeClass
 
     var body: some View {
         if container.authManager.isLoggedIn {
-            ChatDrawerWorkspace(dependencies: container.makeAgentDependencies())
+            if horizontalSizeClass == .regular {
+                WorkspaceView(dependencies: container.makeAgentDependencies())
+            } else {
+                ChatDrawerWorkspace(dependencies: container.makeAgentDependencies())
+            }
         } else {
             AuthView(viewModel: container.makeAuthViewModel())
         }
