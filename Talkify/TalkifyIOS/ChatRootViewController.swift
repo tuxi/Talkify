@@ -466,16 +466,14 @@ final class ChatRootViewController: UIViewController {
     /// Pushes file preview with UIKit slide animation. The pushed VC carries its own
     /// NavigationStack for the back button, so UINavigationController's bar stays hidden.
     private func showFilePreview(path: String) {
-        let previewWithNav = NavigationStack {
-            FilePreviewHost(
-                filePath: path,
-                fileName: (path as NSString).lastPathComponent,
-                provider: fileProvider,
-                showDiff: false
-            )
-        }
+        let preview =  FilePreviewHost(
+            filePath: path,
+            fileName: (path as NSString).lastPathComponent,
+            provider: fileProvider,
+            showDiff: false
+        )
 
-        let previewVC = UIHostingController(rootView: previewWithNav)
+        let previewVC = UIHostingController(rootView: preview)
         navigationController?.pushViewController(previewVC, animated: true)
     }
 
