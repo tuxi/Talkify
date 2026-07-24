@@ -54,8 +54,12 @@ public struct WorkspaceView: View {
             initialSelection: store.inspectorSelection,
             fileProvider: fileProviderForInspector
         )
+        .environment(\.workflowStore, store.workflowStore)
+        .environment(\.runtimeClient, store.client)
         #else
         InspectorView(selection: store.inspectorSelection)
+            .environment(\.workflowStore, store.workflowStore)
+            .environment(\.runtimeClient, store.client)
         #endif
     }
 

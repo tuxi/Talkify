@@ -48,6 +48,8 @@ private struct ChatDetailWrapper: View {
             .presentationDetents([.medium, .large])
             .presentationDragIndicator(.visible)
             .environment(store)
+            .environment(\.workflowStore, store.workflowStore)
+            .environment(\.runtimeClient, store.client)
         }
         .withAgentSheetDestinations(sheetDestinations: $router.presentedSheet, dependencies: dependencies)
         .withAgentCoverDestinations(coverDestinations: $router.presentedCover, dependencies: dependencies)
