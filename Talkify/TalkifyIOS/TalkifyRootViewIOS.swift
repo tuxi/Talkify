@@ -24,7 +24,7 @@ import FeatureAuth
 /// Replicates the lifecycle logic that `WorkspaceView` provides for the
 /// standard `NavigationSplitView` / `NavigationStack` layouts, but targets
 /// the custom drawer architecture exclusively on iOS.
-private struct ChatDrawerWorkspace: View {
+struct ChatDrawerWorkspace: View {
 
     let dependencies: AgentDependencies
 
@@ -99,20 +99,24 @@ private struct ChatRootViewRepresentable: UIViewControllerRepresentable {
 
 // MARK: - TalkifyRootView
 
-/// iOS 平台根视图：按 size class 分流 iPad 与 iPhone 两套布局。
+/// iOS 平台根视图：按设备类型分流 iPad 与 iPhone。
 ///
-/// - **iPad (regular)**：使用 `WorkspaceView`，与 macOS 一致的
-///   `NavigationSplitView` 三栏 SideBar 布局。
-/// - **iPhone (compact)**：使用 `ChatDrawerWorkspace`，以 UIKit 驱动的
+/// - **iPad**：始终使用 `WorkspaceView`，内部根据 `horizontalSizeClass`
+///   自动切换三栏 `NavigationSplitView` ↔ `NavigationStack`。
+///   iPad 在 Slide Over / 分屏时可能为 compact，但始终应走 WorkspaceView。
+/// - **iPhone**：使用 `ChatDrawerWorkspace`，以 UIKit 驱动的
 ///   抽屉式架构（ChatGPT 风格滑出侧栏）。
 struct TalkifyRootView: View {
 
     @Environment(AppContainer.self) private var container
-    @Environment(\.horizontalSizeClass) private var horizontalSizeClass
+
+    private var isPad: Bool {
+        UIDevice.current.userInterfaceIdiom == .pad
+    }
 
     var body: some View {
         if container.authManager.isLoggedIn {
-            if horizontalSizeClass == .regular {
+            if isPad {
                 WorkspaceView(dependencies: container.makeAgentDependencies())
             } else {
                 ChatDrawerWorkspace(dependencies: container.makeAgentDependencies())

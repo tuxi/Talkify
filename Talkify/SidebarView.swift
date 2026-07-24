@@ -35,8 +35,6 @@ public struct SidebarView: View {
                 selected: $store.selectedConversation,
                 searchText: searchText
             )
-            Divider()
-            footer
         }
         .background(.ultraThinMaterial)
         .navigationTitle(store.selectedTab.title)
@@ -60,96 +58,6 @@ public struct SidebarView: View {
         #endif
     }
 
-    // MARK: - Footer (Account Menu)
-
-    /// 平台适配的账户菜单入口：
-    /// - macOS：`AppMenu`（NSPopover），跟随触发视图锚定。
-    /// - iOS (iPad)：`Button` + SwiftUI `.popover`。
-    private var footer: some View {
-        #if os(macOS)
-        AppMenu(
-            presentation: .fixedToTrigger(preferredEdge: .maxY)
-        ) { resizeMenu in
-            AccountMenuContent(
-                accountName: accountName,
-                accountInitial: accountInitial,
-                usage: agentManager.usage,
-                isRedeemingResetCard: agentManager.isRedeemingResetCard,
-                usageError: agentManager.usageError,
-                onContentSizeChange: resizeMenu,
-                onRefreshUsage: { agentManager.fetchUsage() },
-                onRefreshCards: { agentManager.refreshResetCards() },
-                onRedeemResetCard: { agentManager.redeemResetCard($0) },
-                onSettings: { showSettings = true },
-                onLogout: { authManager.logout() }
-            )
-        } label: {
-            accountLabel
-        }
-        .frame(maxWidth: .infinity)
-        .padding(.horizontal, 16)
-        .padding(.vertical, 13)
-        .accessibilityLabel("账户：\(accountName)")
-        .task { await loadAccountDataIfNeeded() }
-        #else
-        Button {
-            showAccountPopover = true
-        } label: {
-            accountLabel
-        }
-        .buttonStyle(.plain)
-        .frame(maxWidth: .infinity)
-        .padding(.horizontal, 16)
-        .padding(.vertical, 13)
-        .accessibilityLabel("账户：\(accountName)")
-        .popover(isPresented: $showAccountPopover) {
-            AccountMenuContent(
-                accountName: accountName,
-                accountInitial: accountInitial,
-                usage: agentManager.usage,
-                isRedeemingResetCard: agentManager.isRedeemingResetCard,
-                usageError: agentManager.usageError,
-                onContentSizeChange: { _ in },
-                onRefreshUsage: { agentManager.fetchUsage() },
-                onRefreshCards: { agentManager.refreshResetCards() },
-                onRedeemResetCard: { agentManager.redeemResetCard($0) },
-                onSettings: {
-                    showSettings = true
-                    showAccountPopover = false
-                },
-                onLogout: { authManager.logout() }
-            )
-        }
-        .task { await loadAccountDataIfNeeded() }
-        #endif
-    }
-
-    /// 公共账户标签：头像首字母 + 昵称。
-    private var accountLabel: some View {
-        HStack(spacing: 10) {
-            Text(accountInitial)
-                .font(.system(size: 11, weight: .bold))
-                .foregroundStyle(.white)
-                .frame(width: 24, height: 24)
-                .background(Color.accentColor, in: Circle())
-
-            Text(accountName)
-                .font(.system(size: 14, weight: .medium))
-                .lineLimit(1)
-                .truncationMode(.tail)
-                .frame(maxWidth: .infinity, alignment: .leading)
-                .layoutPriority(1)
-        }
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .contentShape(Rectangle())
-    }
-
-    /// 登录后加载账户资料与用量。
-    private func loadAccountDataIfNeeded() async {
-        guard authManager.isLoggedIn, authManager.isRegistered else { return }
-        await userManager.refreshProfileIfNeeded()
-        agentManager.fetchUsage()
-    }
 
     private var newTaskButton: some View {
         Button {
@@ -171,51 +79,9 @@ public struct SidebarView: View {
         .padding(.bottom, 10)
         .accessibilityHint("创建一个新的对话草稿")
     }
-
-    private var accountName: String {
-        guard authManager.isLoggedIn else { return "未登录" }
-
-        let candidates = [
-            userManager.profile?.nickname,
-            authManager.displayNickname
-        ]
-        if let name = candidates.lazy.compactMap({ value -> String? in
-            guard let value else { return nil }
-            let trimmed = value.trimmingCharacters(in: .whitespacesAndNewlines)
-            return trimmed.isEmpty ? nil : trimmed
-        }).first {
-            return name
-        }
-
-        if let username = userManager.profile?.username.trimmingCharacters(in: .whitespacesAndNewlines),
-           !username.isEmpty,
-           !username.allSatisfy(\.isNumber) {
-            return username
-        }
-        if let userID = authManager.token?.userId {
-            return "用户 \(userID)"
-        }
-        return "账户"
-    }
-
-    private var accountInitial: String {
-        String(accountName.prefix(1)).uppercased()
-    }
-
-    private var usageTitle: String {
-        guard let usage = agentManager.usage else { return "剩余用量" }
-        let remaining = max(usage.weekly.unitsLimit - usage.weekly.unitsUsed, 0)
-        return "剩余用量：\(formattedUnits(remaining)) / \(formattedUnits(usage.weekly.unitsLimit))"
-    }
-
-    private func formattedUnits(_ value: Int) -> String {
-        value >= 1_000_000
-            ? String(format: "%.1fM", Double(value) / 1_000_000)
-            : (value >= 1_000 ? String(format: "%.1fK", Double(value) / 1_000) : "\(value)")
-    }
 }
 
-private struct AccountMenuContent: View {
+struct AccountMenuContent: View {
     @Environment(\.dismiss) private var dismiss
 
     let accountName: String

@@ -11,6 +11,7 @@ import UIKit
 import UniformTypeIdentifiers
 import AgentKit
 import FileViewerKit
+import CoreKit
 
 /// 抽屉内部的工作区枢纽视图。
 ///
@@ -41,6 +42,17 @@ struct WorkspaceHubView: View {
     var onFileSelected: ((String) -> Void)?
     /// 工作区 ZIP 准备完成 → 由宿主展示系统分享面板
     var onWorkspaceExportReady: ((URL) -> Void)?
+    
+    
+    var tabs: [HubTab] {
+        if DeviceInfo.isPadLayout {
+            return [
+                .conversations,
+                .files
+            ]
+        }
+        return HubTab.allCases
+    }
 
     // MARK: - Local State
 
@@ -112,7 +124,12 @@ struct WorkspaceHubView: View {
                         .safeAreaPadding(.bottom, 68)
                 }
                 .overlay(alignment: .bottom, content: {
-                    bottomBar
+                    if !DeviceInfo.isPadLayout {
+                        bottomBar
+                            .safeAreaPadding()
+                        
+                    }
+                    
                 })
             }
         }
@@ -358,39 +375,19 @@ struct WorkspaceHubView: View {
             }
             .buttonStyle(.plain)
             .accessibilityLabel("切换项目")
-
-            Button {
-                exportWorkspace()
-            } label: {
-                Group {
-                    if isExportingWorkspace {
-                        ProgressView()
-                            .controlSize(.small)
-                    } else {
-                        Image(systemName: "square.and.arrow.up")
-                            .font(.system(size: 15, weight: .semibold))
+            if !DeviceInfo.isPadLayout {
+                Button {
+                    exportWorkspace()
+                } label: {
+                    Group {
+                        if isExportingWorkspace {
+                            ProgressView()
+                                .controlSize(.small)
+                        } else {
+                            Image(systemName: "square.and.arrow.up")
+                                .font(.system(size: 15, weight: .semibold))
+                        }
                     }
-                }
-                .foregroundStyle(.secondary)
-                .frame(width: 38, height: 38)
-                .background(
-                    Color.primary.opacity(colorScheme == .dark ? 0.08 : 0.05),
-                    in: RoundedRectangle(cornerRadius: 11, style: .continuous)
-                )
-                .overlay {
-                    RoundedRectangle(cornerRadius: 11, style: .continuous)
-                        .stroke(Color.primary.opacity(0.06), lineWidth: 0.5)
-                }
-            }
-            .buttonStyle(.plain)
-            .disabled(isExportingWorkspace || fileProvider == nil)
-            .accessibilityLabel(isExportingWorkspace ? "正在导出项目" : "导出项目")
-
-            Button {
-                onWorkspaceBrowserRequested?()
-            } label: {
-                Image(systemName: "arrow.up.right.square")
-                    .font(.system(size: 15, weight: .semibold))
                     .foregroundStyle(.secondary)
                     .frame(width: 38, height: 38)
                     .background(
@@ -401,10 +398,31 @@ struct WorkspaceHubView: View {
                         RoundedRectangle(cornerRadius: 11, style: .continuous)
                             .stroke(Color.primary.opacity(0.06), lineWidth: 0.5)
                     }
+                }
+                .buttonStyle(.plain)
+                .disabled(isExportingWorkspace || fileProvider == nil)
+                .accessibilityLabel(isExportingWorkspace ? "正在导出项目" : "导出项目")
+
+                Button {
+                    onWorkspaceBrowserRequested?()
+                } label: {
+                    Image(systemName: "arrow.up.right.square")
+                        .font(.system(size: 15, weight: .semibold))
+                        .foregroundStyle(.secondary)
+                        .frame(width: 38, height: 38)
+                        .background(
+                            Color.primary.opacity(colorScheme == .dark ? 0.08 : 0.05),
+                            in: RoundedRectangle(cornerRadius: 11, style: .continuous)
+                        )
+                        .overlay {
+                            RoundedRectangle(cornerRadius: 11, style: .continuous)
+                                .stroke(Color.primary.opacity(0.06), lineWidth: 0.5)
+                        }
+                }
+                .buttonStyle(.plain)
+                .disabled(workspaceContext.activeWorkspace == nil)
+                .accessibilityLabel("查看当前项目")
             }
-            .buttonStyle(.plain)
-            .disabled(workspaceContext.activeWorkspace == nil)
-            .accessibilityLabel("查看当前项目")
         }
         .padding(.horizontal, 16)
         .padding(.top, 14)
@@ -467,7 +485,7 @@ struct WorkspaceHubView: View {
 
     private var tabBar: some View {
         HStack(spacing: 3) {
-            ForEach(HubTab.allCases, id: \.self) { tab in
+            ForEach(tabs, id: \.self) { tab in
                 Button {
                     UISelectionFeedbackGenerator().selectionChanged()
                     withAnimation(.snappy(duration: 0.24, extraBounce: 0.04)) {
@@ -643,19 +661,6 @@ private struct WorkspaceSwitcherView: View {
     var body: some View {
         NavigationStack {
             List {
-                Section("添加工作区") {
-                    Button(action: onCreate) {
-                        Label("新建空白工作区", systemImage: "folder.badge.plus")
-                    }
-                    Button(action: onImport) {
-                        Label("从文件 App 导入", systemImage: "square.and.arrow.down")
-                    }
-                    if let onClone {
-                        Button(action: onClone) {
-                            Label("克隆 Git 仓库", systemImage: "arrow.down.circle")
-                        }
-                    }
-                }
 
                 if filteredWorkspaces.isEmpty {
                     if !query.isEmpty {
@@ -700,6 +705,19 @@ private struct WorkspaceSwitcherView: View {
                                     ? Color.accentColor.opacity(0.07)
                                     : Color.clear
                             )
+                        }
+                    }
+                }
+                Section("添加工作区") {
+                    Button(action: onCreate) {
+                        Label("新建空白工作区", systemImage: "folder.badge.plus")
+                    }
+                    Button(action: onImport) {
+                        Label("从文件 App 导入", systemImage: "square.and.arrow.down")
+                    }
+                    if let onClone {
+                        Button(action: onClone) {
+                            Label("克隆 Git 仓库", systemImage: "arrow.down.circle")
                         }
                     }
                 }
