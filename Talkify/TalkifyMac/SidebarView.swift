@@ -38,16 +38,6 @@ public struct SidebarView: View {
         }
         .background(.ultraThinMaterial)
         .navigationTitle(store.selectedTab.title)
-//        .toolbar {
-//            ToolbarItem(placement: .primaryAction) {
-//                Button {
-//                    showSettings = true
-//                } label: {
-//                    Image(systemName: "gearshape")
-//                }
-//                .accessibilityLabel("设置")
-//            }
-//        }
         #if os(iOS)
         .searchable(
             text: $searchText,

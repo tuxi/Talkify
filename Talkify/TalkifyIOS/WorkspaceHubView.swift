@@ -31,6 +31,7 @@ struct WorkspaceHubView: View {
     let searchText: String
     let fileProvider: WorkspaceFileContentProvider?
     let workspaceContext: IOSWorkspaceContext
+    let isBottomHide: Bool
 
     /// 用户点击 WorkspaceHeader 右侧 [›] → 父 VC present WorkspaceBrowser
     var onWorkspaceBrowserRequested: (() -> Void)?
@@ -124,7 +125,7 @@ struct WorkspaceHubView: View {
                         .safeAreaPadding(.bottom, 68)
                 }
                 .overlay(alignment: .bottom, content: {
-                    if !DeviceInfo.isPadLayout {
+                    if !isBottomHide {
                         bottomBar
                             .safeAreaPadding()
                         
@@ -1023,14 +1024,17 @@ private struct WorkspaceConversationListView: View {
             .padding(.vertical, 8)
 
             if conversations.isEmpty && !store.listViewModel.isLoading {
-                WorkspaceSectionEmptyState(
-                    icon: "bubble.left.and.bubble.right",
-                    title: "开始第一次对话",
-                    description: "描述你想在 \(workspaceName) 中构建或修改的内容，CodeAgent 会直接在这个工作区中工作。",
-                    primaryTitle: "开始对话",
-                    primaryIcon: "square.and.pencil",
-                    primaryAction: onCreateConversation
-                )
+                ScrollView {
+                    WorkspaceSectionEmptyState(
+                        icon: "bubble.left.and.bubble.right",
+                        title: "开始第一次对话",
+                        description: "描述你想在 \(workspaceName) 中构建或修改的内容，CodeAgent 会直接在这个工作区中工作。",
+                        primaryTitle: "开始对话",
+                        primaryIcon: "square.and.pencil",
+                        primaryAction: onCreateConversation
+                    )
+                }
+                .scrollIndicators(.hidden, axes: .vertical)
             } else {
                 List(conversations, id: \.id) { conversation in
                     Button {
@@ -1483,17 +1487,20 @@ private struct WorkspaceFilesView: View {
                     primaryAction: { Task { await loadDirectory() } }
                 )
             } else if nodes.isEmpty {
-                WorkspaceSectionEmptyState(
-                    icon: "folder",
-                    title: "工作区还是空的",
-                    description: "让 CodeAgent 根据你的想法创建文件，或者从“文件”App 复制已有内容。",
-                    primaryTitle: "让 CodeAgent 创建",
-                    primaryIcon: "sparkles",
-                    primaryAction: onStartConversation,
-                    secondaryTitle: "导入文件",
-                    secondaryIcon: "square.and.arrow.down",
-                    secondaryAction: onImportItems
-                )
+                ScrollView {
+                    WorkspaceSectionEmptyState(
+                        icon: "folder",
+                        title: "工作区还是空的",
+                        description: "让 CodeAgent 根据你的想法创建文件，或者从“文件”App 复制已有内容。",
+                        primaryTitle: "让 CodeAgent 创建",
+                        primaryIcon: "sparkles",
+                        primaryAction: onStartConversation,
+                        secondaryTitle: "导入文件",
+                        secondaryIcon: "square.and.arrow.down",
+                        secondaryAction: onImportItems
+                    )
+                }
+                .scrollIndicators(.hidden, axes: .vertical)
             } else {
                 List(nodes) { node in
                     Button {

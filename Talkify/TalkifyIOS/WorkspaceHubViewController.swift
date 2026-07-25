@@ -63,6 +63,7 @@ final class WorkspaceHubViewController: UIViewController {
             searchText: searchText,
             fileProvider: fileProvider,
             workspaceContext: workspaceContext,
+            isBottomHide: false,
             onWorkspaceBrowserRequested: { [weak self] in
                 self?.onWorkspaceBrowserRequested?()
             },

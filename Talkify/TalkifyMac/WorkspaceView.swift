@@ -121,8 +121,11 @@ public struct WorkspaceView: View {
     @ViewBuilder
     private var content: some View {
         if horizontalSizeClass == .compact {
-//            iOSCompactLayout
+            #if os(iOS)
             ChatDrawerWorkspace(dependencies: container.makeAgentDependencies())
+            #else
+            iOSCompactLayout
+            #endif
         } else {
             standardLayout
         }
@@ -208,15 +211,13 @@ public struct WorkspaceView: View {
                             workspaceContext = IOSWorkspaceContext(store: store)
                         }
                     }
-                    .navigationTitle("Code")
-#if os(iOS)
-                    .searchable(
-                        text: $searchText,
-                        placement: .navigationBarDrawer,
-                        prompt: "搜索会话…"
-                    )
-                    .navigationBarTitleDisplayMode(.large)
-#endif
+//                    .navigationTitle("Code")
+//                    .searchable(
+//                        text: $searchText,
+//                        placement: .navigationBarDrawer,
+//                        prompt: "搜索会话…"
+//                    )
+//                    .navigationBarTitleDisplayMode(.large)
 #else
                 VStack {
                     SidebarView(showSettings: $showSettings)
@@ -321,6 +322,9 @@ public struct WorkspaceView: View {
                 }
             }
 #endif
+            .onChange(of: store.selectedConversation, { oldValue, newValue in
+                store.isInspectorPresented = false
+            })
             .withAgentSheetDestinations(sheetDestinations: $router.presentedSheet, dependencies: dependencies)
             .withAgentCoverDestinations(coverDestinations: $router.presentedCover, dependencies: dependencies)
             .environment(router)
@@ -352,9 +356,10 @@ public struct WorkspaceView: View {
             ZStack(alignment: .bottom) {
                 WorkspaceHubView(
                     selectedConversation: $store.selectedConversation,
-                    searchText: "",
+                    searchText: searchText,
                     fileProvider: fileProvider,
                     workspaceContext: workspaceContext,
+                    isBottomHide: true,
                     onWorkspaceBrowserRequested: { showWorkspaceBrowser = true },
                     onNewChat: {
                         columnVisibility = .detailOnly
@@ -368,7 +373,8 @@ public struct WorkspaceView: View {
                     if store.selectedConversation != nil {
                         // iPad 中，当已经选择一个对话时，显示新建对话
                         Button {
-    //                        onNewChat?()
+                            columnVisibility = .detailOnly
+                            store.beginDraft()
                         } label: {
                             HStack(spacing: 7) {
                                 Image(systemName: "square.and.pencil")
