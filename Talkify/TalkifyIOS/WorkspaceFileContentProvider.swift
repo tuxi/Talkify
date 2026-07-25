@@ -305,7 +305,7 @@ extension WorkspaceFileContentProvider: FileViewerKit.FileContentProvider {
         let contents = try fileManager.contentsOfDirectory(
             at: url,
             includingPropertiesForKeys: [.fileSizeKey, .contentModificationDateKey],
-            options: [.skipsHiddenFiles]
+//            options: [.skipsHiddenFiles]
         )
 
         let root = workspaceRoot ?? absPath

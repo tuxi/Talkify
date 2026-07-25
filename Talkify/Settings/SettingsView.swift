@@ -18,11 +18,11 @@ public struct SettingsView: View {
     @Environment(UserManager.self) private var userManager
     @Environment(AuthManager.self) private var authManager
     @Environment(\.horizontalSizeClass) private var horizontalSizeClass
-
+    
     private let onClose: () -> Void
     @State private var selection: SettingsSection = .general
     @State private var searchText = ""
-
+    
     @AppStorage("settings.defaultPermission") private var defaultPermission = true
     @AppStorage("settings.autoApproval") private var autoApproval = true
     @AppStorage("settings.fullDiskAccess") private var fullDiskAccess = false
@@ -30,11 +30,11 @@ public struct SettingsView: View {
     @AppStorage("settings.showBottomPanel") private var showBottomPanel = true
     
     @State var router = SettingsRouter()
-
+    
     public init(onClose: @escaping () -> Void = {}) {
         self.onClose = onClose
     }
-
+    
     public var body: some View {
         Group {
             if horizontalSizeClass == .compact {
@@ -54,15 +54,15 @@ public struct SettingsView: View {
             }
         }
     }
-
+    
     // MARK: - Compact (iPhone) — NavigationStack
-
+    
     private var compactLayout: some View {
         NavigationStack(path: $router.path) {
             settingsSidebar(navigateWithRouter: true)
                 .withSettingsNavigationDestinations(router: router)
                 .toolbar {
-                    #if os(iOS)
+#if os(iOS)
                     ToolbarItem(placement: .topBarTrailing) {
                         Button {
                             onClose()
@@ -71,17 +71,17 @@ public struct SettingsView: View {
                                 .font(.system(size: 16))
                                 .clipShape(Circle())
                         }
-
+                        
                     }
-                    #endif
+#endif
                 }
         }
         .withSettingsSheetDestinations(sheetDestinations: $router.presentedSheet)
         .withSettingsCoverDestinations(coverDestinations: $router.presentedCover)
     }
-
+    
     // MARK: - Regular (iPad / macOS) — NavigationSplitView
-
+    
     private var regularLayout: some View {
         NavigationSplitView {
             settingsSidebar(navigateWithRouter: false)
@@ -96,9 +96,9 @@ public struct SettingsView: View {
         }
         .navigationSplitViewStyle(.balanced)
     }
-
+    
     // MARK: - Sidebar
-
+    
     private func settingsSidebar(navigateWithRouter: Bool) -> some View {
         VStack(spacing: 0) {
             if horizontalSizeClass == .regular {
@@ -128,79 +128,149 @@ public struct SettingsView: View {
                 }
                 .padding(.horizontal, 14)
                 .padding(.bottom, 16)
-            }
-            
-
-            ScrollView(showsIndicators: false) {
-                VStack {
-                    Text(accountInitial)
-                        .font(.system(size: 34, weight: .medium))
-                        .foregroundStyle(.white)
-                        .frame(width: 80, height: 80)
-                        .background(Color.accentColor, in: Circle())
-                        .padding(.top, 30)
-
-                    Text(accountName)
-                        .font(.system(size: 23, weight: .regular))
-                        .padding(.top, 10)
-                }
-                LazyVStack(alignment: .leading, spacing: 2) {
-                    ForEach(SettingsSection.Group.allCases, id: \.self) { group in
-                        let sections = filteredSections(in: group)
-                        if !sections.isEmpty {
-                            Text(group.title)
-                                .font(.system(size: 13, weight: .semibold))
-                                .foregroundStyle(.tertiary)
-                                .padding(.horizontal, 16)
-                                .padding(.top, group == .personal ? 8 : 20)
-                                .padding(.bottom, 5)
-
-                            ForEach(sections) { section in
-                                Button {
-                                    if navigateWithRouter {
-                                        router.navigate(to: .detail(section))
-                                    } else {
-                                        selection = section
-                                    }
-                                } label: {
-                                    let isSelected: Bool = {
+                
+                ScrollView(showsIndicators: false) {
+                    VStack {
+                        Text(accountInitial)
+                            .font(.system(size: 34, weight: .medium))
+                            .foregroundStyle(.white)
+                            .frame(width: 80, height: 80)
+                            .background(Color.accentColor, in: Circle())
+                            .padding(.top, 30)
+                        
+                        Text(accountName)
+                            .font(.system(size: 23, weight: .regular))
+                            .padding(.top, 10)
+                    }
+                    LazyVStack(alignment: .leading, spacing: 2) {
+                        ForEach(SettingsSection.Group.allCases, id: \.self) { group in
+                            let sections = filteredSections(in: group)
+                            if !sections.isEmpty {
+                                Text(group.title)
+                                    .font(.system(size: 13, weight: .semibold))
+                                    .foregroundStyle(.tertiary)
+                                    .padding(.horizontal, 16)
+                                    .padding(.top, group == .personal ? 8 : 20)
+                                    .padding(.bottom, 5)
+                                
+                                ForEach(sections) { section in
+                                    Button {
                                         if navigateWithRouter {
-                                            if case .detail(let s) = router.path.last, s == section {
-                                                return true
-                                            }
-                                            return false
+                                            router.navigate(to: .detail(section))
+                                        } else {
+                                            selection = section
                                         }
-                                        return selection == section
-                                    }()
-                                    SettingsSidebarRow(section: section, isSelected: isSelected)
-                                        .contentShape(Rectangle())
+                                    } label: {
+                                        let isSelected: Bool = {
+                                            if navigateWithRouter {
+                                                if case .detail(let s) = router.path.last, s == section {
+                                                    return true
+                                                }
+                                                return false
+                                            }
+                                            return selection == section
+                                        }()
+                                        SettingsSidebarRow(section: section, isSelected: isSelected)
+                                            .contentShape(Rectangle())
+                                    }
+                                    .buttonStyle(.plain)
                                 }
-                                .buttonStyle(.plain)
+                            }
+                        }
+                        if horizontalSizeClass == .compact {
+                            Button(role: .destructive) {
+                                authManager.logout()
+                            } label: {
+                                Label("退出登录", systemImage: "rectangle.portrait.and.arrow.right")
+                                    .font(.system(size: 15, weight: .medium))
+                                    .frame(maxWidth: .infinity, alignment: .leading)
+                                    .padding(.horizontal, 16)
+                                    .padding(.vertical, 15)
+                            }
+                            .buttonStyle(.plain)
+                            .foregroundStyle(.red)
+                        }
+                    }
+                    .padding(.bottom, 20)
+                }
+            } else {
+                List {
+                    Section {
+                        HStack {
+                            Spacer()
+                            VStack {
+                                Text(accountInitial)
+                                    .font(.system(size: 34, weight: .medium))
+                                    .foregroundStyle(.white)
+                                    .frame(width: 80, height: 80)
+                                    .background(Color.accentColor, in: Circle())
+                                    .padding(.top, 30)
+                                
+                                Text(accountName)
+                                    .font(.system(size: 23, weight: .regular))
+                                    .padding(.top, 10)
+                            }
+                            Spacer()
+                        }
+                    }
+                    .listRowBackground(Color.clear) // 隐藏头像区域的白色卡片背景
+                    .listRowInsets(EdgeInsets())    // 清除边距以居中
+                    
+                    ForEach(SettingsSection.Group.allCases, id: \.self) { group in
+                        Section {
+                            let sections = filteredSections(in: group)
+                            if !sections.isEmpty {
+                                Section(header: Text(group.title)) {
+                                    ForEach(sections) { section in
+                                        Button {
+                                            if navigateWithRouter {
+                                                router.navigate(to: .detail(section))
+                                            } else {
+                                                selection = section
+                                            }
+                                        } label: {
+                                            let isSelected: Bool = {
+                                                if navigateWithRouter {
+                                                    if case .detail(let s) = router.path.last, s == section {
+                                                        return true
+                                                    }
+                                                    return false
+                                                }
+                                                return selection == section
+                                            }()
+                                            
+                                            // 自定义行布局（包含图标、标题、Chevron箭头等）
+                                            SettingsSidebarRow(section: section, isSelected: isSelected)
+                                        }
+                                        .buttonStyle(.plain)
+                                    }
+                                }
+                            }
+                        }
+                        
+                    }
+                    // 底部退出登录按钮（针对 Compact 宽度显示）
+                    if horizontalSizeClass == .compact {
+                        Section {
+                            Button(role: .destructive) {
+                                authManager.logout()
+                            } label: {
+                                Label("退出登录", systemImage: "rectangle.portrait.and.arrow.right")
+                                    .font(.system(size: 16, weight: .medium))
+                                    .foregroundStyle(.red)
                             }
                         }
                     }
-                    if horizontalSizeClass == .compact {
-                        Button(role: .destructive) {
-                            authManager.logout()
-                        } label: {
-                            Label("退出登录", systemImage: "rectangle.portrait.and.arrow.right")
-                                .font(.system(size: 15, weight: .medium))
-                                .frame(maxWidth: .infinity, alignment: .leading)
-                                .padding(.horizontal, 16)
-                                .padding(.vertical, 15)
-                        }
-                        .buttonStyle(.plain)
-                        .foregroundStyle(.red)
-                    }
                 }
-                .padding(.bottom, 20)
+                .listStyle(.insetGrouped)
             }
+            
         }
         .background(.ultraThinMaterial)
     }
-
+    
     // MARK: - Helpers
-
+    
     private func filteredSections(in group: SettingsSection.Group) -> [SettingsSection] {
         let query = searchText.trimmingCharacters(in: .whitespacesAndNewlines)
         return SettingsSection.allCases.filter {
@@ -212,9 +282,9 @@ public struct SettingsView: View {
         guard authManager.isLoggedIn else { return "未登录" }
         return authManager.displayNickname ?? userManager.profile?.nickname ?? "Unknow"
     }
-
+    
     private var accountInitial: String { String(accountName.prefix(1)).uppercased() }
-
+    
 }
 
 // MARK: - SettingsDetailView
@@ -224,53 +294,65 @@ public struct SettingsDetailView: View {
     @Environment(AgentManager.self) private var agentManager
     @Environment(UserManager.self) private var userManager
     @Environment(AuthManager.self) private var authManager
-
+    
     let section: SettingsSection
-
+    
     @AppStorage("settings.defaultPermission") private var defaultPermission = true
     @AppStorage("settings.autoApproval") private var autoApproval = true
     @AppStorage("settings.fullDiskAccess") private var fullDiskAccess = false
     @AppStorage("settings.showInMenuBar") private var showInMenuBar = true
     @AppStorage("settings.showBottomPanel") private var showBottomPanel = true
-
+    
     public var body: some View {
-        ScrollView(showsIndicators: false) {
+        contentView
+        #if os(iOS)
+            .navigationBarTitleDisplayMode(.large)
+        #endif
+            .toolbar {
+                if section == .profile {
+                    ToolbarItemGroup(placement: .primaryAction) {
+                        Button("分享", systemImage: "square.and.arrow.up") {}
+                        Button("私有", systemImage: "lock") {}
+                        Button("编辑", systemImage: "pencil") {}
+                    }
+                }
+            }
+    }
+    
+    private var contentView: some View {
+        ScrollView(.vertical, content: {
             VStack(alignment: .leading, spacing: 0) {
                 switch section {
                 case .general:
                     generalSettings
+                        .navigationTitle("常规")
                 case .profile:
                     profileSettings
+                        .navigationTitle("个人资料")
                 case .usage:
                     usageBillingSettings
+                        .navigationTitle("使用情况和计费")
                 case .account:
                     accountSettings
+                        .navigationTitle("账户")
                 default:
                     unavailableSettings
+                        .navigationTitle(section.title)
                 }
             }
             .frame(maxWidth: 780, alignment: .leading)
             .padding(.horizontal, 38)
             .padding(.top, 44)
             .padding(.bottom, 56)
-        }
+        })
         .background(Color.primary.opacity(0.018))
-        .toolbar {
-            if section == .profile {
-                ToolbarItemGroup(placement: .primaryAction) {
-                    Button("分享", systemImage: "square.and.arrow.up") {}
-                    Button("私有", systemImage: "lock") {}
-                    Button("编辑", systemImage: "pencil") {}
-                }
-            }
-        }
     }
-
+    
     // MARK: - General
-
+    
     private var generalSettings: some View {
         VStack(alignment: .leading, spacing: 0) {
-            settingsTitle("常规")
+            //            settingsTitle("常规")
             sectionTitle("权限")
             settingsCard {
                 SettingsToggleRow(
@@ -289,7 +371,7 @@ public struct SettingsDetailView: View {
                     isOn: $fullDiskAccess
                 )
             }
-
+            
             sectionTitle("常规")
             settingsCard {
                 SettingsValueRow(
@@ -316,22 +398,22 @@ public struct SettingsDetailView: View {
             }
         }
     }
-
+    
     // MARK: - Profile
-
+    
     private var profileSettings: some View {
         VStack(spacing: 0) {
-            Text("个人资料")
-                .font(.system(size: 19, weight: .semibold))
-                .frame(maxWidth: .infinity, alignment: .leading)
-
+            //            Text("个人资料")
+            //                .font(.system(size: 19, weight: .semibold))
+            //                .frame(maxWidth: .infinity, alignment: .leading)
+            
             Text(accountInitial)
                 .font(.system(size: 34, weight: .medium))
                 .foregroundStyle(.white)
                 .frame(width: 128, height: 128)
                 .background(Color.accentColor, in: Circle())
                 .padding(.top, 66)
-
+            
             Text(accountName)
                 .font(.system(size: 32, weight: .regular))
                 .padding(.top, 26)
@@ -339,10 +421,10 @@ public struct SettingsDetailView: View {
                 .font(.system(size: 16, weight: .medium))
                 .foregroundStyle(.secondary)
                 .padding(.top, 8)
-
+            
             profileMetricCard
                 .padding(.top, 78)
-
+            
             HStack(alignment: .top, spacing: 80) {
                 profileActivity
                 profileUsageSummary
@@ -351,7 +433,7 @@ public struct SettingsDetailView: View {
             .frame(maxWidth: .infinity, alignment: .leading)
         }
     }
-
+    
     @ViewBuilder
     private var profileMetricCard: some View {
         if let usage = agentManager.usage {
@@ -368,7 +450,7 @@ public struct SettingsDetailView: View {
             }
         }
     }
-
+    
     @ViewBuilder
     private var profileActivity: some View {
         if let usage = agentManager.usage {
@@ -382,7 +464,7 @@ public struct SettingsDetailView: View {
             .frame(maxWidth: .infinity, alignment: .leading)
         }
     }
-
+    
     @ViewBuilder
     private var profileUsageSummary: some View {
         if let usage = agentManager.usage {
@@ -396,12 +478,12 @@ public struct SettingsDetailView: View {
             .frame(maxWidth: .infinity, alignment: .leading)
         }
     }
-
+    
     // MARK: - Account
-
+    
     private var accountSettings: some View {
         VStack(alignment: .leading, spacing: 0) {
-            settingsTitle("账户")
+            //            settingsTitle("账户")
             sectionTitle("账户信息")
             settingsCard {
                 SettingsValueRow(title: "昵称", description: "当前登录账户") {
@@ -427,18 +509,18 @@ public struct SettingsDetailView: View {
             }
         }
     }
-
+    
     // MARK: - Usage & Billing
-
+    
     private var usageBillingSettings: some View {
         VStack(alignment: .leading, spacing: 0) {
-            settingsTitle("使用情况和计费")
+            //            settingsTitle("使用情况和计费")
             Text("如需管理订阅或购买额外点数，请前往网页端设置。")
                 .font(.system(size: 15))
                 .foregroundStyle(.secondary)
                 .padding(.top, -38)
                 .padding(.bottom, 58)
-
+            
             if let usage = agentManager.usage {
                 sectionTitle("当前套餐")
                 settingsCard {
@@ -447,12 +529,12 @@ public struct SettingsDetailView: View {
                             .settingsPickerCapsule()
                     }
                 }
-
+                
                 sectionTitle("通用使用限额")
                 settingsCard {
                     WeeklyQuotaRow(usage: usage.weekly)
                 }
-
+                
                 if let cycle = usage.cycle {
                     sectionTitle("订阅周期")
                     settingsCard {
@@ -462,7 +544,7 @@ public struct SettingsDetailView: View {
                         }
                     }
                 }
-
+                
                 if !usage.availableResetCards.isEmpty {
                     sectionTitle("使用限制重置")
                     settingsCard {
@@ -479,33 +561,33 @@ public struct SettingsDetailView: View {
             }
         }
     }
-
+    
     // MARK: - Unavailable
-
+    
     private var unavailableSettings: some View {
         VStack(alignment: .leading, spacing: 12) {
-            settingsTitle(section.title)
+            //            settingsTitle(section.title)
             Text("此设置项正在准备中。你可以先在\"常规\"和\"账户\"中调整当前可用的偏好。")
                 .font(.system(size: 16))
                 .foregroundStyle(.secondary)
                 .padding(.top, 8)
         }
     }
-
+    
     // MARK: - Shared UI helpers
-
+    
     private func settingsTitle(_ title: String) -> some View {
         Text(title)
             .font(.system(size: 34, weight: .semibold))
             .padding(.bottom, 58)
     }
-
+    
     private func sectionTitle(_ title: String) -> some View {
         Text(title)
             .font(.system(size: 19, weight: .semibold))
             .padding(.bottom, 28)
     }
-
+    
     private func settingsCard<Content: View>(@ViewBuilder content: () -> Content) -> some View {
         VStack(spacing: 0, content: content)
             .background(Color.primary.opacity(0.035), in: RoundedRectangle(cornerRadius: 24, style: .continuous))
@@ -515,36 +597,36 @@ public struct SettingsDetailView: View {
             }
             .padding(.bottom, 88)
     }
-
+    
     // MARK: - Computed properties
-
+    
     private var accountName: String {
         guard authManager.isLoggedIn else { return "未登录" }
         return authManager.displayNickname ?? userManager.profile?.nickname ?? "Unknow"
     }
-
+    
     private var accountInitial: String { String(accountName.prefix(1)).uppercased() }
     private var accountSubtitle: String { agentManager.usage?.tier.rawValue.capitalized ?? "Talkify 用户" }
-
+    
     private var weeklyQuotaText: String {
         guard let usage = agentManager.usage else { return "暂不可用" }
         let remaining = max(usage.weekly.unitsLimit - usage.weekly.unitsUsed, 0)
         return "\(formatted(remaining)) / \(formatted(usage.weekly.unitsLimit)) 剩余"
     }
-
+    
     private func subscriptionDescription(for usage: UsageInfo) -> String {
         usage.tier == .free ? "当前免费服务等级" : "订阅状态正常"
     }
-
+    
     private func formattedResetDate(_ value: String) -> String {
         guard let date = ISO8601DateFormatter().date(from: value) else { return value }
         return date.formatted(.dateTime.month(.abbreviated).day())
     }
-
+    
     private func formatted(_ value: Int) -> String {
         value >= 1_000_000
-            ? String(format: "%.1fM", Double(value) / 1_000_000)
-            : (value >= 1_000 ? String(format: "%.1fK", Double(value) / 1_000) : "\(value)")
+        ? String(format: "%.1fM", Double(value) / 1_000_000)
+        : (value >= 1_000 ? String(format: "%.1fK", Double(value) / 1_000) : "\(value)")
     }
 }
 
@@ -562,7 +644,7 @@ extension SettingsNavigationDestination {
 private struct SettingsSidebarRow: View {
     let section: SettingsSection
     let isSelected: Bool
-
+    
     var body: some View {
         HStack(spacing: 11) {
             Image(systemName: section.icon)
@@ -587,7 +669,7 @@ private struct SettingsToggleRow: View {
     let title: String
     let description: String
     @Binding var isOn: Bool
-
+    
     var body: some View {
         HStack(alignment: .top, spacing: 20) {
             VStack(alignment: .leading, spacing: 5) {
@@ -607,7 +689,7 @@ private struct SettingsValueRow<Trailing: View>: View {
     let title: String
     let description: String
     @ViewBuilder let trailing: () -> Trailing
-
+    
     var body: some View {
         HStack(alignment: .center, spacing: 20) {
             VStack(alignment: .leading, spacing: 5) {
@@ -625,7 +707,7 @@ private struct SettingsValueRow<Trailing: View>: View {
 
 private struct WeeklyQuotaRow: View {
     let usage: UsageInfo.Units
-
+    
     var body: some View {
         HStack(spacing: 22) {
             VStack(alignment: .leading, spacing: 5) {
@@ -648,7 +730,7 @@ private struct WeeklyQuotaRow: View {
         .padding(.horizontal, 30)
         .padding(.vertical, 21)
     }
-
+    
     private func formattedDate(_ value: String) -> String {
         guard let date = ISO8601DateFormatter().date(from: value) else { return value }
         return date.formatted(.dateTime.month(.abbreviated).day())
@@ -659,7 +741,7 @@ private struct ResetCardSettingsRow: View {
     let card: UsageInfo.ResetCard
     let onRedeem: () -> Void
     @Environment(AgentManager.self) private var agentManager
-
+    
     var body: some View {
         HStack(spacing: 20) {
             VStack(alignment: .leading, spacing: 5) {
@@ -680,7 +762,7 @@ private struct ResetCardSettingsRow: View {
         .padding(.horizontal, 30)
         .padding(.vertical, 21)
     }
-
+    
     private func formattedDate(_ value: String?) -> String {
         guard let value, let date = ISO8601DateFormatter().date(from: value) else { return "—" }
         return date.formatted(.dateTime.month(.abbreviated).day())
@@ -705,7 +787,7 @@ private struct ProfileKeyValue: View {
     let value: String
     var body: some View {
         HStack { Text(title).foregroundStyle(.secondary); Spacer(); Text(value).fontWeight(.medium) }
-        .font(.system(size: 15))
+            .font(.system(size: 15))
     }
 }
 
