@@ -60,6 +60,19 @@ public final class UserManager {
             throw error
         }
     }
+
+    public func deleteAccount() async throws {
+        isLoading = true
+        defer { isLoading = false }
+
+        do {
+            _ = try await service.deleteAccount()
+            lastErrorMessage = nil
+        } catch {
+            lastErrorMessage = error.localizedDescription
+            throw error
+        }
+    }
     
     public func updateProfile(_ profile: UserProfile?) {
         self.profile = profile

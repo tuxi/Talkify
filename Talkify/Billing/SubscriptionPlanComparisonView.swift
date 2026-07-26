@@ -41,7 +41,7 @@ struct SubscriptionPlanComparisonView: View {
 //            Text(title)
 //                .font(.system(size: 24, weight: .bold))
 
-            Text("对比不同订阅档位的权益差异，选择最适合你的 Pro 方案。")
+            Text("对比不同订阅档位的权益差异，选择最适合你的 Plus 方案。")
                 .font(.system(size: 14))
                 .foregroundColor(.secondary)
         }

@@ -19,7 +19,7 @@ final class SubscriptionViewModel: ObservableObject {
         let id = UUID()
         let productCode: String
         let productName: String
-        let availablePoints: Int
+        let availablePoints: Double
         let subscriptionActive: Bool
         let currentSubscription: String?
         let originalTransactionID: String?
@@ -360,7 +360,8 @@ final class SubscriptionViewModel: ObservableObject {
                     purchaseSuccessState = PurchaseSuccessState(
                         productCode: product.productCode,
                         productName: product.displayName,
-                        availablePoints: verifyResult.availablePoints,
+                        availablePoints: verifyResult.availableTalkifyPoints
+                            ?? Double(verifyResult.availablePoints) / 20_000,
                         subscriptionActive: verifyResult.subscriptionActive,
                         currentSubscription: billingManager.wallet?.currentSubscription,
                         originalTransactionID: String(transaction.originalID)

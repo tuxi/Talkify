@@ -21,7 +21,7 @@ final class SubscriptionCenterViewModel: ObservableObject {
         let productCode: String
         let productName: String
         let productType: String
-        let availablePoints: Int
+        let availablePoints: Double
         let subscriptionActive: Bool
         let currentSubscription: String?
         let originalTransactionID: String?
@@ -185,7 +185,7 @@ final class SubscriptionCenterViewModel: ObservableObject {
     }
     
     var currentPointsText: String {
-        "\(wallet?.availablePoints ?? 0)"
+        (wallet?.availableTalkifyPoints ?? 0).cleanDisplay
     }
 
     var currentStatusBadgeText: String {
@@ -193,7 +193,7 @@ final class SubscriptionCenterViewModel: ObservableObject {
     }
 
     var heroTitle: String {
-        hasActiveSubscription ? "你的 Talkify Pro 正在生效" : "开通 Talkify Pro"
+        hasActiveSubscription ? "你的 Talkify Plus 正在生效" : "开通 Talkify Plus"
     }
 
     var heroSubtitle: String {
@@ -329,13 +329,12 @@ final class SubscriptionCenterViewModel: ObservableObject {
 
     func productSubtitle(_ product: BillingProduct) -> String {
         let price = displayPrice(for: product)
-        let points = "\(product.pointAmount) 点"
 
         if let periodUnit = product.periodUnit, let periodCount = product.periodCount {
-            return "\(price) · \(points) · 每\(periodCount)\(localizedPeriodUnit(periodUnit))"
+            return "\(price) · 每\(periodCount)\(localizedPeriodUnit(periodUnit))"
         }
 
-        return "\(price) · \(points)"
+        return "\(price) · \(product.pointAmount) 点"
     }
 
     func benefitLines(for product: BillingProduct) -> [String] {
@@ -412,7 +411,7 @@ final class SubscriptionCenterViewModel: ObservableObject {
         if entitlements.weeklyIncludedUnits > 0 {
             rows.append(
                 SubscriptionEntitlementRow(
-                    title: "每周 \(entitlements.weeklyIncludedUnits.formatted()) Usage Units",
+                    title: "每周 \(talkifyPointEquivalent(entitlements.weeklyIncludedUnits)) 点等值额度",
                     value: "每 7 天重置，不结转"
                 )
             )
@@ -420,12 +419,16 @@ final class SubscriptionCenterViewModel: ObservableObject {
         if entitlements.subscriptionCycleIncludedUnits > 0 {
             rows.append(
                 SubscriptionEntitlementRow(
-                    title: "订阅周期 \(entitlements.subscriptionCycleIncludedUnits.formatted()) Usage Units",
+                    title: "每个订阅周期最多 \(talkifyPointEquivalent(entitlements.subscriptionCycleIncludedUnits)) 点等值额度",
                     value: "与每周额度同时约束"
                 )
             )
         }
         return rows
+    }
+
+    private func talkifyPointEquivalent(_ usageUnits: Int) -> String {
+        (Double(usageUnits) / 20_000).cleanDisplay
     }
 
     func currentEntitlementSummary() -> [SubscriptionEntitlementRow] {
@@ -531,7 +534,7 @@ final class SubscriptionCenterViewModel: ObservableObject {
                 case .verified(let transaction):
                     let verifyResult = try await verifyTransaction(transaction, productCode: product.productCode)
                     handledTransactionIDs.insert(transaction.id)
-                    try await transaction.finish()
+                    await transaction.finish()
                     originalTransactionID = String(transaction.originalID)
                     guard transaction.purchaseDate >= purchaseStartedAt.addingTimeInterval(-2) else {
                         feedbackMessage = verifyResult.productType == "subscription"
@@ -547,7 +550,8 @@ final class SubscriptionCenterViewModel: ObservableObject {
                         productCode: product.productCode,
                         productName: product.displayName,
                         productType: verifyResult.productType,
-                        availablePoints: verifyResult.availablePoints,
+                        availablePoints: verifyResult.availableTalkifyPoints
+                            ?? Double(verifyResult.availablePoints) / 20_000,
                         subscriptionActive: verifyResult.subscriptionActive,
                         currentSubscription: billingManager.wallet?.currentSubscription,
                         originalTransactionID: String(transaction.originalID)
@@ -655,7 +659,7 @@ final class SubscriptionCenterViewModel: ObservableObject {
         do {
             _ = try await verifyTransaction(transaction, productCode: transaction.productID)
             handledTransactionIDs.insert(transaction.id)
-            try await transaction.finish()
+            await transaction.finish()
             originalTransactionID = String(transaction.originalID)
         } catch {
             errorMessage = error.localizedDescription

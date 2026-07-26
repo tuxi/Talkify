@@ -19,7 +19,7 @@ final class PointsCenterViewModel: ObservableObject {
         let id = UUID()
         let productCode: String
         let productName: String
-        let availablePoints: Int
+        let availablePoints: Double
         let subscriptionActive: Bool
         let currentSubscription: String?
         let originalTransactionID: String?
@@ -101,7 +101,7 @@ final class PointsCenterViewModel: ObservableObject {
     }
 
     var availablePointsText: String {
-        "\(wallet?.availablePoints ?? 0)"
+        (wallet?.availableTalkifyPoints ?? 0).cleanDisplay
     }
 
     var checkInRewardText: String {
@@ -123,7 +123,7 @@ final class PointsCenterViewModel: ObservableObject {
         if hasCheckedInToday, let checkInStatus {
             return "已在 \(checkInStatus.checkInDate) 完成签到，点数已到账钱包"
         }
-        return "今天签到可领取 \(checkInRewardText) 点，到账后可直接用于视频生成"
+        return "今天签到可领取 \(checkInRewardText) 点，到账后可用于 Talkify AI 能力"
     }
 
     var checkInDateText: String {
@@ -139,11 +139,11 @@ final class PointsCenterViewModel: ObservableObject {
     }
     
     var restoreButtonTitle: String {
-        isRestoring ? "恢复中..." : "恢复购买"
+        isRestoring ? "同步中..." : "同步购买记录"
     }
 
     var frozenPointsText: String {
-        "\(wallet?.frozenPoints ?? 0)"
+        (wallet?.frozenTalkifyPoints ?? 0).cleanDisplay
     }
 
     var pointDiscountText: String {
@@ -156,6 +156,10 @@ final class PointsCenterViewModel: ObservableObject {
 
     var hasPurchasableProducts: Bool {
         !pointPackProducts.isEmpty
+    }
+
+    var validityText: String {
+        "购买后 \(pointPackProducts.first?.validityMonths ?? 12) 个月"
     }
 
     var failedPurchaseProduct: BillingProduct? {
@@ -263,8 +267,9 @@ final class PointsCenterViewModel: ObservableObject {
         }
 
         var lines: [String] = []
-        lines.append("购买后点数直接发放到钱包")
-        lines.append("可用于视频生成、加速和高级能力")
+        lines.append("购买后 Talkify 点数直接发放到钱包")
+        lines.append("可用于 AI 对话、网页搜索和图片理解")
+        lines.append("每笔购买独立有效 \(product.validityMonths ?? 12) 个月，优先使用最早到期点数")
         if let discount = product.benefits?.pointPackDiscountRate {
             lines.append("点数包折扣系数 \(discount.cleanDisplay)")
         }
@@ -305,8 +310,8 @@ final class PointsCenterViewModel: ObservableObject {
                 _ = try? await billingService.restoreIOSOrder(originalTransactionID: trimmed)
             }
             await billingManager.refreshAllIfNeeded(maxAge: 0)
-            feedbackMessage = "恢复购买已完成"
-            ToastContext.shared.show("恢复购买已完成", style: .success)
+            feedbackMessage = "购买记录同步完成"
+            ToastContext.shared.show("购买记录同步完成", style: .success)
         } catch {
             restoreErrorMessage = error.localizedDescription
         }
@@ -341,7 +346,8 @@ final class PointsCenterViewModel: ObservableObject {
                     purchaseSuccessState = PurchaseSuccessState(
                         productCode: product.productCode,
                         productName: product.displayName,
-                        availablePoints: verifyResult.availablePoints,
+                        availablePoints: verifyResult.availableTalkifyPoints
+                            ?? Double(verifyResult.availablePoints) / 20_000,
                         subscriptionActive: verifyResult.subscriptionActive,
                         currentSubscription: billingManager.wallet?.currentSubscription,
                         originalTransactionID: String(transaction.originalID)
@@ -426,13 +432,14 @@ final class PointsCenterViewModel: ObservableObject {
         do {
             let verifyResult = try await verifyTransaction(transaction, productCode: transaction.productID)
             handledTransactionIDs.insert(transaction.id)
-            try await transaction.finish()
+            await transaction.finish()
             originalTransactionID = String(transaction.originalID)
             feedbackMessage = "购买已完成，点数已自动同步到钱包。"
             purchaseSuccessState = PurchaseSuccessState(
                 productCode: transaction.productID,
                 productName: pointPackProducts.first(where: { $0.productCode == transaction.productID })?.displayName ?? transaction.productID,
-                availablePoints: verifyResult.availablePoints,
+                availablePoints: verifyResult.availableTalkifyPoints
+                    ?? Double(verifyResult.availablePoints) / 20_000,
                 subscriptionActive: verifyResult.subscriptionActive,
                 currentSubscription: billingManager.wallet?.currentSubscription,
                 originalTransactionID: String(transaction.originalID)

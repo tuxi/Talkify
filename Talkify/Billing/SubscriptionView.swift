@@ -34,15 +34,9 @@ struct SubscriptionView: View {
                         Button {
                             dismiss()
                         } label: {
-                            ZStack {
-                                Circle()
-                                    .fill(topBarBackground)
-                                    .frame(width: 38, height: 38)
-                                
-                                Image(systemName: "xmark")
-                                    .font(.system(size: 14, weight: .bold))
-                                    .foregroundColor(topBarForeground)
-                            }
+                            Image(systemName: "xmark")
+                                .font(.system(size: 14, weight: .bold))
+                                .foregroundColor(topBarForeground)
                         }
                     }
                     
@@ -78,7 +72,7 @@ struct SubscriptionView: View {
                 .sheet(isPresented: $showPaidServiceAgreement) {
                     PaidServiceAgreementSheet(
                         title: "付费服务协议",
-                        content: "为保障您的合法权益，请同意[《DreamAI付费服务协议》（含自动续费条款）](dreamai://vip-protocol)",
+                        content: "为保障您的合法权益，请同意[《Talkify 付费服务协议》（含自动续费条款）](dreamai://vip-protocol)",
                         onAgree: {
                             showPaidServiceAgreement = false
                             Task {
@@ -1202,7 +1196,7 @@ private extension SubscriptionView {
     
     var footerSection: some View {
         AgreementRow(isAgreed: $viewModel.isAgreement, content:
-                        "为保障您的合法权益，请同意[《DreamAI付费服务协议》（含自动续费条款）](dreamai://vip-protocol)", openURL: { url in
+                        "为保障您的合法权益，请同意[《Talkify 付费服务协议》（含自动续费条款）](dreamai://vip-protocol)", openURL: { url in
             if url.host() == "vip-protocol" {
                 router.navigate(to: .openURL(AgreementURLs.paid))
             }
@@ -1527,7 +1521,7 @@ private struct SubscriptionPurchaseSuccessSheet: View {
             }
             
             VStack(spacing: 12) {
-                resultRow(title: "当前余额", value: "\(state.availablePoints) 点")
+                resultRow(title: "当前余额", value: "\(state.availablePoints.cleanDisplay) 点")
                 resultRow(title: "订阅状态", value: state.subscriptionActive ? "已生效" : "未生效")
                 
                 if let currentSubscription = state.currentSubscription, !currentSubscription.isEmpty {
@@ -1757,14 +1751,11 @@ struct PaidServiceAgreementSheet: View {
 
     var body: some View {
         VStack(spacing: 18) {
-            Capsule()
-                .fill(Color.secondary.opacity(0.24))
-                .frame(width: 36, height: 4)
-                .padding(.top, 4)
 
             Text(title)
                 .font(.system(size: 20, weight: .bold))
                 .foregroundColor(.primary)
+                .padding(.top)
 
             Text((try? AttributedString(markdown: content)) ?? AttributedString(content))
                 .font(.system(size: 15))
@@ -1822,7 +1813,6 @@ struct PaidServiceAgreementSheet: View {
         }
         .padding(.horizontal, 24)
         .padding(.bottom, 18)
-        .background(Color.systemBackground)
     }
     
     var agreementTextColor: Color {

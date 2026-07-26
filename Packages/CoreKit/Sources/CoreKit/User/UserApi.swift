@@ -3,12 +3,15 @@ import Foundation
 public enum UserApi: ApiEndpoint {
     case profile
     case updateProfile(nickname: String?, avatarURL: String?)
+    case deleteAccount
     
     public var path: String {
         switch self {
         case .profile:
             return "user/profile"
         case .updateProfile:
+            return "user/profile"
+        case .deleteAccount:
             return "user/profile"
         }
     }
@@ -19,12 +22,14 @@ public enum UserApi: ApiEndpoint {
             return .get
         case .updateProfile:
             return .patch
+        case .deleteAccount:
+            return .delete
         }
     }
     
     public var parameters: [String : Sendable] {
         switch self {
-        case .profile:
+        case .profile, .deleteAccount:
             return [:]
         case .updateProfile(let nickname, let avatarURL):
             var parameters: [String: Sendable] = [:]

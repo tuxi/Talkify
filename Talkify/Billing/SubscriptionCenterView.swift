@@ -54,19 +54,24 @@ struct SubscriptionCenterView: View {
         #endif
         .toolbar {
             ToolbarItem(placement: .primaryAction) {
-                Button("管理") {
-                    viewModel.showManagementSheet = true
-                }
-            }
-            ToolbarItem(placement: .cancellationAction) {
-                Button {
-                    dismiss()
+                NavigationLink {
+                    SubscriptionManagementSheet(
+                        summaryItems: viewModel.managementSummaryItems,
+                        paymentRecords: viewModel.paymentRecords,
+                        onManageInStore: {
+                            openManageSubscription()
+                        }
+                    )
+        #if os(iOS)
+                    .presentationDetents([.large])
+        #endif
                 } label: {
-                    Image(systemName: "xmark")
-                        .font(.system(size: 16))
-                        .clipShape(Circle())
+                    Text("管理")
                 }
-
+//
+//                Button("管理") {
+//                    viewModel.showManagementSheet = true
+//                }
             }
         }
         .task {
@@ -303,7 +308,7 @@ private extension SubscriptionCenterView {
                 title: viewModel.hasActiveSubscription ? "订阅管理" : "选择你的会员方案",
                 subtitle: viewModel.hasActiveSubscription
                     ? "你当前已开通会员，如需切换或取消套餐，请前往 Apple 订阅管理"
-                    : "请选择最适合你的 Talkify Pro 方案"
+                    : "请选择最适合你的 Talkify Plus 方案"
             )
 
             if viewModel.subscriptionProducts.isEmpty && viewModel.isLoading {
@@ -688,31 +693,22 @@ private struct SubscriptionManagementSheet: View {
     let onManageInStore: () -> Void
 
     var body: some View {
-        NavigationStack {
-            ScrollView(showsIndicators: false) {
-                VStack(spacing: 18) {
-                    summaryCard
-                    paymentRecordsCard
-                    manageActionCard
-                }
-                .padding(.horizontal, 16)
-                .padding(.vertical, 16)
-                .frame(maxWidth: 760)
-                .frame(maxWidth: .infinity)
+        ScrollView(showsIndicators: false) {
+            VStack(spacing: 18) {
+                summaryCard
+                paymentRecordsCard
+                manageActionCard
             }
-            .background(Color.underPageBackground)
-            .navigationTitle("订阅管理")
-#if os(iOS)
-            .navigationBarTitleDisplayMode(.inline)
-#endif
-            .toolbar {
-                ToolbarItem(placement: .cancellationAction) {
-                    Button("关闭") {
-                        dismiss()
-                    }
-                }
-            }
+            .padding(.horizontal, 16)
+            .padding(.vertical, 16)
+            .frame(maxWidth: 760)
+            .frame(maxWidth: .infinity)
         }
+        .background(Color.underPageBackground)
+        .navigationTitle("订阅管理")
+#if os(iOS)
+        .navigationBarTitleDisplayMode(.inline)
+#endif
     }
 
     var summaryCard: some View {
@@ -845,7 +841,7 @@ private struct PurchaseSuccessSheet: View {
             }
 
             VStack(spacing: 12) {
-                resultRow(title: "当前余额", value: "\(state.availablePoints) 点")
+                resultRow(title: "当前余额", value: "\(state.availablePoints.cleanDisplay) 点")
                 resultRow(title: "订阅状态", value: state.subscriptionActive ? "已生效" : "未生效")
 
                 if !state.productName.isEmpty {

@@ -18,7 +18,15 @@ extension View {
             switch destination {
             case .detail(let section):
                 SettingsDetailView(section: section)
-                
+            case .pointsCenter:
+                PointsCenterView(viewModel: PointsCenterViewModel(billingManager: container.billingManager, billingService: container.makeBillingService()))
+            case .subscriptionCenter:
+                SubscriptionCenterView(navigationActions: SubscriptionCenterNavigationActions(showPointsCenter: {
+                    
+                }), viewModel: SubscriptionCenterViewModel(
+                    billingManager: container.billingManager,
+                    billingService: container.makeBillingService()
+                ))
             }
         }
     }
@@ -29,15 +37,6 @@ extension View {
     ) -> some View {
         return sheet(item: sheetDestinations) { destination in
             switch destination {
-            case .subscriptionCenter:
-                NavigationStack {
-                    SubscriptionCenterView(navigationActions: SubscriptionCenterNavigationActions(showPointsCenter: {
-                        
-                    }), viewModel: SubscriptionCenterViewModel(
-                        billingManager: container.billingManager,
-                        billingService: container.makeBillingService()
-                    ))
-                }
             case .subscription:
                 SubscriptionView(container: container, viewModel: SubscriptionViewModel(billingManager: container.billingManager, billingService: container.makeBillingService(), authManager: container.authManager))
             }

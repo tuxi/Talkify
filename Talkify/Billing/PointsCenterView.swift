@@ -81,13 +81,14 @@ struct PointsCenterView: View {
                 }
             )
 #if os(iOS)
-            .presentationDetents([.medium])
+            .presentationDetents([.height(328)])
+            .presentationDragIndicator(.visible)
 #endif
         }
         .sheet(isPresented: $showPaidServiceAgreement) {
             PaidServiceAgreementSheet(
                 title: "付费服务协议",
-                content: "为保障您的合法权益，请同意[《DreamAI付费服务协议》](dreamai://paid-protocol)",
+                content: "为保障您的合法权益，请同意[《Talkify 付费服务协议》](talkify://paid-protocol)",
                 onAgree: {
                     showPaidServiceAgreement = false
                     Task {
@@ -107,7 +108,7 @@ struct PointsCenterView: View {
                 }
             )
 #if os(iOS)
-            .presentationDetents([.height(250)])
+            .presentationDetents([.height(220)])
             .presentationDragIndicator(.visible)
 #endif
         }
@@ -387,7 +388,7 @@ private extension PointsCenterView {
     func walletMetricBlock(title: String, value: String) -> some View {
         VStack(spacing: 7) {
             Text(value)
-                .font(.system(size: 26, weight: .bold, design: .rounded))
+                .font(.system(size: 20, weight: .bold, design: .rounded))
                 .foregroundColor(headerPrimaryText)
                 .lineLimit(1)
 
@@ -440,7 +441,7 @@ private extension PointsCenterView {
                     .font(.system(size: 18, weight: .medium))
                     .foregroundColor(validityTextColor)
                 +
-                Text("1年")
+                Text(viewModel.validityText)
                     .font(.system(size: 18, weight: .semibold))
                     .foregroundColor(pointsAccent)
             )
@@ -455,7 +456,7 @@ private extension PointsCenterView {
                 .font(.system(size: 34, weight: .semibold))
                 .foregroundColor(Color.accentColor.opacity(0.82))
 
-            Text("DreamAI 的点数购买功能在当前地区暂不可用")
+            Text("Talkify 点数购买功能在当前地区暂不可用")
                 .font(.system(size: 16, weight: .semibold))
                 .foregroundColor(.primary)
                 .multilineTextAlignment(.center)
@@ -526,7 +527,7 @@ private extension PointsCenterView {
     }
 
     func packPrimaryTextColor(isSelected: Bool) -> Color {
-        isSelected ? Color.white : (colorScheme == .dark ? Color.white : Color(hex: "101827"))
+         isSelected ? Color.white : (colorScheme == .dark ? Color.white : Color(hex: "101827"))
     }
 
     func packSecondaryTextColor(isSelected: Bool) -> Color {
@@ -606,7 +607,7 @@ private extension PointsCenterView {
             .buttonStyle(.plain)
             .disabled(viewModel.selectedPointPackProduct == nil)
             
-            AgreementRow(isAgreed: $viewModel.isAgreement, content: "支付即代表同意，[《DreamAI付费服务协议》](dreamai://paid-protocol)", openURL: { url in
+            AgreementRow(isAgreed: $viewModel.isAgreement, content: "支付即代表同意，[《Talkify 付费服务协议》](talkify://paid-protocol)", openURL: { url in
                 if url.host() == "paid-protocol" {
                     openURL = AgreementURLs.paid
                 }
@@ -659,8 +660,8 @@ private extension PointsCenterView {
     var restorePurchaseCard: some View {
         VStack(alignment: .leading, spacing: 16) {
             sectionHeader(
-                title: "恢复购买",
-                subtitle: "同步 App Store 交易并刷新钱包状态"
+                title: "同步购买记录",
+                subtitle: "用于补发尚未入账的 App Store 交易；消耗型点数包不能像订阅一样恢复"
             )
 
             TextField("请输入 original_transaction_id（可选）", text: $viewModel.originalTransactionID)
@@ -688,7 +689,7 @@ private extension PointsCenterView {
                         ProgressView()
                     }
 
-                    Text(viewModel.isRestoring ? "恢复中..." : "恢复购买")
+                    Text(viewModel.restoreButtonTitle)
                         .font(.system(size: 15, weight: .semibold))
                 }
                 .foregroundColor(.white)
@@ -790,7 +791,7 @@ private struct PointsPurchaseSuccessSheet: View {
             }
 
             VStack(spacing: 12) {
-                resultRow(title: "当前余额", value: "\(state.availablePoints) 点")
+                resultRow(title: "当前余额", value: "\(state.availablePoints.cleanDisplay) 点")
 
                 if let currentSubscription = state.currentSubscription, !currentSubscription.isEmpty {
                     resultRow(title: "当前订阅", value: currentSubscription)
@@ -815,7 +816,6 @@ private struct PointsPurchaseSuccessSheet: View {
             .buttonStyle(.plain)
         }
         .padding(24)
-        .background(Color.systemBackground)
     }
 
     func resultRow(title: String, value: String) -> some View {

@@ -77,6 +77,8 @@ public struct BillingProduct: Codable, Sendable, Identifiable {
     public let priceAmount: Int
     public let currency: String
     public let pointAmount: Int
+    public let usageUnitAmount: Int?
+    public let validityMonths: Int?
     public let periodUnit: String?
     public let periodCount: Int?
     public let benefits: BillingBenefits?
@@ -91,6 +93,8 @@ public struct BillingProduct: Codable, Sendable, Identifiable {
         case priceAmount = "price_amount"
         case currency
         case pointAmount = "point_amount"
+        case usageUnitAmount = "usage_unit_amount"
+        case validityMonths = "validity_months"
         case periodUnit = "period_unit"
         case periodCount = "period_count"
         case benefits
@@ -104,6 +108,8 @@ public struct BillingProduct: Codable, Sendable, Identifiable {
         priceAmount: Int,
         currency: String,
         pointAmount: Int,
+        usageUnitAmount: Int? = nil,
+        validityMonths: Int? = nil,
         periodUnit: String?,
         periodCount: Int?,
         benefits: BillingBenefits?,
@@ -115,6 +121,8 @@ public struct BillingProduct: Codable, Sendable, Identifiable {
         self.priceAmount = priceAmount
         self.currency = currency
         self.pointAmount = pointAmount
+        self.usageUnitAmount = usageUnitAmount
+        self.validityMonths = validityMonths
         self.periodUnit = periodUnit
         self.periodCount = periodCount
         self.benefits = benefits
@@ -177,6 +185,8 @@ public struct BillingWallet: Codable, Sendable {
     public let frozenPoints: Int
     public let paidUsageUnits: Int
     public let frozenUsageUnits: Int
+    public let availableTalkifyPoints: Double
+    public let frozenTalkifyPoints: Double
     public let currentSubscription: String?
     public let subscriptionActive: Bool
     public let subscriptionExpiredAt: Int?
@@ -201,6 +211,8 @@ public struct BillingWallet: Codable, Sendable {
         case frozenPoints = "frozen_points"
         case paidUsageUnits = "paid_usage_units"
         case frozenUsageUnits = "frozen_usage_units"
+        case availableTalkifyPoints = "available_talkify_points"
+        case frozenTalkifyPoints = "frozen_talkify_points"
         case currentSubscription = "current_subscription"
         case subscriptionActive = "subscription_active"
         case subscriptionExpiredAt = "subscription_expired_at"
@@ -227,6 +239,10 @@ public struct BillingWallet: Codable, Sendable {
         let legacyFrozenPoints = try container.decodeIfPresent(Int.self, forKey: .frozenPoints) ?? 0
         paidUsageUnits = try container.decodeIfPresent(Int.self, forKey: .paidUsageUnits) ?? legacyAvailablePoints
         frozenUsageUnits = try container.decodeIfPresent(Int.self, forKey: .frozenUsageUnits) ?? legacyFrozenPoints
+        availableTalkifyPoints = try container.decodeIfPresent(Double.self, forKey: .availableTalkifyPoints)
+            ?? Double(paidUsageUnits) / 20_000
+        frozenTalkifyPoints = try container.decodeIfPresent(Double.self, forKey: .frozenTalkifyPoints)
+            ?? Double(frozenUsageUnits) / 20_000
         availablePoints = legacyAvailablePoints == 0 ? paidUsageUnits : legacyAvailablePoints
         frozenPoints = legacyFrozenPoints == 0 ? frozenUsageUnits : legacyFrozenPoints
         currentSubscription = try container.decodeIfPresent(String.self, forKey: .currentSubscription)
@@ -449,12 +465,14 @@ public struct BillingOrderResult: Codable, Sendable {
     public let productType: String
     public let subscriptionActive: Bool
     public let availablePoints: Int
+    public let availableTalkifyPoints: Double?
 
     enum CodingKeys: String, CodingKey {
         case orderNo = "order_no"
         case productType = "product_type"
         case subscriptionActive = "subscription_active"
         case availablePoints = "available_points"
+        case availableTalkifyPoints = "available_talkify_points"
     }
 }
 

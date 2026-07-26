@@ -8,13 +8,10 @@
 import SwiftUI
 
 enum SettingsSheetDestination: Identifiable, Equatable {
-    case subscriptionCenter
     case subscription
     
     var id: String {
         switch self {
-        case .subscriptionCenter:
-            return "subscriptionCenter"
         case .subscription:
             return "subscription"
         }
