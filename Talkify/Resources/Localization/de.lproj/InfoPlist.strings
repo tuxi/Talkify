@@ -1,14 +1,24 @@
-/* 
-  Localizable.strings
-  Chater
+/*
+  InfoPlist.strings
+  Talkify
 
-  Created by xiaoyuan on 2023/8/23.
-  
+  System permission usage descriptions for Talkify 2.0.
 */
 
 /* Bundle name */
 "CFBundleName" = "Talkify";
 
-"NSCameraUsageDescription" = "Talkify benötigt Kamerazugriff, um aufgenommene und empfangene Medien zu speichern.";
-"NSPhotoLibraryAddUsageDescription" = "Talkify benötigt Zugriff auf die Fotobibliothek, um aufgenommene und empfangene Medien zu speichern.";
-"NSNetworkClientUsageDescription" = "Talkify benötigt Netzwerkzugriff, um alle Funktionen bereitzustellen.";
+/* Privacy - Camera Usage Description */
+"NSCameraUsageDescription" = "Talkify verwendet die Kamera, um Fotos aufzunehmen und mit Ihrem KI-Agenten zu teilen.";
+
+/* Privacy - Microphone Usage Description */
+"NSMicrophoneUsageDescription" = "Talkify verwendet das Mikrofon für die Spracheingabe zur Interaktion mit Ihrem KI-Agenten.";
+
+/* Privacy - Photo Library Additions Usage Description */
+"NSPhotoLibraryAddUsageDescription" = "Talkify verwendet die Fotomediathek, um Bilder aus Ihrem Arbeitsbereich und Agentenunterhaltungen zu speichern.";
+
+/* Privacy - Speech Recognition Usage Description */
+"NSSpeechRecognitionUsageDescription" = "Talkify verwendet die Spracherkennung, um Ihre Stimme in Text für Agentenbefehle zu transkribieren.";
+
+/* Privacy - Local Network Usage Description */
+"NSNetworkClientUsageDescription" = "Talkify verwendet das Netzwerk, um eine Verbindung zu KI-Diensten herzustellen und Echtzeit-Agentenzusammenarbeit zu ermöglichen.";

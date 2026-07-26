@@ -49,15 +49,15 @@
 		<true/>
 	</dict>
 	<key>NSCameraUsageDescription</key>
-	<string>Talkify needs camera access  for saving captured and received media.</string>
+	<string>Talkify uses the camera to capture photos and share them with your AI agent.</string>
 	<key>NSMicrophoneUsageDescription</key>
-	<string>Talkify 需要使用麦克风权限</string>
+	<string>Talkify uses the microphone for voice input to interact with your AI agent.</string>
 	<key>NSNetworkClientUsageDescription</key>
-	<string>Talkify needs access to the network to provide full functionality.</string>
+	<string>Talkify uses the network to connect to AI services and enable real-time agent collaboration.</string>
 	<key>NSPhotoLibraryAddUsageDescription</key>
-	<string>Talkify needs access to the photo library to save captured and received media.</string>
+	<string>Talkify uses the photo library to save images from your workspace and agent conversations.</string>
 	<key>NSSpeechRecognitionUsageDescription</key>
-	<string>Talkify 使用系统语音识别，将你选择的录音转写为文字。</string>
+	<string>Talkify uses speech recognition to transcribe your voice into text for agent commands.</string>
 	<key>UIAppFonts</key>
 	<array>
 		<string>Atkinson-Hyperlegible-Regular-102.ttf</string>
