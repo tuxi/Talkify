@@ -562,10 +562,10 @@ private extension SubscriptionCenterView {
                 subtitle: "用于同步 App Store 已有订阅并刷新当前账号权益"
             )
 
-            Text("系统会优先尝试通过 App Store 同步并自动验单；若当前设备没有找到可恢复交易")
-                .font(.system(size: 13))
-                .foregroundColor(.secondary)
-                .fixedSize(horizontal: false, vertical: true)
+//            Text("系统会优先尝试通过 App Store 同步并自动验单；若当前设备没有找到可恢复交易")
+//                .font(.system(size: 13))
+//                .foregroundColor(.secondary)
+//                .fixedSize(horizontal: false, vertical: true)
 //
 //            TextField("请输入 original_transaction_id（可选）", text: $viewModel.originalTransactionID)
 //                .textFieldStyle(.plain)

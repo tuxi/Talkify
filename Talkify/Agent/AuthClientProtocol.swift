@@ -84,13 +84,15 @@ public struct UsageInfo: Codable, Sendable {
         public let unitsLimit: Int
         public let tokensUsed: Int
         public let utilizationPct: Float64
-        public let resetsAt: String
+        public let resetsAt: String?
+        public let unitsRemaining: Int
         
         enum CodingKeys: String, CodingKey {
             case unitsUsed = "units_used"
             case unitsLimit = "units_limit"
             case tokensUsed = "tokens_used"
             case utilizationPct = "utilization_pct"
+            case unitsRemaining = "units_remaining"
             case resetsAt = "resets_at"
         }
     }

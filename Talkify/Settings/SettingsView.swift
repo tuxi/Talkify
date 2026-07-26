@@ -556,10 +556,18 @@ public struct SettingsDetailView: View {
                 if let cycle = usage.cycle {
                     sectionTitle("订阅周期")
                     settingsCard {
-                        SettingsValueRow(title: "订阅周期用量", description: "至 \(formattedResetDate(cycle.resetsAt))") {
-                            Text("\(formatted(max(cycle.unitsLimit - cycle.unitsUsed, 0))) / \(formatted(cycle.unitsLimit)) 剩余")
-                                .foregroundStyle(.secondary)
+                        if let resetsAt = cycle.resetsAt, !resetsAt.isEmpty {
+                            SettingsValueRow(title: "订阅周期用量", description: "至 \(formattedResetDate(resetsAt))") {
+                                Text("\(formatted(max(cycle.unitsLimit - cycle.unitsUsed, 0))) / \(formatted(cycle.unitsLimit)) 剩余")
+                                    .foregroundStyle(.secondary)
+                            }
+                        } else {
+                            SettingsValueRow(title: "订阅周期用量", description: "") {
+                                Text("\(formatted(max(cycle.unitsLimit - cycle.unitsUsed, 0))) / \(formatted(cycle.unitsLimit)) 剩余")
+                                    .foregroundStyle(.secondary)
+                            }
                         }
+                        
                     }
                 }
                 
@@ -577,6 +585,9 @@ public struct SettingsDetailView: View {
                 ProgressView("正在获取使用情况…")
                     .padding(.top, 24)
             }
+        }
+        .task {
+            agentManager.fetchUsage()
         }
     }
     
@@ -731,9 +742,11 @@ private struct WeeklyQuotaRow: View {
             VStack(alignment: .leading, spacing: 5) {
                 Text("每周使用限制")
                     .font(.system(size: 17, weight: .semibold))
-                Text("重置时间：\(formattedDate(usage.resetsAt))")
-                    .font(.system(size: 15))
-                    .foregroundStyle(.secondary)
+                if let resetsAt = usage.resetsAt, !resetsAt.isEmpty {
+                    Text("重置时间：\(formattedDate(resetsAt))")
+                        .font(.system(size: 15))
+                        .foregroundStyle(.secondary)
+                }
             }
             Spacer(minLength: 16)
             VStack(alignment: .trailing, spacing: 7) {
