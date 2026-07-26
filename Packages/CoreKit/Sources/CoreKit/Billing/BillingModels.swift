@@ -153,13 +153,39 @@ public struct BillingProductList: Codable, Sendable {
     }
 }
 
+public struct BillingQuotaPeriod: Codable, Sendable {
+    public let unitsUsed: Int
+    public let unitsLimit: Int
+    public let unitsRemaining: Int
+    public let tokensUsed: Int
+    public let utilizationPercent: Double
+    public let resetsAt: String?
+
+    enum CodingKeys: String, CodingKey {
+        case unitsUsed = "units_used"
+        case unitsLimit = "units_limit"
+        case unitsRemaining = "units_remaining"
+        case tokensUsed = "tokens_used"
+        case utilizationPercent = "utilization_pct"
+        case resetsAt = "resets_at"
+    }
+}
+
 public struct BillingWallet: Codable, Sendable {
     public let userID: Int
     public let availablePoints: Int
     public let frozenPoints: Int
+    public let paidUsageUnits: Int
+    public let frozenUsageUnits: Int
     public let currentSubscription: String?
     public let subscriptionActive: Bool
     public let subscriptionExpiredAt: Int?
+    public let planCode: String
+    public let planVersion: Int
+    public let quotaPolicy: String
+    public let weekly: BillingQuotaPeriod?
+    public let subscriptionCycle: BillingQuotaPeriod?
+    public let currentFundingSource: String?
     public let currentPeriodUsed: Int
     public let pointDiscountRate: Double
     public let canUse1080p: Bool
@@ -173,9 +199,17 @@ public struct BillingWallet: Codable, Sendable {
         case userID = "user_id"
         case availablePoints = "available_points"
         case frozenPoints = "frozen_points"
+        case paidUsageUnits = "paid_usage_units"
+        case frozenUsageUnits = "frozen_usage_units"
         case currentSubscription = "current_subscription"
         case subscriptionActive = "subscription_active"
         case subscriptionExpiredAt = "subscription_expired_at"
+        case planCode = "plan_code"
+        case planVersion = "plan_version"
+        case quotaPolicy = "quota_policy"
+        case weekly
+        case subscriptionCycle = "subscription_cycle"
+        case currentFundingSource = "current_funding_source"
         case currentPeriodUsed = "current_period_used"
         case pointDiscountRate = "point_discount_rate"
         case canUse1080p = "can_use_1080p"
@@ -185,6 +219,34 @@ public struct BillingWallet: Codable, Sendable {
         case dailyFreeRemain = "daily_free_remain"
         case dailyDurationRemainSec = "daily_duration_remain_sec"
     }
+
+    public init(from decoder: any Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        userID = try container.decode(Int.self, forKey: .userID)
+        let legacyAvailablePoints = try container.decodeIfPresent(Int.self, forKey: .availablePoints) ?? 0
+        let legacyFrozenPoints = try container.decodeIfPresent(Int.self, forKey: .frozenPoints) ?? 0
+        paidUsageUnits = try container.decodeIfPresent(Int.self, forKey: .paidUsageUnits) ?? legacyAvailablePoints
+        frozenUsageUnits = try container.decodeIfPresent(Int.self, forKey: .frozenUsageUnits) ?? legacyFrozenPoints
+        availablePoints = legacyAvailablePoints == 0 ? paidUsageUnits : legacyAvailablePoints
+        frozenPoints = legacyFrozenPoints == 0 ? frozenUsageUnits : legacyFrozenPoints
+        currentSubscription = try container.decodeIfPresent(String.self, forKey: .currentSubscription)
+        subscriptionActive = try container.decodeIfPresent(Bool.self, forKey: .subscriptionActive) ?? false
+        subscriptionExpiredAt = try container.decodeIfPresent(Int.self, forKey: .subscriptionExpiredAt)
+        planCode = try container.decodeIfPresent(String.self, forKey: .planCode) ?? (subscriptionActive ? "pro" : "free")
+        planVersion = try container.decodeIfPresent(Int.self, forKey: .planVersion) ?? 0
+        quotaPolicy = try container.decodeIfPresent(String.self, forKey: .quotaPolicy) ?? "weekly_only"
+        weekly = try container.decodeIfPresent(BillingQuotaPeriod.self, forKey: .weekly)
+        subscriptionCycle = try container.decodeIfPresent(BillingQuotaPeriod.self, forKey: .subscriptionCycle)
+        currentFundingSource = try container.decodeIfPresent(String.self, forKey: .currentFundingSource)
+        currentPeriodUsed = try container.decodeIfPresent(Int.self, forKey: .currentPeriodUsed) ?? 0
+        pointDiscountRate = try container.decodeIfPresent(Double.self, forKey: .pointDiscountRate) ?? 1
+        canUse1080p = try container.decodeIfPresent(Bool.self, forKey: .canUse1080p) ?? false
+        canRemoveWatermark = try container.decodeIfPresent(Bool.self, forKey: .canRemoveWatermark) ?? false
+        canUsePriorityQueue = try container.decodeIfPresent(Bool.self, forKey: .canUsePriorityQueue) ?? false
+        canUseCustomAspectRatio = try container.decodeIfPresent(Bool.self, forKey: .canUseCustomAspectRatio) ?? false
+        dailyFreeRemain = try container.decodeIfPresent(Int.self, forKey: .dailyFreeRemain) ?? 0
+        dailyDurationRemainSec = try container.decodeIfPresent(Int.self, forKey: .dailyDurationRemainSec) ?? 0
+    }
 }
 
 public struct BillingEntitlements: Codable, Sendable {
@@ -192,6 +254,12 @@ public struct BillingEntitlements: Codable, Sendable {
     public let subscriptionActive: Bool
     public let currentSubscription: String?
     public let subscriptionExpiredAt: Int?
+    public let planCode: String
+    public let planVersion: Int
+    public let quotaPolicy: String
+    public let weeklyIncludedUnits: Int
+    public let subscriptionCycleIncludedUnits: Int
+    public let benefitItems: [BillingBenefitItem]
     public let pointDiscountRate: Double
     public let canUse1080p: Bool
     public let canRemoveWatermark: Bool
@@ -207,6 +275,12 @@ public struct BillingEntitlements: Codable, Sendable {
         case subscriptionActive = "subscription_active"
         case currentSubscription = "current_subscription"
         case subscriptionExpiredAt = "subscription_expired_at"
+        case planCode = "plan_code"
+        case planVersion = "plan_version"
+        case quotaPolicy = "quota_policy"
+        case weeklyIncludedUnits = "weekly_included_units"
+        case subscriptionCycleIncludedUnits = "subscription_cycle_included_units"
+        case benefitItems = "benefit_items"
         case pointDiscountRate = "point_discount_rate"
         case canUse1080p = "can_use_1080p"
         case canRemoveWatermark = "can_remove_watermark"
@@ -216,6 +290,29 @@ public struct BillingEntitlements: Codable, Sendable {
         case dailyFreeRemain = "daily_free_remain"
         case dailyDurationLimitSec = "daily_duration_limit_sec"
         case dailyDurationRemainSec = "daily_duration_remain_sec"
+    }
+
+    public init(from decoder: any Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        userID = try container.decode(Int.self, forKey: .userID)
+        subscriptionActive = try container.decodeIfPresent(Bool.self, forKey: .subscriptionActive) ?? false
+        currentSubscription = try container.decodeIfPresent(String.self, forKey: .currentSubscription)
+        subscriptionExpiredAt = try container.decodeIfPresent(Int.self, forKey: .subscriptionExpiredAt)
+        planCode = try container.decodeIfPresent(String.self, forKey: .planCode) ?? (subscriptionActive ? "pro" : "free")
+        planVersion = try container.decodeIfPresent(Int.self, forKey: .planVersion) ?? 0
+        quotaPolicy = try container.decodeIfPresent(String.self, forKey: .quotaPolicy) ?? "weekly_only"
+        weeklyIncludedUnits = try container.decodeIfPresent(Int.self, forKey: .weeklyIncludedUnits) ?? 0
+        subscriptionCycleIncludedUnits = try container.decodeIfPresent(Int.self, forKey: .subscriptionCycleIncludedUnits) ?? 0
+        benefitItems = try container.decodeIfPresent([BillingBenefitItem].self, forKey: .benefitItems) ?? []
+        pointDiscountRate = try container.decodeIfPresent(Double.self, forKey: .pointDiscountRate) ?? 1
+        canUse1080p = try container.decodeIfPresent(Bool.self, forKey: .canUse1080p) ?? false
+        canRemoveWatermark = try container.decodeIfPresent(Bool.self, forKey: .canRemoveWatermark) ?? false
+        canUsePriorityQueue = try container.decodeIfPresent(Bool.self, forKey: .canUsePriorityQueue) ?? false
+        canUseCustomAspectRatio = try container.decodeIfPresent(Bool.self, forKey: .canUseCustomAspectRatio) ?? false
+        dailyFreeLimit = try container.decodeIfPresent(Int.self, forKey: .dailyFreeLimit) ?? 0
+        dailyFreeRemain = try container.decodeIfPresent(Int.self, forKey: .dailyFreeRemain) ?? 0
+        dailyDurationLimitSec = try container.decodeIfPresent(Int.self, forKey: .dailyDurationLimitSec) ?? 0
+        dailyDurationRemainSec = try container.decodeIfPresent(Int.self, forKey: .dailyDurationRemainSec) ?? 0
     }
 }
 

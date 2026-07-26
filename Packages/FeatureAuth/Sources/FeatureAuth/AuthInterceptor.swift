@@ -48,11 +48,9 @@ public final class AuthInterceptor: RequestInterceptor, @unchecked Sendable {
             completion(.doNotRetry)
             return
         }
-        if afError.responseCode == 401 {
-            Task { @MainActor in
-                authManager.handleTokenExpired()
-            }
-            completion(.doNotRetry)
+
+        if afError.responseCode != 401 {
+            completion(.doNotRetry) // 非401错误不重试
             return
         }
         // 2. 若请求本身是 refresh 接口，绝不重试。匿名静默重建，正式弹出登录
@@ -74,6 +72,11 @@ public final class AuthInterceptor: RequestInterceptor, @unchecked Sendable {
             return
         }
         
+        if afError.responseCode == nil {
+            completion(.doNotRetry)
+            return
+        }
+        
         // 4. 尝试刷新逻辑
         // 委托给 AuthManager 判断是否需要刷新（全局控流）
         if authManager.addWaiterAndCheckRefresh(completion) {
@@ -81,10 +84,15 @@ public final class AuthInterceptor: RequestInterceptor, @unchecked Sendable {
                 do {
                     // 401 means the server rejected the credential even if its
                     // local exp has not elapsed, so force one refresh.
-                    try await authManager.refreshAfterUnauthorized()
-                    authManager.handleRefreshResult(.retry)
+                    try await authManager.refreshAfterUnauthorized() // 刷新token
+                    authManager.handleRefreshResult(.retry) // token刷新完成后，重试当前接口
                 } catch {
-                    authManager.handleRefreshResult(.doNotRetry)
+                    authManager.handleRefreshResult(.doNotRetry) // token 刷新失败，不重试当前接口
+                    if error.isUnauthorized401 {
+                        Task { @MainActor in
+                            authManager.handleTokenExpired()
+                        }
+                    }
                 }
             }
         }

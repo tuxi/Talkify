@@ -402,14 +402,30 @@ final class SubscriptionCenterViewModel: ObservableObject {
 
         guard let entitlements else { return [] }
 
-        return [
-            SubscriptionEntitlementRow(title: "1080p 输出", value: entitlements.canUse1080p ? "已开启" : "不可用"),
-            SubscriptionEntitlementRow(title: "去水印", value: entitlements.canRemoveWatermark ? "已开启" : "不可用"),
-            SubscriptionEntitlementRow(title: "优先队列", value: entitlements.canUsePriorityQueue ? "已开启" : "不可用"),
-//            SubscriptionEntitlementRow(title: "自定义比例", value: entitlements.canUseCustomAspectRatio ? "已开启" : "不可用"),
-//            SubscriptionEntitlementRow(title: "每日免费次数", value: "\(entitlements.dailyFreeRemain) / \(entitlements.dailyFreeLimit)"),
-//            SubscriptionEntitlementRow(title: "每日时长", value: "\(entitlements.dailyDurationRemainSec)s / \(entitlements.dailyDurationLimitSec)s")
-        ]
+        if !entitlements.benefitItems.isEmpty {
+            return entitlements.benefitItems.map {
+                SubscriptionEntitlementRow(title: $0.title, value: $0.description)
+            }
+        }
+
+        var rows: [SubscriptionEntitlementRow] = []
+        if entitlements.weeklyIncludedUnits > 0 {
+            rows.append(
+                SubscriptionEntitlementRow(
+                    title: "每周 \(entitlements.weeklyIncludedUnits.formatted()) Usage Units",
+                    value: "每 7 天重置，不结转"
+                )
+            )
+        }
+        if entitlements.subscriptionCycleIncludedUnits > 0 {
+            rows.append(
+                SubscriptionEntitlementRow(
+                    title: "订阅周期 \(entitlements.subscriptionCycleIncludedUnits.formatted()) Usage Units",
+                    value: "与每周额度同时约束"
+                )
+            )
+        }
+        return rows
     }
 
     func currentEntitlementSummary() -> [SubscriptionEntitlementRow] {

@@ -159,7 +159,7 @@ public struct UsageInfo: Codable, Sendable {
     public enum QuotaPolicy: String, Codable, Sendable { case weeklyOnly = "weekly_only" }
 
     public enum FundingSource: String, Codable, Sendable {
-        case subscription, resetCard = "reset_card", purchased, campaign, adminGrant = "admin_grant"
+        case subscription, resetCard = "reset_card", purchased, campaign, adminGrant = "admin_grant", includedQuota = "included_quota"
     }
 
     /// 付费用户展示订阅周期；Free 用户不会回退到废弃月字段。
