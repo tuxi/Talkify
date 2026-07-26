@@ -65,6 +65,7 @@ struct WorkspaceHubView: View {
     @State private var isWorkspaceContentImporterPresented = false
     @State private var isImportingWorkspaceContent = false
     @State private var workspaceFilesRevision = 0
+    @State private var fileNavigationStates: [String: WorkspaceFileNavigationState] = [:]
     @State private var isExportingWorkspace = false
     @State private var workspaceExportError: String?
     @State private var pendingImportURL: URL?
@@ -549,6 +550,7 @@ struct WorkspaceHubView: View {
                 WorkspaceFilesView(
                     workspace: workspaceContext.activeWorkspace,
                     provider: fileProvider,
+                    navigationState: fileNavigationBinding(for: workspaceContext.activeWorkspace),
                     refreshRevision: workspaceFilesRevision,
                     isImporting: isImportingWorkspaceContent,
                     onSelectFile: { onFileSelected?($0) },
@@ -575,6 +577,17 @@ struct WorkspaceHubView: View {
         .transition(.opacity)
         .animation(.easeInOut(duration: 0.16), value: selectedTab)
         .frame(maxHeight: .infinity)
+    }
+
+    private func fileNavigationBinding(for workspace: Workspace?) -> Binding<WorkspaceFileNavigationState> {
+        let key = workspace?.id ?? "none"
+        return Binding(
+            get: {
+                fileNavigationStates[key]
+                    ?? WorkspaceFileNavigationState.root(for: workspace)
+            },
+            set: { fileNavigationStates[key] = $0 }
+        )
     }
 
     // MARK: - Bottom Bar
@@ -1365,9 +1378,34 @@ private struct ArchivedWorkspaceConversationsView: View {
     }
 }
 
+private struct WorkspaceFileNavigationState: Equatable {
+    var workspaceID: String?
+    var directoryPath: String
+    var directoryTitles: [String]
+    var directoryPaths: [String]
+
+    static func root(for workspace: Workspace?) -> Self {
+        guard let workspace else {
+            return .init(
+                workspaceID: nil,
+                directoryPath: "",
+                directoryTitles: [],
+                directoryPaths: []
+            )
+        }
+        return .init(
+            workspaceID: workspace.id,
+            directoryPath: workspace.url.path,
+            directoryTitles: [workspace.name],
+            directoryPaths: [workspace.url.path]
+        )
+    }
+}
+
 private struct WorkspaceFilesView: View {
     let workspace: Workspace?
     let provider: WorkspaceFileContentProvider?
+    @Binding var navigationState: WorkspaceFileNavigationState
     let refreshRevision: Int
     let isImporting: Bool
     let onSelectFile: (String) -> Void
@@ -1375,9 +1413,6 @@ private struct WorkspaceFilesView: View {
     let onStartConversation: () -> Void
     let onImportItems: () -> Void
 
-    @State private var directoryPath = ""
-    @State private var directoryTitles: [String] = []
-    @State private var directoryPaths: [String] = []
     @State private var nodes: [WorkspaceFileListItem] = []
     @State private var isLoading = false
     @State private var errorMessage: String?
@@ -1385,7 +1420,7 @@ private struct WorkspaceFilesView: View {
     var body: some View {
         VStack(spacing: 0) {
             HStack(spacing: 8) {
-                if directoryPaths.count > 1 {
+                if navigationState.directoryPaths.count > 1 {
                     Button { navigateBack() } label: {
                         Image(systemName: "chevron.left")
                             .font(.caption.weight(.bold))
@@ -1398,7 +1433,7 @@ private struct WorkspaceFilesView: View {
                 ScrollViewReader { proxy in
                     ScrollView(.horizontal) {
                         HStack(spacing: 5) {
-                            ForEach(directoryTitles.indices, id: \.self) { index in
+                            ForEach(navigationState.directoryTitles.indices, id: \.self) { index in
                                 if index > 0 {
                                     Image(systemName: "chevron.right")
                                         .font(.system(size: 8, weight: .bold))
@@ -1407,9 +1442,9 @@ private struct WorkspaceFilesView: View {
                                 Button {
                                     navigate(to: index)
                                 } label: {
-                                    Text(directoryTitles[index])
-                                        .font(.caption.weight(index == directoryTitles.count - 1 ? .semibold : .regular))
-                                        .foregroundStyle(index == directoryTitles.count - 1 ? .primary : .secondary)
+                                    Text(navigationState.directoryTitles[index])
+                                        .font(.caption.weight(index == navigationState.directoryTitles.count - 1 ? .semibold : .regular))
+                                        .foregroundStyle(index == navigationState.directoryTitles.count - 1 ? .primary : .secondary)
                                         .lineLimit(1)
                                 }
                                 .buttonStyle(.plain)
@@ -1418,7 +1453,7 @@ private struct WorkspaceFilesView: View {
                         }
                     }
                     .scrollIndicators(.hidden)
-                    .onChange(of: directoryTitles.count) { _, count in
+                    .onChange(of: navigationState.directoryTitles.count) { _, count in
                         guard count > 0 else { return }
                         withAnimation(.easeOut(duration: 0.18)) {
                             proxy.scrollTo(count - 1, anchor: .trailing)
@@ -1534,44 +1569,64 @@ private struct WorkspaceFilesView: View {
                 .refreshable { await loadDirectory() }
             }
         }
-        .task(id: "\(workspace?.id ?? "none"):\(refreshRevision)") {
-            guard let workspace else { return }
-            directoryPath = workspace.url.path
-            directoryPaths = [workspace.url.path]
-            directoryTitles = [workspace.name]
-            await loadDirectory()
+        .task(id: workspace?.id) {
+            await initializeWorkspaceIfNeededAndRefresh()
+        }
+        .onChange(of: refreshRevision) { _, _ in
+            Task { await loadDirectory() }
         }
     }
 
     private func navigateInto(_ node: WorkspaceFileListItem) {
-        directoryPath = node.path
-        directoryPaths.append(node.path)
-        directoryTitles.append(node.name)
+        navigationState.directoryPath = node.path
+        navigationState.directoryPaths.append(node.path)
+        navigationState.directoryTitles.append(node.name)
         Task { await loadDirectory() }
     }
 
     private func navigateBack() {
-        guard directoryPaths.count > 1 else { return }
-        directoryPaths.removeLast()
-        directoryTitles.removeLast()
-        directoryPath = directoryPaths.last ?? workspace?.url.path ?? ""
+        guard navigationState.directoryPaths.count > 1 else { return }
+        navigationState.directoryPaths.removeLast()
+        navigationState.directoryTitles.removeLast()
+        navigationState.directoryPath = navigationState.directoryPaths.last
+            ?? workspace?.url.path
+            ?? ""
         Task { await loadDirectory() }
     }
 
     private func navigate(to index: Int) {
-        guard directoryPaths.indices.contains(index), index < directoryPaths.count - 1 else { return }
-        directoryPaths = Array(directoryPaths.prefix(index + 1))
-        directoryTitles = Array(directoryTitles.prefix(index + 1))
-        directoryPath = directoryPaths[index]
+        guard navigationState.directoryPaths.indices.contains(index),
+              index < navigationState.directoryPaths.count - 1 else { return }
+        navigationState.directoryPaths = Array(navigationState.directoryPaths.prefix(index + 1))
+        navigationState.directoryTitles = Array(navigationState.directoryTitles.prefix(index + 1))
+        navigationState.directoryPath = navigationState.directoryPaths[index]
         Task { await loadDirectory() }
     }
 
+    private func initializeWorkspaceIfNeededAndRefresh() async {
+        guard let workspace else {
+            navigationState = .root(for: nil)
+            nodes = []
+            return
+        }
+
+        // `.task` 会在 UIKit preview pop 后重新启动。只有 workspace 真正变化或
+        // 尚未建立导航栈时才回到根目录；普通重现只刷新当前目录。
+        if navigationState.workspaceID != workspace.id
+            || navigationState.directoryPaths.isEmpty
+            || navigationState.directoryPath.isEmpty {
+            navigationState = .root(for: workspace)
+        }
+        await loadDirectory()
+    }
+
     private func loadDirectory() async {
-        guard let provider, !directoryPath.isEmpty else { return }
+        guard let provider, !navigationState.directoryPath.isEmpty else { return }
         isLoading = true
         errorMessage = nil
         do {
-            nodes = try await provider.children(of: directoryPath).map(WorkspaceFileListItem.init)
+            nodes = try await provider.children(of: navigationState.directoryPath)
+                .map(WorkspaceFileListItem.init)
         } catch {
             nodes = []
             errorMessage = error.localizedDescription
