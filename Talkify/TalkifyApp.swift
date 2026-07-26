@@ -53,10 +53,9 @@ struct TalkifyApp: App {
                 .environment(container)
                 .environment(container.agentManager)
                 .environment(container.modelSettings)
-                .environment(container)
                 .environment(container.authManager)
                 .environment(container.userManager)
-//                .environment(container.billingManager)
+                .environment(container.billingManager)
                 .environment(environmentManager)
                 .environment(deviceManager)
                 .onChange(of: container.authManager.isLoggedIn, { oldValue, newValue in
@@ -75,7 +74,7 @@ struct TalkifyApp: App {
 //                        toggleConnect()
                         if container.authManager.isRegistered {
                             await container.userManager.refreshProfileIfNeeded(maxAge: 0)
-//                            await container.billingManager.refreshAllIfNeeded(maxAge: 0)
+                            await container.billingManager.refreshAllIfNeeded(maxAge: 0)
                         }
                     }
                 }

@@ -70,6 +70,7 @@ final class AppContainer {
     
     let authManager: AuthManager
     let userManager: UserManager
+    let billingManager: BillingManager
     let deviceManager: DeviceManager
     private let agentCredentialStore: AppCredentialStore
     
@@ -169,7 +170,7 @@ final class AppContainer {
             service: UserService(apiProvider: apiProvider),
             environment: environmentManager.currentEnvironmentSnapshot
         )
-//        self.billingManager = BillingManager(service: BillingService(apiProvider: apiProvider))
+        self.billingManager = BillingManager(service: BillingService(apiProvider: apiProvider))
         // AgentKit 账户与用量服务复用 Talkify 的授权 API Provider。
         self.agentManager = AgentManager(apiProvider: apiProvider)
 
@@ -299,6 +300,10 @@ final class AppContainer {
     
     func makeAuthService() -> AuthService {
         AuthService(api: makeApiProvider())
+    }
+
+    func makeBillingService() -> BillingService {
+        BillingService(apiProvider: makeApiProvider())
     }
     
     // MARK: - ApiProvider 工厂方法（按需创建）

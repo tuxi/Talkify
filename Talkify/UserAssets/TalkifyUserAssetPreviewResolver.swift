@@ -41,11 +41,17 @@ actor TalkifyUserAssetPreviewResolver: UserAssetPreviewResolving {
               expiresAt > Date() else {
             throw TalkifyUserAssetError.unavailable
         }
+        // OSS 签名 URL 可能返回 http://，升级为 https:// 以避免
+        // WKWebView 混合内容拦截。OSS 签名对 scheme 不敏感。
+        let secureURL = url.absoluteString.hasPrefix("http://")
+            ? URL(string: "https://" + url.absoluteString.dropFirst(7)) ?? url
+            : url
+
         cache[asset.assetID] = Entry(
-            url: url,
+            url: secureURL,
             usableUntil: expiresAt.addingTimeInterval(-30)
         )
-        return url
+        return secureURL
     }
 
     func clearCache() {

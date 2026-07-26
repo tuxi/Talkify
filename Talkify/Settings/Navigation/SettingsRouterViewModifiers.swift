@@ -12,19 +12,34 @@ extension View {
    
     func withSettingsNavigationDestinations(
             router: SettingsRouter,
+            container: AppContainer
     ) -> some View {
         navigationDestination(for: SettingsNavigationDestination.self) { destination in
-            SettingsDetailView(section: destination.section)
+            switch destination {
+            case .detail(let section):
+                SettingsDetailView(section: section)
+                
+            }
         }
     }
     
    func withSettingsSheetDestinations(
-        sheetDestinations: Binding<SettingsSheetDestination?>
+        sheetDestinations: Binding<SettingsSheetDestination?>,
+        container: AppContainer
     ) -> some View {
         return sheet(item: sheetDestinations) { destination in
             switch destination {
-            case .demo:
-                Color.red
+            case .subscriptionCenter:
+                NavigationStack {
+                    SubscriptionCenterView(navigationActions: SubscriptionCenterNavigationActions(showPointsCenter: {
+                        
+                    }), viewModel: SubscriptionCenterViewModel(
+                        billingManager: container.billingManager,
+                        billingService: container.makeBillingService()
+                    ))
+                }
+            case .subscription:
+                SubscriptionView(container: container, viewModel: SubscriptionViewModel(billingManager: container.billingManager, billingService: container.makeBillingService(), authManager: container.authManager))
             }
         }
     }

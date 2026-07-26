@@ -44,8 +44,22 @@ final class TalkifyUserAssetUploader: UserAssetUploading, @unchecked Sendable {
         }
         progress(0)
         try Task.checkCancellation()
+
+        // 拖拽/粘贴等来源的文件可能在管理目录之外，需要先拷贝到 UserAssets/Drafts；
+        // 已经由 picker 导入过的文件（已在管理目录内）则跳过，避免自我覆盖。
+        let managedURL: URL
+        if normalizer.isManagedURL(sourceURL) {
+            managedURL = sourceURL
+        } else {
+            managedURL = try normalizer.importFile(
+                from: sourceURL,
+                attachmentID: attachment.id,
+                accountScope: startingScope
+            )
+        }
+
         let image = try normalizer.normalize(
-            sourceURL: sourceURL,
+            sourceURL: managedURL,
             attachmentID: attachment.id,
             preferredFilename: attachment.displayName
         )

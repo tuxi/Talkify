@@ -8,6 +8,10 @@ public struct BillingBenefits: Codable, Sendable, Hashable {
 //    public let dailyFreeTaskLimit: Int
 //    public let dailyDurationLimitSec: Int
     public let pointPackDiscountRate: Double
+    public let agentPlanCode: String?
+    public let agentPlanVersion: Int?
+    public let agentWeeklyUnits: Int
+    public let agentSubscriptionCycleUnits: Int
 
     enum CodingKeys: String, CodingKey {
         case removeWatermark = "remove_watermark"
@@ -17,6 +21,10 @@ public struct BillingBenefits: Codable, Sendable, Hashable {
 //        case dailyFreeTaskLimit = "daily_free_task_limit"
 //        case dailyDurationLimitSec = "daily_duration_limit_sec"
         case pointPackDiscountRate = "point_pack_discount_rate"
+        case agentPlanCode = "agent_plan_code"
+        case agentPlanVersion = "agent_plan_version"
+        case agentWeeklyUnits = "agent_weekly_units"
+        case agentSubscriptionCycleUnits = "agent_subscription_cycle_units"
     }
 
     public init(
@@ -26,7 +34,11 @@ public struct BillingBenefits: Codable, Sendable, Hashable {
         allowCustomAspectRatio: Bool = false,
         dailyFreeTaskLimit: Int = 0,
         dailyDurationLimitSec: Int = 0,
-        pointPackDiscountRate: Double = 0
+        pointPackDiscountRate: Double = 0,
+        agentPlanCode: String? = nil,
+        agentPlanVersion: Int? = nil,
+        agentWeeklyUnits: Int = 0,
+        agentSubscriptionCycleUnits: Int = 0
     ) {
         self.removeWatermark = removeWatermark
         self.priorityQueue = priorityQueue
@@ -35,6 +47,10 @@ public struct BillingBenefits: Codable, Sendable, Hashable {
 //        self.dailyFreeTaskLimit = dailyFreeTaskLimit
 //        self.dailyDurationLimitSec = dailyDurationLimitSec
         self.pointPackDiscountRate = pointPackDiscountRate
+        self.agentPlanCode = agentPlanCode
+        self.agentPlanVersion = agentPlanVersion
+        self.agentWeeklyUnits = agentWeeklyUnits
+        self.agentSubscriptionCycleUnits = agentSubscriptionCycleUnits
     }
 
     public init(from decoder: Decoder) throws {
@@ -47,6 +63,10 @@ public struct BillingBenefits: Codable, Sendable, Hashable {
 //        self.dailyFreeTaskLimit = try container.decodeIfPresent(Int.self, forKey: .dailyFreeTaskLimit) ?? 0
 //        self.dailyDurationLimitSec = try container.decodeIfPresent(Int.self, forKey: .dailyDurationLimitSec) ?? 0
         self.pointPackDiscountRate = try container.decodeIfPresent(Double.self, forKey: .pointPackDiscountRate) ?? 0
+        self.agentPlanCode = try container.decodeIfPresent(String.self, forKey: .agentPlanCode)
+        self.agentPlanVersion = try container.decodeIfPresent(Int.self, forKey: .agentPlanVersion)
+        self.agentWeeklyUnits = try container.decodeIfPresent(Int.self, forKey: .agentWeeklyUnits) ?? 0
+        self.agentSubscriptionCycleUnits = try container.decodeIfPresent(Int.self, forKey: .agentSubscriptionCycleUnits) ?? 0
     }
 }
 

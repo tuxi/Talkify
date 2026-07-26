@@ -44,8 +44,14 @@ public final class AuthInterceptor: RequestInterceptor, @unchecked Sendable {
     ) {
            
         // 1. 校验状态码
-        guard let afError = error as? AFError,
-              afError.responseCode == 401 else {
+        guard let afError = error as? AFError else {
+            completion(.doNotRetry)
+            return
+        }
+        if afError.responseCode == 401 {
+            Task { @MainActor in
+                authManager.handleTokenExpired()
+            }
             completion(.doNotRetry)
             return
         }

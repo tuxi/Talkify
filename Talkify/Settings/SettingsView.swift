@@ -17,6 +17,7 @@ public struct SettingsView: View {
     @Environment(AgentManager.self) private var agentManager
     @Environment(UserManager.self) private var userManager
     @Environment(AuthManager.self) private var authManager
+    @Environment(AppContainer.self) private var container
     @Environment(\.horizontalSizeClass) private var horizontalSizeClass
     
     private let onClose: () -> Void
@@ -60,7 +61,7 @@ public struct SettingsView: View {
     private var compactLayout: some View {
         NavigationStack(path: $router.path) {
             settingsSidebar(navigateWithRouter: true)
-                .withSettingsNavigationDestinations(router: router)
+                .withSettingsNavigationDestinations(router: router, container: container)
                 .toolbar {
 #if os(iOS)
                     ToolbarItem(placement: .topBarTrailing) {
@@ -76,8 +77,9 @@ public struct SettingsView: View {
 #endif
                 }
         }
-        .withSettingsSheetDestinations(sheetDestinations: $router.presentedSheet)
+        .withSettingsSheetDestinations(sheetDestinations: $router.presentedSheet, container: container)
         .withSettingsCoverDestinations(coverDestinations: $router.presentedCover)
+        .environment(router)
     }
     
     // MARK: - Regular (iPad / macOS) — NavigationSplitView
@@ -89,10 +91,11 @@ public struct SettingsView: View {
         } detail: {
             NavigationStack(path: $router.path) {
                 SettingsDetailView(section: selection)
-                    .withSettingsNavigationDestinations(router: router)
+                    .withSettingsNavigationDestinations(router: router, container: container)
             }
-            .withSettingsSheetDestinations(sheetDestinations: $router.presentedSheet)
+            .withSettingsSheetDestinations(sheetDestinations: $router.presentedSheet, container: container)
             .withSettingsCoverDestinations(coverDestinations: $router.presentedCover)
+            .environment(router)
         }
         .navigationSplitViewStyle(.balanced)
     }
@@ -262,7 +265,11 @@ public struct SettingsView: View {
                         }
                     }
                 }
+#if os(iOS)
                 .listStyle(.insetGrouped)
+#else
+                .listStyle(.sidebar)
+#endif
             }
             
         }
@@ -291,6 +298,7 @@ public struct SettingsView: View {
 
 /// 每个设置分区的内容视图，独立提取以便在 NavigationStack 和 NavigationSplitView 中复用。
 public struct SettingsDetailView: View {
+    @Environment(SettingsRouter.self) private var router
     @Environment(AgentManager.self) private var agentManager
     @Environment(UserManager.self) private var userManager
     @Environment(AuthManager.self) private var authManager
@@ -491,8 +499,13 @@ public struct SettingsDetailView: View {
                 }
                 if let usage = agentManager.usage {
                     SettingsValueRow(title: "订阅方案", description: "当前服务等级") {
-                        Text(usage.tier.rawValue.capitalized)
-                            .settingsPickerCapsule()
+                        Button {
+                            router.presentSheet(.subscriptionCenter)
+                        } label: {
+                            Text(usage.tier.rawValue.capitalized)
+                                .settingsPickerCapsule()
+                        }
+
                     }
                 }
                 Button(role: .destructive) {
@@ -515,7 +528,7 @@ public struct SettingsDetailView: View {
     private var usageBillingSettings: some View {
         VStack(alignment: .leading, spacing: 0) {
             //            settingsTitle("使用情况和计费")
-            Text("如需管理订阅或购买额外点数，请前往网页端设置。")
+            Text("可在此查看订阅方案、管理订阅并了解当前使用额度。")
                 .font(.system(size: 15))
                 .foregroundStyle(.secondary)
                 .padding(.top, -38)
@@ -525,8 +538,13 @@ public struct SettingsDetailView: View {
                 sectionTitle("当前套餐")
                 settingsCard {
                     SettingsValueRow(title: "\(usage.tier.rawValue.capitalized) 套餐", description: subscriptionDescription(for: usage)) {
-                        Text("查看套餐")
-                            .settingsPickerCapsule()
+                        Button {
+                            router.presentSheet(.subscription)
+                        } label: {
+                            Text("查看套餐")
+                                .settingsPickerCapsule()
+                        }
+
                     }
                 }
                 
@@ -804,4 +822,3 @@ private extension View {
         .overlay { Capsule().stroke(Color.primary.opacity(0.10), lineWidth: 1) }
     }
 }
-

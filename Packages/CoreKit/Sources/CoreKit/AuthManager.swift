@@ -411,7 +411,9 @@ public final class AuthManager: Sendable {
     
     nonisolated public func handleRefreshResult(_ result: RetryResult) {
         let waiters = state.reset()
-        waiters.forEach { $0(result) }
+        waiters.forEach {
+            $0(result)
+        }
     }
     
     // MARK: - 令牌自动校验逻辑

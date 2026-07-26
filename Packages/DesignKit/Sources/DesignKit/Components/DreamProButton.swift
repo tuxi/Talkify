@@ -62,7 +62,7 @@ public struct DreamProButton: View {
             .shadow(color: shadowColor, radius: shadowRadius, x: 0, y: shadowYOffset)
         }
         .buttonStyle(DreamProButtonStyle())
-        .accessibilityLabel("DreamAI Pro")
+        .accessibilityLabel("Talkify Pro")
         .accessibilityHint("打开订阅中心")
     }
 }

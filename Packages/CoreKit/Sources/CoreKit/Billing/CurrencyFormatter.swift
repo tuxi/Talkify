@@ -8,12 +8,17 @@
 import Foundation
 
 public enum CurrencyFormatter {
-   public static func cnyString(fromFen amount: Int) -> String {
+    public static func currencyString(fromMinorUnits amount: Int, currencyCode: String) -> String {
         let formatter = NumberFormatter()
         formatter.numberStyle = .currency
-        formatter.currencyCode = "CNY"
-        formatter.locale = Locale(identifier: "zh_CN")
-        return formatter.string(from: NSNumber(value: Double(amount) / 100.0)) ?? "¥\(Double(amount) / 100.0)"
+        formatter.currencyCode = currencyCode.uppercased()
+        formatter.locale = .current
+        let value = Double(amount) / 100.0
+        return formatter.string(from: NSNumber(value: value)) ?? "\(currencyCode.uppercased()) \(value.cleanDisplay)"
+    }
+
+    public static func cnyString(fromFen amount: Int) -> String {
+        currencyString(fromMinorUnits: amount, currencyCode: "CNY")
     }
 }
 

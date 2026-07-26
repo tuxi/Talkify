@@ -15,6 +15,7 @@
 		D096205E300B19610005EBC6 /* CoreKit in Frameworks */ = {isa = PBXBuildFile; productRef = D096205D300B19610005EBC6 /* CoreKit */; };
 		D0962061300B19920005EBC6 /* FeatureAuth in Frameworks */ = {isa = PBXBuildFile; productRef = D0962060300B19920005EBC6 /* FeatureAuth */; };
 		D0962065300B1D160005EBC6 /* AgentKit in Frameworks */ = {isa = PBXBuildFile; productRef = D0962064300B1D160005EBC6 /* AgentKit */; };
+		D0F9C4AB30146A5D00DD5013 /* DesignKit in Frameworks */ = {isa = PBXBuildFile; productRef = D0F9C21E3014645F00DD5013 /* DesignKit */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -101,6 +102,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				D0F9C4AB30146A5D00DD5013 /* DesignKit in Frameworks */,
 				D096205E300B19610005EBC6 /* CoreKit in Frameworks */,
 				D0962061300B19920005EBC6 /* FeatureAuth in Frameworks */,
 				D0935524300EEFCF006C3962 /* ClientToolsKit in Frameworks */,
@@ -218,6 +220,7 @@
 				D0962064300B1D160005EBC6 /* AgentKit */,
 				D0935523300EEFCF006C3962 /* ClientToolsKit */,
 				D0935659300F7080006C3962 /* FileViewerKit */,
+				D0F9C21E3014645F00DD5013 /* DesignKit */,
 			);
 			productName = Talkify;
 			productReference = D0962009300B17250005EBC6 /* Talkify.app */;
@@ -278,6 +281,7 @@
 				D0962062300B1D160005EBC6 /* XCLocalSwiftPackageReference "../AgentKit" */,
 				D0935521300EEF17006C3962 /* XCLocalSwiftPackageReference "../ClientToolsKit" */,
 				D093553C300F63FC006C3962 /* XCLocalSwiftPackageReference "../FileViewerKit" */,
+				D0F9C21D3014645F00DD5013 /* XCLocalSwiftPackageReference "Packages/DesignKit" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = D096200A300B17250005EBC6 /* Products */;
@@ -399,7 +403,7 @@
 				APPLICATION_EXTENSION_API_ONLY = YES;
 				CODE_SIGN_ENTITLEMENTS = TalkifyShareExtension/TalkifyShareExtension.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 38;
+				CURRENT_PROJECT_VERSION = 40;
 				DEVELOPMENT_TEAM = NKW67GFDHM;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = TalkifyShareExtension/Info.plist;
@@ -429,7 +433,7 @@
 				APPLICATION_EXTENSION_API_ONLY = YES;
 				CODE_SIGN_ENTITLEMENTS = TalkifyShareExtension/TalkifyShareExtension.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 38;
+				CURRENT_PROJECT_VERSION = 40;
 				DEVELOPMENT_TEAM = NKW67GFDHM;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = TalkifyShareExtension/Info.plist;
@@ -727,6 +731,10 @@
 			isa = XCLocalSwiftPackageReference;
 			relativePath = ../AgentKit;
 		};
+		D0F9C21D3014645F00DD5013 /* XCLocalSwiftPackageReference "Packages/DesignKit" */ = {
+			isa = XCLocalSwiftPackageReference;
+			relativePath = Packages/DesignKit;
+		};
 /* End XCLocalSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
@@ -752,6 +760,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = D0962062300B1D160005EBC6 /* XCLocalSwiftPackageReference "../AgentKit" */;
 			productName = AgentKit;
+		};
+		D0F9C21E3014645F00DD5013 /* DesignKit */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = D0F9C21D3014645F00DD5013 /* XCLocalSwiftPackageReference "Packages/DesignKit" */;
+			productName = DesignKit;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};

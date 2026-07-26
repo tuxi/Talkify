@@ -41,7 +41,7 @@ public struct FullScreenVideoPlayer: View {
             Color.black.ignoresSafeArea()
             
             // 1. 播放器底层
-            PlayerLayerContainer(player: player, videoGravity: .resizeAspect)
+            PlayerContainerView(player: player)
                 .onTapGesture {
                     withAnimation(.easeInOut(duration: 0.3)) {
                         showControls.toggle()

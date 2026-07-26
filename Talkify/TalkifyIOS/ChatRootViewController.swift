@@ -328,6 +328,8 @@ final class ChatRootViewController: UIViewController {
             .environment(container.authManager)
             .environment(container.agentManager)
             .environment(container.userManager)
+            .environment(container)
+            .environment(container.billingManager)
         let settingsVC = UIHostingController(rootView: settingsView)
         self.present(settingsVC, animated: true)
     }

@@ -39,6 +39,16 @@ struct UserImageNormalizer: Sendable {
 
     let fileStore: ManagedUserAssetFileStore
 
+    /// 将外部文件（拖拽、粘贴等来源）拷贝到管理目录，后续 normalize 才能通过安全校验。
+    func importFile(from sourceURL: URL, attachmentID: String, accountScope: String) throws -> URL {
+        try fileStore.importFile(from: sourceURL, attachmentID: attachmentID, accountScope: accountScope)
+    }
+
+    /// 检查 URL 是否已在管理目录内且文件存在，用于判断是否需要先 import。
+    func isManagedURL(_ url: URL) -> Bool {
+        (try? fileStore.validateManagedURL(url)) != nil
+    }
+
     func normalize(
         sourceURL: URL,
         attachmentID: String,
