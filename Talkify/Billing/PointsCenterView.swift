@@ -58,7 +58,7 @@ struct PointsCenterView: View {
             } label: {
                 HStack(spacing: 6) {
                     Image(systemName: "clock.arrow.circlepath")
-                    Text("明细")
+                    Text(verbatim: TalkifyLocalized.string("billing.points.ledger"))
                 }
                 .font(.system(size: 13, weight: .semibold))
             }
@@ -437,7 +437,7 @@ private extension PointsCenterView {
                 .foregroundColor(validityIconColor)
 
             (
-                Text("点数有效期：")
+                Text(verbatim: TalkifyLocalized.string("billing.points.validity"))
                     .font(.system(size: 18, weight: .medium))
                     .foregroundColor(validityTextColor)
                 +
@@ -456,12 +456,12 @@ private extension PointsCenterView {
                 .font(.system(size: 34, weight: .semibold))
                 .foregroundColor(Color.accentColor.opacity(0.82))
 
-            Text("Talkify 点数购买功能在当前地区暂不可用")
+            Text(verbatim: TalkifyLocalized.string("billing.points.unavailable"))
                 .font(.system(size: 16, weight: .semibold))
                 .foregroundColor(.primary)
                 .multilineTextAlignment(.center)
 
-            Text("我们正在努力扩大支持范围，后续会逐步开放更多地区的购买能力。")
+            Text(verbatim: TalkifyLocalized.string("billing.points.unavailable_hint"))
                 .font(.system(size: 13))
                 .foregroundColor(.secondary)
                 .multilineTextAlignment(.center)
@@ -781,7 +781,7 @@ private struct PointsPurchaseSuccessSheet: View {
                 .foregroundColor(Color(hex: "FF8A00"))
 
             VStack(spacing: 8) {
-                Text("购买成功")
+                Text(verbatim: TalkifyLocalized.string("billing.points.purchase_success"))
                     .font(.system(size: 24, weight: .bold))
                     .foregroundColor(.primary)
 
@@ -803,7 +803,7 @@ private struct PointsPurchaseSuccessSheet: View {
             }
 
             Button(action: onClose) {
-                Text("我知道了")
+                Text(verbatim: TalkifyLocalized.string("billing.points.got_it"))
                     .font(.system(size: 15, weight: .semibold))
                     .foregroundColor(.white)
                     .frame(maxWidth: .infinity)

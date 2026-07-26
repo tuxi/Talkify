@@ -42,21 +42,21 @@ struct SettingsDetailView: View {
             .toolbar {
                 if section == .profile {
                     ToolbarItemGroup(placement: .primaryAction) {
-                        Button("分享", systemImage: "square.and.arrow.up") {}
-                        Button("私有", systemImage: "lock") {}
-                        Button("编辑", systemImage: "pencil") {}
+                        Button(TalkifyLocalized.string("settings.share"), systemImage: "square.and.arrow.up") {}
+                        Button(TalkifyLocalized.string("settings.private"), systemImage: "lock") {}
+                        Button(TalkifyLocalized.string("common.action.edit"), systemImage: "pencil") {}
                     }
                 }
             }
-            .alert("确认删除账号？", isPresented: $showDeleteAccountAlert) {
-                Button("取消", role: .cancel) {}
-                Button("继续", role: .destructive) {
+            .alert(TalkifyLocalized.string("settings.delete_account_confirm"), isPresented: $showDeleteAccountAlert) {
+                Button(TalkifyLocalized.string("common.action.cancel"), role: .cancel) {}
+                Button(TalkifyLocalized.string("common.action.continue"), role: .destructive) {
                     deleteConfirmationText = ""
                     deleteAccountError = nil
                     showDeleteAccountConfirmation = true
                 }
             } message: {
-                Text("删除账号后，账号资料、登录绑定及相关数据将进入删除流程。该操作通常不可恢复。")
+                Text(verbatim: TalkifyLocalized.string("settings.delete_account_warning"))
             }
             .sheet(isPresented: $showDeleteAccountConfirmation) {
                 DeleteAccountConfirmationSheet(
@@ -79,16 +79,16 @@ struct SettingsDetailView: View {
                 switch section {
                 case .general:
                     generalSettings
-                        .navigationTitle("常规")
+                        .navigationTitle(TalkifyLocalized.string("settings.item.general"))
                 case .profile:
                     profileSettings
-                        .navigationTitle("个人资料")
+                        .navigationTitle(TalkifyLocalized.string("settings.item.profile"))
                 case .usage:
                     usageBillingSettings
-                        .navigationTitle("使用情况和计费")
+                        .navigationTitle(TalkifyLocalized.string("settings.item.usage"))
                 case .account:
                     accountSettings
-                        .navigationTitle("账户")
+                        .navigationTitle(TalkifyLocalized.string("settings.item.account"))
                 default:
                     unavailableSettings
                         .navigationTitle(section.title)
@@ -107,46 +107,46 @@ struct SettingsDetailView: View {
     private var generalSettings: some View {
         VStack(alignment: .leading, spacing: 0) {
             //            settingsTitle("常规")
-            sectionTitle("权限")
+            sectionTitle(TalkifyLocalized.string("settings.permissions"))
             settingsCard {
                 SettingsToggleRow(
-                    title: "默认权限",
-                    description: "默认情况下，Talkify 可以读取和编辑其工作空间中的文件；需要时会请求额外访问权限。",
+                    title: TalkifyLocalized.string("settings.default_permission"),
+                    description: TalkifyLocalized.string("settings.default_permission_desc"),
                     isOn: $defaultPermission
                 )
                 SettingsToggleRow(
-                    title: "自动审核",
-                    description: "自动审核额外访问请求，让常规任务流转更顺畅。高风险操作仍会要求你确认。",
+                    title: TalkifyLocalized.string("settings.auto_review"),
+                    description: TalkifyLocalized.string("settings.auto_review_desc"),
                     isOn: $autoApproval
                 )
                 SettingsToggleRow(
-                    title: "完全访问权限",
-                    description: "允许在获得授权后访问工作空间之外的文件和命令。启用前请确认你了解相应风险。",
+                    title: TalkifyLocalized.string("settings.full_access"),
+                    description: TalkifyLocalized.string("settings.full_access_desc"),
                     isOn: $fullDiskAccess
                 )
             }
             
-            sectionTitle("常规")
+            sectionTitle(TalkifyLocalized.string("settings.item.general"))
             settingsCard {
                 SettingsValueRow(
-                    title: "默认文件打开目标",
-                    description: "默认打开文件和文件夹的位置"
+                    title: TalkifyLocalized.string("settings.default_file_target"),
+                    description: TalkifyLocalized.string("settings.default_file_target_desc")
                 ) {
                     Label("Finder", systemImage: "face.smiling")
                         .settingsPickerCapsule()
                 }
-                SettingsValueRow(title: "语言", description: "应用 UI 语言") {
-                    Text("自动检测")
+                SettingsValueRow(title: TalkifyLocalized.string("settings.language"), description: TalkifyLocalized.string("settings.app_ui_language")) {
+                    Text(verbatim: TalkifyLocalized.string("settings.auto_detect"))
                         .settingsPickerCapsule()
                 }
                 SettingsToggleRow(
-                    title: "在菜单栏中显示",
-                    description: "关闭主窗口后，仍在 macOS 菜单栏中保留 Talkify。",
+                    title: TalkifyLocalized.string("settings.show_in_menu_bar"),
+                    description: TalkifyLocalized.string("settings.show_in_menu_bar_desc"),
                     isOn: $showInMenuBar
                 )
                 SettingsToggleRow(
-                    title: "底部面板",
-                    description: "在应用标题栏中显示底部面板控件。",
+                    title: TalkifyLocalized.string("settings.bottom_panel"),
+                    description: TalkifyLocalized.string("settings.bottom_panel_desc"),
                     isOn: $showBottomPanel
                 )
             }
@@ -192,9 +192,9 @@ struct SettingsDetailView: View {
     private var profileMetricCard: some View {
         if let usage = agentManager.usage {
             HStack(spacing: 0) {
-                ProfileMetric(value: formatted(usage.weekly.unitsUsed), label: "本周用量")
-                ProfileMetric(value: formatted(usage.cycle?.unitsUsed ?? 0), label: "订阅周期用量")
-                ProfileMetric(value: usage.tier.rawValue.capitalized, label: "当前方案")
+                ProfileMetric(value: formatted(usage.weekly.unitsUsed), label: TalkifyLocalized.string("settings.this_week_usage"))
+                ProfileMetric(value: formatted(usage.cycle?.unitsUsed ?? 0), label: TalkifyLocalized.string("settings.cycle_usage"))
+                ProfileMetric(value: usage.tier.rawValue.capitalized, label: TalkifyLocalized.string("settings.current_tier"))
             }
             .padding(.vertical, 18)
             .background(Color.primary.opacity(0.035), in: RoundedRectangle(cornerRadius: 24, style: .continuous))
@@ -209,11 +209,11 @@ struct SettingsDetailView: View {
     private var profileActivity: some View {
         if let usage = agentManager.usage {
             VStack(alignment: .leading, spacing: 16) {
-                Text("活动洞察")
+                Text(verbatim: TalkifyLocalized.string("settings.activity_insights"))
                     .font(.system(size: 18, weight: .semibold))
-                ProfileKeyValue(title: "本周已使用", value: "\(formatted(usage.weekly.unitsUsed)) 单位")
-                ProfileKeyValue(title: "当前模型", value: usage.byModel?.first?.model ?? "自动选择")
-                ProfileKeyValue(title: "工作区权限", value: defaultPermission ? "已启用" : "按需请求")
+                ProfileKeyValue(title: TalkifyLocalized.string("settings.used_this_week"), value: String(format: TalkifyLocalized.string("settings.used_this_week_value"), formatted(usage.weekly.unitsUsed)))
+                ProfileKeyValue(title: TalkifyLocalized.string("settings.current_model"), value: usage.byModel?.first?.model ?? TalkifyLocalized.string("settings.auto_select"))
+                ProfileKeyValue(title: TalkifyLocalized.string("settings.workspace_permission"), value: defaultPermission ? TalkifyLocalized.string("settings.enabled") : TalkifyLocalized.string("settings.on_demand"))
             }
             .frame(maxWidth: .infinity, alignment: .leading)
         }
@@ -223,11 +223,11 @@ struct SettingsDetailView: View {
     private var profileUsageSummary: some View {
         if let usage = agentManager.usage {
             VStack(alignment: .leading, spacing: 16) {
-                Text("用量")
+                Text(verbatim: TalkifyLocalized.string("workspace.usage"))
                     .font(.system(size: 18, weight: .semibold))
-                ProfileKeyValue(title: "订阅方案", value: usage.tier.rawValue.capitalized)
-                ProfileKeyValue(title: "每周额度", value: weeklyQuotaText)
-                ProfileKeyValue(title: "登录状态", value: authManager.isLoggedIn ? "已登录" : "未登录")
+                ProfileKeyValue(title: TalkifyLocalized.string("settings.subscription_tier"), value: usage.tier.rawValue.capitalized)
+                ProfileKeyValue(title: TalkifyLocalized.string("settings.weekly_quota"), value: weeklyQuotaText)
+                ProfileKeyValue(title: TalkifyLocalized.string("settings.login_status"), value: authManager.isLoggedIn ? TalkifyLocalized.string("settings.signed_in") : TalkifyLocalized.string("settings.not_signed_in"))
             }
             .frame(maxWidth: .infinity, alignment: .leading)
         }
@@ -247,45 +247,45 @@ struct SettingsDetailView: View {
 
     private var accountMetaCard: some View {
         VStack(alignment: .leading, spacing: 0) {
-            sectionTitle("账户信息")
+            sectionTitle(TalkifyLocalized.string("settings.account_info"))
             settingsCard {
-                SettingsValueRow(title: "昵称", description: "当前登录账户") {
+                SettingsValueRow(title: TalkifyLocalized.string("settings.nickname"), description: TalkifyLocalized.string("settings.nickname_desc")) {
                     Text(accountName).foregroundStyle(.secondary)
                 }
-                SettingsValueRow(title: "用户 ID", description: "用于识别和支持请求") {
+                SettingsValueRow(title: TalkifyLocalized.string("settings.user_id"), description: TalkifyLocalized.string("settings.user_id_desc")) {
                     HStack(spacing: 8) {
                         Text(userManager.profile?.userId ?? "--")
                             .foregroundStyle(.secondary)
                         if let userID = userManager.profile?.userId {
                             Button {
                                 CoreKit.Clipboard.copy(userID)
-                                ToastContext.shared.show("已复制")
+                                ToastContext.shared.show(TalkifyLocalized.string("settings.copied"))
                             } label: {
                                 Image(systemName: "doc.on.doc")
                                     .font(.system(size: 13, weight: .semibold))
                             }
                             .buttonStyle(.plain)
                             .foregroundStyle(.secondary)
-                            .help("复制用户 ID")
+                            .help(TalkifyLocalized.string("settings.copy_user_id_help"))
                         }
                     }
                 }
-                SettingsValueRow(title: "注册来源", description: "账号创建方式") {
+                SettingsValueRow(title: TalkifyLocalized.string("settings.registration_source"), description: TalkifyLocalized.string("settings.registration_source_desc")) {
                     Text(registerSourceText).foregroundStyle(.secondary)
                 }
-                SettingsValueRow(title: "当前登录方式", description: "已绑定的登录方式") {
+                SettingsValueRow(title: TalkifyLocalized.string("settings.current_login_method"), description: TalkifyLocalized.string("settings.current_login_method_desc")) {
                     Text(loginMethodsText).foregroundStyle(.secondary)
                 }
-                SettingsValueRow(title: "手机号", description: "账号绑定状态") {
-                    Text(userManager.profile?.phoneMasked ?? "未绑定")
+                SettingsValueRow(title: TalkifyLocalized.string("settings.phone"), description: TalkifyLocalized.string("settings.phone_desc")) {
+                    Text(userManager.profile?.phoneMasked ?? TalkifyLocalized.string("settings.not_bound"))
                         .foregroundStyle(.secondary)
                 }
-                SettingsValueRow(title: "Apple", description: "账号绑定状态") {
-                    Text(userManager.profile?.hasApple == true ? "已绑定" : "未绑定")
+                SettingsValueRow(title: TalkifyLocalized.string("settings.apple"), description: TalkifyLocalized.string("settings.phone_desc")) {
+                    Text(userManager.profile?.hasApple == true ? TalkifyLocalized.string("settings.apple_bound") : TalkifyLocalized.string("settings.not_bound"))
                         .foregroundStyle(.secondary)
                 }
                 if let usage = agentManager.usage {
-                    SettingsValueRow(title: "订阅方案", description: "当前服务等级") {
+                    SettingsValueRow(title: TalkifyLocalized.string("settings.subscription_tier"), description: TalkifyLocalized.string("settings.subscription_tier_desc")) {
                         Button {
                             if usage.tier == .free {
                                 router.presentSheet(.subscription)
@@ -302,7 +302,7 @@ struct SettingsDetailView: View {
                     authManager.logout()
                     userManager.clear()
                 } label: {
-                    Label("退出登录", systemImage: "rectangle.portrait.and.arrow.right")
+                    Label(TalkifyLocalized.string("workspace.sign_out"), systemImage: "rectangle.portrait.and.arrow.right")
                         .font(.system(size: 15, weight: .medium))
                         .frame(maxWidth: .infinity, alignment: .leading)
                         .padding(.horizontal, 16)

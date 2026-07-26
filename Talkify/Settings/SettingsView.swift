@@ -107,7 +107,7 @@ public struct SettingsView: View {
         VStack(spacing: 0) {
             if horizontalSizeClass == .regular {
                 Button(action: onClose) {
-                    Label("返回应用", systemImage: "arrow.left")
+                    Label(TalkifyLocalized.string("settings.back"), systemImage: "arrow.left")
                         .font(.system(size: 15, weight: .medium))
                         .foregroundStyle(.secondary)
                         .frame(maxWidth: .infinity, alignment: .leading)
@@ -119,7 +119,7 @@ public struct SettingsView: View {
                 HStack(spacing: 9) {
                     Image(systemName: "magnifyingglass")
                         .foregroundStyle(.secondary)
-                    TextField("搜索设置…", text: $searchText)
+                    TextField(TalkifyLocalized.string("settings.search_placeholder"), text: $searchText)
                         .textFieldStyle(.plain)
                         .font(.system(size: 15))
                 }
@@ -185,7 +185,7 @@ public struct SettingsView: View {
                             Button(role: .destructive) {
                                 authManager.logout()
                             } label: {
-                                Label("退出登录", systemImage: "rectangle.portrait.and.arrow.right")
+                                Label(TalkifyLocalized.string("workspace.sign_out"), systemImage: "rectangle.portrait.and.arrow.right")
                                     .font(.system(size: 15, weight: .medium))
                                     .frame(maxWidth: .infinity, alignment: .leading)
                                     .padding(.horizontal, 16)
@@ -259,7 +259,7 @@ public struct SettingsView: View {
                             Button(role: .destructive) {
                                 authManager.logout()
                             } label: {
-                                Label("退出登录", systemImage: "rectangle.portrait.and.arrow.right")
+                                Label(TalkifyLocalized.string("workspace.sign_out"), systemImage: "rectangle.portrait.and.arrow.right")
                                     .font(.system(size: 16, weight: .medium))
                                     .foregroundStyle(.red)
                             }
@@ -287,7 +287,7 @@ public struct SettingsView: View {
     }
     
     private var accountName: String {
-        guard authManager.isLoggedIn else { return "未登录" }
+        guard authManager.isLoggedIn else { return TalkifyLocalized.string("workspace.not_logged_in") }
         return authManager.displayNickname ?? userManager.profile?.nickname ?? "Unknow"
     }
     

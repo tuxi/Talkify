@@ -80,19 +80,28 @@ final class PointsLedgerViewModel: ObservableObject {
         if let displayTitle = item.displayTitle, !displayTitle.isEmpty {
             return displayTitle
         }
-        switch item.changeType {
-        case "grant":
-            return "点数发放"
-        case "expire":
-            return "点数过期"
-        case "freeze":
-            return "点数冻结"
-        case "consume":
-            return "点数消耗"
-        case "refund":
-            return "点数退款"
+        switch item.ledgerEvent {
+        case "point_pack_purchase": return TalkifyLocalized.string("billing.ledger.grant")
+        case "subscription_grant": return TalkifyLocalized.string("billing.ledger.grant")
+        case "membership_period_grant": return TalkifyLocalized.string("billing.ledger.grant")
+        case "agent_usage_reserve": return TalkifyLocalized.string("billing.ledger.freeze_event")
+        case "agent_usage_settle": return TalkifyLocalized.string("billing.ledger.consume")
+        case "agent_usage_release": return TalkifyLocalized.string("billing.ledger.refund")
+        case "point_expire": return TalkifyLocalized.string("billing.ledger.consume")
+        case "order_reclaim": return TalkifyLocalized.string("billing.ledger.refund")
+        case "admin_adjust": return TalkifyLocalized.string("billing.ledger.balance_change")
+        case "daily_checkin": return TalkifyLocalized.string("billing.ledger.grant")
+        case "register_reward": return TalkifyLocalized.string("billing.ledger.grant")
+        case "anonymous_merge": return TalkifyLocalized.string("billing.ledger.grant")
         default:
-            return item.changeType
+            // Fallback: use changeType for backward compatibility
+            switch item.changeType {
+            case "grant": return TalkifyLocalized.string("billing.ledger.grant")
+            case "freeze": return TalkifyLocalized.string("billing.ledger.freeze_event")
+            case "consume": return TalkifyLocalized.string("billing.ledger.consume")
+            case "refund": return TalkifyLocalized.string("billing.ledger.refund")
+            default: return TalkifyLocalized.string("billing.ledger.balance_change")
+            }
         }
     }
 
@@ -100,23 +109,15 @@ final class PointsLedgerViewModel: ObservableObject {
         if let displayDescription = item.displayDescription, !displayDescription.isEmpty {
             return displayDescription
         }
-        if let remark = item.remark, !remark.isEmpty {
-            return remark
-        }
-
         switch item.bizType {
-        case "subscription_grant":
-            return "订阅账期发放"
-        case "point_pack_grant":
-            return "点数包到账"
-        case "task_freeze":
-            return "创建任务时冻结"
-        case "task_consume":
-            return "任务完成后核销"
-        case "task_refund":
-            return "任务失败后退款"
+        case "subscription_grant": return TalkifyLocalized.string("billing.ledger.subscription_grant")
+        case "point_pack_grant": return TalkifyLocalized.string("billing.ledger.point_pack_grant")
+        case "task_freeze": return TalkifyLocalized.string("billing.ledger.task_freeze")
+        case "task_consume": return TalkifyLocalized.string("billing.ledger.task_consume")
+        case "task_refund": return TalkifyLocalized.string("billing.ledger.task_refund")
         default:
-            return item.bizType
+            // Fall back to displayDescription if available; never expose raw remark
+            return item.displayDescription ?? TalkifyLocalized.string("billing.ledger.balance_change")
         }
     }
 
@@ -198,11 +199,11 @@ private extension PointsLedgerView {
     @ViewBuilder
     var content: some View {
         if viewModel.isLoading && viewModel.items.isEmpty {
-            ProgressView("加载点数账本...")
+            ProgressView(TalkifyLocalized.string("billing.ledger.title"))
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
         } else if let errorMessage = viewModel.errorMessage, viewModel.items.isEmpty {
             VStack(spacing: 10) {
-                Text("点数账本加载失败")
+                Text(verbatim: TalkifyLocalized.string("billing.ledger.load_failed"))
                     .font(.system(size: 17, weight: .semibold))
                 Text(errorMessage)
                     .font(.system(size: 13))
@@ -213,9 +214,9 @@ private extension PointsLedgerView {
             .frame(maxWidth: .infinity, maxHeight: .infinity)
         } else if viewModel.items.isEmpty {
             VStack(spacing: 10) {
-                Text("还没有点数记录")
+                Text(verbatim: TalkifyLocalized.string("billing.ledger.empty"))
                     .font(.system(size: 17, weight: .semibold))
-                Text("后续购买、消耗、冻结和退款记录会显示在这里。")
+                Text(verbatim: TalkifyLocalized.string("billing.ledger.empty_hint"))
                     .font(.system(size: 13))
                     .foregroundColor(.secondary)
             }
@@ -244,9 +245,9 @@ private extension PointsLedgerView {
                             HStack {
                                 Text(viewModel.createdAtText(for: item))
                                 Spacer()
-                                Text("余额 \(item.balanceAfter)")
+                                Text(verbatim: String(format: TalkifyLocalized.string("billing.ledger.balance"), String(item.balanceAfter)))
                                 if item.frozenAfter > 0 {
-                                    Text("冻结 \(item.frozenAfter)")
+                                    Text(verbatim: String(format: TalkifyLocalized.string("billing.ledger.frozen"), String(item.frozenAfter)))
                                 }
                             }
                             .font(.system(size: 11))
@@ -256,7 +257,7 @@ private extension PointsLedgerView {
                         .listRowBackground(Color.systemBackground)
                     }
                 } header: {
-                    Text("共 \(viewModel.total) 条记录")
+                    Text(verbatim: String(format: TalkifyLocalized.string("billing.ledger.total_records"), String(viewModel.total)))
                 }
             }
 #if os(macOS)
@@ -273,8 +274,9 @@ private extension PointsLedgerView {
 private extension DateFormatter {
     static let pointLedger: DateFormatter = {
         let formatter = DateFormatter()
-        formatter.locale = Locale(identifier: "zh_CN")
-        formatter.dateFormat = "yyyy-MM-dd HH:mm"
+        formatter.locale = .current
+        formatter.dateStyle = .medium
+        formatter.timeStyle = .short
         return formatter
     }()
 }

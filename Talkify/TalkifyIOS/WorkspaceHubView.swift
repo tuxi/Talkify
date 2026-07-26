@@ -97,9 +97,9 @@ struct WorkspaceHubView: View {
 
         var title: String {
             switch self {
-            case .conversations: return "会话"
-            case .files:         return "文件"
-            case .search:        return "搜索"
+            case .conversations: return TalkifyLocalized.string("workspace.tab.conversations")
+            case .files:         return TalkifyLocalized.string("workspace.tab.files")
+            case .search:        return TalkifyLocalized.string("workspace.tab.search")
             }
         }
     }
@@ -453,7 +453,7 @@ struct WorkspaceHubView: View {
                     Text(workspaceStatus.title)
                 }
             } else if workspaceContext.activeWorkspace?.branch == nil {
-                Text("本地工作区")
+                Text(verbatim: TalkifyLocalized.string("workspace.local_workspace"))
             }
         }
         .font(.system(size: 11))
@@ -478,7 +478,7 @@ struct WorkspaceHubView: View {
             return ("\(activeCount) 个运行中", .green)
         }
         if store.draft != nil {
-            return ("草稿", .orange)
+            return (TalkifyLocalized.string("workspace.draft"), .orange)
         }
         return nil
     }
@@ -598,7 +598,7 @@ struct WorkspaceHubView: View {
             } label: {
                 HStack(spacing: 7) {
                     Image(systemName: "square.and.pencil")
-                    Text(store.draft == nil ? "新对话" : "继续草稿")
+                    Text(store.draft == nil ? TalkifyLocalized.string("workspace.new_conversation") : TalkifyLocalized.string("workspace.continue_draft"))
                 }
                 .font(.system(size: 15, weight: .semibold))
                 .foregroundStyle(.white)
@@ -1766,7 +1766,7 @@ private struct GlobalSearchView: View {
             } else {
                 List {
                     if !conversationResults.isEmpty {
-                        Section("会话") {
+                        Section(TalkifyLocalized.string("workspace.tab.conversations")) {
                             ForEach(conversationResults) { ref in
                                 Button {
                                     onSelectConversation?(ref)
@@ -1788,7 +1788,7 @@ private struct GlobalSearchView: View {
                     }
 
                     if !fileResults.isEmpty {
-                        Section("文件") {
+                        Section(TalkifyLocalized.string("workspace.tab.files")) {
                             ForEach(fileResults, id: \.id) { file in
                                 Button {
                                     onSelectFile?(file.path)

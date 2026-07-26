@@ -35,9 +35,9 @@ public struct AuthView: View {
                     Spacer(minLength: 70)
 
                     VStack(spacing: 12) {
-                        Text("登录")
+                        Text(verbatim: TalkifyLocalized.string("auth.title"))
                             .font(.system(size: 40, weight: .bold, design: .serif))
-                        Text("登录后即可继续使用 Talkify")
+                        Text(verbatim: TalkifyLocalized.string("auth.subtitle"))
                             .font(.system(size: 15))
                             .foregroundStyle(.secondary)
                     }
@@ -117,7 +117,7 @@ private extension AuthView {
             appleSignInButton
             #endif
 
-            dividerTitle("或")
+            dividerTitle(TalkifyLocalized.string("auth.divider_or"))
                 .padding(.vertical, 26)
 
             VStack(spacing: 14) {
@@ -150,7 +150,7 @@ private extension AuthView {
         .frame(maxWidth: .infinity)
         .frame(height: 54)
         .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
-        .accessibilityLabel("使用 Apple 继续")
+        .accessibilityLabel(TalkifyLocalized.string("auth.apple_sign_in"))
     }
     #endif
 
@@ -159,7 +159,7 @@ private extension AuthView {
             Text("+86")
                 .font(.system(size: 16, weight: .semibold))
             Divider().frame(height: 22)
-            TextField("输入手机号", text: $viewModel.phoneNumber)
+            TextField(TalkifyLocalized.string("auth.phone_placeholder"), text: $viewModel.phoneNumber)
                 .textFieldStyle(.plain)
                 .font(.system(size: 18))
                 #if os(iOS)
@@ -173,7 +173,7 @@ private extension AuthView {
 
     var codeField: some View {
         HStack(spacing: 12) {
-            TextField("输入验证码", text: $viewModel.captcha)
+            TextField(TalkifyLocalized.string("auth.code_placeholder"), text: $viewModel.captcha)
                 .textFieldStyle(.plain)
                 .font(.system(size: 18))
                 #if os(iOS)
@@ -183,7 +183,7 @@ private extension AuthView {
                 .focused($focusedField, equals: .captcha)
 
             Button(action: sendPhoneCode) {
-                Text(viewModel.isCountingDown ? "\(viewModel.timerCount)s" : (viewModel.isSendingCode ? "发送中" : "获取验证码"))
+                Text(viewModel.isCountingDown ? "\(viewModel.timerCount)s" : (viewModel.isSendingCode ? TalkifyLocalized.string("auth.sending_code") : TalkifyLocalized.string("auth.get_code")))
                     .font(.system(size: 14, weight: .semibold))
                     .foregroundStyle(viewModel.canSendCode ? Color.primary : Color.secondary)
                     .padding(.horizontal, 12)
@@ -198,7 +198,7 @@ private extension AuthView {
         Button(action: loginWithPhoneCode) {
             HStack(spacing: 8) {
                 if viewModel.isLogging { ProgressView().controlSize(.small) }
-                Text(viewModel.isLogging ? "登录中…" : "使用手机号继续")
+                Text(viewModel.isLogging ? TalkifyLocalized.string("auth.logging_in") : TalkifyLocalized.string("auth.phone_continue"))
                     .font(.system(size: 18, weight: .semibold))
             }
             .foregroundStyle(colorScheme == .dark ? .black : .white)
@@ -224,12 +224,12 @@ private extension AuthView {
     }
 
     var agreementAttributedText: AttributedString {
-        var text = AttributedString("继续即表示你已阅读并同意 ")
-        var terms = AttributedString("《用户协议》")
+        var text = AttributedString(TalkifyLocalized.string("auth.agreement_prefix"))
+        var terms = AttributedString(TalkifyLocalized.string("auth.terms_of_service"))
         terms.link = AgreementURLs.terms
         terms.foregroundColor = .accentColor
-        var joiner = AttributedString(" 与 ")
-        var privacy = AttributedString("《隐私政策》")
+        var joiner = AttributedString(TalkifyLocalized.string("auth.agreement_joiner"))
+        var privacy = AttributedString(TalkifyLocalized.string("auth.privacy_policy"))
         privacy.link = AgreementURLs.privacy
         privacy.foregroundColor = .accentColor
         text.append(terms)
@@ -276,7 +276,7 @@ private extension AuthView {
                   let codeData = credential.authorizationCode,
                   let token = String(data: tokenData, encoding: .utf8),
                   let code = String(data: codeData, encoding: .utf8) else {
-                viewModel.errorMessage = "Apple 登录凭证解析失败"
+                viewModel.errorMessage = TalkifyLocalized.string("auth.apple_credential_error")
                 return
             }
             Task {

@@ -238,7 +238,7 @@ public struct WorkspaceView: View {
                                         columnVisibility = .all
                                     } label: {
                                         Image(systemName: "sidebar.left")
-                                            .accessibilityLabel("显示侧栏")
+                                            .accessibilityLabel(TalkifyLocalized.string("workspace.show_sidebar"))
                                     }
                                 }
                             }
@@ -378,7 +378,7 @@ public struct WorkspaceView: View {
                         } label: {
                             HStack(spacing: 7) {
                                 Image(systemName: "square.and.pencil")
-                                Text(store.draft == nil ? "新对话" : "继续草稿")
+                                Text(store.draft == nil ? TalkifyLocalized.string("workspace.new_conversation") : TalkifyLocalized.string("workspace.continue_draft"))
                             }
                             .font(.system(size: 15, weight: .semibold))
                             .foregroundStyle(.white)
@@ -464,7 +464,7 @@ extension WorkspaceView {
         .frame(maxWidth: .infinity)
         .padding(.horizontal, 16)
         .padding(.vertical, 13)
-        .accessibilityLabel("账户：\(accountName)")
+        .accessibilityLabel("\(TalkifyLocalized.string("workspace.account"))：\(accountName)")
         .task { await loadAccountDataIfNeeded() }
         #else
         Button {
@@ -476,7 +476,7 @@ extension WorkspaceView {
         .frame(maxWidth: .infinity)
         .padding(.horizontal, 16)
         .padding(.vertical, 13)
-        .accessibilityLabel("账户：\(accountName)")
+        .accessibilityLabel("\(TalkifyLocalized.string("workspace.account"))：\(accountName)")
         .popover(isPresented: $showAccountPopover) {
             AccountMenuContent(
                 accountName: accountName,
@@ -527,7 +527,7 @@ extension WorkspaceView {
     }
     
     private var accountName: String {
-        guard authManager.isLoggedIn else { return "未登录" }
+        guard authManager.isLoggedIn else { return TalkifyLocalized.string("workspace.not_logged_in") }
 
         let candidates = [
             userManager.profile?.nickname,
@@ -547,9 +547,9 @@ extension WorkspaceView {
             return username
         }
         if let userID = authManager.token?.userId {
-            return "用户 \(userID)"
+            return String(format: TalkifyLocalized.string("workspace.user_label"), userID)
         }
-        return "账户"
+        return TalkifyLocalized.string("workspace.account")
     }
 
     private var accountInitial: String {
@@ -557,9 +557,9 @@ extension WorkspaceView {
     }
 
     private var usageTitle: String {
-        guard let usage = agentManager.usage else { return "剩余用量" }
+        guard let usage = agentManager.usage else { return TalkifyLocalized.string("workspace.remaining_usage") }
         let remaining = max(usage.weekly.unitsLimit - usage.weekly.unitsUsed, 0)
-        return "剩余用量：\(formattedUnits(remaining)) / \(formattedUnits(usage.weekly.unitsLimit))"
+        return "\(TalkifyLocalized.string("workspace.remaining_usage"))：\(formattedUnits(remaining)) / \(formattedUnits(usage.weekly.unitsLimit))"
     }
 
     private func formattedUnits(_ value: Int) -> String {

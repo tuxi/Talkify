@@ -66,7 +66,7 @@ struct SubscriptionCenterView: View {
                     .presentationDetents([.large])
         #endif
                 } label: {
-                    Text("管理")
+                    Text(verbatim: TalkifyLocalized.string("billing.subscription.manage"))
                 }
 //
 //                Button("管理") {
@@ -404,7 +404,7 @@ private extension SubscriptionCenterView {
                     Spacer()
 
                     if recommended {
-                        Text("推荐")
+                        Text(verbatim: TalkifyLocalized.string("billing.subscription.recommended"))
                             .font(.system(size: 10, weight: .bold))
                             .foregroundColor(.white)
                             .padding(.horizontal, 8)
@@ -457,7 +457,7 @@ private extension SubscriptionCenterView {
             )
 
             if viewModel.selectedBenefitLines().isEmpty {
-                Text("暂无权益说明。")
+                Text(verbatim: TalkifyLocalized.string("billing.subscription.no_benefits"))
                     .font(.system(size: 13))
                     .foregroundColor(.secondary)
             } else {
@@ -531,7 +531,7 @@ private extension SubscriptionCenterView {
             )
 
             if viewModel.currentEntitlementSummary().isEmpty {
-                Text("当前没有可展示的权益信息。")
+                Text(verbatim: TalkifyLocalized.string("billing.subscription.no_entitlements"))
                     .font(.system(size: 13))
                     .foregroundColor(.secondary)
             } else {
@@ -713,7 +713,7 @@ private struct SubscriptionManagementSheet: View {
 
     var summaryCard: some View {
         VStack(alignment: .leading, spacing: 14) {
-            Text("当前订阅")
+            Text(verbatim: TalkifyLocalized.string("billing.subscription.current"))
                 .font(.system(size: 18, weight: .bold))
                 .foregroundColor(.primary)
 
@@ -745,12 +745,12 @@ private struct SubscriptionManagementSheet: View {
 
     var paymentRecordsCard: some View {
         VStack(alignment: .leading, spacing: 14) {
-            Text("支付记录")
+            Text(verbatim: TalkifyLocalized.string("billing.subscription.payment_history"))
                 .font(.system(size: 18, weight: .bold))
                 .foregroundColor(.primary)
 
             if paymentRecords.isEmpty {
-                Text("当前暂无可展示的支付记录。后续可接入服务端账单接口或 StoreKit 交易历史。")
+                Text(verbatim: TalkifyLocalized.string("billing.subscription.no_payment_history"))
                     .font(.system(size: 13))
                     .foregroundColor(.secondary)
                     .fixedSize(horizontal: false, vertical: true)
@@ -791,17 +791,17 @@ private struct SubscriptionManagementSheet: View {
 
     var manageActionCard: some View {
         VStack(alignment: .leading, spacing: 14) {
-            Text("系统订阅管理")
+            Text(verbatim: TalkifyLocalized.string("billing.subscription.system_management"))
                 .font(.system(size: 18, weight: .bold))
                 .foregroundColor(.primary)
 
-            Text("你也可以前往 App Store 官方订阅管理页，查看自动续费状态、取消续费或变更系统侧订阅。")
+            Text(verbatim: TalkifyLocalized.string("billing.subscription.system_management_desc"))
                 .font(.system(size: 13))
                 .foregroundColor(.secondary)
                 .fixedSize(horizontal: false, vertical: true)
 
             Button(action: onManageInStore) {
-                Text("前往系统订阅管理")
+                Text(verbatim: TalkifyLocalized.string("billing.subscription.go_to_system"))
                     .font(.system(size: 15, weight: .semibold))
                     .foregroundColor(.white)
                     .frame(maxWidth: .infinity)
@@ -854,7 +854,7 @@ private struct PurchaseSuccessSheet: View {
             }
 
             Button(action: onClose) {
-                Text("我知道了")
+                Text(verbatim: TalkifyLocalized.string("billing.points.got_it"))
                     .font(.system(size: 15, weight: .semibold))
                     .foregroundColor(.white)
                     .frame(maxWidth: .infinity)

@@ -6,10 +6,17 @@
 //
 
 import Foundation
+import CoreKit
 
 enum SettingsSection: String, CaseIterable, Identifiable {
     enum Group: CaseIterable { case personal, integrations, development
-        var title: String { switch self { case .personal: "个人"; case .integrations: "集成"; case .development: "编码" } }
+        var title: String {
+            switch self {
+            case .personal: TalkifyLocalized.string("settings.group.personal")
+            case .integrations: TalkifyLocalized.string("settings.group.integrations")
+            case .development: TalkifyLocalized.string("settings.group.development")
+            }
+        }
     }
 
     case general, profile, appearance, voice, configuration, personalization, shortcuts, usage, account
@@ -25,7 +32,23 @@ enum SettingsSection: String, CaseIterable, Identifiable {
     }
     var title: String {
         switch self {
-        case .general: "常规"; case .profile: "个人资料"; case .appearance: "外观"; case .voice: "语音"; case .configuration: "配置"; case .personalization: "个性化"; case .shortcuts: "键盘快捷键"; case .usage: "使用情况和计费"; case .account: "账户"; case .appSnapshots: "应用快照"; case .plugins: "插件"; case .browser: "浏览器"; case .computerControl: "电脑操控"; case .hooks: "钩子"; case .connections: "连接"; case .git: "Git"; case .environment: "环境"
+        case .general: TalkifyLocalized.string("settings.item.general")
+        case .profile: TalkifyLocalized.string("settings.item.profile")
+        case .appearance: TalkifyLocalized.string("settings.item.appearance")
+        case .voice: TalkifyLocalized.string("settings.item.voice")
+        case .configuration: TalkifyLocalized.string("settings.item.configuration")
+        case .personalization: TalkifyLocalized.string("settings.item.personalization")
+        case .shortcuts: TalkifyLocalized.string("settings.item.shortcuts")
+        case .usage: TalkifyLocalized.string("settings.item.usage")
+        case .account: TalkifyLocalized.string("settings.item.account")
+        case .appSnapshots: TalkifyLocalized.string("settings.item.app_snapshots")
+        case .plugins: TalkifyLocalized.string("settings.item.plugins")
+        case .browser: TalkifyLocalized.string("settings.item.browser")
+        case .computerControl: TalkifyLocalized.string("settings.item.computer_control")
+        case .hooks: TalkifyLocalized.string("settings.item.hooks")
+        case .connections: TalkifyLocalized.string("settings.item.connections")
+        case .git: TalkifyLocalized.string("settings.item.git")
+        case .environment: TalkifyLocalized.string("settings.item.environment")
         }
     }
     var icon: String {

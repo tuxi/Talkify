@@ -32,10 +32,11 @@ public extension Double {
 }
 
 public extension DateFormatter {
-    public static let subscriptionDate: DateFormatter = {
+    static let subscriptionDate: DateFormatter = {
         let formatter = DateFormatter()
-        formatter.locale = Locale(identifier: "zh_CN")
-        formatter.dateFormat = "yyyy.MM.dd"
+        formatter.locale = .current
+        formatter.dateStyle = .medium
+        formatter.timeStyle = .none
         return formatter
     }()
 }

@@ -9,6 +9,7 @@ import Foundation
 import Observation
 import UserNotifications
 import AgentKit
+import CoreKit
 
 @MainActor
 @Observable
@@ -73,10 +74,10 @@ final class ConversationNotificationCoordinator: NSObject, UNUserNotificationCen
             sessionID = id
             turnID = turn
             sequence = seq
-            content.title = "Code Agent 需要审批"
+            content.title = TalkifyLocalized.string("agent.notification.approval_needed")
             content.body = pendingCount > 1
-                ? "后台任务有 \(pendingCount) 项操作等待你的决定。"
-                : "后台任务有一项操作等待你的决定。"
+                ? String(format: TalkifyLocalized.string("agent.notification.pending_items_many"), pendingCount)
+                : TalkifyLocalized.string("agent.notification.pending_items_one")
 
         case .turnCompleted(let attention):
             sessionID = attention.sessionID
@@ -84,14 +85,14 @@ final class ConversationNotificationCoordinator: NSObject, UNUserNotificationCen
             sequence = attention.sequence
             switch attention.outcome {
             case .succeeded:
-                content.title = "Code Agent 已完成"
-                content.body = "后台任务已完成，点击查看结果。"
+                content.title = TalkifyLocalized.string("agent.notification.completed")
+                content.body = TalkifyLocalized.string("agent.notification.completed_body")
             case .failed:
-                content.title = "Code Agent 执行失败"
-                content.body = "后台任务执行失败，点击查看详情。"
+                content.title = TalkifyLocalized.string("agent.notification.failed")
+                content.body = TalkifyLocalized.string("agent.notification.failed_body")
             case .cancelled:
-                content.title = "Code Agent 已取消"
-                content.body = "后台任务已取消。"
+                content.title = TalkifyLocalized.string("agent.notification.cancelled")
+                content.body = TalkifyLocalized.string("agent.notification.cancelled_body")
             }
         }
 

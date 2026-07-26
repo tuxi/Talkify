@@ -42,7 +42,7 @@ public struct SidebarView: View {
         .searchable(
             text: $searchText,
             placement: .navigationBarDrawer,
-            prompt: "搜索会话…"
+            prompt: TalkifyLocalized.string("workspace.search_placeholder")
         )
         .navigationBarTitleDisplayMode(.large)
         #endif
@@ -57,7 +57,7 @@ public struct SidebarView: View {
             HStack(spacing: 8) {
                 Image(systemName: "square.and.pencil")
                     .font(.system(size: 13, weight: .medium))
-                Text("新建任务")
+                Text(verbatim: TalkifyLocalized.string("workspace.new_task"))
                     .font(.system(size: 16, weight: .semibold))
                     .frame(maxWidth: .infinity, alignment: .leading)
                     .contentShape(Rectangle())
@@ -67,7 +67,7 @@ public struct SidebarView: View {
         .padding(.horizontal, 20)
         .padding(.top, 15)
         .padding(.bottom, 10)
-        .accessibilityHint("创建一个新的对话草稿")
+        .accessibilityHint(TalkifyLocalized.string("workspace.new_draft_hint"))
     }
 }
 
@@ -119,7 +119,7 @@ struct AccountMenuContent: View {
                 HStack(spacing: 10) {
                     Image(systemName: "gauge.with.dots.needle.50percent")
                         .frame(width: 18)
-                    Text("剩余用量")
+                    Text(verbatim: TalkifyLocalized.string("workspace.remaining_usage"))
                     Spacer(minLength: 0)
                     Image(systemName: isUsageExpanded ? "chevron.down" : "chevron.right")
                         .font(.system(size: 11, weight: .bold))
@@ -139,11 +139,11 @@ struct AccountMenuContent: View {
 
             Divider()
 
-            menuRow("设置", systemImage: "gearshape") {
+            menuRow(TalkifyLocalized.string("workspace.settings"), systemImage: "gearshape") {
                 onSettings()
                 dismiss()
             }
-            menuRow("退出登录", systemImage: "rectangle.portrait.and.arrow.right", isDestructive: true) {
+            menuRow(TalkifyLocalized.string("workspace.sign_out"), systemImage: "rectangle.portrait.and.arrow.right", isDestructive: true) {
                 onLogout()
                 dismiss()
             }
@@ -165,7 +165,7 @@ struct AccountMenuContent: View {
     private var usageDetails: some View {
         VStack(alignment: .leading, spacing: 11) {
             if let usage {
-                usageLine("1周", metric: usage.weekly)
+                usageLine(TalkifyLocalized.string("workspace.week"), metric: usage.weekly)
 
                 if let card = usage.availableResetCards.first {
                     Divider().padding(.vertical, 1)
@@ -173,7 +173,7 @@ struct AccountMenuContent: View {
                         HStack(spacing: 8) {
                             Image(systemName: "arrow.counterclockwise.circle")
                             VStack(alignment: .leading, spacing: 2) {
-                                Text("使用限额重置")
+                                Text(verbatim: TalkifyLocalized.string("workspace.usage_limit_reset"))
                                 Text("可用 \(usage.resetCards?.availableCount ?? 1) 次 · \(formattedResetDate(card.expiresAt)) 到期")
                                     .font(.system(size: 12))
                                     .foregroundStyle(.secondary)
@@ -188,14 +188,14 @@ struct AccountMenuContent: View {
                 }
 
                 if usage.currentFundingSource == .resetCard {
-                    Label("当前周额度来自重置卡", systemImage: "checkmark.circle.fill")
+                    Label(TalkifyLocalized.string("workspace.reset_card_current_week"), systemImage: "checkmark.circle.fill")
                         .font(.system(size: 12, weight: .medium))
                         .foregroundStyle(.green)
                 }
             } else {
                 HStack(spacing: 8) {
                     ProgressView().controlSize(.small)
-                    Text("正在获取用量…").foregroundStyle(.secondary)
+                    Text(verbatim: TalkifyLocalized.string("workspace.refreshing_usage")).foregroundStyle(.secondary)
                 }
             }
         }
@@ -217,9 +217,9 @@ struct AccountMenuContent: View {
                     .foregroundStyle(metric.utilizationPct >= 90 ? Color.orange : Color.secondary)
             }
             HStack {
-                Text("剩余 \(formatted(max(metric.unitsLimit - metric.unitsUsed, 0)))")
+                Text("\(TalkifyLocalized.string("workspace.remaining_format")) \(formatted(max(metric.unitsLimit - metric.unitsUsed, 0)))")
                 Spacer()
-                Text("重置 \(formattedResetDate(metric.resetsAt))")
+                Text("\(TalkifyLocalized.string("workspace.reset_immediately")) \(formattedResetDate(metric.resetsAt))")
             }
             .font(.system(size: 12))
             .foregroundStyle(.tertiary)
@@ -273,7 +273,7 @@ private struct ResetCardSheet: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 22) {
             HStack {
-                Text("使用量")
+                Text(TalkifyLocalized.string("workspace.usage"))
                     .font(.system(size: 25, weight: .bold))
                 Spacer()
                 Button { dismiss() } label: { Image(systemName: "xmark") }
@@ -283,14 +283,14 @@ private struct ResetCardSheet: View {
 
             VStack(alignment: .leading, spacing: 13) {
                 HStack {
-                    Text("每周使用限额")
+                    Text(TalkifyLocalized.string("workspace.weekly_usage"))
                         .font(.system(size: 16, weight: .semibold))
                     Spacer()
-                    Text("将立即重新开始一周")
+                    Text(TalkifyLocalized.string("workspace.reset_immediately"))
                         .font(.system(size: 13))
                         .foregroundStyle(.secondary)
                 }
-                Text("使用重置卡会结束当前周窗口，并从现在开始创建新的 7 天额度。")
+                Text(TalkifyLocalized.string("workspace.reset_card_desc"))
                     .font(.system(size: 14))
                     .foregroundStyle(.secondary)
             }
@@ -307,7 +307,7 @@ private struct ResetCardSheet: View {
                             .foregroundStyle(.secondary)
                     }
                     Spacer()
-                    Button(isRedeeming ? "正在使用…" : "使用重置") { onRedeem() }
+                    Button(isRedeeming ? TalkifyLocalized.string("workspace.using_reset") : TalkifyLocalized.string("workspace.use_reset")) { onRedeem() }
                         .buttonStyle(.borderedProminent)
                         .disabled(isRedeeming)
                 }
@@ -318,7 +318,7 @@ private struct ResetCardSheet: View {
             .padding(18)
             .background(Color.primary.opacity(0.035), in: RoundedRectangle(cornerRadius: 16, style: .continuous))
 
-            Text("重置成功后，此卡会被核销且不能撤销。")
+            Text(TalkifyLocalized.string("workspace.reset_confirm_warning"))
                 .font(.system(size: 13))
                 .foregroundStyle(.secondary)
         }

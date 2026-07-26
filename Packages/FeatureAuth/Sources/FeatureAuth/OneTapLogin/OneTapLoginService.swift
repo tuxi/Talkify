@@ -22,17 +22,17 @@ public enum OneTapLoginError: LocalizedError {
     public var errorDescription: String? {
         switch self {
         case .sdkNotAvailable:
-            return "一键登录SDK不可用"
+            return TalkifyLocalized.string("auth.onetap_sdk_unavailable")
         case .initializeFailed(let msg):
-            return "SDK初始化失败: \(msg)"
+            return String(format: TalkifyLocalized.string("auth.onetap_init_failed %@"), msg)
         case .envNotAvailable(let msg):
-            return "当前环境不支持一键登录: \(msg)"
+            return String(format: TalkifyLocalized.string("auth.onetap_env_unavailable %@"), msg)
         case .tokenFailed(let msg):
-            return "获取Token失败: \(msg)"
+            return String(format: TalkifyLocalized.string("auth.onetap_token_failed %@"), msg)
         case .userCancelled:
-            return "用户取消登录"
+            return TalkifyLocalized.string("auth.onetap_cancelled")
         case .userSwitchToOtherLogin:
-            return "用户选择其他登录方式"
+            return TalkifyLocalized.string("auth.onetap_switched")
         }
     }
 }
@@ -86,7 +86,7 @@ public final class OneTapLoginService: @unchecked Sendable {
         if code == "600000" {
             isInitialized = true
         } else {
-            let msg = result["msg"] ?? "未知错误"
+            let msg = result["msg"] ?? TalkifyLocalized.string("common.error.unknown")
             throw OneTapLoginError.initializeFailed(msg)
         }
         #else
@@ -267,7 +267,7 @@ public final class OneTapLoginService: @unchecked Sendable {
 
         model.customViewBlock = { superView in
             let welcome = UILabel()
-            welcome.text = "欢迎使用 DreamAI"
+            welcome.text = TalkifyLocalized.string("auth.onetap_welcome")
             welcome.font = .systemFont(ofSize: 24, weight: .bold)
             welcome.textColor = .label
             welcome.textAlignment = .center
@@ -275,7 +275,7 @@ public final class OneTapLoginService: @unchecked Sendable {
             welcomeLabel = welcome
 
             let hint = UILabel()
-            hint.text = "首次登录将自动注册账号"
+            hint.text = TalkifyLocalized.string("auth.onetap_hint")
             hint.font = .systemFont(ofSize: 14)
             hint.textColor = .tertiaryLabel
             hint.textAlignment = .center
@@ -297,7 +297,7 @@ public final class OneTapLoginService: @unchecked Sendable {
 
         // MARK: Login button — full-width minus 24pt margins, 54pt height
         model.loginBtnText = NSAttributedString(
-            string: "本机号码一键登录",
+            string: TalkifyLocalized.string("auth.onetap_login_button"),
             attributes: [
                 .foregroundColor: UIColor.white,
                 .font: UIFont.systemFont(ofSize: 17, weight: .semibold)
@@ -314,7 +314,7 @@ public final class OneTapLoginService: @unchecked Sendable {
         // MARK: Switch button
         model.changeBtnIsHidden = false
         model.changeBtnTitle = NSAttributedString(
-            string: "其他手机号登录",
+            string: TalkifyLocalized.string("auth.onetap_switch_button"),
             attributes: [
                 .foregroundColor: dynamicSecond,
                 .font: UIFont.systemFont(ofSize: 15)

@@ -483,6 +483,7 @@ public struct BillingPointLedger: Codable, Sendable, Identifiable {
     public let points: Int
     public let bizType: String
     public let bizID: String
+    public let ledgerEvent: String?
     public let remark: String?
     public let extra: [String: JSONValue]?
     public let displayTitle: String?
@@ -500,6 +501,7 @@ public struct BillingPointLedger: Codable, Sendable, Identifiable {
         case points
         case bizType = "biz_type"
         case bizID = "biz_id"
+        case ledgerEvent = "ledger_event"
         case remark
         case extra
         case displayTitle = "display_title"

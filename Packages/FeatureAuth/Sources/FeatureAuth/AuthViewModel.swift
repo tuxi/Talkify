@@ -109,7 +109,7 @@ public final class AuthViewModel {
     func sendPhoneCode() {
         guard !isSendingCode, validatePhoneNumber() else {
             if !validatePhoneNumber() {
-                errorMessage = "请输入正确的 11 位手机号"
+                errorMessage = TalkifyLocalized.string("auth.invalid_phone")
             }
             return
         }
@@ -131,11 +131,11 @@ public final class AuthViewModel {
     
     func loginByPhoneCode() async {
         guard validatePhoneNumber() else {
-            errorMessage = "请输入正确的 11 位手机号"
+            errorMessage = TalkifyLocalized.string("auth.invalid_phone")
             return
         }
         guard validateCaptcha() else {
-            errorMessage = "请输入验证码"
+            errorMessage = TalkifyLocalized.string("auth.empty_code")
             return
         }
         
@@ -155,7 +155,7 @@ public final class AuthViewModel {
     
     func loginByOneTap(accessToken: String, outId: String? = nil) async {
         guard !accessToken.isEmpty else {
-            errorMessage = "一键登录凭证无效"
+            errorMessage = TalkifyLocalized.string("auth.onetap_invalid")
             return
         }
         
@@ -182,7 +182,7 @@ public final class AuthViewModel {
         familyName: String? = nil
     ) async {
         guard !identityToken.isEmpty, !authorizationCode.isEmpty else {
-            errorMessage = "Apple 登录凭证无效"
+            errorMessage = TalkifyLocalized.string("auth.apple_invalid")
             return
         }
         
@@ -235,7 +235,7 @@ public final class AuthViewModel {
 
     func requireAgreement(accepted: Bool) -> Bool {
         guard accepted else {
-            errorMessage = "请先阅读并同意用户协议与隐私政策"
+            errorMessage = TalkifyLocalized.string("auth.agreement_required")
             return false
         }
         return true
