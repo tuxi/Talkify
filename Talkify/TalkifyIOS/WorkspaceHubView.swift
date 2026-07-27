@@ -182,27 +182,27 @@ struct WorkspaceHubView: View {
         }
         .alert(TalkifyLocalized.string("workspace.import_workspace"), isPresented: $isImportNamePresented) {
             TextField(TalkifyLocalized.string("share.workspace_name"), text: $importName)
-            Button("取消", role: .cancel) { pendingImportURL = nil }
-            Button("导入") { importWorkspace() }
+            Button(TalkifyLocalized.string("common.action.cancel"), role: .cancel) { pendingImportURL = nil }
+            Button(TalkifyLocalized.string("workspace.import_action")) { importWorkspace() }
                 .disabled(importName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
         } message: {
-            Text("文件夹会复制到 App 中，原始文件不会被修改。")
+            Text(verbatim: TalkifyLocalized.string("workspace.folder_will_be_copied"))
         }
-        .alert("无法准备工作区", isPresented: Binding(
+        .alert(TalkifyLocalized.string("workspace.cannot_prepare"), isPresented: Binding(
             get: { acquisitionError != nil },
             set: { if !$0 { acquisitionError = nil } }
         )) {
-            Button("好", role: .cancel) { acquisitionError = nil }
+            Button(TalkifyLocalized.string("workspace.ok"), role: .cancel) { acquisitionError = nil }
         } message: {
-            Text(acquisitionError ?? "未知错误")
+            Text(acquisitionError ?? TalkifyLocalized.string("common.error.unknown"))
         }
-        .alert("无法导出工作区", isPresented: Binding(
+        .alert(TalkifyLocalized.string("workspace.cannot_export"), isPresented: Binding(
             get: { workspaceExportError != nil },
             set: { if !$0 { workspaceExportError = nil } }
         )) {
-            Button("好", role: .cancel) { workspaceExportError = nil }
+            Button(TalkifyLocalized.string("workspace.ok"), role: .cancel) { workspaceExportError = nil }
         } message: {
-            Text(workspaceExportError ?? "未知错误")
+            Text(workspaceExportError ?? TalkifyLocalized.string("common.error.unknown"))
         }
         .onAppear {
             store.projects.reload()
@@ -376,7 +376,7 @@ struct WorkspaceHubView: View {
                 .contentShape(Rectangle())
             }
             .buttonStyle(.plain)
-            .accessibilityLabel("切换项目")
+            .accessibilityLabel(TalkifyLocalized.string("workspace.switch_project"))
             if !DeviceInfo.isPadLayout {
                 Button {
                     exportWorkspace()
@@ -403,7 +403,7 @@ struct WorkspaceHubView: View {
                 }
                 .buttonStyle(.plain)
                 .disabled(isExportingWorkspace || fileProvider == nil)
-                .accessibilityLabel(isExportingWorkspace ? "正在导出项目" : "导出项目")
+                .accessibilityLabel(isExportingWorkspace ? TalkifyLocalized.string("workspace.exporting_project") : TalkifyLocalized.string("workspace.export_project"))
 
                 Button {
                     onWorkspaceBrowserRequested?()
@@ -423,7 +423,7 @@ struct WorkspaceHubView: View {
                 }
                 .buttonStyle(.plain)
                 .disabled(workspaceContext.activeWorkspace == nil)
-                .accessibilityLabel("查看当前项目")
+                .accessibilityLabel(TalkifyLocalized.string("workspace.view_current_project"))
             }
         }
         .padding(.horizontal, 16)
@@ -433,7 +433,7 @@ struct WorkspaceHubView: View {
     }
 
     private var currentWorkspaceName: String {
-        workspaceContext.activeWorkspace?.name ?? "选择项目"
+        workspaceContext.activeWorkspace?.name ?? TalkifyLocalized.string("workspace.select_project")
     }
 
     @ViewBuilder
@@ -468,14 +468,14 @@ struct WorkspaceHubView: View {
             return activity == .waitingForApproval || activity == .waitingForClientTool
         }.count
         if waitingCount > 0 {
-            return ("\(waitingCount) 个待处理", .orange)
+            return (String(format: TalkifyLocalized.string("workspace.pending_count"), String(waitingCount)), .orange)
         }
 
         let activeCount = conversations.filter {
             store.supervisor.activity(for: $0).isActive
         }.count
         if activeCount > 0 {
-            return ("\(activeCount) 个运行中", .green)
+            return (String(format: TalkifyLocalized.string("workspace.running_count"), String(activeCount)), .green)
         }
         if store.draft != nil {
             return (TalkifyLocalized.string("workspace.draft"), .orange)
@@ -625,7 +625,7 @@ struct WorkspaceHubView: View {
                     )
             }
             .buttonStyle(.plain)
-            .accessibilityLabel("设置")
+            .accessibilityLabel(TalkifyLocalized.string("workspace.settings"))
         }
         .padding(.horizontal, 16)
         .padding(.top, 10)
@@ -681,7 +681,7 @@ private struct WorkspaceSwitcherView: View {
                         ContentUnavailableView.search(text: query)
                     }
                 } else {
-                    Section("项目") {
+                    Section(TalkifyLocalized.string("workspace.projects_section")) {
                         ForEach(filteredWorkspaces) { workspace in
                             Button {
                                 onSelect(workspace)
@@ -722,26 +722,26 @@ private struct WorkspaceSwitcherView: View {
                         }
                     }
                 }
-                Section("添加工作区") {
+                Section(TalkifyLocalized.string("workspace.add_workspace_section")) {
                     Button(action: onCreate) {
-                        Label("新建空白工作区", systemImage: "folder.badge.plus")
+                        Label(TalkifyLocalized.string("workspace.new_blank_workspace"), systemImage: "folder.badge.plus")
                     }
                     Button(action: onImport) {
-                        Label("从文件 App 导入", systemImage: "square.and.arrow.down")
+                        Label(TalkifyLocalized.string("workspace.import_from_files"), systemImage: "square.and.arrow.down")
                     }
                     if let onClone {
                         Button(action: onClone) {
-                            Label("克隆 Git 仓库", systemImage: "arrow.down.circle")
+                            Label(TalkifyLocalized.string("workspace.clone_git_repo"), systemImage: "arrow.down.circle")
                         }
                     }
                 }
             }
-            .searchable(text: $query, prompt: "搜索项目")
-            .navigationTitle("切换项目")
+            .searchable(text: $query, prompt: TalkifyLocalized.string("workspace.search_projects"))
+            .navigationTitle(TalkifyLocalized.string("workspace.switch_project_nav"))
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
-                    Button("完成") { dismiss() }
+                    Button(TalkifyLocalized.string("workspace.done")) { dismiss() }
                 }
             }
         }
@@ -767,7 +767,7 @@ private struct WorkspaceProjectLauncher: View {
                 VStack(alignment: .leading, spacing: 3) {
                     Text("CodeAgent")
                         .font(.system(size: 17, weight: .semibold))
-                    Text("创建你的第一个工作区")
+                    Text(TalkifyLocalized.string("workspace.create_first"))
                         .font(.caption)
                         .foregroundStyle(.secondary)
                 }
@@ -783,7 +783,7 @@ private struct WorkspaceProjectLauncher: View {
                         )
                 }
                 .buttonStyle(.plain)
-                .accessibilityLabel("设置")
+                .accessibilityLabel(TalkifyLocalized.string("workspace.settings"))
             }
             .padding(.horizontal, 18)
             .padding(.top, 16)
@@ -800,16 +800,16 @@ private struct WorkspaceProjectLauncher: View {
                                 in: RoundedRectangle(cornerRadius: 18, style: .continuous)
                             )
 
-                        Text("从一个想法开始")
+                        Text(verbatim: TalkifyLocalized.string("workspace.start_from_idea"))
                             .font(.system(size: 27, weight: .bold, design: .rounded))
-                        Text("不需要先准备代码或文件。创建一个空白工作区，告诉 CodeAgent 你想构建什么。")
+                        Text(verbatim: TalkifyLocalized.string("workspace.start_from_idea_desc"))
                             .font(.system(size: 15))
                             .foregroundStyle(.secondary)
                             .fixedSize(horizontal: false, vertical: true)
                     }
 
                     Button(action: onCreate) {
-                        Label("创建空白工作区", systemImage: "sparkles")
+                        Label(TalkifyLocalized.string("workspace.create_blank_action"), systemImage: "sparkles")
                             .font(.system(size: 16, weight: .semibold))
                             .foregroundStyle(.white)
                             .frame(maxWidth: .infinity, minHeight: 50)
@@ -821,15 +821,15 @@ private struct WorkspaceProjectLauncher: View {
                     .buttonStyle(.plain)
 
                     VStack(alignment: .leading, spacing: 10) {
-                        Text("也可以从已有内容开始")
+                        Text(verbatim: TalkifyLocalized.string("workspace.or_start_from_existing"))
                             .font(.caption.weight(.semibold))
                             .foregroundStyle(.secondary)
                             .textCase(.uppercase)
 
                         if canClone {
                             launcherOption(
-                                title: "克隆 Git 仓库",
-                                subtitle: "输入公开 HTTPS 仓库地址",
+                                title: TalkifyLocalized.string("workspace.clone_git_repo_title"),
+                                subtitle: TalkifyLocalized.string("workspace.clone_git_repo_subtitle"),
                                 icon: "arrow.down.circle",
                                 action: onClone
                             )
@@ -837,7 +837,7 @@ private struct WorkspaceProjectLauncher: View {
 
                         if canImport {
                             launcherOption(
-                                title: "导入文件夹",
+                                title: TalkifyLocalized.string("workspace.import_folder_title"),
                                 subtitle: "从“文件”App 复制现有项目",
                                 icon: "square.and.arrow.down",
                                 action: onImport
@@ -845,7 +845,7 @@ private struct WorkspaceProjectLauncher: View {
                         }
                     }
 
-                    Text("工作区保存在这台 iPhone 上。导入时只会复制内容，不会修改原始文件。")
+                    Text(verbatim: TalkifyLocalized.string("workspace.saved_on_iphone"))
                         .font(.caption)
                         .foregroundStyle(.tertiary)
                         .fixedSize(horizontal: false, vertical: true)
@@ -858,7 +858,7 @@ private struct WorkspaceProjectLauncher: View {
             if isPreparing {
                 HStack(spacing: 9) {
                     ProgressView().controlSize(.small)
-                    Text("正在准备工作区…")
+                    Text(TalkifyLocalized.string("workspace.preparing"))
                         .font(.caption)
                         .foregroundStyle(.secondary)
                 }
@@ -930,25 +930,25 @@ private struct WorkspaceGitCloneSheet: View {
     var body: some View {
         NavigationStack {
             Form {
-                Section("公开 Git 仓库") {
+                Section(TalkifyLocalized.string("workspace.public_git_repo_section")) {
                     TextField("https://github.com/owner/repo.git", text: $repositoryURL)
                         .textInputAutocapitalization(.never)
                         .autocorrectionDisabled()
                         .keyboardType(.URL)
-                    TextField("分支或 Tag（可选）", text: $branch)
+                    TextField(TalkifyLocalized.string("workspace.branch_or_tag_optional"), text: $branch)
                         .textInputAutocapitalization(.never)
                         .autocorrectionDisabled()
-                    TextField("工作区名称（可选）", text: $projectName)
+                    TextField(TalkifyLocalized.string("workspace.name_optional"), text: $projectName)
                 }
 
                 Section {
-                    Toggle("克隆完整历史", isOn: $clonesFullHistory)
+                    Toggle(TalkifyLocalized.string("workspace.clone_full_history"), isOn: $clonesFullHistory)
                 } footer: {
-                    Text("默认使用浅克隆，更适合移动网络。仅支持无需登录的 HTTPS 仓库。")
+                    Text(verbatim: TalkifyLocalized.string("workspace.clone_default_desc"))
                 }
 
                 if let projectsRoot {
-                    Section("保存位置") {
+                    Section(TalkifyLocalized.string("workspace.save_location_section")) {
                         Text(projectsRoot)
                             .font(.caption.monospaced())
                             .foregroundStyle(.secondary)
@@ -962,15 +962,15 @@ private struct WorkspaceGitCloneSheet: View {
                     }
                 }
             }
-            .navigationTitle("克隆 Git 仓库")
+            .navigationTitle(TalkifyLocalized.string("workspace.clone_git_nav_title"))
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
-                    Button("取消", action: onCancel)
+                    Button(TalkifyLocalized.string("common.action.cancel"), action: onCancel)
                         .disabled(isCloning)
                 }
                 ToolbarItem(placement: .confirmationAction) {
-                    Button(isCloning ? "克隆中…" : "克隆") { startClone() }
+                    Button(isCloning ? TalkifyLocalized.string("workspace.cloning") : TalkifyLocalized.string("workspace.clone_action")) { startClone() }
                         .disabled(trimmedURL.isEmpty || isCloning)
                 }
             }
@@ -1018,7 +1018,7 @@ private struct WorkspaceConversationListView: View {
     var body: some View {
         VStack(spacing: 0) {
             HStack {
-                Text("\(conversations.count) 个会话")
+                Text(String(format: TalkifyLocalized.string("workspace.conversations_count"), String(conversations.count)))
                     .font(.caption)
                     .foregroundStyle(.secondary)
                 Spacer()
@@ -1026,7 +1026,7 @@ private struct WorkspaceConversationListView: View {
                     Button {
                         showsArchived = true
                     } label: {
-                        Label("已归档", systemImage: "archivebox")
+                        Label(TalkifyLocalized.string("workspace.archived_label"), systemImage: "archivebox")
                             .font(.caption)
                     }
                     .buttonStyle(.plain)
@@ -1040,9 +1040,9 @@ private struct WorkspaceConversationListView: View {
                 ScrollView {
                     WorkspaceSectionEmptyState(
                         icon: "bubble.left.and.bubble.right",
-                        title: "开始第一次对话",
-                        description: "描述你想在 \(workspaceName) 中构建或修改的内容，CodeAgent 会直接在这个工作区中工作。",
-                        primaryTitle: "开始对话",
+                        title: TalkifyLocalized.string("workspace.start_first_conversation"),
+                        description: String(format: TalkifyLocalized.string("workspace.start_first_conversation_desc"), workspaceName),
+                        primaryTitle: TalkifyLocalized.string("workspace.start_conversation"),
                         primaryIcon: "square.and.pencil",
                         primaryAction: onCreateConversation
                     )
@@ -1068,7 +1068,7 @@ private struct WorkspaceConversationListView: View {
                         Button(role: .destructive) {
                             deletionTarget = conversation
                         } label: {
-                            Label("删除", systemImage: "trash")
+                            Label(TalkifyLocalized.string("common.action.delete"), systemImage: "trash")
                         }
                         .disabled(!store.canDeleteConversation(conversation))
 
@@ -1076,7 +1076,7 @@ private struct WorkspaceConversationListView: View {
                             Button {
                                 archive(conversation)
                             } label: {
-                                Label("归档", systemImage: "archivebox")
+                                Label(TalkifyLocalized.string("workspace.archive"), systemImage: "archivebox")
                             }
                             .tint(.gray)
                             .disabled(!store.canArchiveConversation(conversation))
@@ -1087,13 +1087,13 @@ private struct WorkspaceConversationListView: View {
                             renameTarget = conversation
                             renameText = conversation.name ?? ""
                         } label: {
-                            Label("重命名", systemImage: "pencil")
+                            Label(TalkifyLocalized.string("workspace.rename"), systemImage: "pencil")
                         }
                         if store.supportsConversationArchive {
                             Button {
                                 archive(conversation)
                             } label: {
-                                Label("归档", systemImage: "archivebox")
+                                Label(TalkifyLocalized.string("workspace.archive"), systemImage: "archivebox")
                             }
                             .disabled(!store.canArchiveConversation(conversation))
                         }
@@ -1101,7 +1101,7 @@ private struct WorkspaceConversationListView: View {
                         Button(role: .destructive) {
                             deletionTarget = conversation
                         } label: {
-                            Label("删除…", systemImage: "trash")
+                            Label(TalkifyLocalized.string("workspace.delete_with_ellipsis"), systemImage: "trash")
                         }
                         .disabled(!store.canDeleteConversation(conversation))
                     }
@@ -1125,16 +1125,16 @@ private struct WorkspaceConversationListView: View {
             )
             .presentationDetents([.medium, .large])
         }
-        .alert("重命名会话", isPresented: Binding(
+        .alert(TalkifyLocalized.string("workspace.rename_conversation"), isPresented: Binding(
             get: { renameTarget != nil },
             set: { if !$0 { renameTarget = nil } }
         )) {
-            TextField("会话名称", text: $renameText)
-            Button("取消", role: .cancel) { renameTarget = nil }
-            Button("确定") { rename() }
+            TextField(TalkifyLocalized.string("workspace.conversation_name"), text: $renameText)
+            Button(TalkifyLocalized.string("common.action.cancel"), role: .cancel) { renameTarget = nil }
+            Button(TalkifyLocalized.string("workspace.confirm")) { rename() }
         }
         .confirmationDialog(
-            deletionTarget?.worktree?.managed == true ? "删除会话和 Worktree？" : "删除会话？",
+            deletionTarget?.worktree?.managed == true ? TalkifyLocalized.string("workspace.delete_conversation_and_worktree") : TalkifyLocalized.string("workspace.delete_conversation"),
             isPresented: Binding(
                 get: { deletionTarget != nil },
                 set: { if !$0 { deletionTarget = nil } }
@@ -1355,7 +1355,7 @@ private struct ArchivedWorkspaceConversationsView: View {
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
-                    Button("完成") { dismiss() }
+                    Button(TalkifyLocalized.string("workspace.done")) { dismiss() }
                 }
             }
             .task { await store.listViewModel.refreshArchived() }
