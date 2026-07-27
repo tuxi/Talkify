@@ -9,10 +9,16 @@
 import SwiftUI
 import UIKit
 import UniformTypeIdentifiers
+import CoreKit
 
 final class ShareViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
+        // In the extension process, Bundle.main is the .appex bundle.
+        // Walk up to the containing .app bundle where Localizable.xcstrings lives.
+        if let appBundle = Bundle.mainApp {
+            TalkifyLocalized.bundle = appBundle
+        }
         view.backgroundColor = .systemBackground
 
         let extensionItems = extensionContext?.inputItems
@@ -404,5 +410,17 @@ private enum ShareImportError: LocalizedError {
         case .cannotOpenApp:
             return TalkifyLocalized.string("share.materials_received_reminder")
         }
+    }
+}
+
+// MARK: - Main app bundle lookup for extensions
+
+private extension Bundle {
+    /// Walk from the extension's `.appex` bundle up to the containing `.app` bundle.
+    static var mainApp: Bundle? {
+        var url = Bundle.main.bundleURL                      // …/Talkify.app/PlugIns/TalkifyShareExtension.appex
+        url = url.deletingLastPathComponent()                // …/Talkify.app/PlugIns
+        url = url.deletingLastPathComponent()                // …/Talkify.app
+        return Bundle(url: url)
     }
 }

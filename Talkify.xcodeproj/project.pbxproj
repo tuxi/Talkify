@@ -191,6 +191,7 @@
 			);
 			name = TalkifyShareExtension;
 			packageProductDependencies = (
+				D096205D300B19610005EBC6 /* CoreKit */,
 			);
 			productName = TalkifyShareExtension;
 			productReference = B20000000000000000000003 /* TalkifyShareExtension.appex */;
