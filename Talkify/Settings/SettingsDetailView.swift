@@ -36,6 +36,7 @@ struct SettingsDetailView: View {
     @State private var deleteConfirmationText = ""
     @State private var isDeletingAccount = false
     @State private var deleteAccountError: String?
+    @State private var tokenActivityTab: TokenActivityTab = .daily
     
     public var body: some View {
         contentView
@@ -151,80 +152,203 @@ struct SettingsDetailView: View {
     
     private var profileSettings: some View {
         VStack(spacing: 0) {
-            //            Text("个人资料")
-            //                .font(.system(size: 19, weight: .semibold))
-            //                .frame(maxWidth: .infinity, alignment: .leading)
-            
             Text(accountInitial)
                 .font(.system(size: 34, weight: .medium))
                 .foregroundStyle(.white)
                 .frame(width: 128, height: 128)
                 .background(Color.accentColor, in: Circle())
-                .padding(.top, 66)
+                .padding(.top, 48)
             
             Text(accountName)
                 .font(.system(size: 32, weight: .regular))
-                .padding(.top, 26)
+                .padding(.top, 20)
             Text(accountSubtitle)
                 .font(.system(size: 16, weight: .medium))
                 .foregroundStyle(.secondary)
-                .padding(.top, 8)
+                .padding(.top, 6)
             
-            profileMetricCard
-                .padding(.top, 78)
+            if let usage = agentManager.usage {
+                profileStatsGrid(usage: usage)
+                    .padding(.top, 44)
+                
+                tokenActivitySection(usage: usage)
+                    .padding(.top, 60)
+                
+                activityInsightsSection(usage: usage)
+                    .padding(.top, 44)
+                
+                quickModeBanner
+                    .padding(.top, 44)
+            }
+        }
+        .padding(.bottom, 56)
+    }
+    
+    // MARK: - Stats Grid (2x3)
+    
+    private func profileStatsGrid(usage: UsageInfo) -> some View {
+        LazyVGrid(
+            columns: [GridItem(.flexible(), spacing: 24), GridItem(.flexible(), spacing: 24)],
+            spacing: 28
+        ) {
+            ProfileStatCell(
+                value: formattedCN(usage.weekly.tokensUsed),
+                label: TalkifyLocalized.string("settings.cumulative_tokens")
+            )
+            ProfileStatCell(
+                value: formattedCN(usage.weekly.tokensUsed),
+                label: TalkifyLocalized.string("settings.peak_tokens")
+            )
+            ProfileStatCell(
+                value: "\(usage.weekly.unitsUsed)",
+                label: TalkifyLocalized.string("settings.this_week_usage")
+            )
+            ProfileStatCell(
+                value: "\(max(usage.weekly.unitsLimit - usage.weekly.unitsUsed, 0))",
+                label: TalkifyLocalized.string("settings.weekly_quota")
+            )
+            ProfileStatCell(
+                value: "\(usage.byModel?.count ?? 0)",
+                label: TalkifyLocalized.string("settings.available_models")
+            )
+            ProfileStatCell(
+                value: usage.tier.rawValue.capitalized,
+                label: TalkifyLocalized.string("settings.current_tier")
+            )
+        }
+        .padding(28)
+        .background(
+            RoundedRectangle(cornerRadius: 24, style: .continuous)
+                .fill(Color.primary.opacity(0.035))
+        )
+        .overlay {
+            RoundedRectangle(cornerRadius: 24, style: .continuous)
+                .stroke(Color.primary.opacity(0.10), lineWidth: 1)
+        }
+    }
+    
+    // MARK: - Token Activity
+    
+    private func tokenActivitySection(usage: UsageInfo) -> some View {
+        VStack(alignment: .leading, spacing: 18) {
+            Text(verbatim: TalkifyLocalized.string("settings.token_activity"))
+                .font(.system(size: 18, weight: .semibold))
             
-            HStack(alignment: .top, spacing: 80) {
-                profileActivity
-                profileUsageSummary
+            HStack(spacing: 8) {
+                ForEach([TokenActivityTab.daily, .weekly, .cumulative], id: \.self) { tab in
+                    tokenActivityPill(tab, selected: tokenActivityTab == tab)
+                        .onTapGesture { tokenActivityTab = tab }
+                }
             }
-            .padding(.top, 76)
+            
+            VStack(alignment: .leading, spacing: 14) {
+                ProfileKeyValue(
+                    title: TalkifyLocalized.string("settings.used_this_week_label"),
+                    value: formattedCN(usage.weekly.tokensUsed) + " Token"
+                )
+                if let modelUsage = usage.byModel?.first {
+                    ProfileKeyValue(
+                        title: TalkifyLocalized.string("settings.current_model"),
+                        value: modelUsage.model
+                    )
+                }
+                ProfileKeyValue(
+                    title: TalkifyLocalized.string("settings.weekly_quota"),
+                    value: String(
+                        format: TalkifyLocalized.string("settings.cycle_remaining_format"),
+                        formatted(max(usage.weekly.unitsLimit - usage.weekly.unitsUsed, 0)),
+                        formatted(usage.weekly.unitsLimit)
+                    )
+                )
+            }
+            .padding(20)
             .frame(maxWidth: .infinity, alignment: .leading)
+            .background(
+                RoundedRectangle(cornerRadius: 16, style: .continuous)
+                    .fill(Color.primary.opacity(0.035))
+            )
         }
+        .frame(maxWidth: .infinity, alignment: .leading)
     }
     
-    @ViewBuilder
-    private var profileMetricCard: some View {
-        if let usage = agentManager.usage {
-            HStack(spacing: 0) {
-                ProfileMetric(value: formatted(usage.weekly.unitsUsed), label: TalkifyLocalized.string("settings.this_week_usage"))
-                ProfileMetric(value: formatted(usage.cycle?.unitsUsed ?? 0), label: TalkifyLocalized.string("settings.cycle_usage"))
-                ProfileMetric(value: usage.tier.rawValue.capitalized, label: TalkifyLocalized.string("settings.current_tier"))
-            }
-            .padding(.vertical, 18)
-            .background(Color.primary.opacity(0.035), in: RoundedRectangle(cornerRadius: 24, style: .continuous))
-            .overlay {
-                RoundedRectangle(cornerRadius: 24, style: .continuous)
-                    .stroke(Color.primary.opacity(0.10), lineWidth: 1)
-            }
-        }
+    private func tokenActivityPill(_ tab: TokenActivityTab, selected: Bool) -> some View {
+        Text(tab.label)
+            .font(.system(size: 14, weight: selected ? .semibold : .regular))
+            .foregroundStyle(selected ? .white : .secondary)
+            .padding(.horizontal, 18)
+            .padding(.vertical, 8)
+            .background(
+                selected
+                    ? Color.accentColor
+                    : Color.primary.opacity(0.08),
+                in: Capsule()
+            )
     }
     
+    // MARK: - Activity Insights
+    
+    private func activityInsightsSection(usage: UsageInfo) -> some View {
+        VStack(alignment: .leading, spacing: 16) {
+            Text(verbatim: TalkifyLocalized.string("settings.activity_insights"))
+                .font(.system(size: 18, weight: .semibold))
+            
+            VStack(alignment: .leading, spacing: 14) {
+                ProfileKeyValue(
+                    title: TalkifyLocalized.string("settings.current_model"),
+                    value: usage.byModel?.first?.model ?? TalkifyLocalized.string("settings.auto_select")
+                )
+                ProfileKeyValue(
+                    title: TalkifyLocalized.string("settings.workspace_permission"),
+                    value: defaultPermission ? TalkifyLocalized.string("settings.enabled") : TalkifyLocalized.string("settings.on_demand")
+                )
+                ProfileKeyValue(
+                    title: TalkifyLocalized.string("settings.subscription_tier"),
+                    value: usage.tier.rawValue.capitalized
+                )
+                ProfileKeyValue(
+                    title: TalkifyLocalized.string("settings.total_calls"),
+                    value: "\(usage.byModel?.reduce(0) { $0 + $1.callCount } ?? 0)"
+                )
+            }
+            .padding(20)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .background(
+                RoundedRectangle(cornerRadius: 16, style: .continuous)
+                    .fill(Color.primary.opacity(0.035))
+            )
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+    }
+    
+    // MARK: - Quick Mode Banner
+    
     @ViewBuilder
-    private var profileActivity: some View {
-        if let usage = agentManager.usage {
-            VStack(alignment: .leading, spacing: 16) {
-                Text(verbatim: TalkifyLocalized.string("settings.activity_insights"))
+    private var quickModeBanner: some View {
+        HStack {
+            VStack(alignment: .leading, spacing: 5) {
+                Text(verbatim: TalkifyLocalized.string("settings.fast_mode"))
                     .font(.system(size: 18, weight: .semibold))
-                ProfileKeyValue(title: TalkifyLocalized.string("settings.used_this_week"), value: String(format: TalkifyLocalized.string("settings.used_this_week_value"), formatted(usage.weekly.unitsUsed)))
-                ProfileKeyValue(title: TalkifyLocalized.string("settings.current_model"), value: usage.byModel?.first?.model ?? TalkifyLocalized.string("settings.auto_select"))
-                ProfileKeyValue(title: TalkifyLocalized.string("settings.workspace_permission"), value: defaultPermission ? TalkifyLocalized.string("settings.enabled") : TalkifyLocalized.string("settings.on_demand"))
+                Text(verbatim: TalkifyLocalized.string("settings.fast_mode_desc"))
+                    .font(.system(size: 14))
+                    .foregroundStyle(.secondary)
             }
-            .frame(maxWidth: .infinity, alignment: .leading)
+            Spacer()
+            Text(verbatim: TalkifyLocalized.string("settings.not_used"))
+                .font(.system(size: 14, weight: .medium))
+                .foregroundStyle(.secondary)
+                .padding(.horizontal, 14)
+                .padding(.vertical, 7)
+                .background(
+                    Color.primary.opacity(0.06),
+                    in: Capsule()
+                )
         }
-    }
-    
-    @ViewBuilder
-    private var profileUsageSummary: some View {
-        if let usage = agentManager.usage {
-            VStack(alignment: .leading, spacing: 16) {
-                Text(verbatim: TalkifyLocalized.string("workspace.usage"))
-                    .font(.system(size: 18, weight: .semibold))
-                ProfileKeyValue(title: TalkifyLocalized.string("settings.subscription_tier"), value: usage.tier.rawValue.capitalized)
-                ProfileKeyValue(title: TalkifyLocalized.string("settings.weekly_quota"), value: weeklyQuotaText)
-                ProfileKeyValue(title: TalkifyLocalized.string("settings.login_status"), value: authManager.isLoggedIn ? TalkifyLocalized.string("settings.signed_in") : TalkifyLocalized.string("settings.not_signed_in"))
-            }
-            .frame(maxWidth: .infinity, alignment: .leading)
-        }
+        .padding(20)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(
+            RoundedRectangle(cornerRadius: 16, style: .continuous)
+                .fill(Color.primary.opacity(0.035))
+        )
     }
     
     // MARK: - Account
@@ -660,7 +784,15 @@ struct SettingsDetailView: View {
     }
     
     private var accountInitial: String { String(accountName.prefix(1)).uppercased() }
-    private var accountSubtitle: String { agentManager.usage?.tier.rawValue.capitalized ?? TalkifyLocalized.string("settings.talkify_user") }
+    private var accountSubtitle: String {
+        let handle = userManager.profile?.username.isEmpty == false
+        ? "@\(userManager.profile!.username)"
+            : ""
+        let tier = agentManager.usage?.tier.rawValue.capitalized ?? ""
+        if handle.isEmpty { return tier.isEmpty ? TalkifyLocalized.string("settings.talkify_user") : tier }
+        if tier.isEmpty { return handle }
+        return "\(handle) • \(tier)"
+    }
 
     private var registerSourceText: String {
         switch userManager.profile?.registerSource {
@@ -721,6 +853,16 @@ struct SettingsDetailView: View {
         value >= 1_000_000
         ? String(format: "%.1fM", Double(value) / 1_000_000)
         : (value >= 1_000 ? String(format: "%.1fK", Double(value) / 1_000) : "\(value)")
+    }
+    
+    private func formattedCN(_ value: Int) -> String {
+        if value >= 100_000_000 {
+            return String(format: TalkifyLocalized.string("settings.unit.billion"), Double(value) / 100_000_000)
+        } else if value >= 10_000 {
+            return String(format: TalkifyLocalized.string("settings.unit.ten_thousand"), Double(value) / 10_000)
+        } else {
+            return "\(value)"
+        }
     }
 }
 
@@ -926,16 +1068,32 @@ private struct ResetCardSettingsRow: View {
     }
 }
 
-private struct ProfileMetric: View {
+// MARK: - Token Activity Tab
+
+private enum TokenActivityTab: Hashable {
+    case daily, weekly, cumulative
+    var label: String {
+        switch self {
+        case .daily: return TalkifyLocalized.string("settings.period.daily")
+        case .weekly: return TalkifyLocalized.string("settings.period.weekly")
+        case .cumulative: return TalkifyLocalized.string("settings.period.cumulative")
+        }
+    }
+}
+
+private struct ProfileStatCell: View {
     let value: String
     let label: String
     var body: some View {
-        VStack(alignment: .leading, spacing: 5) {
-            Text(value).font(.system(size: 20, weight: .medium)).lineLimit(1)
-            Text(label).font(.system(size: 14)).foregroundStyle(.secondary)
+        VStack(alignment: .leading, spacing: 6) {
+            Text(value)
+                .font(.system(size: 24, weight: .semibold))
+                .lineLimit(1)
+            Text(label)
+                .font(.system(size: 14))
+                .foregroundStyle(.secondary)
         }
         .frame(maxWidth: .infinity, alignment: .leading)
-        .padding(.horizontal, 24)
     }
 }
 
