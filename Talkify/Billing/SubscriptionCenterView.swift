@@ -563,7 +563,7 @@ private extension SubscriptionCenterView {
     var restorePurchaseCard: some View {
         VStack(alignment: .leading, spacing: 16) {
             sectionHeader(
-                title: "恢复购买",
+                title: TalkifyLocalized.string("billing.restore_subscription"),
                 subtitle: "用于同步 App Store 已有订阅并刷新当前账号权益"
             )
 
@@ -599,7 +599,7 @@ private extension SubscriptionCenterView {
                             ProgressView()
                         }
 
-                        Text(viewModel.isRestoring ? "恢复中..." : "恢复购买")
+                        Text(viewModel.isRestoring ? TalkifyLocalized.string("billing.restoring") : TalkifyLocalized.string("billing.restore_purchases"))
                             .font(.system(size: 15, weight: .semibold))
                     }
                     .foregroundColor(.primary)

@@ -485,25 +485,25 @@ final class SubscriptionCenterViewModel: ObservableObject {
                 await transaction.finish()
                 originalTransactionID = String(transaction.originalID)
                 feedbackMessage = result.subscriptionActive
-                    ? "已通过 App Store 同步并完成服务端验单，当前订阅已恢复。"
-                    : "恢复流程已完成，但当前没有有效订阅。"
-                ToastContext.shared.show("恢复购买已完成", style: .success)
+                    ? TalkifyLocalized.string("billing.restore_success_with_subscription")
+                    : TalkifyLocalized.string("billing.restore_no_active_subscription")
+                ToastContext.shared.show(TalkifyLocalized.string("billing.restore_complete"), style: .success)
                 return
             }
 #endif
 
             let trimmedOriginalTransactionID = originalTransactionID.trimmingCharacters(in: .whitespacesAndNewlines)
             guard !trimmedOriginalTransactionID.isEmpty else {
-                restoreErrorMessage = "未从 App Store 找到可恢复交易，请输入 original_transaction_id 后重试。"
+                restoreErrorMessage = TalkifyLocalized.string("billing.restore_no_transactions")
                 return
             }
 
             let result = try await billingService.restoreIOSOrder(originalTransactionID: trimmedOriginalTransactionID)
             await billingManager.refreshAllIfNeeded(maxAge: 0)
             feedbackMessage = result.subscriptionActive
-                ? "已按原始订阅交易号恢复当前订阅摘要。"
-                : "恢复请求已完成，但当前没有可用订阅状态。"
-            ToastContext.shared.show("恢复购买已完成", style: .success)
+                ? TalkifyLocalized.string("billing.restore_by_transaction_id")
+                : TalkifyLocalized.string("billing.restore_request_complete_no_subscription")
+            ToastContext.shared.show(TalkifyLocalized.string("billing.restore_complete"), style: .success)
         } catch {
             restoreErrorMessage = error.localizedDescription
         }

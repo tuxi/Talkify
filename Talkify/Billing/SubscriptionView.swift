@@ -830,10 +830,24 @@ private struct CompactSubscriptionProductCard: View {
                     .lineLimit(2)
                     .multilineTextAlignment(.leading)
                 
-                if let periodText {
-                    Text(periodText)
-                        .font(.system(size: 11, weight: .medium))
-                        .foregroundColor(subtitleColor)
+                HStack {
+                    if let periodText {
+                        Text(periodText)
+                            .font(.system(size: 11, weight: .medium))
+                            .foregroundColor(subtitleColor)
+                    }
+                    Spacer()
+                    if isRecommended {
+                        Text(TalkifyLocalized.string("billing.subscription.recommended"))
+                            .font(.system(size: 9, weight: .bold))
+                            .foregroundColor(recommendedTextColor)
+                            .padding(.horizontal, 6)
+                            .padding(.vertical, 4)
+                            .background(
+                                Capsule()
+                                    .fill(recommendedBackground)
+                            )
+                    }
                 }
                 
                 VStack(alignment: .leading, spacing: 2) {
@@ -860,17 +874,6 @@ private struct CompactSubscriptionProductCard: View {
                     
                     Spacer()
                     
-                    if isRecommended {
-                        Text(TalkifyLocalized.string("billing.subscription.recommended"))
-                            .font(.system(size: 9, weight: .bold))
-                            .foregroundColor(recommendedTextColor)
-                            .padding(.horizontal, 6)
-                            .padding(.vertical, 4)
-                            .background(
-                                Capsule()
-                                    .fill(recommendedBackground)
-                            )
-                    }
                 }
             }
             .padding(.horizontal, 14)

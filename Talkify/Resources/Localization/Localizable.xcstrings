@@ -6176,6 +6176,596 @@
         }
       }
     },
+    "billing.restore_by_transaction_id": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Subscription summary restored using the original transaction ID."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "已按原始订阅交易号恢复当前订阅摘要。"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "已按原始訂閱交易號恢復當前訂閱摘要。"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "元の取引IDを使用してサブスクリプション概要が復元されました。"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "원래 거래 ID를 사용하여 구독 요약이 복원되었습니다."
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Abonnementübersicht mit der ursprünglichen Transaktions-ID wiederhergestellt."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Résumé de l'abonnement restauré à l'aide de l'ID de transaction d'origine."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Resumen de suscripción restaurado usando el ID de transacción original."
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Resumo da assinatura restaurado usando o ID da transação original."
+          }
+        }
+      }
+    },
+    "billing.restore_complete": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Restore completed"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "恢复购买已完成"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "恢復購買已完成"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "購入の復元が完了しました"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "구매 복원 완료"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Wiederherstellung abgeschlossen"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Restauration terminée"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Restauración completada"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Restauração concluída"
+          }
+        }
+      }
+    },
+    "billing.restore_hint": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Used to recover App Store transactions not yet credited. Consumable point packs cannot be restored like subscriptions."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "用于补发尚未入账的 App Store 交易；消耗型点数包不能像订阅一样恢复"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "用於補發尚未入帳的 App Store 交易；消耗型點數包不能像訂閱一樣恢復"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "未入金のApp Store取引を回収するために使用します。消費型ポイントパックはサブスクリプションのように復元できません。"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "아직 입금되지 않은 App Store 거래를 복구하는 데 사용됩니다. 소비형 포인트 팩은 구독처럼 복원할 수 없습니다."
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dient zur Wiederherstellung noch nicht gutgeschriebener App Store-Transaktionen. Verbrauchbare Punktpakete können nicht wie Abonnements wiederhergestellt werden."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Utilisé pour récupérer les transactions App Store non encore créditées. Les packs de points consommables ne peuvent pas être restaurés comme les abonnements."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Se usa para recuperar transacciones de App Store aún no acreditadas. Los paquetes de puntos consumibles no se pueden restaurar como las suscripciones."
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Usado para recuperar transações da App Store ainda não creditadas. Pacotes de pontos consumíveis não podem ser restaurados como assinaturas."
+          }
+        }
+      }
+    },
+    "billing.restore_no_active_subscription": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Restore process completed, but no active subscription was found."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "恢复流程已完成，但当前没有有效订阅。"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "恢復流程已完成，但當前沒有有效訂閱。"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "復元プロセスが完了しましたが、有効なサブスクリプションが見つかりませんでした。"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "복원 프로세스가 완료되었지만 활성 구독을 찾을 수 없습니다."
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Wiederherstellungsprozess abgeschlossen, aber kein aktives Abonnement gefunden."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Processus de restauration terminé, mais aucun abonnement actif n'a été trouvé."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Proceso de restauración completado, pero no se encontró ninguna suscripción activa."
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Processo de restauração concluído, mas nenhuma assinatura ativa foi encontrada."
+          }
+        }
+      }
+    },
+    "billing.restore_no_transactions": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No restorable transactions found in App Store. Please enter the original_transaction_id and try again."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "未从 App Store 找到可恢复交易，请输入 original_transaction_id 后重试。"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "未從 App Store 找到可恢復交易，請輸入 original_transaction_id 後重試。"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "App Storeで復元可能な取引が見つかりませんでした。original_transaction_idを入力して再試行してください。"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "App Store에서 복원 가능한 거래를 찾을 수 없습니다. original_transaction_id를 입력하고 다시 시도하세요."
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Keine wiederherstellbaren Transaktionen im App Store gefunden. Bitte geben Sie die original_transaction_id ein und versuchen Sie es erneut."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aucune transaction restaurable trouvée dans l'App Store. Veuillez saisir l'original_transaction_id et réessayer."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No se encontraron transacciones restaurables en App Store. Ingresa el original_transaction_id e inténtalo de nuevo."
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nenhuma transação restaurável encontrada na App Store. Digite o original_transaction_id e tente novamente."
+          }
+        }
+      }
+    },
+    "billing.restore_purchases": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Restore Purchases"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "恢复购买"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "恢復購買"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "購入を復元"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "구매 복원"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Käufe wiederherstellen"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Restaurer les achats"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Restaurar compras"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Restaurar compras"
+          }
+        }
+      }
+    },
+    "billing.restore_request_complete_no_subscription": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Restore request completed, but no subscription status is currently available."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "恢复请求已完成，但当前没有可用订阅状态。"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "恢復請求已完成，但當前沒有可用訂閱狀態。"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "復元リクエストが完了しましたが、現在利用可能なサブスクリプション状態はありません。"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "복원 요청이 완료되었지만 현재 사용 가능한 구독 상태가 없습니다."
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Wiederherstellungsanfrage abgeschlossen, aber derzeit ist kein Abonnementstatus verfügbar."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Demande de restauration terminée, mais aucun statut d'abonnement n'est actuellement disponible."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Solicitud de restauración completada, pero no hay estado de suscripción disponible actualmente."
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Solicitação de restauração concluída, mas nenhum status de assinatura está disponível no momento."
+          }
+        }
+      }
+    },
+    "billing.restore_subscription": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Restore Purchases"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "恢复购买"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "恢復購買"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "購入を復元"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "구매 복원"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Käufe wiederherstellen"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Restaurer les achats"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Restaurar compras"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Restaurar compras"
+          }
+        }
+      }
+    },
+    "billing.restore_success_with_subscription": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Synced with App Store and verified on server. Current subscription has been restored."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "已通过 App Store 同步并完成服务端验单，当前订阅已恢复。"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "已通過 App Store 同步並完成伺服器驗單，當前訂閱已恢復。"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "App Storeと同期し、サーバーで検証が完了しました。現在のサブスクリプションが復元されました。"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "App Store와 동기화되고 서버에서 확인되었습니다. 현재 구독이 복원되었습니다."
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mit App Store synchronisiert und auf dem Server verifiziert. Aktuelles Abonnement wurde wiederhergestellt."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Synchronisé avec l'App Store et vérifié sur le serveur. L'abonnement actuel a été restauré."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sincronizado con App Store y verificado en el servidor. La suscripción actual ha sido restaurada."
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sincronizado com a App Store e verificado no servidor. A assinatura atual foi restaurada."
+          }
+        }
+      }
+    },
+    "billing.restoring": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Restoring…"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "恢复中..."
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "恢復中..."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "復元中…"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "복원 중…"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Wiederherstellung…"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Restauration…"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Restaurando…"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Restaurando…"
+          }
+        }
+      }
+    },
     "billing.select_points": {
       "extractionState": "manual",
       "localizations": {
@@ -6356,22 +6946,28 @@
     "billing.subscription.activated": {
       "extractionState": "manual",
       "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Abonnement aktiviert"
+          }
+        },
         "en": {
           "stringUnit": {
             "state": "translated",
             "value": "Subscription Activated"
           }
         },
-        "zh-Hans": {
+        "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "订阅开通成功"
+            "value": "Suscripción activada"
           }
         },
-        "zh-Hant": {
+        "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "訂閱開通成功"
+            "value": "Abonnement activé"
           }
         },
         "ja": {
@@ -6386,28 +6982,22 @@
             "value": "구독이 활성화되었습니다"
           }
         },
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Abonnement aktiviert"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Abonnement activé"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Suscripción activada"
-          }
-        },
         "pt-BR": {
           "stringUnit": {
             "state": "translated",
             "value": "Assinatura ativada"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "订阅开通成功"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "訂閱開通成功"
           }
         }
       }
@@ -6474,22 +7064,28 @@
     "billing.subscription.agree_and_purchase": {
       "extractionState": "manual",
       "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Zustimmen & Kaufen"
+          }
+        },
         "en": {
           "stringUnit": {
             "state": "translated",
             "value": "Agree & Purchase"
           }
         },
-        "zh-Hans": {
+        "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "同意并购买"
+            "value": "Aceptar y comprar"
           }
         },
-        "zh-Hant": {
+        "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "同意並購買"
+            "value": "Accepter et acheter"
           }
         },
         "ja": {
@@ -6504,28 +7100,22 @@
             "value": "동의하고 구매"
           }
         },
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Zustimmen & Kaufen"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Accepter et acheter"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Aceptar y comprar"
-          }
-        },
         "pt-BR": {
           "stringUnit": {
             "state": "translated",
             "value": "Aceitar e comprar"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "同意并购买"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "同意並購買"
           }
         }
       }
@@ -6592,22 +7182,28 @@
     "billing.subscription.choose_plan_title": {
       "extractionState": "manual",
       "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Plan auswählen"
+          }
+        },
         "en": {
           "stringUnit": {
             "state": "translated",
             "value": "Choose a Plan"
           }
         },
-        "zh-Hans": {
+        "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "选择会员方案"
+            "value": "Elegir un plan"
           }
         },
-        "zh-Hant": {
+        "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "選擇會員方案"
+            "value": "Choisir un forfait"
           }
         },
         "ja": {
@@ -6622,28 +7218,22 @@
             "value": "플랜 선택"
           }
         },
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Plan auswählen"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Choisir un forfait"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Elegir un plan"
-          }
-        },
         "pt-BR": {
           "stringUnit": {
             "state": "translated",
             "value": "Escolher um plano"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "选择会员方案"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "選擇會員方案"
           }
         }
       }
@@ -6710,22 +7300,28 @@
     "billing.subscription.current_balance": {
       "extractionState": "manual",
       "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aktuelles Guthaben"
+          }
+        },
         "en": {
           "stringUnit": {
             "state": "translated",
             "value": "Current Balance"
           }
         },
-        "zh-Hans": {
+        "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "当前余额"
+            "value": "Saldo actual"
           }
         },
-        "zh-Hant": {
+        "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "當前餘額"
+            "value": "Solde actuel"
           }
         },
         "ja": {
@@ -6740,28 +7336,22 @@
             "value": "현재 잔액"
           }
         },
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Aktuelles Guthaben"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Solde actuel"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Saldo actual"
-          }
-        },
         "pt-BR": {
           "stringUnit": {
             "state": "translated",
             "value": "Saldo atual"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "当前余额"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "當前餘額"
           }
         }
       }
@@ -6769,22 +7359,28 @@
     "billing.subscription.current_subscription_label": {
       "extractionState": "manual",
       "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aktuelles Abonnement"
+          }
+        },
         "en": {
           "stringUnit": {
             "state": "translated",
             "value": "Current Subscription"
           }
         },
-        "zh-Hans": {
+        "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "当前订阅"
+            "value": "Suscripción actual"
           }
         },
-        "zh-Hant": {
+        "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "當前訂閱"
+            "value": "Abonnement actuel"
           }
         },
         "ja": {
@@ -6799,28 +7395,22 @@
             "value": "현재 구독"
           }
         },
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Aktuelles Abonnement"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Abonnement actuel"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Suscripción actual"
-          }
-        },
         "pt-BR": {
           "stringUnit": {
             "state": "translated",
             "value": "Assinatura atual"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "当前订阅"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "當前訂閱"
           }
         }
       }
@@ -6828,22 +7418,28 @@
     "billing.subscription.effective": {
       "extractionState": "manual",
       "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aktiv"
+          }
+        },
         "en": {
           "stringUnit": {
             "state": "translated",
             "value": "Active"
           }
         },
-        "zh-Hans": {
+        "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "已生效"
+            "value": "Activo"
           }
         },
-        "zh-Hant": {
+        "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "已生效"
+            "value": "Actif"
           }
         },
         "ja": {
@@ -6858,28 +7454,22 @@
             "value": "적용됨"
           }
         },
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Aktiv"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Actif"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Activo"
-          }
-        },
         "pt-BR": {
           "stringUnit": {
             "state": "translated",
             "value": "Ativo"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "已生效"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "已生效"
           }
         }
       }
@@ -7005,22 +7595,28 @@
     "billing.subscription.loading_plans": {
       "extractionState": "manual",
       "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Abonnementpläne werden geladen…"
+          }
+        },
         "en": {
           "stringUnit": {
             "state": "translated",
             "value": "Loading subscription plans…"
           }
         },
-        "zh-Hans": {
+        "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "正在加载订阅方案…"
+            "value": "Cargando planes de suscripción…"
           }
         },
-        "zh-Hant": {
+        "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "正在載入訂閱方案…"
+            "value": "Chargement des plans d'abonnement…"
           }
         },
         "ja": {
@@ -7035,28 +7631,22 @@
             "value": "구독 플랜을 불러오는 중…"
           }
         },
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Abonnementpläne werden geladen…"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Chargement des plans d'abonnement…"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Cargando planes de suscripción…"
-          }
-        },
         "pt-BR": {
           "stringUnit": {
             "state": "translated",
             "value": "Carregando planos de assinatura…"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "正在加载订阅方案…"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "正在載入訂閱方案…"
           }
         }
       }
@@ -7418,22 +8008,28 @@
     "billing.subscription.not_effective": {
       "extractionState": "manual",
       "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Inaktiv"
+          }
+        },
         "en": {
           "stringUnit": {
             "state": "translated",
             "value": "Inactive"
           }
         },
-        "zh-Hans": {
+        "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "未生效"
+            "value": "Inactivo"
           }
         },
-        "zh-Hant": {
+        "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "未生效"
+            "value": "Inactif"
           }
         },
         "ja": {
@@ -7448,28 +8044,22 @@
             "value": "적용되지 않음"
           }
         },
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Inaktiv"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Inactif"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Inactivo"
-          }
-        },
         "pt-BR": {
           "stringUnit": {
             "state": "translated",
             "value": "Inativo"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "未生效"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "未生效"
           }
         }
       }
@@ -7477,22 +8067,28 @@
     "billing.subscription.operation_result": {
       "extractionState": "manual",
       "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ergebnis"
+          }
+        },
         "en": {
           "stringUnit": {
             "state": "translated",
             "value": "Operation Result"
           }
         },
-        "zh-Hans": {
+        "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "操作结果"
+            "value": "Resultado de la operación"
           }
         },
-        "zh-Hant": {
+        "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "操作結果"
+            "value": "Résultat de l'opération"
           }
         },
         "ja": {
@@ -7507,28 +8103,22 @@
             "value": "작업 결과"
           }
         },
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Ergebnis"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Résultat de l'opération"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Resultado de la operación"
-          }
-        },
         "pt-BR": {
           "stringUnit": {
             "state": "translated",
             "value": "Resultado da operação"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "操作结果"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "操作結果"
           }
         }
       }
@@ -7536,22 +8126,28 @@
     "billing.subscription.paid_agreement_full": {
       "extractionState": "manual",
       "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Zum Schutz Ihrer Rechte stimmen Sie bitte der [Talkify-Vereinbarung für kostenpflichtige Dienste (einschließlich automatischer Verlängerung)](dreamai://vip-protocol) zu."
+          }
+        },
         "en": {
           "stringUnit": {
             "state": "translated",
             "value": "To protect your rights, please agree to the [Talkify Paid Service Agreement (including auto-renewal terms)](dreamai://vip-protocol)"
           }
         },
-        "zh-Hans": {
+        "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "为保障您的合法权益，请同意[《Talkify 付费服务协议》（含自动续费条款）](dreamai://vip-protocol)"
+            "value": "Para proteger tus derechos, acepta el [Acuerdo de servicio de pago de Talkify (incluye renovación automática)](dreamai://vip-protocol)."
           }
         },
-        "zh-Hant": {
+        "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "為保障您的合法權益，請同意[《Talkify 付費服務協議》（含自動續費條款）](dreamai://vip-protocol)"
+            "value": "Pour protéger vos droits, veuillez accepter le [Contrat de service payant Talkify (incluant les conditions de renouvellement automatique)](dreamai://vip-protocol)."
           }
         },
         "ja": {
@@ -7566,28 +8162,22 @@
             "value": "귀하의 권리를 보호하기 위해 [Talkify 유료 서비스 약관(자동 갱신 조항 포함)](dreamai://vip-protocol)에 동의해 주세요."
           }
         },
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Zum Schutz Ihrer Rechte stimmen Sie bitte der [Talkify-Vereinbarung für kostenpflichtige Dienste (einschließlich automatischer Verlängerung)](dreamai://vip-protocol) zu."
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Pour protéger vos droits, veuillez accepter le [Contrat de service payant Talkify (incluant les conditions de renouvellement automatique)](dreamai://vip-protocol)."
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Para proteger tus derechos, acepta el [Acuerdo de servicio de pago de Talkify (incluye renovación automática)](dreamai://vip-protocol)."
-          }
-        },
         "pt-BR": {
           "stringUnit": {
             "state": "translated",
             "value": "Para proteger seus direitos, aceite o [Contrato de Serviço Pago do Talkify (incluindo termos de renovação automática)](dreamai://vip-protocol)."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "为保障您的合法权益，请同意[《Talkify 付费服务协议》（含自动续费条款）](dreamai://vip-protocol)"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "為保障您的合法權益，請同意[《Talkify 付費服務協議》（含自動續費條款）](dreamai://vip-protocol)"
           }
         }
       }
@@ -7654,22 +8244,28 @@
     "billing.subscription.purchase_tip": {
       "extractionState": "manual",
       "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kaufhinweis"
+          }
+        },
         "en": {
           "stringUnit": {
             "state": "translated",
             "value": "Purchase Tip"
           }
         },
-        "zh-Hans": {
+        "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "购买提示"
+            "value": "Consejo de compra"
           }
         },
-        "zh-Hant": {
+        "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "購買提示"
+            "value": "Conseil d'achat"
           }
         },
         "ja": {
@@ -7684,28 +8280,22 @@
             "value": "구매 팁"
           }
         },
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Kaufhinweis"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Conseil d'achat"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Consejo de compra"
-          }
-        },
         "pt-BR": {
           "stringUnit": {
             "state": "translated",
             "value": "Dica de compra"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "购买提示"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "購買提示"
           }
         }
       }
@@ -7772,22 +8362,28 @@
     "billing.subscription.select": {
       "extractionState": "manual",
       "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Auswählen"
+          }
+        },
         "en": {
           "stringUnit": {
             "state": "translated",
             "value": "Select"
           }
         },
-        "zh-Hans": {
+        "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "选择"
+            "value": "Seleccionar"
           }
         },
-        "zh-Hant": {
+        "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "選擇"
+            "value": "Sélectionner"
           }
         },
         "ja": {
@@ -7802,28 +8398,22 @@
             "value": "선택"
           }
         },
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Auswählen"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Sélectionner"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Seleccionar"
-          }
-        },
         "pt-BR": {
           "stringUnit": {
             "state": "translated",
             "value": "Selecionar"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "选择"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "選擇"
           }
         }
       }
@@ -7831,22 +8421,28 @@
     "billing.subscription.selected": {
       "extractionState": "manual",
       "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ausgewählt"
+          }
+        },
         "en": {
           "stringUnit": {
             "state": "translated",
             "value": "Selected"
           }
         },
-        "zh-Hans": {
+        "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "已选择"
+            "value": "Seleccionado"
           }
         },
-        "zh-Hant": {
+        "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "已選擇"
+            "value": "Sélectionné"
           }
         },
         "ja": {
@@ -7861,28 +8457,22 @@
             "value": "선택됨"
           }
         },
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Ausgewählt"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Sélectionné"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Seleccionado"
-          }
-        },
         "pt-BR": {
           "stringUnit": {
             "state": "translated",
             "value": "Selecionado"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "已选择"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "已選擇"
           }
         }
       }
@@ -7890,22 +8480,28 @@
     "billing.subscription.start_experience": {
       "extractionState": "manual",
       "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Erlebnis starten"
+          }
+        },
         "en": {
           "stringUnit": {
             "state": "translated",
             "value": "Start Experience"
           }
         },
-        "zh-Hans": {
+        "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "开始体验"
+            "value": "Comenzar experiencia"
           }
         },
-        "zh-Hant": {
+        "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "開始體驗"
+            "value": "Commencer l'expérience"
           }
         },
         "ja": {
@@ -7920,28 +8516,22 @@
             "value": "체험 시작"
           }
         },
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Erlebnis starten"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Commencer l'expérience"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Comenzar experiencia"
-          }
-        },
         "pt-BR": {
           "stringUnit": {
             "state": "translated",
             "value": "Começar experiência"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "开始体验"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "開始體驗"
           }
         }
       }
@@ -8126,22 +8716,28 @@
     "billing.subscription.tap_to_select": {
       "extractionState": "manual",
       "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Zum Auswählen tippen"
+          }
+        },
         "en": {
           "stringUnit": {
             "state": "translated",
             "value": "Tap to Select"
           }
         },
-        "zh-Hans": {
+        "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "点击选择"
+            "value": "Toca para seleccionar"
           }
         },
-        "zh-Hant": {
+        "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "點擊選擇"
+            "value": "Appuyez pour sélectionner"
           }
         },
         "ja": {
@@ -8156,28 +8752,22 @@
             "value": "탭하여 선택"
           }
         },
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Zum Auswählen tippen"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Appuyez pour sélectionner"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Toca para seleccionar"
-          }
-        },
         "pt-BR": {
           "stringUnit": {
             "state": "translated",
             "value": "Toque para selecionar"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "点击选择"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "點擊選擇"
           }
         }
       }
@@ -19895,7 +20485,6 @@
     "删除会话？": {},
     "刷新文件": {},
     "取消": {},
-    "同意并购买": {},
     "好": {},
     "完成": {},
     "完整浏览": {},
@@ -19906,8 +20495,6 @@
     "工作区保存在这台 iPhone 上。导入时只会复制内容，不会修改原始文件。": {},
     "工作区名称（可选）": {},
     "已归档": {},
-    "已选择": {},
-    "开始体验": {},
     "强制删除 Worktree 和会话": {},
     "归档": {},
     "当前会话": {},
@@ -19919,7 +20506,6 @@
     "恢复失败": {},
     "恢复购买": {},
     "打开会话": {},
-    "推荐": {},
     "搜索会话或文件...": {},
     "搜索项目": {},
     "操作失败": {},
@@ -19931,7 +20517,6 @@
     "查看当前项目": {},
     "正在使用…": {},
     "正在准备工作区…": {},
-    "正在加载订阅方案…": {},
     "正在复制到 %@…": {},
     "正在导出项目": {},
     "此操作会永久删除会话及其历史。": {},
@@ -19946,8 +20531,6 @@
     "请稍后重试，或检查网络连接。": {},
     "请输入 original_transaction_id（可选）": {},
     "购买成功": {},
-    "选择": {},
-    "选择会员方案": {},
     "重命名": {},
     "重命名会话": {},
     "项目": {},

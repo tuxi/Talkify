@@ -661,7 +661,7 @@ private extension PointsCenterView {
         VStack(alignment: .leading, spacing: 16) {
             sectionHeader(
                 title: TalkifyLocalized.string("billing.sync_purchase_records"),
-                subtitle: "用于补发尚未入账的 App Store 交易；消耗型点数包不能像订阅一样恢复"
+                subtitle: TalkifyLocalized.string("billing.restore_hint")
             )
 
             TextField("请输入 original_transaction_id（可选）", text: $viewModel.originalTransactionID)

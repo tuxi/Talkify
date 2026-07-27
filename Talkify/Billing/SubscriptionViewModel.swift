@@ -98,9 +98,9 @@ final class SubscriptionViewModel: ObservableObject {
 
     var restoreButtonTitle: String {
         if isRestoring {
-            return "恢复中..."
+            return TalkifyLocalized.string("billing.restoring")
         }
-        return publicPage?.restoreButtonTitle ?? "恢复购买"
+        return publicPage?.restoreButtonTitle ?? TalkifyLocalized.string("billing.restore_purchases")
     }
 
     var termsURLString: String {
@@ -112,11 +112,11 @@ final class SubscriptionViewModel: ObservableObject {
     }
 
     var primaryButtonTitle: String {
-        guard let selectedProduct else { return "继续" }
+        guard let selectedProduct else { return TalkifyLocalized.string("common.action.continue") }
         if purchasingProductCode == selectedProduct.productCode {
-            return "处理中..."
+            return TalkifyLocalized.string("common.loading")
         }
-        return "继续"
+        return TalkifyLocalized.string("common.action.continue")
     }
 
     var footerPriceText: String {
@@ -235,33 +235,6 @@ final class SubscriptionViewModel: ObservableObject {
             ))
         }
 
-//        if benefits.allowCustomAspectRatio {
-//            lines.append(.init(
-//                icon: "rectangle.compress.vertical",
-//                title: "自定义比例",
-//                detail: nil,
-//                highlighted: false
-//            ))
-//        }
-
-//        if benefits.dailyFreeTaskLimit > 0 {
-//            lines.append(.init(
-//                icon: "calendar",
-//                title: "每日免费次数 \(benefits.dailyFreeTaskLimit)",
-//                detail: nil,
-//                highlighted: false
-//            ))
-//        }
-
-//        if benefits.dailyDurationLimitSec > 0 {
-//            lines.append(.init(
-//                icon: "timer",
-//                title: "每日可生成时长 \(benefits.dailyDurationLimitSec) 秒",
-//                detail: nil,
-//                highlighted: false
-//            ))
-//        }
-
         if benefits.pointPackDiscountRate > 0, benefits.pointPackDiscountRate < 1 {
             lines.append(.init(
                 icon: "tag.fill",
@@ -322,8 +295,8 @@ final class SubscriptionViewModel: ObservableObject {
             try await AppStore.sync()
 #endif
             await billingManager.refreshAllIfNeeded(maxAge: 0)
-            feedbackMessage = "恢复购买已完成"
-            ToastContext.shared.show("恢复购买已完成", style: .success)
+            feedbackMessage = TalkifyLocalized.string("billing.restore_complete")
+            ToastContext.shared.show(TalkifyLocalized.string("billing.restore_complete"), style: .success)
         } catch {
             errorMessage = error.localizedDescription
         }
