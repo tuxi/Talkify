@@ -155,7 +155,6 @@ struct PointsLedgerView: View {
             filterBar
             content
         }
-        .background(pageBackground)
         .navigationTitle("点数明细")
 #if os(iOS)
         .navigationBarTitleDisplayMode(.inline)
@@ -170,9 +169,6 @@ struct PointsLedgerView: View {
         }
     }
     
-    var pageBackground: some View {
-        Color(hex: colorScheme == .dark ? "080A09" : "F3F7FB")
-    }
 }
 
 private extension PointsLedgerView {
@@ -259,7 +255,6 @@ private extension PointsLedgerView {
                             .foregroundColor(.secondary)
                         }
                         .padding(.vertical, 6)
-                        .listRowBackground(Color.systemBackground)
                     }
                 } header: {
                     Text(verbatim: String(format: TalkifyLocalized.string("billing.ledger.total_records"), String(viewModel.total)))
@@ -270,8 +265,7 @@ private extension PointsLedgerView {
 #else
             .listStyle(.insetGrouped)
 #endif
-            .scrollContentBackground(.hidden)
-            .background(Color.underPageBackground)
+
         }
     }
 }

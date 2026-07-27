@@ -8,6 +8,7 @@ import UIKit
 #elseif os(macOS)
 import AppKit
 #endif
+import CoreKit
 
 @MainActor
 final class TalkifyUserAssetPicker {

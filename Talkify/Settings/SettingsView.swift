@@ -22,7 +22,7 @@ public struct SettingsView: View {
     @Environment(\.horizontalSizeClass) private var horizontalSizeClass
     
     private let onClose: () -> Void
-    @State private var selection: SettingsSection = .general
+    @State private var selection: SettingsSection = .account
     @State private var searchText = ""
     
     @AppStorage("settings.defaultPermission") private var defaultPermission = true

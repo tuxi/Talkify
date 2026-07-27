@@ -19,6 +19,7 @@ struct TalkifyApp: App {
     private var container: AppContainer
     private let environmentManager: EnvironmentManager
     private let deviceManager = DeviceManager(keychainGroupId: keychainGroupID)
+    
     @State private var pendingWorkspaceItem: WorkspaceItem?
     
     init() {
@@ -85,6 +86,7 @@ struct TalkifyApp: App {
     }
     
     private func handleDeepLink(_ url: URL) -> OpenURLAction.Result {
+        let url = resolveAppURL(url)
         // talkify://workspace?path=/Users/xxx/my-project
         if url.scheme == "talkifyapp" || url.scheme == "talkify" || url.scheme == "codeagent" {
             // Share Extension 只负责唤醒主 App；ChatRootViewController 会从
@@ -106,6 +108,21 @@ struct TalkifyApp: App {
             return .handled // 阻止系统弹窗或外部浏览器打开
         }
         return .systemAction
+    }
+    
+    private func resolveAppURL(_ url: URL) -> URL {
+        guard url.scheme == "talkify" else { return url }
+
+        switch url.host {
+        case "user-agreement":
+            return AgreementURLs.terms
+        case "privacy-policy":
+            return AgreementURLs.privacy
+        case "ai-data-processing":
+            return AgreementURLs.AIData
+        default:
+            return url
+        }
     }
 }
 

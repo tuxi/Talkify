@@ -15,6 +15,9 @@ import AgentKit
 
 /// 每个设置分区的内容视图，独立提取以便在 NavigationStack 和 NavigationSplitView 中复用。
 struct SettingsDetailView: View {
+    
+    @Environment(\.openURL) private var openURL
+    
     @Environment(SettingsRouter.self) private var router
     @Environment(AgentManager.self) private var agentManager
     @Environment(UserManager.self) private var userManager
@@ -39,15 +42,6 @@ struct SettingsDetailView: View {
         #if os(iOS)
             .navigationBarTitleDisplayMode(.large)
         #endif
-            .toolbar {
-//                if section == .profile {
-//                    ToolbarItemGroup(placement: .primaryAction) {
-//                        Button(TalkifyLocalized.string("settings.share"), systemImage: "square.and.arrow.up") {}
-//                        Button(TalkifyLocalized.string("settings.private"), systemImage: "lock") {}
-//                        Button(TalkifyLocalized.string("common.action.edit"), systemImage: "pencil") {}
-//                    }
-//                }
-            }
             .alert(TalkifyLocalized.string("settings.delete_account_confirm"), isPresented: $showDeleteAccountAlert) {
                 Button(TalkifyLocalized.string("common.action.cancel"), role: .cancel) {}
                 Button(TalkifyLocalized.string("common.action.continue"), role: .destructive) {
@@ -77,9 +71,6 @@ struct SettingsDetailView: View {
         ScrollView(.vertical, content: {
             VStack(alignment: .leading, spacing: 0) {
                 switch section {
-                case .general:
-                    generalSettings
-                        .navigationTitle(TalkifyLocalized.string("settings.item.general"))
                 case .profile:
                     profileSettings
                         .navigationTitle(TalkifyLocalized.string("settings.item.profile"))
@@ -89,9 +80,12 @@ struct SettingsDetailView: View {
                 case .account:
                     accountSettings
                         .navigationTitle(TalkifyLocalized.string("settings.item.account"))
-                default:
-                    unavailableSettings
-                        .navigationTitle(section.title)
+                case .support:
+                    supportSettings
+                        .navigationTitle(TalkifyLocalized.string("settings.item.support"))
+                case .about:
+                    aboutSettings
+                        .navigationTitle(TalkifyLocalized.string("settings.item.about"))
                 }
             }
             .frame(maxWidth: 780, alignment: .leading)
@@ -436,8 +430,194 @@ struct SettingsDetailView: View {
         }
     }
     
+    // MARK: - Support & Help
+
+    private var supportSettings: some View {
+        VStack(alignment: .leading, spacing: 0) {
+            // Hero card
+            supportHeroCard
+                .padding(.bottom, 44)
+
+            // Contact section
+            sectionTitle(TalkifyLocalized.string("settings.support.contact_section"))
+            settingsCard {
+                supportLinkRow(
+                    icon: "paperplane",
+                    iconTint: Color(hex: "2E7CF6"),
+                    title: TalkifyLocalized.string("settings.support.contact_email"),
+                    subtitle: "support@talkify.ai"
+                ) {
+                    openURL(URL(string: "mailto:support@talkify.ai")!)
+                }
+                .overlay(alignment: .bottom) { Divider().padding(.leading, 30) }
+
+                supportLinkRow(
+                    icon: "bubble.left.and.exclamationmark.bubble.right",
+                    iconTint: Color(hex: "0F766E"),
+                    title: TalkifyLocalized.string("settings.support.feedback"),
+                    subtitle: TalkifyLocalized.string("settings.support.feedback_desc")
+                ) {
+                    openURL(URL(string: "mailto:feedback@talkify.ai")!)
+                }
+            }
+
+            sectionTitle(TalkifyLocalized.string("settings.support.help_section"))
+                .padding(.top, 12)
+            settingsCard {
+                supportLinkRow(
+                    icon: "sparkles.rectangle.stack",
+                    iconTint: Color(hex: "8B5CF6"),
+                    title: TalkifyLocalized.string("settings.support.user_guide"),
+                    subtitle: TalkifyLocalized.string("settings.support.user_guide_desc"),
+                    trailingText: TalkifyLocalized.string("settings.coming_soon")
+                ) { }
+                .overlay(alignment: .bottom) { Divider().padding(.leading, 30) }
+
+                supportLinkRow(
+                    icon: "play.rectangle.on.rectangle",
+                    iconTint: Color(hex: "F59E0B"),
+                    title: TalkifyLocalized.string("settings.support.beginner_guide"),
+                    subtitle: TalkifyLocalized.string("settings.support.beginner_guide_desc"),
+                    trailingText: TalkifyLocalized.string("settings.coming_soon")
+                ) { }
+            }
+        }
+    }
+
+    private var supportHeroCard: some View {
+        HStack(alignment: .top, spacing: 14) {
+            VStack(alignment: .leading, spacing: 6) {
+                Text(TalkifyLocalized.string("settings.item.support"))
+                    .font(.system(size: 24, weight: .bold))
+                    .foregroundColor(.primary)
+
+                Text(TalkifyLocalized.string("settings.support.hero_desc"))
+                    .font(.system(size: 13))
+                    .foregroundColor(.secondary)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+
+            Spacer()
+
+            ZStack {
+                RoundedRectangle(cornerRadius: 16, style: .continuous)
+                    .fill(Color.accentColor.opacity(0.10))
+                    .frame(width: 52, height: 52)
+
+                Image(systemName: "questionmark.bubble")
+                    .font(.system(size: 22, weight: .semibold))
+                    .foregroundColor(Color.accentColor)
+            }
+        }
+        .padding(18)
+        .cardStyle()
+    }
+
+    // MARK: - About
+
+    private var aboutSettings: some View {
+        VStack(alignment: .leading, spacing: 0) {
+            // Hero card
+            aboutHeroCard
+                .padding(.bottom, 44)
+
+            // Policy section
+            sectionTitle(TalkifyLocalized.string("settings.about.policy_section"))
+            settingsCard {
+                supportLinkRow(
+                    icon: "doc.plaintext",
+                    iconTint: Color(hex: "64748B"),
+                    title: TalkifyLocalized.string("settings.about.terms_of_service"),
+                    subtitle: TalkifyLocalized.string("settings.about.terms_of_service_desc")
+                ) {
+                    openURL(AgreementURLs.terms)
+                }
+                .overlay(alignment: .bottom) { Divider().padding(.leading, 30) }
+
+                supportLinkRow(
+                    icon: "hand.raised",
+                    iconTint: Color(hex: "64748B"),
+                    title: TalkifyLocalized.string("settings.about.privacy_policy"),
+                    subtitle: TalkifyLocalized.string("settings.about.privacy_policy_desc")
+                ) {
+                    openURL(AgreementURLs.privacy)
+                }
+                .overlay(alignment: .bottom) { Divider().padding(.leading, 30) }
+
+                supportLinkRow(
+                    icon: "sparkles",
+                    iconTint: Color.accentColor,
+                    title: TalkifyLocalized.string("settings.about.ai_data_processing"),
+                    subtitle: TalkifyLocalized.string("settings.about.ai_data_processing_desc")
+                ) {
+                    openURL(AgreementURLs.AIData)
+                }
+                .overlay(alignment: .bottom) { Divider().padding(.leading, 30) }
+
+                supportLinkRow(
+                    icon: "exclamationmark.shield",
+                    iconTint: Color(hex: "64748B"),
+                    title: TalkifyLocalized.string("settings.about.content_policy"),
+                    subtitle: TalkifyLocalized.string("settings.about.content_policy_desc")
+                ) {
+                    openURL(AgreementURLs.content)
+                }
+                .overlay(alignment: .bottom) { Divider().padding(.leading, 30) }
+
+                supportLinkRow(
+                    icon: "function",
+                    iconTint: Color(hex: "64748B"),
+                    title: TalkifyLocalized.string("settings.about.algorithm_disclosure"),
+                    subtitle: TalkifyLocalized.string("settings.about.algorithm_disclosure_desc")
+                ) {
+                    openURL(AgreementURLs.algorithmDisclosure)
+                }
+            }
+
+            // Version section
+            sectionTitle(TalkifyLocalized.string("settings.about.version_section"))
+                .padding(.top, 12)
+            settingsCard {
+                versionInfoRow(title: TalkifyLocalized.string("settings.about.app_version"), value: shortVersionText)
+                    .overlay(alignment: .bottom) { Divider().padding(.leading, 30) }
+                versionInfoRow(title: TalkifyLocalized.string("settings.about.build_number"), value: buildVersionText)
+                    .overlay(alignment: .bottom) { Divider().padding(.leading, 30) }
+                versionInfoRow(title: TalkifyLocalized.string("settings.about.full_version"), value: fullVersionText)
+            }
+        }
+    }
+
+    private var aboutHeroCard: some View {
+        HStack(alignment: .top, spacing: 14) {
+            VStack(alignment: .leading, spacing: 6) {
+                Text(TalkifyLocalized.string("settings.item.about"))
+                    .font(.system(size: 24, weight: .bold))
+                    .foregroundColor(.primary)
+
+                Text(TalkifyLocalized.string("settings.about.hero_desc"))
+                    .font(.system(size: 13))
+                    .foregroundColor(.secondary)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+
+            Spacer()
+
+            ZStack {
+                RoundedRectangle(cornerRadius: 16, style: .continuous)
+                    .fill(Color.accentColor.opacity(0.10))
+                    .frame(width: 52, height: 52)
+
+                Image(systemName: "info.circle")
+                    .font(.system(size: 22, weight: .semibold))
+                    .foregroundColor(Color.accentColor)
+            }
+        }
+        .padding(18)
+        .cardStyle()
+    }
+
     // MARK: - Unavailable
-    
+
     private var unavailableSettings: some View {
         VStack(alignment: .leading, spacing: 12) {
             //            settingsTitle(section.title)
@@ -611,7 +791,7 @@ private struct DeleteAccountConfirmationSheet: View {
 extension SettingsNavigationDestination {
     var section: SettingsSection {
         if case .detail(let section) = self { return section }
-        return .general
+        return .account
     }
 }
 
@@ -765,6 +945,137 @@ private struct ProfileKeyValue: View {
     var body: some View {
         HStack { Text(title).foregroundStyle(.secondary); Spacer(); Text(value).fontWeight(.medium) }
             .font(.system(size: 15))
+    }
+}
+
+// MARK: - Support/About Row Components
+
+private struct SupportLinkRow: View {
+    let icon: String
+    let iconTint: Color
+    let title: String
+    let subtitle: String?
+    let trailingText: String?
+    let action: () -> Void
+
+    init(
+        icon: String,
+        iconTint: Color,
+        title: String,
+        subtitle: String? = nil,
+        trailingText: String? = nil,
+        action: @escaping () -> Void
+    ) {
+        self.icon = icon
+        self.iconTint = iconTint
+        self.title = title
+        self.subtitle = subtitle
+        self.trailingText = trailingText
+        self.action = action
+    }
+
+    var body: some View {
+        Button(action: action) {
+            HStack(spacing: 14) {
+                ZStack {
+                    RoundedRectangle(cornerRadius: 12, style: .continuous)
+                        .fill(iconTint.opacity(0.12))
+                        .frame(width: 38, height: 38)
+
+                    Image(systemName: icon)
+                        .font(.system(size: 17, weight: .semibold))
+                        .foregroundColor(iconTint)
+                }
+
+                VStack(alignment: .leading, spacing: 4) {
+                    Text(title)
+                        .font(.system(size: 15, weight: .semibold))
+                        .foregroundColor(.primary)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+
+                    if let subtitle {
+                        Text(subtitle)
+                            .font(.system(size: 12))
+                            .foregroundColor(.secondary)
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                    }
+                }
+
+                Spacer(minLength: 8)
+
+                if let trailingText {
+                    Text(trailingText)
+                        .font(.system(size: 12, weight: .medium))
+                        .foregroundColor(.secondary)
+                }
+
+                Image(systemName: "chevron.right")
+                    .font(.system(size: 12, weight: .semibold))
+                    .foregroundColor(.secondary.opacity(0.8))
+            }
+            .padding(.horizontal, 16)
+            .padding(.vertical, 14)
+            .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
+    }
+}
+
+private struct VersionInfoRow: View {
+    let title: String
+    let value: String
+
+    var body: some View {
+        HStack(alignment: .center, spacing: 20) {
+            VStack(alignment: .leading, spacing: 5) {
+                Text(title).font(.system(size: 15, weight: .semibold))
+            }
+            Spacer(minLength: 24)
+            Text(value)
+                .font(.system(size: 13, weight: .semibold))
+                .foregroundColor(.secondary)
+                .multilineTextAlignment(.trailing)
+        }
+        .padding(.horizontal, 30)
+        .padding(.vertical, 18)
+    }
+}
+
+// MARK: - Version info helpers
+
+private extension SettingsDetailView {
+    var shortVersionText: String {
+        Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "--"
+    }
+
+    var buildVersionText: String {
+        Bundle.main.infoDictionary?["CFBundleVersion"] as? String ?? "--"
+    }
+
+    var fullVersionText: String {
+        "v\(shortVersionText) (\(buildVersionText))"
+    }
+
+    func supportLinkRow(
+        icon: String,
+        iconTint: Color,
+        title: String,
+        subtitle: String? = nil,
+        trailingText: String? = nil,
+        action: @escaping () -> Void
+    ) -> some View {
+        SupportLinkRow(
+            icon: icon,
+            iconTint: iconTint,
+            title: title,
+            subtitle: subtitle,
+            trailingText: trailingText,
+            action: action
+        )
+    }
+
+    func versionInfoRow(title: String, value: String) -> some View {
+        VersionInfoRow(title: title, value: value)
     }
 }
 
