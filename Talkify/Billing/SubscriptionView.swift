@@ -71,8 +71,8 @@ struct SubscriptionView: View {
                 }
                 .sheet(isPresented: $showPaidServiceAgreement) {
                     PaidServiceAgreementSheet(
-                        title: "付费服务协议",
-                        content: "为保障您的合法权益，请同意[《Talkify 付费服务协议》（含自动续费条款）](dreamai://vip-protocol)",
+                        title: TalkifyLocalized.string("billing.paid_service_agreement"),
+                        content: TalkifyLocalized.string("billing.subscription.paid_agreement_full"),
                         onAgree: {
                             showPaidServiceAgreement = false
                             Task {
@@ -403,7 +403,7 @@ private extension SubscriptionView {
     var padProductSection: some View {
         VStack(spacing: 12) {
             HStack {
-                Text("选择会员方案")
+                Text(TalkifyLocalized.string("billing.subscription.choose_plan_title"))
                     .font(.system(size: 18, weight: .bold))
                     .foregroundColor(heroTitleColor)
                 
@@ -854,14 +854,14 @@ private struct CompactSubscriptionProductCard: View {
                         .font(.system(size: 13, weight: .semibold))
                         .foregroundColor(isSelected ? selectedAccent : subtitleColor)
                     
-                    Text(isSelected ? "已选择" : "选择")
+                    Text(isSelected ? TalkifyLocalized.string("billing.subscription.selected") : TalkifyLocalized.string("billing.subscription.select"))
                         .font(.system(size: 11, weight: .semibold))
                         .foregroundColor(isSelected ? selectedAccent : subtitleColor)
                     
                     Spacer()
                     
                     if isRecommended {
-                        Text("推荐")
+                        Text(TalkifyLocalized.string("billing.subscription.recommended"))
                             .font(.system(size: 9, weight: .bold))
                             .foregroundColor(recommendedTextColor)
                             .padding(.horizontal, 6)
@@ -1045,7 +1045,7 @@ private struct PadSubscriptionProductCard: View {
                     Spacer(minLength: 8)
                     
                     if isRecommended {
-                        Text("推荐")
+                        Text(TalkifyLocalized.string("billing.subscription.recommended"))
                             .font(.system(size: 10, weight: .bold))
                             .foregroundColor(.white)
                             .padding(.horizontal, 8)
@@ -1072,7 +1072,7 @@ private struct PadSubscriptionProductCard: View {
                     Image(systemName: isSelected ? "checkmark.circle.fill" : "circle")
                         .font(.system(size: 15, weight: .semibold))
                     
-                    Text(isSelected ? "已选择" : "选择")
+                    Text(isSelected ? TalkifyLocalized.string("billing.subscription.selected") : TalkifyLocalized.string("billing.subscription.select"))
                         .font(.system(size: 12, weight: .bold))
                 }
                 .foregroundColor(isSelected ? selectedAccent : subtitleColor)
@@ -1196,7 +1196,7 @@ private extension SubscriptionView {
     
     var footerSection: some View {
         AgreementRow(isAgreed: $viewModel.isAgreement, content:
-                        "为保障您的合法权益，请同意[《Talkify 付费服务协议》（含自动续费条款）](dreamai://vip-protocol)", openURL: { url in
+                        TalkifyLocalized.string("billing.subscription.paid_agreement_full"), openURL: { url in
             if url.host() == "vip-protocol" {
                 router.navigate(to: .openURL(AgreementURLs.paid))
             }
@@ -1233,7 +1233,7 @@ private extension SubscriptionView {
     func floatingMessageOverlay(bottomInset: CGFloat) -> some View {
         if let errorMessage = viewModel.errorMessage, !errorMessage.isEmpty {
             InlineFloatingMessageCard(
-                title: "购买提示",
+                title: TalkifyLocalized.string("billing.subscription.purchase_tip"),
                 message: errorMessage,
                 tint: Color(hex: "D35454"),
                 colorScheme: colorScheme
@@ -1242,7 +1242,7 @@ private extension SubscriptionView {
             .padding(.bottom, bottomInset + 48)
         } else if let feedbackMessage = viewModel.feedbackMessage {
             InlineFloatingMessageCard(
-                title: "操作结果",
+                title: TalkifyLocalized.string("billing.subscription.operation_result"),
                 message: feedbackMessage,
                 tint: Color(hex: "2E9E5B"),
                 colorScheme: colorScheme
@@ -1427,7 +1427,7 @@ private struct SubscriptionProductCard: View {
                     Spacer()
                     
                     if isRecommended {
-                        Text("推荐")
+                        Text(TalkifyLocalized.string("billing.subscription.recommended"))
                             .font(.system(size: 11, weight: .bold))
                             .foregroundColor(.white)
                             .padding(.horizontal, 8)
@@ -1454,7 +1454,7 @@ private struct SubscriptionProductCard: View {
                 Spacer(minLength: 0)
                 
                 HStack {
-                    Text(isSelected ? "已选择" : "点击选择")
+                    Text(isSelected ? TalkifyLocalized.string("billing.subscription.selected") : TalkifyLocalized.string("billing.subscription.tap_to_select"))
                         .font(.system(size: 13, weight: .semibold))
                         .foregroundColor(isSelected ? .white : Color.accentColor)
                     
@@ -1511,7 +1511,7 @@ private struct SubscriptionPurchaseSuccessSheet: View {
                 .foregroundColor(Color(hex: "FF8A00"))
             
             VStack(spacing: 8) {
-                Text("订阅开通成功")
+                Text(TalkifyLocalized.string("billing.subscription.activated"))
                     .font(.system(size: 24, weight: .bold))
                     .foregroundColor(.primary)
                 
@@ -1521,16 +1521,16 @@ private struct SubscriptionPurchaseSuccessSheet: View {
             }
             
             VStack(spacing: 12) {
-                resultRow(title: "当前余额", value: "\(state.availablePoints.cleanDisplay) 点")
-                resultRow(title: "订阅状态", value: state.subscriptionActive ? "已生效" : "未生效")
+                resultRow(title: TalkifyLocalized.string("billing.subscription.current_balance"), value: String(format: TalkifyLocalized.string("billing.points_value"), state.availablePoints.cleanDisplay))
+                resultRow(title: TalkifyLocalized.string("billing.subscription_status"), value: state.subscriptionActive ? TalkifyLocalized.string("billing.subscription.effective") : TalkifyLocalized.string("billing.subscription.not_effective"))
                 
                 if let currentSubscription = state.currentSubscription, !currentSubscription.isEmpty {
-                    resultRow(title: "当前订阅", value: currentSubscription)
+                    resultRow(title: TalkifyLocalized.string("billing.subscription.current_subscription_label"), value: currentSubscription)
                 }
             }
             
             Button(action: onClose) {
-                Text("开始体验")
+                Text(TalkifyLocalized.string("billing.subscription.start_experience"))
                     .font(.system(size: 15, weight: .semibold))
                     .foregroundColor(.white)
                     .frame(maxWidth: .infinity)
@@ -1636,7 +1636,7 @@ private extension SubscriptionView {
                 ProgressView()
                     .controlSize(.small)
                 
-                Text("正在加载订阅方案…")
+                Text(TalkifyLocalized.string("billing.subscription.loading_plans"))
                     .font(.system(size: 13, weight: .medium))
                     .foregroundColor(heroSubtitleColor)
             }
@@ -1775,7 +1775,7 @@ struct PaidServiceAgreementSheet: View {
 
             VStack(spacing: 10) {
                 Button(action: onAgree) {
-                    Text("同意并购买")
+                    Text(TalkifyLocalized.string("billing.subscription.agree_and_purchase"))
                         .font(.system(size: 16, weight: .bold))
                         .foregroundColor(Color(hex: "061108"))
                         .frame(maxWidth: .infinity)
@@ -1794,7 +1794,7 @@ struct PaidServiceAgreementSheet: View {
                 .buttonStyle(.plain)
 
                 Button(action: onCancel) {
-                    Text("取消")
+                    Text(TalkifyLocalized.string("common.action.cancel"))
                         .font(.system(size: 16, weight: .semibold))
                         .foregroundColor(.primary)
                         .frame(maxWidth: .infinity)

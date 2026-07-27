@@ -40,13 +40,13 @@ struct SettingsDetailView: View {
             .navigationBarTitleDisplayMode(.large)
         #endif
             .toolbar {
-                if section == .profile {
-                    ToolbarItemGroup(placement: .primaryAction) {
-                        Button(TalkifyLocalized.string("settings.share"), systemImage: "square.and.arrow.up") {}
-                        Button(TalkifyLocalized.string("settings.private"), systemImage: "lock") {}
-                        Button(TalkifyLocalized.string("common.action.edit"), systemImage: "pencil") {}
-                    }
-                }
+//                if section == .profile {
+//                    ToolbarItemGroup(placement: .primaryAction) {
+//                        Button(TalkifyLocalized.string("settings.share"), systemImage: "square.and.arrow.up") {}
+//                        Button(TalkifyLocalized.string("settings.private"), systemImage: "lock") {}
+//                        Button(TalkifyLocalized.string("common.action.edit"), systemImage: "pencil") {}
+//                    }
+//                }
             }
             .alert(TalkifyLocalized.string("settings.delete_account_confirm"), isPresented: $showDeleteAccountAlert) {
                 Button(TalkifyLocalized.string("common.action.cancel"), role: .cancel) {}
@@ -364,7 +364,7 @@ struct SettingsDetailView: View {
             if let usage = agentManager.usage {
                 sectionTitle(TalkifyLocalized.string("settings.current_plan"))
                 settingsCard {
-                    SettingsValueRow(title: "\(usage.tier.rawValue.capitalized) 套餐", description: subscriptionDescription(for: usage)) {
+                    SettingsValueRow(title: String(format: TalkifyLocalized.string("settings.tier_plan_format"), usage.tier.rawValue.capitalized), description: subscriptionDescription(for: usage)) {
                         Button {
                             if usage.tier == .free {
                                 router.presentSheet(.subscription)
@@ -388,7 +388,7 @@ struct SettingsDetailView: View {
                     sectionTitle(TalkifyLocalized.string("settings.subscription_cycle"))
                     settingsCard {
                         if let resetsAt = cycle.resetsAt, !resetsAt.isEmpty {
-                            SettingsValueRow(title: TalkifyLocalized.string("settings.subscription_cycle_usage"), description: String(format: TalkifyLocalized.string("settings.subscription_cycle_until"), \(formattedResetDate(resetsAt))") {
+                            SettingsValueRow(title: TalkifyLocalized.string("settings.subscription_cycle_usage"), description: String(format: TalkifyLocalized.string("settings.subscription_cycle_until"), formattedResetDate(resetsAt))) {
                                 Text(String(format: TalkifyLocalized.string("settings.cycle_remaining_format"), formatted(max(cycle.unitsLimit - cycle.unitsUsed, 0)), formatted(cycle.unitsLimit)))
                                     .foregroundStyle(.secondary)
                             }
@@ -398,7 +398,6 @@ struct SettingsDetailView: View {
                                     .foregroundStyle(.secondary)
                             }
                         }
-                        
                     }
                 }
                 
@@ -690,7 +689,7 @@ private struct WeeklyQuotaRow: View {
                 Text(TalkifyLocalized.string("settings.weekly_limit"))
                     .font(.system(size: 17, weight: .semibold))
                 if let resetsAt = usage.resetsAt, !resetsAt.isEmpty {
-                    Text("重置\(formattedDate(resetsAt))")
+                    Text(String(format: TalkifyLocalized.string("settings.reset_on"), formattedDate(resetsAt)))
                         .font(.system(size: 15))
                         .foregroundStyle(.secondary)
                 }

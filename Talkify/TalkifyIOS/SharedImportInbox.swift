@@ -7,6 +7,7 @@
 
 #if os(iOS)
 import Foundation
+import CoreKit
 
 /// 主 App 与 Share Extension 之间的 App Group Inbox 协议。
 ///

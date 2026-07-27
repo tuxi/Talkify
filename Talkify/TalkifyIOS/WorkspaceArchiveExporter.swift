@@ -7,6 +7,7 @@
 
 #if os(iOS)
 import Foundation
+import CoreKit
 
 /// 将当前工作区导出为标准 ZIP32（Store 模式）。
 ///

@@ -9,6 +9,7 @@
 import Foundation
 import AgentKit
 import FileViewerKit
+import CoreKit
 
 // MARK: - Workspace File Node
 

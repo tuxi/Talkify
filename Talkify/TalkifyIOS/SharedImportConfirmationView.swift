@@ -7,6 +7,7 @@
 
 #if os(iOS)
 import SwiftUI
+import CoreKit
 
 struct SharedImportConfirmationView: View {
     @Environment(\.dismiss) private var dismiss

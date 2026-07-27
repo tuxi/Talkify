@@ -85,7 +85,7 @@ final class PointsCenterViewModel: ObservableObject {
 
     var currentSubscriptionText: String {
         guard let currentSubscription = wallet?.currentSubscription else {
-            return wallet?.subscriptionActive == true ? TalkifyLocalized.string("billing.subscription_active_status") : TalkifyLocalized.string("billing.no_subscription")
+            return wallet?.subscriptionActive == true ? TalkifyLocalized.string("billing.subscription.active_status") : TalkifyLocalized.string("billing.no_subscription")
         }
         
         guard let subscriptionProducts = self.billingManager.products?.subscriptionProducts else {
