@@ -47,7 +47,7 @@ struct PointsCenterView: View {
 
             bottomPurchaseBar
         }
-        .navigationTitle("点数中心")
+        .navigationTitle(TalkifyLocalized.string("billing.points_center"))
         .toolbar {
             NavigationLink {
                 PointsLedgerView(
@@ -87,8 +87,8 @@ struct PointsCenterView: View {
         }
         .sheet(isPresented: $showPaidServiceAgreement) {
             PaidServiceAgreementSheet(
-                title: "付费服务协议",
-                content: "为保障您的合法权益，请同意[《Talkify 付费服务协议》](talkify://paid-protocol)",
+                title: TalkifyLocalized.string("billing.paid_service_agreement"),
+                content: TalkifyLocalized.string("billing.paid_agreement_content"),
                 onAgree: {
                     showPaidServiceAgreement = false
                     Task {
@@ -187,17 +187,17 @@ private extension PointsCenterView {
 
             HStack(spacing: 12) {
                 checkInMetricChip(
-                    title: "今日奖励",
+                    title: TalkifyLocalized.string("billing.today_reward"),
                     value: "\(viewModel.checkInRewardText) 点",
                     icon: "sparkles"
                 )
                 checkInMetricChip(
-                    title: "服务端日期",
+                    title: TalkifyLocalized.string("billing.server_date"),
                     value: viewModel.checkInDateText,
                     icon: "calendar"
                 )
                 checkInMetricChip(
-                    title: "当前点数",
+                    title: TalkifyLocalized.string("billing.current_points"),
                     value: viewModel.checkInAvailablePointsText,
                     icon: "bolt.fill"
                 )
@@ -308,11 +308,11 @@ private extension PointsCenterView {
                 .padding(.bottom, 44)
 
                 HStack(spacing: 0) {
-                    walletMetricBlock(title: "冻结点数", value: viewModel.frozenPointsText)
+                    walletMetricBlock(title: TalkifyLocalized.string("billing.frozen_points"), value: viewModel.frozenPointsText)
                     headerDivider
-                    walletMetricBlock(title: "折扣系数", value: viewModel.pointDiscountText)
+                    walletMetricBlock(title: TalkifyLocalized.string("billing.discount_coefficient"), value: viewModel.pointDiscountText)
                     headerDivider
-                    walletMetricBlock(title: "订阅状态", value: viewModel.currentSubscriptionText)
+                    walletMetricBlock(title: TalkifyLocalized.string("billing.subscription_status"), value: viewModel.currentSubscriptionText)
 
                 }
                 .padding(.vertical, 22)
@@ -408,10 +408,10 @@ private extension PointsCenterView {
     var pointsPurchaseSection: some View {
         VStack(alignment: .leading, spacing: 18) {
             sectionHeader(
-                title: "请选择点数购买额度",
+                title: TalkifyLocalized.string("billing.select_points"),
                 subtitle: viewModel.hasPurchasableProducts
                     ? ""
-                    : "当前地区暂不可购买"
+                    : TalkifyLocalized.string("billing.unavailable_in_region")
             )
 
             if viewModel.isLoading && viewModel.pointPackProducts.isEmpty {
@@ -607,7 +607,7 @@ private extension PointsCenterView {
             .buttonStyle(.plain)
             .disabled(viewModel.selectedPointPackProduct == nil)
             
-            AgreementRow(isAgreed: $viewModel.isAgreement, content: "支付即代表同意，[《Talkify 付费服务协议》](talkify://paid-protocol)", openURL: { url in
+            AgreementRow(isAgreed: $viewModel.isAgreement, content: TalkifyLocalized.string("billing.payment_agreement"), openURL: { url in
                 if url.host() == "paid-protocol" {
                     openURL = AgreementURLs.paid
                 }
@@ -660,7 +660,7 @@ private extension PointsCenterView {
     var restorePurchaseCard: some View {
         VStack(alignment: .leading, spacing: 16) {
             sectionHeader(
-                title: "同步购买记录",
+                title: TalkifyLocalized.string("billing.sync_purchase_records"),
                 subtitle: "用于补发尚未入账的 App Store 交易；消耗型点数包不能像订阅一样恢复"
             )
 

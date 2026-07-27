@@ -375,19 +375,19 @@ enum WorkspaceArchiveExporter {
         var errorDescription: String? {
             switch self {
             case .workspaceUnavailable:
-                return "当前工作区不可用。"
+                return TalkifyLocalized.string("workspace.error.unavailable")
             case .cannotCreateArchive:
-                return "无法创建导出文件。"
+                return TalkifyLocalized.string("workspace.error.cannot_create_export")
             case .cannotReadWorkspace:
-                return "无法读取当前工作区。"
+                return TalkifyLocalized.string("workspace.error.cannot_read")
             case .tooManyItems:
-                return "工作区文件数量超过 ZIP 导出限制。"
+                return TalkifyLocalized.string("workspace.error.zip_limit")
             case .itemTooLarge(let name):
-                return "文件 \(name) 超过 4 GB，暂时无法导出。"
+                return String(format: TalkifyLocalized.string("workspace.error.file_too_large"), name)
             case .archiveTooLarge:
-                return "工作区超过 4 GB，暂时无法导出。"
+                return TalkifyLocalized.string("workspace.error.workspace_too_large")
             case .pathTooLong:
-                return "工作区中存在过长的文件路径。"
+                return TalkifyLocalized.string("workspace.error.long_path")
             }
         }
     }

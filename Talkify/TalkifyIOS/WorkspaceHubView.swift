@@ -172,16 +172,16 @@ struct WorkspaceHubView: View {
             allowsMultipleSelection: true,
             onCompletion: handleWorkspaceContentImport
         )
-        .alert("新建工作区", isPresented: $isNewWorkspacePresented) {
-            TextField("工作区名称", text: $newWorkspaceName)
-            Button("取消", role: .cancel) { }
-            Button("创建") { createWorkspace() }
+        .alert(TalkifyLocalized.string("workspace.new_workspace"), isPresented: $isNewWorkspacePresented) {
+            TextField(TalkifyLocalized.string("share.workspace_name"), text: $newWorkspaceName)
+            Button(TalkifyLocalized.string("common.action.cancel"), role: .cancel) { }
+            Button(TalkifyLocalized.string("workspace.create")) { createWorkspace() }
                 .disabled(newWorkspaceName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
         } message: {
-            Text("将在 App 的 Documents 中创建一个空白工作区。")
+            Text(TalkifyLocalized.string("workspace.create_blank_hint"))
         }
-        .alert("导入工作区", isPresented: $isImportNamePresented) {
-            TextField("工作区名称", text: $importName)
+        .alert(TalkifyLocalized.string("workspace.import_workspace"), isPresented: $isImportNamePresented) {
+            TextField(TalkifyLocalized.string("share.workspace_name"), text: $importName)
             Button("取消", role: .cancel) { pendingImportURL = nil }
             Button("导入") { importWorkspace() }
                 .disabled(importName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)

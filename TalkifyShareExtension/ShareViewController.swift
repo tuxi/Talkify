@@ -89,21 +89,21 @@ private struct ShareImportView: View {
                         Image(systemName: "checkmark.circle.fill")
                             .font(.system(size: 42))
                             .foregroundStyle(.green)
-                        Text("资料已接收")
+                        Text(TalkifyLocalized.string("share.materials_received"))
                             .font(.title2.bold())
-                        Text("当前来源 App 不允许直接打开 CodeAgent。下次打开 Talkify 时，我们会提醒你创建工作区并开始对话。")
+                        Text(TalkifyLocalized.string("share.cannot_open_agent"))
                             .font(.subheadline)
                             .foregroundStyle(.secondary)
                             .multilineTextAlignment(.center)
                             .fixedSize(horizontal: false, vertical: true)
-                        Button("完成", action: onFinish)
+                        Button(TalkifyLocalized.string("common.action.done"), action: onFinish)
                             .buttonStyle(.borderedProminent)
                     }
                     .padding(28)
                 } else if isPreparing {
                     VStack(spacing: 12) {
                         ProgressView()
-                        Text("正在接收资料…")
+                        Text(TalkifyLocalized.string("share.receiving_materials"))
                             .font(.subheadline)
                             .foregroundStyle(.secondary)
                     }
@@ -114,22 +114,22 @@ private struct ShareImportView: View {
                                 Image(systemName: "folder.badge.plus")
                                     .font(.system(size: 26, weight: .semibold))
                                     .foregroundStyle(Color.accentColor)
-                                Text("创建一个工作区")
+                                Text(TalkifyLocalized.string("share.create_workspace"))
                                     .font(.system(size: 23, weight: .bold, design: .rounded))
-                                Text("资料会安全复制到 CodeAgent。打开 App 后，你只需补充想让它完成的任务。")
+                                Text(TalkifyLocalized.string("share.workspace_desc"))
                                     .font(.subheadline)
                                     .foregroundStyle(.secondary)
                                     .fixedSize(horizontal: false, vertical: true)
                             }
 
-                            TextField("工作区名称", text: $workspaceName)
+                            TextField(TalkifyLocalized.string("share.workspace_name"), text: $workspaceName)
                                 .textFieldStyle(.plain)
                                 .padding(.horizontal, 13)
                                 .frame(minHeight: 46)
                                 .background(Color.primary.opacity(0.06), in: RoundedRectangle(cornerRadius: 13))
 
                             VStack(alignment: .leading, spacing: 7) {
-                                Text("包含 \(request.items.count) 项")
+                                Text(String(format: TalkifyLocalized.string("share.containing_items"), String(request.items.count)))
                                     .font(.caption.weight(.semibold))
                                     .foregroundStyle(.secondary)
                                 ForEach(Array(request.items.enumerated()), id: \.offset) { _, item in
@@ -149,7 +149,7 @@ private struct ShareImportView: View {
                             Button(action: continueInApp) {
                                 HStack(spacing: 8) {
                                     if isContinuing { ProgressView().tint(.white) }
-                                    Label("在 CodeAgent 中继续", systemImage: "arrow.up.forward.app.fill")
+                                    Label(TalkifyLocalized.string("share.continue_in_agent"), systemImage: "arrow.up.forward.app.fill")
                                 }
                                     .font(.headline)
                                     .foregroundStyle(.white)
@@ -163,18 +163,18 @@ private struct ShareImportView: View {
                     }
                 } else {
                     ContentUnavailableView(
-                        "无法接收资料",
+                        TalkifyLocalized.string("share.cannot_receive"),
                         systemImage: "exclamationmark.triangle",
-                        description: Text(errorMessage ?? "来源 App 没有提供可读取的文件。")
+                        description: Text(errorMessage ?? TalkifyLocalized.string("share.no_readable_files"))
                     )
                 }
             }
-            .navigationTitle("发送到 CodeAgent")
+            .navigationTitle(TalkifyLocalized.string("share.send_to_agent"))
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
                     if !requiresManualOpen {
-                        Button("取消") { onCancel(request) }
+                        Button(TalkifyLocalized.string("common.action.cancel")) { onCancel(request) }
                             .disabled(isContinuing)
                     }
                 }
@@ -187,7 +187,7 @@ private struct ShareImportView: View {
     private func prepare() async {
         guard !providers.isEmpty else {
             isPreparing = false
-            errorMessage = "没有找到可导入的文件。"
+            errorMessage = TalkifyLocalized.string("share.no_files_found")
             return
         }
         do {
@@ -269,12 +269,12 @@ private enum ShareInboxWriter {
                     ? name
                     : (name as NSString).deletingPathExtension
             } else {
-                suggestedName = "共享资料"
+                suggestedName = TalkifyLocalized.string("share.shared_materials")
             }
             let request = Request(
                 version: 1,
                 id: id,
-                suggestedName: suggestedName.isEmpty ? "共享资料" : suggestedName,
+                suggestedName: suggestedName.isEmpty ? TalkifyLocalized.string("share.shared_materials") : suggestedName,
                 createdAt: .now,
                 items: items
             )
@@ -398,11 +398,11 @@ private enum ShareImportError: LocalizedError {
     var errorDescription: String? {
         switch self {
         case .appGroupUnavailable:
-            return "无法访问 CodeAgent 的共享空间。"
+            return TalkifyLocalized.string("share.cannot_access_shared")
         case .noReadableItems:
-            return "来源 App 没有提供可读取的文件。"
+            return TalkifyLocalized.string("share.no_readable_files")
         case .cannotOpenApp:
-            return "资料已接收，请手动打开 Talkify 继续。"
+            return TalkifyLocalized.string("share.materials_received_reminder")
         }
     }
 }

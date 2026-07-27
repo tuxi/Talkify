@@ -170,7 +170,7 @@ final class SubscriptionCenterViewModel: ObservableObject {
     }
     
     var currentSubscriptionName: String {
-        guard let currentSubscription = wallet?.currentSubscription else { return "未开通订阅" }
+        guard let currentSubscription = wallet?.currentSubscription else { return TalkifyLocalized.string("billing.subscription.no_subscription_label") }
         
         guard let subscriptionProducts = self.billingManager.products?.subscriptionProducts else {
             return currentSubscription
@@ -189,11 +189,11 @@ final class SubscriptionCenterViewModel: ObservableObject {
     }
 
     var currentStatusBadgeText: String {
-        hasActiveSubscription ? "已开通" : "未开通"
+        hasActiveSubscription ? TalkifyLocalized.string("billing.subscription.active_status") : TalkifyLocalized.string("billing.not_activated")
     }
 
     var heroTitle: String {
-        hasActiveSubscription ? "你的 Talkify Plus 正在生效" : "开通 Talkify Plus"
+        hasActiveSubscription ? TalkifyLocalized.string("billing.subscription.talkify_plus_active") : TalkifyLocalized.string("billing.subscription.activate_plus")
     }
 
     var heroSubtitle: String {
@@ -208,12 +208,12 @@ final class SubscriptionCenterViewModel: ObservableObject {
             return "选择 \(product.displayName)，获得更高的 Agent 周额度和订阅周期额度"
         }
 
-        return "获得更高的 Agent 周额度和订阅周期额度"
+        return TalkifyLocalized.string("billing.subscription.higher_quota")
     }
 
     var heroPrimaryButtonTitle: String {
         if hasActiveSubscription {
-            return "管理订阅"
+            return TalkifyLocalized.string("billing.subscription.manage_subscription")
         }
 
         if let selectedSubscriptionProduct {
@@ -250,7 +250,7 @@ final class SubscriptionCenterViewModel: ObservableObject {
             SubscriptionManagementItem(
                 title: "订阅状态",
                 subtitle: "当前会员开通状态",
-                value: hasActiveSubscription ? "已开通" : "未开通"
+                value: hasActiveSubscription ? TalkifyLocalized.string("billing.subscription.active_status") : TalkifyLocalized.string("billing.not_activated")
             ),
             SubscriptionManagementItem(
                 title: "到期时间",

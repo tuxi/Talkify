@@ -46,19 +46,19 @@ struct SharedImportConfirmationView: View {
                             .frame(width: 56, height: 56)
                             .background(Color.accentColor.opacity(0.12), in: RoundedRectangle(cornerRadius: 17))
 
-                        Text("收到外部资料")
+                        Text(TalkifyLocalized.string("import.external_materials"))
                             .font(.system(size: 24, weight: .bold, design: .rounded))
-                        Text("将这些内容复制为独立工作区，然后你可以补充要求并让 CodeAgent 开始处理。")
+                        Text(TalkifyLocalized.string("import.copy_as_workspace"))
                             .font(.system(size: 15))
                             .foregroundStyle(.secondary)
                             .fixedSize(horizontal: false, vertical: true)
                     }
 
                     VStack(alignment: .leading, spacing: 8) {
-                        Text("工作区名称")
+                        Text(TalkifyLocalized.string("share.workspace_name"))
                             .font(.caption.weight(.semibold))
                             .foregroundStyle(.secondary)
-                        TextField("工作区名称", text: $workspaceName)
+                        TextField(TalkifyLocalized.string("share.workspace_name"), text: $workspaceName)
                             .textFieldStyle(.plain)
                             .padding(.horizontal, 13)
                             .frame(minHeight: 46)
@@ -66,7 +66,7 @@ struct SharedImportConfirmationView: View {
                     }
 
                     VStack(alignment: .leading, spacing: 8) {
-                        Text("包含 \(request.items.count) 项")
+                        Text(String(format: TalkifyLocalized.string("share.containing_items"), String(request.items.count)))
                             .font(.caption.weight(.semibold))
                             .foregroundStyle(.secondary)
                         ForEach(Array(request.items.enumerated()), id: \.offset) { _, item in
@@ -95,7 +95,7 @@ struct SharedImportConfirmationView: View {
                         HStack(spacing: 8) {
                             if isCreating { ProgressView().tint(.white) }
                             Image(systemName: "bubble.left.and.bubble.right.fill")
-                            Text(isCreating ? "正在创建工作区…" : "创建工作区并开始对话")
+                            Text(isCreating ? TalkifyLocalized.string("import.creating_workspace") : TalkifyLocalized.string("import.create_and_chat"))
                         }
                         .font(.system(size: 16, weight: .semibold))
                         .foregroundStyle(.white)
@@ -105,7 +105,7 @@ struct SharedImportConfirmationView: View {
                     .buttonStyle(.plain)
                     .disabled(trimmedName.isEmpty || isCreating)
 
-                    Button("不再导入这些资料", role: .destructive) {
+                    Button(TalkifyLocalized.string("import.stop_importing"), role: .destructive) {
                         confirmsDiscard = true
                     }
                     .font(.system(size: 14, weight: .medium))
@@ -114,11 +114,11 @@ struct SharedImportConfirmationView: View {
                 }
                 .padding(20)
             }
-            .navigationTitle("导入到 CodeAgent")
+            .navigationTitle(TalkifyLocalized.string("import.title"))
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
-                    Button("稍后") {
+                    Button(TalkifyLocalized.string("import.later")) {
                         dismiss()
                         onFinished(.deferred)
                     }
@@ -127,17 +127,17 @@ struct SharedImportConfirmationView: View {
             }
             .interactiveDismissDisabled()
             .confirmationDialog(
-                "不再导入这些资料？",
+                TalkifyLocalized.string("import.stop_confirm_title"),
                 isPresented: $confirmsDiscard,
                 titleVisibility: .visible
             ) {
-                Button("删除待导入资料", role: .destructive) {
+                Button(TalkifyLocalized.string("import.delete_pending"), role: .destructive) {
                     dismiss()
                     onFinished(.discarded)
                 }
-                Button("取消", role: .cancel) { }
+                Button(TalkifyLocalized.string("common.action.cancel"), role: .cancel) { }
             } message: {
-                Text("已创建的工作区不会受影响。")
+                Text(TalkifyLocalized.string("import.existing_unaffected"))
             }
         }
     }

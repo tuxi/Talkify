@@ -85,7 +85,7 @@ final class PointsCenterViewModel: ObservableObject {
 
     var currentSubscriptionText: String {
         guard let currentSubscription = wallet?.currentSubscription else {
-            return wallet?.subscriptionActive == true ? "订阅已开通" : "未开通订阅"
+            return wallet?.subscriptionActive == true ? TalkifyLocalized.string("billing.subscription_active_status") : TalkifyLocalized.string("billing.no_subscription")
         }
         
         guard let subscriptionProducts = self.billingManager.products?.subscriptionProducts else {
@@ -97,7 +97,7 @@ final class PointsCenterViewModel: ObservableObject {
         if let index {
             return subscriptionProducts[index].displayName
         }
-        return currentSubscription.isEmpty ? "未开通" : currentSubscription
+        return currentSubscription.isEmpty ? TalkifyLocalized.string("billing.not_activated") : currentSubscription
     }
 
     var availablePointsText: String {
@@ -110,13 +110,13 @@ final class PointsCenterViewModel: ObservableObject {
 
     var checkInButtonTitle: String {
         if isCheckingIn {
-            return "签到中..."
+            return TalkifyLocalized.string("billing.checking_in")
         }
-        return hasCheckedInToday ? "今日已签到" : "立即签到"
+        return hasCheckedInToday ? TalkifyLocalized.string("billing.checked_in_today") : TalkifyLocalized.string("billing.check_in_now")
     }
 
     var checkInCardTitle: String {
-        hasCheckedInToday ? "今日点数已领取" : "每日签到奖励"
+        hasCheckedInToday ? TalkifyLocalized.string("billing.points_claimed_today") : TalkifyLocalized.string("billing.daily_checkin_reward")
     }
 
     var checkInCardSubtitle: String {
@@ -139,7 +139,7 @@ final class PointsCenterViewModel: ObservableObject {
     }
     
     var restoreButtonTitle: String {
-        isRestoring ? "同步中..." : "同步购买记录"
+        isRestoring ? TalkifyLocalized.string("billing.syncing") : TalkifyLocalized.string("billing.sync_purchases")
     }
 
     var frozenPointsText: String {
@@ -159,7 +159,7 @@ final class PointsCenterViewModel: ObservableObject {
     }
 
     var validityText: String {
-        "购买后 \(pointPackProducts.first?.validityMonths ?? 12) 个月"
+        String(format: TalkifyLocalized.string("billing.validity_months_format"), String(pointPackProducts.first?.validityMonths ?? 12))
     }
 
     var failedPurchaseProduct: BillingProduct? {
@@ -187,7 +187,7 @@ final class PointsCenterViewModel: ObservableObject {
 
     func performCheckIn() async {
         guard !hasCheckedInToday else {
-            feedbackMessage = "今天已经签到过了"
+            feedbackMessage = TalkifyLocalized.string("billing.already_checked_in")
             return
         }
         guard !isCheckingIn else { return }
@@ -200,8 +200,8 @@ final class PointsCenterViewModel: ObservableObject {
         do {
             let result = try await billingManager.performCheckIn()
             NotificationCenter.default.post(name: .billingPointLedgerDidChange, object: nil)
-            feedbackMessage = "签到成功，已到账 \(result.rewardPoints) 点"
-            ToastContext.shared.show("签到成功 +\(result.rewardPoints) 点", style: .success)
+            feedbackMessage = String(format: TalkifyLocalized.string("billing.checkin_success"), String(result.rewardPoints))
+            ToastContext.shared.show(String(format: TalkifyLocalized.string("billing.checkin_success_toast"), String(result.rewardPoints)), style: .success)
         } catch {
             errorMessage = error.localizedDescription
         }
@@ -219,11 +219,11 @@ final class PointsCenterViewModel: ObservableObject {
     }
     
     var primaryPurchaseButtonTitle: String {
-        guard let product = selectedPointPackProduct else { return "立即购买" }
+        guard let product = selectedPointPackProduct else { return TalkifyLocalized.string("billing.buy_now") }
         if isPurchasing(product) {
-            return "购买中..."
+            return TalkifyLocalized.string("billing.purchasing")
         }
-        return "立即购买 \(productPriceText(product))"
+        return String(format: TalkifyLocalized.string("billing.buy_for_price"), productPriceText(product))
     }
     
     func purchaseSelectedPointPack() async {
@@ -254,9 +254,9 @@ final class PointsCenterViewModel: ObservableObject {
     func productBadgeText(_ product: BillingProduct) -> String? {
         if let discount = product.benefits?.pointPackDiscountRate,
            discount != 1 {
-            return "折扣 \(discount.cleanDisplay)x"
+            return String(format: TalkifyLocalized.string("billing.discount_x"), discount.cleanDisplay)
         }
-        return product.pointAmount >= 1000 ? "热门" : nil
+        return product.pointAmount >= 1000 ? TalkifyLocalized.string("billing.popular") : nil
     }
 
     func benefitLines(for product: BillingProduct) -> [String] {
@@ -267,8 +267,8 @@ final class PointsCenterViewModel: ObservableObject {
         }
 
         var lines: [String] = []
-        lines.append("购买后 Talkify 点数直接发放到钱包")
-        lines.append("可用于 AI 对话、网页搜索和图片理解")
+        lines.append(TalkifyLocalized.string("billing.points_after_purchase"))
+        lines.append(TalkifyLocalized.string("billing.points_usage_desc"))
         lines.append("每笔购买独立有效 \(product.validityMonths ?? 12) 个月，优先使用最早到期点数")
         if let discount = product.benefits?.pointPackDiscountRate {
             lines.append("点数包折扣系数 \(discount.cleanDisplay)")
@@ -281,7 +281,7 @@ final class PointsCenterViewModel: ObservableObject {
     }
 
     func purchaseButtonTitle(for product: BillingProduct) -> String {
-        isPurchasing(product) ? "购买中..." : "购买"
+        isPurchasing(product) ? TalkifyLocalized.string("billing.purchasing") : "购买"
     }
 
     func dismissPurchaseSuccess() {
@@ -310,8 +310,8 @@ final class PointsCenterViewModel: ObservableObject {
                 _ = try? await billingService.restoreIOSOrder(originalTransactionID: trimmed)
             }
             await billingManager.refreshAllIfNeeded(maxAge: 0)
-            feedbackMessage = "购买记录同步完成"
-            ToastContext.shared.show("购买记录同步完成", style: .success)
+            feedbackMessage = TalkifyLocalized.string("billing.purchase_sync_complete")
+            ToastContext.shared.show(TalkifyLocalized.string("billing.purchase_sync_complete"), style: .success)
         } catch {
             restoreErrorMessage = error.localizedDescription
         }
@@ -320,7 +320,7 @@ final class PointsCenterViewModel: ObservableObject {
 #if canImport(StoreKit)
     func purchase(product: BillingProduct) async {
         guard let storeProduct = storeProducts[product.productCode] else {
-            errorMessage = "未能获取 App Store 商品信息，请稍后重试。"
+            errorMessage = TalkifyLocalized.string("billing.product_info_failed")
             lastFailedProductCode = product.productCode
             return
         }
@@ -342,7 +342,7 @@ final class PointsCenterViewModel: ObservableObject {
                     await transaction.finish()
 
                     originalTransactionID = String(transaction.originalID)
-                    feedbackMessage = "购买成功，点数已发放到钱包。"
+                    feedbackMessage = TalkifyLocalized.string("billing.purchase_success_details")
                     purchaseSuccessState = PurchaseSuccessState(
                         productCode: product.productCode,
                         productName: product.displayName,
@@ -352,7 +352,7 @@ final class PointsCenterViewModel: ObservableObject {
                         currentSubscription: billingManager.wallet?.currentSubscription,
                         originalTransactionID: String(transaction.originalID)
                     )
-                    ToastContext.shared.show("购买成功", style: .success)
+                    ToastContext.shared.show(TalkifyLocalized.string("billing.purchase_success_toast"), style: .success)
 
                 case .unverified(_, let error):
                     errorMessage = "App Store 交易校验失败：\(error.localizedDescription)"
@@ -360,11 +360,11 @@ final class PointsCenterViewModel: ObservableObject {
                 }
 
             case .pending:
-                feedbackMessage = "购买请求已提交，正在等待 App Store 完成确认。"
+                feedbackMessage = TalkifyLocalized.string("billing.purchase_submitted")
             case .userCancelled:
-                feedbackMessage = "已取消购买。"
+                feedbackMessage = TalkifyLocalized.string("billing.purchase_cancelled")
             @unknown default:
-                errorMessage = "出现未知的购买结果，请稍后查看钱包状态。"
+                errorMessage = TalkifyLocalized.string("billing.purchase_unknown_result")
                 lastFailedProductCode = product.productCode
             }
         } catch {
@@ -434,7 +434,7 @@ final class PointsCenterViewModel: ObservableObject {
             handledTransactionIDs.insert(transaction.id)
             await transaction.finish()
             originalTransactionID = String(transaction.originalID)
-            feedbackMessage = "购买已完成，点数已自动同步到钱包。"
+            feedbackMessage = TalkifyLocalized.string("billing.purchase_auto_synced")
             purchaseSuccessState = PurchaseSuccessState(
                 productCode: transaction.productID,
                 productName: pointPackProducts.first(where: { $0.productCode == transaction.productID })?.displayName ?? transaction.productID,

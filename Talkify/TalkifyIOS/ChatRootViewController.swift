@@ -530,7 +530,7 @@ final class ChatRootViewController: UIViewController {
 private enum SharedImportHandlingError: LocalizedError {
     case missingPayload
 
-    var errorDescription: String? { "共享资料已不存在，请重新分享。" }
+    var errorDescription: String? { TalkifyLocalized.string("import.materials_gone") }
 }
 
 // MARK: - UIGestureRecognizerDelegate

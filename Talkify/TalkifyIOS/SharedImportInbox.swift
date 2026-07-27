@@ -229,9 +229,9 @@ enum SharedImportInbox {
         var errorDescription: String? {
             switch self {
             case .appGroupUnavailable:
-                return "无法访问共享资料。"
+                return TalkifyLocalized.string("import.cannot_access")
             case .requestUnavailable:
-                return "共享资料已不存在，请重新分享。"
+                return TalkifyLocalized.string("import.materials_gone")
             }
         }
     }

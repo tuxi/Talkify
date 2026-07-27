@@ -59,7 +59,7 @@ final class DesktopControlEvidenceTimeline: WebTimelineExtension {
             guard let item = card.item else {
                 return TimelineWebNode(
                     id: card.id,
-                    title: "正在等待 Evidence Timeline…",
+                    title: TalkifyLocalized.string("evidence.waiting"),
                     summary: card.auditEventID,
                     status: "pending",
                     tone: .neutral
@@ -117,7 +117,7 @@ final class DesktopControlEvidenceTimeline: WebTimelineExtension {
                     )
                 },
                 actions: documentActions,
-                footer: card.bundle.map { "证据 bundle 已导出 · \($0.artifact.uri)" }
+                footer: card.bundle.map { String(format: TalkifyLocalized.string("evidence.bundle_exported_with_uri"), $0.artifact.uri) }
             )
         }
     }
@@ -267,7 +267,7 @@ private struct DesktopEvidenceTimelineCard: View {
             if let item = card.item {
                 itemContent(item)
             } else {
-                Label("正在等待 Evidence Timeline…", systemImage: "hourglass")
+                Label(TalkifyLocalized.string("evidence.waiting"), systemImage: "hourglass")
                     .font(.subheadline)
                     .foregroundStyle(.secondary)
                 Text(card.auditEventID)
@@ -334,7 +334,7 @@ private struct DesktopEvidenceTimelineCard: View {
             }
             Spacer()
             if let bundle = card.bundle {
-                Label("证据 bundle 已导出", systemImage: "link")
+                Label(TalkifyLocalized.string("evidence.bundle_exported"), systemImage: "link")
                     .help(bundle.artifact.uri)
                     .foregroundStyle(.secondary)
             }

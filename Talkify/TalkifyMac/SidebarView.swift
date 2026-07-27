@@ -174,7 +174,7 @@ struct AccountMenuContent: View {
                             Image(systemName: "arrow.counterclockwise.circle")
                             VStack(alignment: .leading, spacing: 2) {
                                 Text(verbatim: TalkifyLocalized.string("workspace.usage_limit_reset"))
-                                Text("可用 \(usage.resetCards?.availableCount ?? 1) 次 · \(formattedResetDate(card.expiresAt)) 到期")
+                                Text(String(format: TalkifyLocalized.string("workspace.available_count"), String(usage.resetCards?.availableCount ?? 1), formattedResetDate(card.expiresAt)))
                                     .font(.system(size: 12))
                                     .foregroundStyle(.secondary)
                             }
@@ -302,7 +302,7 @@ private struct ResetCardSheet: View {
                     VStack(alignment: .leading, spacing: 4) {
                         Text("Full reset")
                             .font(.system(size: 17, weight: .semibold))
-                        Text("\(formattedDate(card.expiresAt)) 到期")
+                        Text(String(format: TalkifyLocalized.string("workspace.usage_expires"), formattedDate(card.expiresAt)))
                             .font(.system(size: 14))
                             .foregroundStyle(.secondary)
                     }

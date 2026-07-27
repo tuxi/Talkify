@@ -197,7 +197,7 @@ private enum WorkspaceContentImportError: LocalizedError {
     var errorDescription: String? {
         switch self {
         case .noActiveWorkspace:
-            return "请先选择一个工作区。"
+            return TalkifyLocalized.string("import.select_workspace_first")
         }
     }
 }

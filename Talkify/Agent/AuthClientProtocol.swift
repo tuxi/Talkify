@@ -194,11 +194,11 @@ public enum AuthError: Error, LocalizedError {
 
     public var errorDescription: String? {
         switch self {
-        case .notAuthenticated:       return "未登录。"
-        case .noRefreshToken:         return "无法刷新：缺少 refresh token。"
-        case .refreshFailed:          return "Token 刷新失败，请重新登录。"
-        case .networkError(let e):    return "网络错误：\(e.localizedDescription)"
-        case .invalidResponse:        return "服务器响应无效。"
+        case .notAuthenticated:       return TalkifyLocalized.string("auth.error.not_authenticated")
+        case .noRefreshToken:         return TalkifyLocalized.string("auth.error.no_refresh_token")
+        case .refreshFailed:          return TalkifyLocalized.string("auth.error.token_refresh_failed")
+        case .networkError(let e):    return String(format: TalkifyLocalized.string("auth.error.network"), e.localizedDescription)
+        case .invalidResponse:        return TalkifyLocalized.string("auth.error.invalid_response")
         case .serverError(let c, let m): return "[\(c)] \(m)"
         }
     }

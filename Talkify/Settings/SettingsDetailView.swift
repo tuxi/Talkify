@@ -316,16 +316,16 @@ struct SettingsDetailView: View {
 
     private var dangerZoneCard: some View {
         VStack(alignment: .leading, spacing: 0) {
-            sectionTitle("危险操作")
+            sectionTitle(TalkifyLocalized.string("settings.danger_zone"))
             settingsCard {
                 VStack(alignment: .leading, spacing: 8) {
 //                    Label("删除账号", systemImage: "exclamationmark.triangle.fill")
 //                        .font(.system(size: 16, weight: .semibold))
 //                        .foregroundStyle(.red)
-                    Text("删除账号会清除账号资料、登录绑定和相关数据访问能力。该操作通常不可恢复，请谨慎处理。")
+                    Text(TalkifyLocalized.string("settings.delete_account_long_warning"))
                         .font(.system(size: 14))
                         .foregroundStyle(.secondary)
-                    Text("如仅暂时不用，建议先退出登录。")
+                    Text(TalkifyLocalized.string("settings.sign_out_instead"))
                         .font(.system(size: 14))
                         .foregroundStyle(.secondary)
                 }
@@ -337,7 +337,7 @@ struct SettingsDetailView: View {
                 Button(role: .destructive) {
                     showDeleteAccountAlert = true
                 } label: {
-                    Label(isDeletingAccount ? "正在删除…" : "删除账号", systemImage: "trash")
+                    Label(isDeletingAccount ? TalkifyLocalized.string("settings.deleting") : TalkifyLocalized.string("settings.delete_account"), systemImage: "trash")
                         .font(.system(size: 15, weight: .semibold))
                         .frame(maxWidth: .infinity)
                         .padding(.horizontal, 16)
@@ -355,14 +355,14 @@ struct SettingsDetailView: View {
     private var usageBillingSettings: some View {
         VStack(alignment: .leading, spacing: 0) {
             //            settingsTitle("使用情况和计费")
-            Text("可在此查看订阅方案、管理订阅并了解当前使用额度。")
+            Text(TalkifyLocalized.string("settings.usage_view_subscription_hint"))
                 .font(.system(size: 15))
                 .foregroundStyle(.secondary)
                 .padding(.top, -38)
                 .padding(.bottom, 58)
             
             if let usage = agentManager.usage {
-                sectionTitle("当前套餐")
+                sectionTitle(TalkifyLocalized.string("settings.current_plan"))
                 settingsCard {
                     SettingsValueRow(title: "\(usage.tier.rawValue.capitalized) 套餐", description: subscriptionDescription(for: usage)) {
                         Button {
@@ -372,29 +372,29 @@ struct SettingsDetailView: View {
                                 router.navigate(to: .subscriptionCenter)
                             }
                         } label: {
-                            Text("查看套餐")
+                            Text(TalkifyLocalized.string("settings.view_plan"))
                                 .settingsPickerCapsule()
                         }
 
                     }
                 }
                 
-                sectionTitle("通用使用限额")
+                sectionTitle(TalkifyLocalized.string("settings.general_usage_limit"))
                 settingsCard {
                     WeeklyQuotaRow(usage: usage.weekly)
                 }
                 
                 if let cycle = usage.cycle {
-                    sectionTitle("订阅周期")
+                    sectionTitle(TalkifyLocalized.string("settings.subscription_cycle"))
                     settingsCard {
                         if let resetsAt = cycle.resetsAt, !resetsAt.isEmpty {
-                            SettingsValueRow(title: "订阅周期用量", description: "至 \(formattedResetDate(resetsAt))") {
-                                Text("\(formatted(max(cycle.unitsLimit - cycle.unitsUsed, 0))) / \(formatted(cycle.unitsLimit)) 剩余")
+                            SettingsValueRow(title: TalkifyLocalized.string("settings.subscription_cycle_usage"), description: String(format: TalkifyLocalized.string("settings.subscription_cycle_until"), \(formattedResetDate(resetsAt))") {
+                                Text(String(format: TalkifyLocalized.string("settings.cycle_remaining_format"), formatted(max(cycle.unitsLimit - cycle.unitsUsed, 0)), formatted(cycle.unitsLimit)))
                                     .foregroundStyle(.secondary)
                             }
                         } else {
-                            SettingsValueRow(title: "订阅周期用量", description: "") {
-                                Text("\(formatted(max(cycle.unitsLimit - cycle.unitsUsed, 0))) / \(formatted(cycle.unitsLimit)) 剩余")
+                            SettingsValueRow(title: TalkifyLocalized.string("settings.cycle_usage_title"), description: "") {
+                                Text(String(format: TalkifyLocalized.string("settings.cycle_remaining_format"), formatted(max(cycle.unitsLimit - cycle.unitsUsed, 0)), formatted(cycle.unitsLimit)))
                                     .foregroundStyle(.secondary)
                             }
                         }
@@ -403,7 +403,7 @@ struct SettingsDetailView: View {
                 }
                 
                 if !usage.availableResetCards.isEmpty {
-                    sectionTitle("使用限制重置")
+                    sectionTitle(TalkifyLocalized.string("settings.usage_reset"))
                     settingsCard {
                         ForEach(usage.availableResetCards) { card in
                             ResetCardSettingsRow(card: card) {
@@ -418,7 +418,7 @@ struct SettingsDetailView: View {
                         router.navigate(to: .pointsCenter)
                     } label: {
                         HStack(alignment: .center, spacing: 20) {
-                            Text("购买点数").font(.system(size: 17, weight: .semibold))
+                            Text(TalkifyLocalized.string("settings.buy_points")).font(.system(size: 17, weight: .semibold))
                             Spacer()
                             Image(systemName: "chevron.right")
                         }
@@ -428,7 +428,7 @@ struct SettingsDetailView: View {
                 }
                 
             } else {
-                ProgressView("正在获取使用情况…")
+                ProgressView(TalkifyLocalized.string("settings.fetching_usage"))
                     .padding(.top, 24)
             }
         }
@@ -442,7 +442,7 @@ struct SettingsDetailView: View {
     private var unavailableSettings: some View {
         VStack(alignment: .leading, spacing: 12) {
             //            settingsTitle(section.title)
-            Text("此设置项正在准备中。你可以先在\"常规\"和\"账户\"中调整当前可用的偏好。")
+            Text(TalkifyLocalized.string("settings.placeholder_page"))
                 .font(.system(size: 16))
                 .foregroundStyle(.secondary)
                 .padding(.top, 8)
@@ -476,16 +476,16 @@ struct SettingsDetailView: View {
     // MARK: - Computed properties
     
     private var accountName: String {
-        guard authManager.isLoggedIn else { return "未登录" }
+        guard authManager.isLoggedIn else { return TalkifyLocalized.string("workspace.not_logged_in") }
         return authManager.displayNickname ?? userManager.profile?.nickname ?? "Unknow"
     }
     
     private var accountInitial: String { String(accountName.prefix(1)).uppercased() }
-    private var accountSubtitle: String { agentManager.usage?.tier.rawValue.capitalized ?? "Talkify 用户" }
+    private var accountSubtitle: String { agentManager.usage?.tier.rawValue.capitalized ?? TalkifyLocalized.string("settings.talkify_user") }
 
     private var registerSourceText: String {
         switch userManager.profile?.registerSource {
-        case "phone": return "手机号"
+        case "phone": return TalkifyLocalized.string("settings.phone_label")
         case "apple": return "Apple"
         case .some(let source) where !source.isEmpty: return source
         default: return "--"
@@ -494,7 +494,7 @@ struct SettingsDetailView: View {
 
     private var loginMethodsText: String {
         var methods: [String] = []
-        if userManager.profile?.hasPhone == true { methods.append("手机号") }
+        if userManager.profile?.hasPhone == true { methods.append(TalkifyLocalized.string("settings.phone_label")) }
         if userManager.profile?.hasApple == true { methods.append("Apple") }
         if methods.isEmpty, let source = userManager.profile?.registerSource, !source.isEmpty {
             methods.append(registerSourceText)
@@ -505,7 +505,7 @@ struct SettingsDetailView: View {
     private func deleteAccount() async {
         let keyword = deleteConfirmationText.trimmingCharacters(in: .whitespacesAndNewlines)
         guard keyword.uppercased() == "DELETE" else {
-            deleteAccountError = "请输入正确的确认字样 DELETE"
+            deleteAccountError = TalkifyLocalized.string("settings.enter_delete_confirm")
             return
         }
 
@@ -524,13 +524,13 @@ struct SettingsDetailView: View {
     }
     
     private var weeklyQuotaText: String {
-        guard let usage = agentManager.usage else { return "暂不可用" }
+        guard let usage = agentManager.usage else { return TalkifyLocalized.string("settings.unavailable") }
         let remaining = max(usage.weekly.unitsLimit - usage.weekly.unitsUsed, 0)
-        return "\(formatted(remaining)) / \(formatted(usage.weekly.unitsLimit)) 剩余"
+        return String(format: TalkifyLocalized.string("settings.cycle_remaining_format"), formatted(remaining), formatted(usage.weekly.unitsLimit))
     }
     
     private func subscriptionDescription(for usage: UsageInfo) -> String {
-        usage.tier == .free ? "当前免费服务等级" : "订阅状态正常"
+        usage.tier == .free ? TalkifyLocalized.string("settings.free_tier") : TalkifyLocalized.string("settings.subscription_active")
     }
     
     private func formattedResetDate(_ value: String) -> String {
@@ -561,16 +561,16 @@ private struct DeleteAccountConfirmationSheet: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 18) {
-            Label("再次确认删除账号", systemImage: "trash.fill")
+            Label(TalkifyLocalized.string("settings.confirm_delete_again"), systemImage: "trash.fill")
                 .font(.system(size: 20, weight: .bold))
                 .foregroundStyle(.red)
 
-            Text("为避免误操作，请输入 DELETE 以确认删除。账号资料、登录绑定及相关数据将进入删除流程。")
+            Text(TalkifyLocalized.string("settings.type_delete_to_confirm"))
                 .font(.system(size: 14))
                 .foregroundStyle(.secondary)
                 .fixedSize(horizontal: false, vertical: true)
 
-            TextField("请输入 DELETE", text: $confirmationText)
+            TextField(TalkifyLocalized.string("settings.enter_delete"), text: $confirmationText)
                 .textFieldStyle(.roundedBorder)
                 .focused($isConfirmationFocused)
 #if os(iOS)
@@ -585,7 +585,7 @@ private struct DeleteAccountConfirmationSheet: View {
             }
 
             HStack(spacing: 12) {
-                Button("取消", action: onCancel)
+                Button(TalkifyLocalized.string("common.action.cancel"), action: onCancel)
                     .buttonStyle(.bordered)
 
                 Button(role: .destructive, action: onConfirm) {
@@ -593,7 +593,7 @@ private struct DeleteAccountConfirmationSheet: View {
                         ProgressView()
                             .controlSize(.small)
                     } else {
-                        Text("删除账号")
+                        Text(verbatim: TalkifyLocalized.string("settings.delete_account"))
                     }
                 }
                 .buttonStyle(.borderedProminent)
@@ -687,7 +687,7 @@ private struct WeeklyQuotaRow: View {
     var body: some View {
         HStack(spacing: 22) {
             VStack(alignment: .leading, spacing: 5) {
-                Text("每周使用限制")
+                Text(TalkifyLocalized.string("settings.weekly_limit"))
                     .font(.system(size: 17, weight: .semibold))
                 if let resetsAt = usage.resetsAt, !resetsAt.isEmpty {
                     Text("重置\(formattedDate(resetsAt))")
@@ -700,7 +700,7 @@ private struct WeeklyQuotaRow: View {
                 ProgressView(value: min(max(usage.utilizationPct, 0), 100), total: 100)
                     .tint(usage.utilizationPct >= 90 ? .orange : .primary)
                     .frame(width: 132)
-                Text("剩余 \(Int(max(100 - usage.utilizationPct, 0).rounded()))%")
+                Text(String(format: TalkifyLocalized.string("settings.remaining_pct"), "\(Int(max(100 - usage.utilizationPct, 0).rounded()))%"))
                     .font(.system(size: 14, weight: .medium))
                     .foregroundStyle(.secondary)
             }
@@ -730,7 +730,7 @@ private struct ResetCardSettingsRow: View {
                     .foregroundStyle(.secondary)
             }
             Spacer(minLength: 24)
-            Button(agentManager.isRedeemingResetCard ? "正在使用…" : "使用重置额度") {
+            Button(agentManager.isRedeemingResetCard ? "正在使用…" : TalkifyLocalized.string("settings.use_reset_quota")) {
                 onRedeem()
             }
             .buttonStyle(.borderedProminent)
