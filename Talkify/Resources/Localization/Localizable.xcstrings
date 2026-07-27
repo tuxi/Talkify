@@ -37,6 +37,8 @@
     "CodeAgent": {},
     "Finder": {},
     "Full reset": {},
+    "HTML": {},
+    "Markdown": {},
     "Talkify Pro": {},
     "Worktree 包含未保存的更改": {},
     "agent.notification.approval_needed": {
@@ -18215,6 +18217,243 @@
     "user-assets.error.too-large": {},
     "user-assets.error.unavailable": {},
     "user-assets.error.upload": {},
+    "user-assets.picker.message": {},
+    "userassets.add_attachment": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Add Attachment"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "添加附件"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "新增附件"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "添付を追加"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "첨부 추가"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Anhang hinzufügen"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ajouter une pièce jointe"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Agregar adjunto"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Adicionar anexo"
+          }
+        }
+      }
+    },
+    "userassets.pdf_or_document": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "PDF or Document"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "PDF 或文档"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "PDF 或文件"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "PDFまたは文書"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "PDF 또는 문서"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "PDF oder Dokument"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "PDF ou document"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "PDF o documento"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "PDF ou documento"
+          }
+        }
+      }
+    },
+    "userassets.photos": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Photos"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "照片"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "照片"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "写真"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "사진"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fotos"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Photos"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fotos"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fotos"
+          }
+        }
+      }
+    },
+    "userassets.take_photo": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Take Photo"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "拍照"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "拍照"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "写真を撮る"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "사진 촬영"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Foto aufnehmen"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Prendre une photo"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tomar foto"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tirar foto"
+          }
+        }
+      }
+    },
     "workspace.account": {
       "extractionState": "manual",
       "localizations": {
@@ -18277,22 +18516,28 @@
     "workspace.add_workspace_section": {
       "extractionState": "manual",
       "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Arbeitsbereich hinzufügen"
+          }
+        },
         "en": {
           "stringUnit": {
             "state": "translated",
             "value": "Add Workspace"
           }
         },
-        "zh-Hans": {
+        "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "添加工作区"
+            "value": "Agregar espacio de trabajo"
           }
         },
-        "zh-Hant": {
+        "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "新增工作區"
+            "value": "Ajouter un espace de travail"
           }
         },
         "ja": {
@@ -18307,28 +18552,22 @@
             "value": "워크스페이스 추가"
           }
         },
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Arbeitsbereich hinzufügen"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Ajouter un espace de travail"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Agregar espacio de trabajo"
-          }
-        },
         "pt-BR": {
           "stringUnit": {
             "state": "translated",
             "value": "Adicionar espaço de trabalho"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "添加工作区"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "新增工作區"
           }
         }
       }
@@ -18336,22 +18575,28 @@
     "workspace.archive": {
       "extractionState": "manual",
       "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Archivieren"
+          }
+        },
         "en": {
           "stringUnit": {
             "state": "translated",
             "value": "Archive"
           }
         },
-        "zh-Hans": {
+        "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "归档"
+            "value": "Archivar"
           }
         },
-        "zh-Hant": {
+        "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "歸檔"
+            "value": "Archiver"
           }
         },
         "ja": {
@@ -18366,28 +18611,22 @@
             "value": "보관"
           }
         },
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Archivieren"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Archiver"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Archivar"
-          }
-        },
         "pt-BR": {
           "stringUnit": {
             "state": "translated",
             "value": "Arquivar"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "归档"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "歸檔"
           }
         }
       }
@@ -18395,22 +18634,28 @@
     "workspace.archived_label": {
       "extractionState": "manual",
       "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Archiviert"
+          }
+        },
         "en": {
           "stringUnit": {
             "state": "translated",
             "value": "Archived"
           }
         },
-        "zh-Hans": {
+        "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "已归档"
+            "value": "Archivado"
           }
         },
-        "zh-Hant": {
+        "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "已歸檔"
+            "value": "Archivé"
           }
         },
         "ja": {
@@ -18425,28 +18670,22 @@
             "value": "보관됨"
           }
         },
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Archiviert"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Archivé"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Archivado"
-          }
-        },
         "pt-BR": {
           "stringUnit": {
             "state": "translated",
             "value": "Arquivado"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "已归档"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "已歸檔"
           }
         }
       }
@@ -18513,22 +18752,28 @@
     "workspace.branch_or_tag_optional": {
       "extractionState": "manual",
       "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Branch oder Tag (optional)"
+          }
+        },
         "en": {
           "stringUnit": {
             "state": "translated",
             "value": "Branch or Tag (optional)"
           }
         },
-        "zh-Hans": {
+        "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "分支或 Tag（可选）"
+            "value": "Rama o etiqueta (opcional)"
           }
         },
-        "zh-Hant": {
+        "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "分支或 Tag（可選）"
+            "value": "Branche ou tag (facultatif)"
           }
         },
         "ja": {
@@ -18543,28 +18788,22 @@
             "value": "브랜치 또는 태그 (선택 사항)"
           }
         },
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Branch oder Tag (optional)"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Branche ou tag (facultatif)"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Rama o etiqueta (opcional)"
-          }
-        },
         "pt-BR": {
           "stringUnit": {
             "state": "translated",
             "value": "Branch ou Tag (opcional)"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "分支或 Tag（可选）"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "分支或 Tag（可選）"
           }
         }
       }
@@ -18572,22 +18811,28 @@
     "workspace.cannot_export": {
       "extractionState": "manual",
       "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Arbeitsbereich kann nicht exportiert werden"
+          }
+        },
         "en": {
           "stringUnit": {
             "state": "translated",
             "value": "Cannot Export Workspace"
           }
         },
-        "zh-Hans": {
+        "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "无法导出工作区"
+            "value": "No se puede exportar el espacio de trabajo"
           }
         },
-        "zh-Hant": {
+        "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "無法匯出工作區"
+            "value": "Impossible d’exporter l’espace de travail"
           }
         },
         "ja": {
@@ -18602,28 +18847,22 @@
             "value": "워크스페이스를 내보낼 수 없음"
           }
         },
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Arbeitsbereich kann nicht exportiert werden"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Impossible d’exporter l’espace de travail"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "No se puede exportar el espacio de trabajo"
-          }
-        },
         "pt-BR": {
           "stringUnit": {
             "state": "translated",
             "value": "Não foi possível exportar o espaço de trabalho"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "无法导出工作区"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "無法匯出工作區"
           }
         }
       }
@@ -18631,22 +18870,28 @@
     "workspace.cannot_prepare": {
       "extractionState": "manual",
       "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Arbeitsbereich kann nicht vorbereitet werden"
+          }
+        },
         "en": {
           "stringUnit": {
             "state": "translated",
             "value": "Cannot Prepare Workspace"
           }
         },
-        "zh-Hans": {
+        "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "无法准备工作区"
+            "value": "No se puede preparar el espacio de trabajo"
           }
         },
-        "zh-Hant": {
+        "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "無法準備工作區"
+            "value": "Impossible de préparer l’espace de travail"
           }
         },
         "ja": {
@@ -18661,28 +18906,22 @@
             "value": "워크스페이스를 준비할 수 없음"
           }
         },
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Arbeitsbereich kann nicht vorbereitet werden"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Impossible de préparer l’espace de travail"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "No se puede preparar el espacio de trabajo"
-          }
-        },
         "pt-BR": {
           "stringUnit": {
             "state": "translated",
             "value": "Não foi possível preparar o espaço de trabalho"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "无法准备工作区"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "無法準備工作區"
           }
         }
       }
@@ -18690,22 +18929,28 @@
     "workspace.clone_action": {
       "extractionState": "manual",
       "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Klonen"
+          }
+        },
         "en": {
           "stringUnit": {
             "state": "translated",
             "value": "Clone"
           }
         },
-        "zh-Hans": {
+        "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "克隆"
+            "value": "Clonar"
           }
         },
-        "zh-Hant": {
+        "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "克隆"
+            "value": "Cloner"
           }
         },
         "ja": {
@@ -18720,28 +18965,22 @@
             "value": "복제"
           }
         },
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Klonen"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Cloner"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Clonar"
-          }
-        },
         "pt-BR": {
           "stringUnit": {
             "state": "translated",
             "value": "Clonar"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "克隆"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "克隆"
           }
         }
       }
@@ -18749,22 +18988,28 @@
     "workspace.clone_default_desc": {
       "extractionState": "manual",
       "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Verwendet standardmäßig flachen Klon, besser für mobile Netzwerke. Unterstützt nur öffentliche HTTPS-Repositories ohne Authentifizierung."
+          }
+        },
         "en": {
           "stringUnit": {
             "state": "translated",
             "value": "Uses shallow clone by default, better for mobile networks. Only supports public HTTPS repositories that do not require authentication."
           }
         },
-        "zh-Hans": {
+        "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "默认使用浅克隆，更适合移动网络。仅支持无需登录的 HTTPS 仓库。"
+            "value": "Usa clonación superficial por defecto, mejor para redes móviles. Solo admite repositorios HTTPS públicos sin autenticación."
           }
         },
-        "zh-Hant": {
+        "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "預設使用淺克隆，更適合行動網路。僅支援無需登入的 HTTPS 倉庫。"
+            "value": "Utilise un clonage superficiel par défaut, mieux adapté aux réseaux mobiles. Prend en charge uniquement les dépôts HTTPS publics sans authentification."
           }
         },
         "ja": {
@@ -18779,28 +19024,22 @@
             "value": "기본적으로 얕은 복제를 사용하며 모바일 네트워크에 더 적합합니다. 인증이 필요 없는 HTTPS 저장소만 지원합니다."
           }
         },
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Verwendet standardmäßig flachen Klon, besser für mobile Netzwerke. Unterstützt nur öffentliche HTTPS-Repositories ohne Authentifizierung."
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Utilise un clonage superficiel par défaut, mieux adapté aux réseaux mobiles. Prend en charge uniquement les dépôts HTTPS publics sans authentification."
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Usa clonación superficial por defecto, mejor para redes móviles. Solo admite repositorios HTTPS públicos sin autenticación."
-          }
-        },
         "pt-BR": {
           "stringUnit": {
             "state": "translated",
             "value": "Usa clone superficial por padrão, melhor para redes móveis. Suporta apenas repositórios HTTPS públicos sem autenticação."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "默认使用浅克隆，更适合移动网络。仅支持无需登录的 HTTPS 仓库。"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "預設使用淺克隆，更適合行動網路。僅支援無需登入的 HTTPS 倉庫。"
           }
         }
       }
@@ -18808,22 +19047,28 @@
     "workspace.clone_full_history": {
       "extractionState": "manual",
       "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vollständigen Verlauf klonen"
+          }
+        },
         "en": {
           "stringUnit": {
             "state": "translated",
             "value": "Clone Full History"
           }
         },
-        "zh-Hans": {
+        "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "克隆完整历史"
+            "value": "Clonar historial completo"
           }
         },
-        "zh-Hant": {
+        "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "克隆完整歷史"
+            "value": "Cloner l’historique complet"
           }
         },
         "ja": {
@@ -18838,28 +19083,22 @@
             "value": "전체 기록 복제"
           }
         },
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Vollständigen Verlauf klonen"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Cloner l’historique complet"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Clonar historial completo"
-          }
-        },
         "pt-BR": {
           "stringUnit": {
             "state": "translated",
             "value": "Clonar histórico completo"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "克隆完整历史"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "克隆完整歷史"
           }
         }
       }
@@ -18867,22 +19106,28 @@
     "workspace.clone_git_nav_title": {
       "extractionState": "manual",
       "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Git-Repository klonen"
+          }
+        },
         "en": {
           "stringUnit": {
             "state": "translated",
             "value": "Clone Git Repository"
           }
         },
-        "zh-Hans": {
+        "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "克隆 Git 仓库"
+            "value": "Clonar repositorio Git"
           }
         },
-        "zh-Hant": {
+        "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "克隆 Git 倉庫"
+            "value": "Cloner le dépôt Git"
           }
         },
         "ja": {
@@ -18897,28 +19142,22 @@
             "value": "Git 저장소 복제"
           }
         },
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Git-Repository klonen"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Cloner le dépôt Git"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Clonar repositorio Git"
-          }
-        },
         "pt-BR": {
           "stringUnit": {
             "state": "translated",
             "value": "Clonar repositório Git"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "克隆 Git 仓库"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "克隆 Git 倉庫"
           }
         }
       }
@@ -18926,22 +19165,28 @@
     "workspace.clone_git_repo": {
       "extractionState": "manual",
       "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Git-Repository klonen"
+          }
+        },
         "en": {
           "stringUnit": {
             "state": "translated",
             "value": "Clone Git Repository"
           }
         },
-        "zh-Hans": {
+        "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "克隆 Git 仓库"
+            "value": "Clonar repositorio Git"
           }
         },
-        "zh-Hant": {
+        "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "克隆 Git 倉庫"
+            "value": "Cloner le dépôt Git"
           }
         },
         "ja": {
@@ -18956,28 +19201,22 @@
             "value": "Git 저장소 복제"
           }
         },
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Git-Repository klonen"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Cloner le dépôt Git"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Clonar repositorio Git"
-          }
-        },
         "pt-BR": {
           "stringUnit": {
             "state": "translated",
             "value": "Clonar repositório Git"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "克隆 Git 仓库"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "克隆 Git 倉庫"
           }
         }
       }
@@ -18985,22 +19224,28 @@
     "workspace.clone_git_repo_subtitle": {
       "extractionState": "manual",
       "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Öffentliche HTTPS-Repository-URL eingeben"
+          }
+        },
         "en": {
           "stringUnit": {
             "state": "translated",
             "value": "Enter a public HTTPS repository URL"
           }
         },
-        "zh-Hans": {
+        "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "输入公开 HTTPS 仓库地址"
+            "value": "Ingresa la URL de un repositorio HTTPS público"
           }
         },
-        "zh-Hant": {
+        "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "輸入公開 HTTPS 倉庫地址"
+            "value": "Saisissez l’URL d’un dépôt HTTPS public"
           }
         },
         "ja": {
@@ -19015,28 +19260,22 @@
             "value": "공개 HTTPS 저장소 URL 입력"
           }
         },
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Öffentliche HTTPS-Repository-URL eingeben"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Saisissez l’URL d’un dépôt HTTPS public"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Ingresa la URL de un repositorio HTTPS público"
-          }
-        },
         "pt-BR": {
           "stringUnit": {
             "state": "translated",
             "value": "Digite a URL de um repositório HTTPS público"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "输入公开 HTTPS 仓库地址"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "輸入公開 HTTPS 倉庫地址"
           }
         }
       }
@@ -19044,22 +19283,28 @@
     "workspace.clone_git_repo_title": {
       "extractionState": "manual",
       "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Git-Repository klonen"
+          }
+        },
         "en": {
           "stringUnit": {
             "state": "translated",
             "value": "Clone Git Repository"
           }
         },
-        "zh-Hans": {
+        "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "克隆 Git 仓库"
+            "value": "Clonar repositorio Git"
           }
         },
-        "zh-Hant": {
+        "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "克隆 Git 倉庫"
+            "value": "Cloner le dépôt Git"
           }
         },
         "ja": {
@@ -19074,28 +19319,22 @@
             "value": "Git 저장소 복제"
           }
         },
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Git-Repository klonen"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Cloner le dépôt Git"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Clonar repositorio Git"
-          }
-        },
         "pt-BR": {
           "stringUnit": {
             "state": "translated",
             "value": "Clonar repositório Git"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "克隆 Git 仓库"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "克隆 Git 倉庫"
           }
         }
       }
@@ -19103,22 +19342,28 @@
     "workspace.cloning": {
       "extractionState": "manual",
       "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Klonen…"
+          }
+        },
         "en": {
           "stringUnit": {
             "state": "translated",
             "value": "Cloning…"
           }
         },
-        "zh-Hans": {
+        "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "克隆中…"
+            "value": "Clonando…"
           }
         },
-        "zh-Hant": {
+        "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "克隆中…"
+            "value": "Clonage…"
           }
         },
         "ja": {
@@ -19133,28 +19378,22 @@
             "value": "복제 중…"
           }
         },
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Klonen…"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Clonage…"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Clonando…"
-          }
-        },
         "pt-BR": {
           "stringUnit": {
             "state": "translated",
             "value": "Clonando…"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "克隆中…"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "克隆中…"
           }
         }
       }
@@ -19162,22 +19401,28 @@
     "workspace.confirm": {
       "extractionState": "manual",
       "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bestätigen"
+          }
+        },
         "en": {
           "stringUnit": {
             "state": "translated",
             "value": "Confirm"
           }
         },
-        "zh-Hans": {
+        "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "确定"
+            "value": "Confirmar"
           }
         },
-        "zh-Hant": {
+        "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "確定"
+            "value": "Confirmer"
           }
         },
         "ja": {
@@ -19192,28 +19437,22 @@
             "value": "확인"
           }
         },
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Bestätigen"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Confirmer"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Confirmar"
-          }
-        },
         "pt-BR": {
           "stringUnit": {
             "state": "translated",
             "value": "Confirmar"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "确定"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "確定"
           }
         }
       }
@@ -19280,22 +19519,28 @@
     "workspace.conversation_name": {
       "extractionState": "manual",
       "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Name der Unterhaltung"
+          }
+        },
         "en": {
           "stringUnit": {
             "state": "translated",
             "value": "Conversation Name"
           }
         },
-        "zh-Hans": {
+        "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "会话名称"
+            "value": "Nombre de la conversación"
           }
         },
-        "zh-Hant": {
+        "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "會話名稱"
+            "value": "Nom de la conversation"
           }
         },
         "ja": {
@@ -19310,28 +19555,22 @@
             "value": "대화 이름"
           }
         },
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Name der Unterhaltung"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Nom de la conversation"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Nombre de la conversación"
-          }
-        },
         "pt-BR": {
           "stringUnit": {
             "state": "translated",
             "value": "Nome da conversa"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "会话名称"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "會話名稱"
           }
         }
       }
@@ -19339,22 +19578,28 @@
     "workspace.conversations_count": {
       "extractionState": "manual",
       "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ Unterhaltungen"
+          }
+        },
         "en": {
           "stringUnit": {
             "state": "translated",
             "value": "%@ conversations"
           }
         },
-        "zh-Hans": {
+        "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "%@ 个会话"
+            "value": "%@ conversaciones"
           }
         },
-        "zh-Hant": {
+        "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "%@ 個會話"
+            "value": "%@ conversations"
           }
         },
         "ja": {
@@ -19369,28 +19614,22 @@
             "value": "%@개 대화"
           }
         },
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%@ Unterhaltungen"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%@ conversations"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%@ conversaciones"
-          }
-        },
         "pt-BR": {
           "stringUnit": {
             "state": "translated",
             "value": "%@ conversas"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ 个会话"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ 個會話"
           }
         }
       }
@@ -19457,22 +19696,28 @@
     "workspace.create_blank_action": {
       "extractionState": "manual",
       "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Leeren Arbeitsbereich erstellen"
+          }
+        },
         "en": {
           "stringUnit": {
             "state": "translated",
             "value": "Create Blank Workspace"
           }
         },
-        "zh-Hans": {
+        "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "创建空白工作区"
+            "value": "Crear espacio de trabajo vacío"
           }
         },
-        "zh-Hant": {
+        "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "建立空白工作區"
+            "value": "Créer un espace de travail vide"
           }
         },
         "ja": {
@@ -19487,28 +19732,22 @@
             "value": "빈 워크스페이스 만들기"
           }
         },
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Leeren Arbeitsbereich erstellen"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Créer un espace de travail vide"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Crear espacio de trabajo vacío"
-          }
-        },
         "pt-BR": {
           "stringUnit": {
             "state": "translated",
             "value": "Criar espaço de trabalho em branco"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "创建空白工作区"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "建立空白工作區"
           }
         }
       }
@@ -19575,22 +19814,28 @@
     "workspace.create_first": {
       "extractionState": "manual",
       "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Erstellen Sie Ihren ersten Arbeitsbereich"
+          }
+        },
         "en": {
           "stringUnit": {
             "state": "translated",
             "value": "Create Your First Workspace"
           }
         },
-        "zh-Hans": {
+        "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "创建你的第一个工作区"
+            "value": "Crea tu primer espacio de trabajo"
           }
         },
-        "zh-Hant": {
+        "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "建立你的第一個工作區"
+            "value": "Créez votre premier espace de travail"
           }
         },
         "ja": {
@@ -19605,28 +19850,22 @@
             "value": "첫 번째 워크스페이스 만들기"
           }
         },
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Erstellen Sie Ihren ersten Arbeitsbereich"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Créez votre premier espace de travail"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Crea tu primer espacio de trabajo"
-          }
-        },
         "pt-BR": {
           "stringUnit": {
             "state": "translated",
             "value": "Crie seu primeiro espaço de trabalho"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "创建你的第一个工作区"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "建立你的第一個工作區"
           }
         }
       }
@@ -19634,22 +19873,28 @@
     "workspace.delete_conversation": {
       "extractionState": "manual",
       "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Unterhaltung löschen?"
+          }
+        },
         "en": {
           "stringUnit": {
             "state": "translated",
             "value": "Delete Conversation?"
           }
         },
-        "zh-Hans": {
+        "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "删除会话？"
+            "value": "¿Eliminar conversación?"
           }
         },
-        "zh-Hant": {
+        "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "刪除會話？"
+            "value": "Supprimer la conversation ?"
           }
         },
         "ja": {
@@ -19664,28 +19909,22 @@
             "value": "대화를 삭제하시겠습니까?"
           }
         },
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Unterhaltung löschen?"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Supprimer la conversation ?"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "¿Eliminar conversación?"
-          }
-        },
         "pt-BR": {
           "stringUnit": {
             "state": "translated",
             "value": "Excluir conversa?"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "删除会话？"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "刪除會話？"
           }
         }
       }
@@ -19693,22 +19932,28 @@
     "workspace.delete_conversation_and_worktree": {
       "extractionState": "manual",
       "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Unterhaltung & Worktree löschen?"
+          }
+        },
         "en": {
           "stringUnit": {
             "state": "translated",
             "value": "Delete Conversation & Worktree?"
           }
         },
-        "zh-Hans": {
+        "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "删除会话和 Worktree？"
+            "value": "¿Eliminar conversación y worktree?"
           }
         },
-        "zh-Hant": {
+        "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "刪除會話和 Worktree？"
+            "value": "Supprimer la conversation et le worktree ?"
           }
         },
         "ja": {
@@ -19723,28 +19968,22 @@
             "value": "대화 및 Worktree를 삭제하시겠습니까?"
           }
         },
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Unterhaltung & Worktree löschen?"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Supprimer la conversation et le worktree ?"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "¿Eliminar conversación y worktree?"
-          }
-        },
         "pt-BR": {
           "stringUnit": {
             "state": "translated",
             "value": "Excluir conversa e worktree?"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "删除会话和 Worktree？"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "刪除會話和 Worktree？"
           }
         }
       }
@@ -19752,22 +19991,28 @@
     "workspace.delete_with_ellipsis": {
       "extractionState": "manual",
       "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Löschen…"
+          }
+        },
         "en": {
           "stringUnit": {
             "state": "translated",
             "value": "Delete…"
           }
         },
-        "zh-Hans": {
+        "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "删除…"
+            "value": "Eliminar…"
           }
         },
-        "zh-Hant": {
+        "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "刪除…"
+            "value": "Supprimer…"
           }
         },
         "ja": {
@@ -19782,28 +20027,22 @@
             "value": "삭제…"
           }
         },
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Löschen…"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Supprimer…"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Eliminar…"
-          }
-        },
         "pt-BR": {
           "stringUnit": {
             "state": "translated",
             "value": "Excluir…"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "删除…"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "刪除…"
           }
         }
       }
@@ -19811,22 +20050,28 @@
     "workspace.done": {
       "extractionState": "manual",
       "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fertig"
+          }
+        },
         "en": {
           "stringUnit": {
             "state": "translated",
             "value": "Done"
           }
         },
-        "zh-Hans": {
+        "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "完成"
+            "value": "Hecho"
           }
         },
-        "zh-Hant": {
+        "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "完成"
+            "value": "Terminé"
           }
         },
         "ja": {
@@ -19841,28 +20086,22 @@
             "value": "완료"
           }
         },
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Fertig"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Terminé"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Hecho"
-          }
-        },
         "pt-BR": {
           "stringUnit": {
             "state": "translated",
             "value": "Concluído"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "完成"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "完成"
           }
         }
       }
@@ -20342,22 +20581,28 @@
     "workspace.export_project": {
       "extractionState": "manual",
       "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Projekt exportieren"
+          }
+        },
         "en": {
           "stringUnit": {
             "state": "translated",
             "value": "Export Project"
           }
         },
-        "zh-Hans": {
+        "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "导出项目"
+            "value": "Exportar proyecto"
           }
         },
-        "zh-Hant": {
+        "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "匯出專案"
+            "value": "Exporter le projet"
           }
         },
         "ja": {
@@ -20372,28 +20617,22 @@
             "value": "프로젝트 내보내기"
           }
         },
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Projekt exportieren"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Exporter le projet"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Exportar proyecto"
-          }
-        },
         "pt-BR": {
           "stringUnit": {
             "state": "translated",
             "value": "Exportar projeto"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "导出项目"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "匯出專案"
           }
         }
       }
@@ -20401,22 +20640,28 @@
     "workspace.exporting_project": {
       "extractionState": "manual",
       "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Projekt wird exportiert"
+          }
+        },
         "en": {
           "stringUnit": {
             "state": "translated",
             "value": "Exporting Project"
           }
         },
-        "zh-Hans": {
+        "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "正在导出项目"
+            "value": "Exportando proyecto"
           }
         },
-        "zh-Hant": {
+        "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "正在匯出專案"
+            "value": "Exportation du projet"
           }
         },
         "ja": {
@@ -20431,28 +20676,22 @@
             "value": "프로젝트 내보내는 중"
           }
         },
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Projekt wird exportiert"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Exportation du projet"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Exportando proyecto"
-          }
-        },
         "pt-BR": {
           "stringUnit": {
             "state": "translated",
             "value": "Exportando projeto"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "正在导出项目"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "正在匯出專案"
           }
         }
       }
@@ -20460,22 +20699,28 @@
     "workspace.folder_will_be_copied": {
       "extractionState": "manual",
       "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Der Ordner wird in die App kopiert. Die Originaldateien werden nicht verändert."
+          }
+        },
         "en": {
           "stringUnit": {
             "state": "translated",
             "value": "The folder will be copied into the app. Original files will not be modified."
           }
         },
-        "zh-Hans": {
+        "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "文件夹会复制到 App 中，原始文件不会被修改。"
+            "value": "La carpeta se copiará en la app. Los archivos originales no se modificarán."
           }
         },
-        "zh-Hant": {
+        "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "資料夾會複製到 App 中，原始檔案不會被修改。"
+            "value": "Le dossier sera copié dans l’application. Les fichiers originaux ne seront pas modifiés."
           }
         },
         "ja": {
@@ -20490,28 +20735,22 @@
             "value": "폴더가 앱에 복사됩니다. 원본 파일은 수정되지 않습니다."
           }
         },
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Der Ordner wird in die App kopiert. Die Originaldateien werden nicht verändert."
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Le dossier sera copié dans l’application. Les fichiers originaux ne seront pas modifiés."
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "La carpeta se copiará en la app. Los archivos originales no se modificarán."
-          }
-        },
         "pt-BR": {
           "stringUnit": {
             "state": "translated",
             "value": "A pasta será copiada para o app. Os arquivos originais não serão modificados."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "文件夹会复制到 App 中，原始文件不会被修改。"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "資料夾會複製到 App 中，原始檔案不會被修改。"
           }
         }
       }
@@ -20519,22 +20758,28 @@
     "workspace.import_action": {
       "extractionState": "manual",
       "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Importieren"
+          }
+        },
         "en": {
           "stringUnit": {
             "state": "translated",
             "value": "Import"
           }
         },
-        "zh-Hans": {
+        "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "导入"
+            "value": "Importar"
           }
         },
-        "zh-Hant": {
+        "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "匯入"
+            "value": "Importer"
           }
         },
         "ja": {
@@ -20549,28 +20794,22 @@
             "value": "가져오기"
           }
         },
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Importieren"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Importer"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Importar"
-          }
-        },
         "pt-BR": {
           "stringUnit": {
             "state": "translated",
             "value": "Importar"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "导入"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "匯入"
           }
         }
       }
@@ -20637,22 +20876,28 @@
     "workspace.import_folder_title": {
       "extractionState": "manual",
       "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ordner importieren"
+          }
+        },
         "en": {
           "stringUnit": {
             "state": "translated",
             "value": "Import Folder"
           }
         },
-        "zh-Hans": {
+        "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "导入文件夹"
+            "value": "Importar carpeta"
           }
         },
-        "zh-Hant": {
+        "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "匯入資料夾"
+            "value": "Importer un dossier"
           }
         },
         "ja": {
@@ -20667,28 +20912,22 @@
             "value": "폴더 가져오기"
           }
         },
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Ordner importieren"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Importer un dossier"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Importar carpeta"
-          }
-        },
         "pt-BR": {
           "stringUnit": {
             "state": "translated",
             "value": "Importar pasta"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "导入文件夹"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "匯入資料夾"
           }
         }
       }
@@ -20696,22 +20935,28 @@
     "workspace.import_from_files": {
       "extractionState": "manual",
       "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aus Dateien-App importieren"
+          }
+        },
         "en": {
           "stringUnit": {
             "state": "translated",
             "value": "Import from Files App"
           }
         },
-        "zh-Hans": {
+        "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "从文件 App 导入"
+            "value": "Importar desde la app Archivos"
           }
         },
-        "zh-Hant": {
+        "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "從檔案 App 匯入"
+            "value": "Importer depuis l’app Fichiers"
           }
         },
         "ja": {
@@ -20726,28 +20971,22 @@
             "value": "파일 앱에서 가져오기"
           }
         },
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Aus Dateien-App importieren"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Importer depuis l’app Fichiers"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Importar desde la app Archivos"
-          }
-        },
         "pt-BR": {
           "stringUnit": {
             "state": "translated",
             "value": "Importar do app Arquivos"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "从文件 App 导入"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "從檔案 App 匯入"
           }
         }
       }
@@ -20873,22 +21112,28 @@
     "workspace.name_optional": {
       "extractionState": "manual",
       "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Arbeitsbereich-Name (optional)"
+          }
+        },
         "en": {
           "stringUnit": {
             "state": "translated",
             "value": "Workspace Name (optional)"
           }
         },
-        "zh-Hans": {
+        "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "工作区名称（可选）"
+            "value": "Nombre del espacio de trabajo (opcional)"
           }
         },
-        "zh-Hant": {
+        "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "工作區名稱（可選）"
+            "value": "Nom de l’espace de travail (facultatif)"
           }
         },
         "ja": {
@@ -20903,28 +21148,22 @@
             "value": "워크스페이스 이름 (선택 사항)"
           }
         },
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Arbeitsbereich-Name (optional)"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Nom de l’espace de travail (facultatif)"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Nombre del espacio de trabajo (opcional)"
-          }
-        },
         "pt-BR": {
           "stringUnit": {
             "state": "translated",
             "value": "Nome do espaço de trabalho (opcional)"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "工作区名称（可选）"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "工作區名稱（可選）"
           }
         }
       }
@@ -20932,22 +21171,28 @@
     "workspace.new_blank_workspace": {
       "extractionState": "manual",
       "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Neuer leerer Arbeitsbereich"
+          }
+        },
         "en": {
           "stringUnit": {
             "state": "translated",
             "value": "New Blank Workspace"
           }
         },
-        "zh-Hans": {
+        "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "新建空白工作区"
+            "value": "Nuevo espacio de trabajo vacío"
           }
         },
-        "zh-Hant": {
+        "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "新增空白工作區"
+            "value": "Nouvel espace de travail vide"
           }
         },
         "ja": {
@@ -20962,28 +21207,22 @@
             "value": "새 빈 워크스페이스"
           }
         },
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Neuer leerer Arbeitsbereich"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Nouvel espace de travail vide"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Nuevo espacio de trabajo vacío"
-          }
-        },
         "pt-BR": {
           "stringUnit": {
             "state": "translated",
             "value": "Novo espaço de trabalho em branco"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "新建空白工作区"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "新增空白工作區"
           }
         }
       }
@@ -21286,22 +21525,28 @@
     "workspace.ok": {
       "extractionState": "manual",
       "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "OK"
+          }
+        },
         "en": {
           "stringUnit": {
             "state": "translated",
             "value": "OK"
           }
         },
-        "zh-Hans": {
+        "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "好"
+            "value": "OK"
           }
         },
-        "zh-Hant": {
+        "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "好"
+            "value": "OK"
           }
         },
         "ja": {
@@ -21316,28 +21561,22 @@
             "value": "확인"
           }
         },
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "OK"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "OK"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "OK"
-          }
-        },
         "pt-BR": {
           "stringUnit": {
             "state": "translated",
             "value": "OK"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "好"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "好"
           }
         }
       }
@@ -21345,22 +21584,28 @@
     "workspace.or_start_from_existing": {
       "extractionState": "manual",
       "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Oder mit vorhandenen Inhalten beginnen"
+          }
+        },
         "en": {
           "stringUnit": {
             "state": "translated",
             "value": "Or start from existing content"
           }
         },
-        "zh-Hans": {
+        "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "也可以从已有内容开始"
+            "value": "O empezar desde contenido existente"
           }
         },
-        "zh-Hant": {
+        "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "也可以從已有內容開始"
+            "value": "Ou commencer à partir du contenu existant"
           }
         },
         "ja": {
@@ -21375,28 +21620,22 @@
             "value": "또는 기존 콘텐츠에서 시작"
           }
         },
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Oder mit vorhandenen Inhalten beginnen"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Ou commencer à partir du contenu existant"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "O empezar desde contenido existente"
-          }
-        },
         "pt-BR": {
           "stringUnit": {
             "state": "translated",
             "value": "Ou comece com conteúdo existente"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "也可以从已有内容开始"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "也可以從已有內容開始"
           }
         }
       }
@@ -21463,22 +21702,28 @@
     "workspace.preparing": {
       "extractionState": "manual",
       "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Arbeitsbereich wird vorbereitet…"
+          }
+        },
         "en": {
           "stringUnit": {
             "state": "translated",
             "value": "Preparing workspace…"
           }
         },
-        "zh-Hans": {
+        "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "正在准备工作区…"
+            "value": "Preparando espacio de trabajo…"
           }
         },
-        "zh-Hant": {
+        "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "正在準備工作區…"
+            "value": "Préparation de l’espace de travail…"
           }
         },
         "ja": {
@@ -21493,28 +21738,22 @@
             "value": "워크스페이스 준비 중…"
           }
         },
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Arbeitsbereich wird vorbereitet…"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Préparation de l’espace de travail…"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Preparando espacio de trabajo…"
-          }
-        },
         "pt-BR": {
           "stringUnit": {
             "state": "translated",
             "value": "Preparando espaço de trabalho…"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "正在准备工作区…"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "正在準備工作區…"
           }
         }
       }
@@ -21522,22 +21761,28 @@
     "workspace.projects_section": {
       "extractionState": "manual",
       "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Projekte"
+          }
+        },
         "en": {
           "stringUnit": {
             "state": "translated",
             "value": "Projects"
           }
         },
-        "zh-Hans": {
+        "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "项目"
+            "value": "Proyectos"
           }
         },
-        "zh-Hant": {
+        "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "專案"
+            "value": "Projets"
           }
         },
         "ja": {
@@ -21552,28 +21797,22 @@
             "value": "프로젝트"
           }
         },
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Projekte"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Projets"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Proyectos"
-          }
-        },
         "pt-BR": {
           "stringUnit": {
             "state": "translated",
             "value": "Projetos"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "项目"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "專案"
           }
         }
       }
@@ -21581,22 +21820,28 @@
     "workspace.public_git_repo_section": {
       "extractionState": "manual",
       "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Öffentliches Git-Repository"
+          }
+        },
         "en": {
           "stringUnit": {
             "state": "translated",
             "value": "Public Git Repository"
           }
         },
-        "zh-Hans": {
+        "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "公开 Git 仓库"
+            "value": "Repositorio Git público"
           }
         },
-        "zh-Hant": {
+        "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "公開 Git 倉庫"
+            "value": "Dépôt Git public"
           }
         },
         "ja": {
@@ -21611,28 +21856,22 @@
             "value": "공개 Git 저장소"
           }
         },
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Öffentliches Git-Repository"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Dépôt Git public"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Repositorio Git público"
-          }
-        },
         "pt-BR": {
           "stringUnit": {
             "state": "translated",
             "value": "Repositório Git público"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "公开 Git 仓库"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "公開 Git 倉庫"
           }
         }
       }
@@ -21817,22 +22056,28 @@
     "workspace.rename": {
       "extractionState": "manual",
       "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Umbenennen"
+          }
+        },
         "en": {
           "stringUnit": {
             "state": "translated",
             "value": "Rename"
           }
         },
-        "zh-Hans": {
+        "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "重命名"
+            "value": "Renombrar"
           }
         },
-        "zh-Hant": {
+        "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "重新命名"
+            "value": "Renommer"
           }
         },
         "ja": {
@@ -21847,28 +22092,22 @@
             "value": "이름 변경"
           }
         },
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Umbenennen"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Renommer"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Renombrar"
-          }
-        },
         "pt-BR": {
           "stringUnit": {
             "state": "translated",
             "value": "Renomear"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "重命名"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "重新命名"
           }
         }
       }
@@ -21876,22 +22115,28 @@
     "workspace.rename_conversation": {
       "extractionState": "manual",
       "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Unterhaltung umbenennen"
+          }
+        },
         "en": {
           "stringUnit": {
             "state": "translated",
             "value": "Rename Conversation"
           }
         },
-        "zh-Hans": {
+        "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "重命名会话"
+            "value": "Renombrar conversación"
           }
         },
-        "zh-Hant": {
+        "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "重新命名會話"
+            "value": "Renommer la conversation"
           }
         },
         "ja": {
@@ -21906,28 +22151,22 @@
             "value": "대화 이름 변경"
           }
         },
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Unterhaltung umbenennen"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Renommer la conversation"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Renombrar conversación"
-          }
-        },
         "pt-BR": {
           "stringUnit": {
             "state": "translated",
             "value": "Renomear conversa"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "重命名会话"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "重新命名會話"
           }
         }
       }
@@ -22230,22 +22469,28 @@
     "workspace.save_location_section": {
       "extractionState": "manual",
       "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Speicherort"
+          }
+        },
         "en": {
           "stringUnit": {
             "state": "translated",
             "value": "Save Location"
           }
         },
-        "zh-Hans": {
+        "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "保存位置"
+            "value": "Ubicación de guardado"
           }
         },
-        "zh-Hant": {
+        "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "儲存位置"
+            "value": "Emplacement de sauvegarde"
           }
         },
         "ja": {
@@ -22260,28 +22505,22 @@
             "value": "저장 위치"
           }
         },
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Speicherort"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Emplacement de sauvegarde"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Ubicación de guardado"
-          }
-        },
         "pt-BR": {
           "stringUnit": {
             "state": "translated",
             "value": "Local de salvamento"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "保存位置"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "儲存位置"
           }
         }
       }
@@ -22289,22 +22528,28 @@
     "workspace.saved_on_iphone": {
       "extractionState": "manual",
       "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Arbeitsbereiche werden auf diesem iPhone gespeichert. Der Import kopiert nur Inhalte und verändert keine Originaldateien."
+          }
+        },
         "en": {
           "stringUnit": {
             "state": "translated",
             "value": "Workspaces are saved on this iPhone. Importing only copies content and will not modify original files."
           }
         },
-        "zh-Hans": {
+        "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "工作区保存在这台 iPhone 上。导入时只会复制内容，不会修改原始文件。"
+            "value": "Los espacios de trabajo se guardan en este iPhone. La importación solo copia contenido y no modifica los archivos originales."
           }
         },
-        "zh-Hant": {
+        "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "工作區保存在這台 iPhone 上。匯入時只會複製內容，不會修改原始檔案。"
+            "value": "Les espaces de travail sont enregistrés sur cet iPhone. L’importation ne fait que copier le contenu et ne modifie pas les fichiers originaux."
           }
         },
         "ja": {
@@ -22319,28 +22564,22 @@
             "value": "워크스페이스는 이 iPhone에 저장됩니다. 가져오기는 콘텐츠만 복사하며 원본 파일은 수정되지 않습니다."
           }
         },
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Arbeitsbereiche werden auf diesem iPhone gespeichert. Der Import kopiert nur Inhalte und verändert keine Originaldateien."
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Les espaces de travail sont enregistrés sur cet iPhone. L’importation ne fait que copier le contenu et ne modifie pas les fichiers originaux."
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Los espacios de trabajo se guardan en este iPhone. La importación solo copia contenido y no modifica los archivos originales."
-          }
-        },
         "pt-BR": {
           "stringUnit": {
             "state": "translated",
             "value": "Os espaços de trabalho são salvos neste iPhone. A importação apenas copia o conteúdo e não modifica os arquivos originais."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "工作区保存在这台 iPhone 上。导入时只会复制内容，不会修改原始文件。"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "工作區保存在這台 iPhone 上。匯入時只會複製內容，不會修改原始檔案。"
           }
         }
       }
@@ -22407,22 +22646,28 @@
     "workspace.search_projects": {
       "extractionState": "manual",
       "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Projekte durchsuchen"
+          }
+        },
         "en": {
           "stringUnit": {
             "state": "translated",
             "value": "Search Projects"
           }
         },
-        "zh-Hans": {
+        "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "搜索项目"
+            "value": "Buscar proyectos"
           }
         },
-        "zh-Hant": {
+        "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "搜尋專案"
+            "value": "Rechercher des projets"
           }
         },
         "ja": {
@@ -22437,28 +22682,22 @@
             "value": "프로젝트 검색"
           }
         },
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Projekte durchsuchen"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Rechercher des projets"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Buscar proyectos"
-          }
-        },
         "pt-BR": {
           "stringUnit": {
             "state": "translated",
             "value": "Buscar projetos"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "搜索项目"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "搜尋專案"
           }
         }
       }
@@ -22466,22 +22705,28 @@
     "workspace.select_project": {
       "extractionState": "manual",
       "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Projekt auswählen"
+          }
+        },
         "en": {
           "stringUnit": {
             "state": "translated",
             "value": "Select Project"
           }
         },
-        "zh-Hans": {
+        "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "选择项目"
+            "value": "Seleccionar proyecto"
           }
         },
-        "zh-Hant": {
+        "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "選擇專案"
+            "value": "Sélectionner un projet"
           }
         },
         "ja": {
@@ -22496,28 +22741,22 @@
             "value": "프로젝트 선택"
           }
         },
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Projekt auswählen"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Sélectionner un projet"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Seleccionar proyecto"
-          }
-        },
         "pt-BR": {
           "stringUnit": {
             "state": "translated",
             "value": "Selecionar projeto"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "选择项目"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "選擇專案"
           }
         }
       }
@@ -22702,22 +22941,28 @@
     "workspace.start_conversation": {
       "extractionState": "manual",
       "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Unterhaltung starten"
+          }
+        },
         "en": {
           "stringUnit": {
             "state": "translated",
             "value": "Start Conversation"
           }
         },
-        "zh-Hans": {
+        "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "开始对话"
+            "value": "Iniciar conversación"
           }
         },
-        "zh-Hant": {
+        "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "開始對話"
+            "value": "Démarrer la conversation"
           }
         },
         "ja": {
@@ -22732,28 +22977,22 @@
             "value": "대화 시작"
           }
         },
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Unterhaltung starten"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Démarrer la conversation"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Iniciar conversación"
-          }
-        },
         "pt-BR": {
           "stringUnit": {
             "state": "translated",
             "value": "Iniciar conversa"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "开始对话"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "開始對話"
           }
         }
       }
@@ -22761,22 +23000,28 @@
     "workspace.start_first_conversation": {
       "extractionState": "manual",
       "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Starten Sie Ihre erste Unterhaltung"
+          }
+        },
         "en": {
           "stringUnit": {
             "state": "translated",
             "value": "Start Your First Conversation"
           }
         },
-        "zh-Hans": {
+        "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "开始第一次对话"
+            "value": "Inicia tu primera conversación"
           }
         },
-        "zh-Hant": {
+        "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "開始第一次對話"
+            "value": "Démarrez votre première conversation"
           }
         },
         "ja": {
@@ -22791,28 +23036,22 @@
             "value": "첫 번째 대화 시작"
           }
         },
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Starten Sie Ihre erste Unterhaltung"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Démarrez votre première conversation"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Inicia tu primera conversación"
-          }
-        },
         "pt-BR": {
           "stringUnit": {
             "state": "translated",
             "value": "Inicie sua primeira conversa"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "开始第一次对话"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "開始第一次對話"
           }
         }
       }
@@ -22820,22 +23059,28 @@
     "workspace.start_first_conversation_desc": {
       "extractionState": "manual",
       "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Beschreiben Sie, was Sie in %@ erstellen oder ändern möchten. CodeAgent arbeitet direkt in diesem Arbeitsbereich."
+          }
+        },
         "en": {
           "stringUnit": {
             "state": "translated",
             "value": "Describe what you want to build or modify in %@. CodeAgent will work directly in this workspace."
           }
         },
-        "zh-Hans": {
+        "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "描述你想在 %@ 中构建或修改的内容，CodeAgent 会直接在这个工作区中工作。"
+            "value": "Describe lo que quieres construir o modificar en %@. CodeAgent trabajará directamente en este espacio de trabajo."
           }
         },
-        "zh-Hant": {
+        "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "描述你想在 %@ 中構建或修改的內容，CodeAgent 會直接在這個工作區中工作。"
+            "value": "Décrivez ce que vous voulez construire ou modifier dans %@. CodeAgent travaillera directement dans cet espace de travail."
           }
         },
         "ja": {
@@ -22850,28 +23095,22 @@
             "value": "%@에서 빌드하거나 수정하려는 내용을 설명하세요. CodeAgent가 이 워크스페이스에서 직접 작업합니다."
           }
         },
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Beschreiben Sie, was Sie in %@ erstellen oder ändern möchten. CodeAgent arbeitet direkt in diesem Arbeitsbereich."
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Décrivez ce que vous voulez construire ou modifier dans %@. CodeAgent travaillera directement dans cet espace de travail."
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Describe lo que quieres construir o modificar en %@. CodeAgent trabajará directamente en este espacio de trabajo."
-          }
-        },
         "pt-BR": {
           "stringUnit": {
             "state": "translated",
             "value": "Descreva o que você quer construir ou modificar em %@. O CodeAgent trabalhará diretamente neste espaço de trabalho."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "描述你想在 %@ 中构建或修改的内容，CodeAgent 会直接在这个工作区中工作。"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "描述你想在 %@ 中構建或修改的內容，CodeAgent 會直接在這個工作區中工作。"
           }
         }
       }
@@ -22879,22 +23118,28 @@
     "workspace.start_from_idea": {
       "extractionState": "manual",
       "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mit einer Idee beginnen"
+          }
+        },
         "en": {
           "stringUnit": {
             "state": "translated",
             "value": "Start from an idea"
           }
         },
-        "zh-Hans": {
+        "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "从一个想法开始"
+            "value": "Empezar desde una idea"
           }
         },
-        "zh-Hant": {
+        "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "從一個想法開始"
+            "value": "Partir d’une idée"
           }
         },
         "ja": {
@@ -22909,28 +23154,22 @@
             "value": "아이디어에서 시작"
           }
         },
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Mit einer Idee beginnen"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Partir d’une idée"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Empezar desde una idea"
-          }
-        },
         "pt-BR": {
           "stringUnit": {
             "state": "translated",
             "value": "Comece com uma ideia"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "从一个想法开始"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "從一個想法開始"
           }
         }
       }
@@ -22938,22 +23177,28 @@
     "workspace.start_from_idea_desc": {
       "extractionState": "manual",
       "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Keine Notwendigkeit, zuerst Code oder Dateien vorzubereiten. Erstellen Sie einen leeren Arbeitsbereich und sagen Sie CodeAgent, was Sie erstellen möchten."
+          }
+        },
         "en": {
           "stringUnit": {
             "state": "translated",
             "value": "No need to prepare code or files first. Create a blank workspace and tell CodeAgent what you want to build."
           }
         },
-        "zh-Hans": {
+        "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "不需要先准备代码或文件。创建一个空白工作区，告诉 CodeAgent 你想构建什么。"
+            "value": "No necesitas preparar código o archivos primero. Crea un espacio de trabajo vacío y dile a CodeAgent lo que quieres construir."
           }
         },
-        "zh-Hant": {
+        "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "不需要先準備程式碼或檔案。建立一個空白工作區，告訴 CodeAgent 你想構建什麼。"
+            "value": "Pas besoin de préparer du code ou des fichiers d’abord. Créez un espace de travail vide et dites à CodeAgent ce que vous voulez construire."
           }
         },
         "ja": {
@@ -22968,28 +23213,22 @@
             "value": "코드나 파일을 먼저 준비할 필요가 없습니다. 빈 워크스페이스를 만들고 CodeAgent에게 구축하려는 것을 알려주세요."
           }
         },
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Keine Notwendigkeit, zuerst Code oder Dateien vorzubereiten. Erstellen Sie einen leeren Arbeitsbereich und sagen Sie CodeAgent, was Sie erstellen möchten."
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Pas besoin de préparer du code ou des fichiers d’abord. Créez un espace de travail vide et dites à CodeAgent ce que vous voulez construire."
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "No necesitas preparar código o archivos primero. Crea un espacio de trabajo vacío y dile a CodeAgent lo que quieres construir."
-          }
-        },
         "pt-BR": {
           "stringUnit": {
             "state": "translated",
             "value": "Não precisa preparar código ou arquivos primeiro. Crie um espaço de trabalho em branco e diga ao CodeAgent o que você quer construir."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "不需要先准备代码或文件。创建一个空白工作区，告诉 CodeAgent 你想构建什么。"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "不需要先準備程式碼或檔案。建立一個空白工作區，告訴 CodeAgent 你想構建什麼。"
           }
         }
       }
@@ -22997,22 +23236,28 @@
     "workspace.switch_project": {
       "extractionState": "manual",
       "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Projekt wechseln"
+          }
+        },
         "en": {
           "stringUnit": {
             "state": "translated",
             "value": "Switch Project"
           }
         },
-        "zh-Hans": {
+        "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "切换项目"
+            "value": "Cambiar proyecto"
           }
         },
-        "zh-Hant": {
+        "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "切換專案"
+            "value": "Changer de projet"
           }
         },
         "ja": {
@@ -23027,28 +23272,22 @@
             "value": "프로젝트 전환"
           }
         },
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Projekt wechseln"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Changer de projet"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Cambiar proyecto"
-          }
-        },
         "pt-BR": {
           "stringUnit": {
             "state": "translated",
             "value": "Trocar projeto"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "切换项目"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "切換專案"
           }
         }
       }
@@ -23056,22 +23295,28 @@
     "workspace.switch_project_nav": {
       "extractionState": "manual",
       "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Projekt wechseln"
+          }
+        },
         "en": {
           "stringUnit": {
             "state": "translated",
             "value": "Switch Project"
           }
         },
-        "zh-Hans": {
+        "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "切换项目"
+            "value": "Cambiar proyecto"
           }
         },
-        "zh-Hant": {
+        "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "切換專案"
+            "value": "Changer de projet"
           }
         },
         "ja": {
@@ -23086,28 +23331,22 @@
             "value": "프로젝트 전환"
           }
         },
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Projekt wechseln"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Changer de projet"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Cambiar proyecto"
-          }
-        },
         "pt-BR": {
           "stringUnit": {
             "state": "translated",
             "value": "Trocar projeto"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "切换项目"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "切換專案"
           }
         }
       }
@@ -23646,22 +23885,28 @@
     "workspace.view_current_project": {
       "extractionState": "manual",
       "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aktuelles Projekt anzeigen"
+          }
+        },
         "en": {
           "stringUnit": {
             "state": "translated",
             "value": "View Current Project"
           }
         },
-        "zh-Hans": {
+        "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "查看当前项目"
+            "value": "Ver proyecto actual"
           }
         },
-        "zh-Hant": {
+        "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "查看當前專案"
+            "value": "Voir le projet actuel"
           }
         },
         "ja": {
@@ -23676,28 +23921,22 @@
             "value": "현재 프로젝트 보기"
           }
         },
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Aktuelles Projekt anzeigen"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Voir le projet actuel"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Ver proyecto actual"
-          }
-        },
         "pt-BR": {
           "stringUnit": {
             "state": "translated",
             "value": "Ver projeto atual"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "查看当前项目"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "查看當前專案"
           }
         }
       }

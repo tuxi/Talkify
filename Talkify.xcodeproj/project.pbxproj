@@ -16,6 +16,7 @@
 		D0962061300B19920005EBC6 /* FeatureAuth in Frameworks */ = {isa = PBXBuildFile; productRef = D0962060300B19920005EBC6 /* FeatureAuth */; };
 		D0962065300B1D160005EBC6 /* AgentKit in Frameworks */ = {isa = PBXBuildFile; productRef = D0962064300B1D160005EBC6 /* AgentKit */; };
 		D0F9C4AB30146A5D00DD5013 /* DesignKit in Frameworks */ = {isa = PBXBuildFile; productRef = D0F9C21E3014645F00DD5013 /* DesignKit */; };
+		D0F9C7EA3016DE7000DD5013 /* CoreKit in Frameworks */ = {isa = PBXBuildFile; productRef = D096205D300B19610005EBC6 /* CoreKit */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -95,6 +96,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				D0F9C7EA3016DE7000DD5013 /* CoreKit in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -579,6 +581,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = NO;
 				CODE_SIGN_ENTITLEMENTS = Talkify/Talkify.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 43;
@@ -586,7 +589,7 @@
 				ENABLE_APP_SANDBOX = YES;
 				ENABLE_HARDENED_RUNTIME = YES;
 				ENABLE_PREVIEWS = YES;
-				ENABLE_USER_SELECTED_FILES = readonly;
+				ENABLE_USER_SELECTED_FILES = readwrite;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = "Talkify-Info.plist";
 				INFOPLIST_KEY_CFBundleDisplayName = Talkify;
@@ -627,6 +630,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = NO;
 				CODE_SIGN_ENTITLEMENTS = Talkify/Talkify.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 43;
@@ -634,7 +638,7 @@
 				ENABLE_APP_SANDBOX = YES;
 				ENABLE_HARDENED_RUNTIME = YES;
 				ENABLE_PREVIEWS = YES;
-				ENABLE_USER_SELECTED_FILES = readonly;
+				ENABLE_USER_SELECTED_FILES = readwrite;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = "Talkify-Info.plist";
 				INFOPLIST_KEY_CFBundleDisplayName = Talkify;

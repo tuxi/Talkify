@@ -20,6 +20,7 @@ extension View {
                 SettingsDetailView(section: section)
             case .pointsCenter:
                 PointsCenterView(viewModel: PointsCenterViewModel(billingManager: container.billingManager, billingService: container.makeBillingService()))
+                    .environment(router)
             case .subscriptionCenter:
                 SubscriptionCenterView(navigationActions: SubscriptionCenterNavigationActions(showPointsCenter: {
                     
@@ -27,6 +28,8 @@ extension View {
                     billingManager: container.billingManager,
                     billingService: container.makeBillingService()
                 ))
+            case .pointsLedgerView:
+                PointsLedgerView(viewModel: PointsLedgerViewModel(billingService: container.makeBillingService()))
             }
         }
     }

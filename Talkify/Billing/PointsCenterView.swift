@@ -11,10 +11,13 @@ import CoreKit
 import UIKit
 #endif
 import DesignKit
+import AgentKit
 
 struct PointsCenterView: View {
     @Environment(\.dismiss) private var dismiss
     @Environment(\.colorScheme) private var colorScheme
+    
+    @Environment(SettingsRouter.self) private var routerPath
 
     @StateObject var viewModel: PointsCenterViewModel
     
@@ -49,18 +52,16 @@ struct PointsCenterView: View {
         }
         .navigationTitle(TalkifyLocalized.string("billing.points_center"))
         .toolbar {
-            NavigationLink {
-                PointsLedgerView(
-                    viewModel: PointsLedgerViewModel(
-                        billingService: viewModel.billingService
-                    )
-                )
-            } label: {
-                HStack(spacing: 6) {
-                    Image(systemName: "clock.arrow.circlepath")
-                    Text(verbatim: TalkifyLocalized.string("billing.points.ledger"))
+            ToolbarItem(placement: .automatic) {
+                Button {
+                    routerPath.navigate(to: .pointsLedgerView)
+                } label: {
+                    HStack(spacing: 6) {
+                        Image(systemName: "clock.arrow.circlepath")
+                        Text(verbatim: TalkifyLocalized.string("billing.points.ledger"))
+                    }
+                    .font(.system(size: 13, weight: .semibold))
                 }
-                .font(.system(size: 13, weight: .semibold))
             }
         }
 #if os(iOS)

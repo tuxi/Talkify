@@ -102,6 +102,8 @@ final class AppContainer {
     let userAssetPicker: TalkifyUserAssetPicker
     let userAssetUploader: TalkifyUserAssetUploader
     let userAssetPreviewResolver: TalkifyUserAssetPreviewResolver
+    let localUserAssetStager: TalkifyWorkspaceLocalAssetStager
+    let localUserAssetPreviewResolver: TalkifyLocalUserAssetPreviewResolver
     private let userAssetFileStore: ManagedUserAssetFileStore
     private let userAssetLocalStateStore: ManagedUserAssetLocalStateStore
 
@@ -166,6 +168,11 @@ final class AppContainer {
             api: userAssetAPI,
             accountScope: accountScope
         )
+        self.localUserAssetStager = TalkifyWorkspaceLocalAssetStager(
+            fileStore: userAssetFileStore,
+            normalizer: UserImageNormalizer(fileStore: userAssetFileStore)
+        )
+        self.localUserAssetPreviewResolver = TalkifyLocalUserAssetPreviewResolver()
         self.userManager = UserManager(
             service: UserService(apiProvider: apiProvider),
             environment: environmentManager.currentEnvironmentSnapshot
@@ -256,8 +263,10 @@ final class AppContainer {
             userAssetPicker: { [userAssetPicker] in
                 try await userAssetPicker.pick()
             },
+            localUserAssetStager: localUserAssetStager,
             userAssetUploader: userAssetUploader,
             userAssetPreviewResolver: userAssetPreviewResolver,
+            localUserAssetPreviewResolver: localUserAssetPreviewResolver,
             onAttentionEvent: { [conversationNotifications] event in
                 conversationNotifications.handle(event)
             }
@@ -323,18 +332,6 @@ final class AppContainer {
     // MARK: - Factory
 
     static func makeWorkspaceStore(dependencies: AgentDependencies) -> WorkspaceStore {
-        WorkspaceStore(
-            client: dependencies.client,
-            toolRegistry: dependencies.toolRegistry,
-            timelineExtensions: dependencies.timelineExtensions,
-            conversationRendererMode: dependencies.conversationRendererMode,
-            onAuthExpired: dependencies.onAuthExpired,
-            localStateStore: dependencies.localStateStore,
-            userAssetPicker: dependencies.userAssetPicker,
-            userAssetUploader: dependencies.userAssetUploader,
-            userAssetPreviewResolver: dependencies.userAssetPreviewResolver,
-            attentionReadStore: dependencies.attentionReadStore,
-            onAttentionEvent: dependencies.onAttentionEvent
-        )
+        WorkspaceStore(dependencies: dependencies)
     }
 }

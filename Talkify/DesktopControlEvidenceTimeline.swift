@@ -8,6 +8,7 @@
 
 #if os(macOS)
 import AgentKit
+import enum CoreKit.TalkifyLocalized
 import Foundation
 import Observation
 import SwiftUI
@@ -59,7 +60,7 @@ final class DesktopControlEvidenceTimeline: WebTimelineExtension {
             guard let item = card.item else {
                 return TimelineWebNode(
                     id: card.id,
-                    title: TalkifyLocalized.string("evidence.waiting"),
+                    title: CoreKit.TalkifyLocalized.string("evidence.waiting"),
                     summary: card.auditEventID,
                     status: "pending",
                     tone: .neutral
@@ -117,7 +118,7 @@ final class DesktopControlEvidenceTimeline: WebTimelineExtension {
                     )
                 },
                 actions: documentActions,
-                footer: card.bundle.map { String(format: TalkifyLocalized.string("evidence.bundle_exported_with_uri"), $0.artifact.uri) }
+                footer: card.bundle.map { String(format: CoreKit.TalkifyLocalized.string("evidence.bundle_exported_with_uri"), $0.artifact.uri) }
             )
         }
     }
@@ -267,7 +268,7 @@ private struct DesktopEvidenceTimelineCard: View {
             if let item = card.item {
                 itemContent(item)
             } else {
-                Label(TalkifyLocalized.string("evidence.waiting"), systemImage: "hourglass")
+                Label(CoreKit.TalkifyLocalized.string("evidence.waiting"), systemImage: "hourglass")
                     .font(.subheadline)
                     .foregroundStyle(.secondary)
                 Text(card.auditEventID)
@@ -334,7 +335,7 @@ private struct DesktopEvidenceTimelineCard: View {
             }
             Spacer()
             if let bundle = card.bundle {
-                Label(TalkifyLocalized.string("evidence.bundle_exported"), systemImage: "link")
+                Label(CoreKit.TalkifyLocalized.string("evidence.bundle_exported"), systemImage: "link")
                     .help(bundle.artifact.uri)
                     .foregroundStyle(.secondary)
             }

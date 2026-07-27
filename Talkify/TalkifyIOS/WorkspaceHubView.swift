@@ -374,57 +374,64 @@ struct WorkspaceHubView: View {
                         .foregroundStyle(.tertiary)
                 }
                 .contentShape(Rectangle())
+                .contextMenu {
+                    Button {
+                        exportWorkspace()
+                    } label: {
+                        HStack {
+                            Group {
+                                if isExportingWorkspace {
+                                    ProgressView()
+                                        .controlSize(.small)
+                                } else {
+                                    Image(systemName: "square.and.arrow.up")
+                                        .font(.system(size: 15, weight: .semibold))
+                                }
+                            }
+                            .foregroundStyle(.secondary)
+                            .frame(width: 38, height: 38)
+                            .background(
+                                Color.primary.opacity(colorScheme == .dark ? 0.08 : 0.05),
+                                in: RoundedRectangle(cornerRadius: 11, style: .continuous)
+                            )
+                            .overlay {
+                                RoundedRectangle(cornerRadius: 11, style: .continuous)
+                                    .stroke(Color.primary.opacity(0.06), lineWidth: 0.5)
+                            }
+                            Text(isExportingWorkspace ? TalkifyLocalized.string("workspace.exporting_project") : TalkifyLocalized.string("workspace.export_project"))
+                        }
+                    }
+                    .buttonStyle(.plain)
+                    .disabled(isExportingWorkspace || fileProvider == nil)
+                    .accessibilityLabel(isExportingWorkspace ? TalkifyLocalized.string("workspace.exporting_project") : TalkifyLocalized.string("workspace.export_project"))
+                    Divider()
+                    Button {
+                        onWorkspaceBrowserRequested?()
+                    } label: {
+                        HStack {
+                            Image(systemName: "arrow.up.right.square")
+                                .font(.system(size: 15, weight: .semibold))
+                                .foregroundStyle(.secondary)
+                                .frame(width: 38, height: 38)
+                                .background(
+                                    Color.primary.opacity(colorScheme == .dark ? 0.08 : 0.05),
+                                    in: RoundedRectangle(cornerRadius: 11, style: .continuous)
+                                )
+                                .overlay {
+                                    RoundedRectangle(cornerRadius: 11, style: .continuous)
+                                        .stroke(Color.primary.opacity(0.06), lineWidth: 0.5)
+                                }
+                            Text(TalkifyLocalized.string("workspace.view_current_project"))
+                        }
+                    }
+                    .buttonStyle(.plain)
+                    .disabled(workspaceContext.activeWorkspace == nil)
+                    .accessibilityLabel(TalkifyLocalized.string("workspace.view_current_project"))
+                }
             }
             .buttonStyle(.plain)
             .accessibilityLabel(TalkifyLocalized.string("workspace.switch_project"))
-            if !DeviceInfo.isPadLayout {
-                Button {
-                    exportWorkspace()
-                } label: {
-                    Group {
-                        if isExportingWorkspace {
-                            ProgressView()
-                                .controlSize(.small)
-                        } else {
-                            Image(systemName: "square.and.arrow.up")
-                                .font(.system(size: 15, weight: .semibold))
-                        }
-                    }
-                    .foregroundStyle(.secondary)
-                    .frame(width: 38, height: 38)
-                    .background(
-                        Color.primary.opacity(colorScheme == .dark ? 0.08 : 0.05),
-                        in: RoundedRectangle(cornerRadius: 11, style: .continuous)
-                    )
-                    .overlay {
-                        RoundedRectangle(cornerRadius: 11, style: .continuous)
-                            .stroke(Color.primary.opacity(0.06), lineWidth: 0.5)
-                    }
-                }
-                .buttonStyle(.plain)
-                .disabled(isExportingWorkspace || fileProvider == nil)
-                .accessibilityLabel(isExportingWorkspace ? TalkifyLocalized.string("workspace.exporting_project") : TalkifyLocalized.string("workspace.export_project"))
 
-                Button {
-                    onWorkspaceBrowserRequested?()
-                } label: {
-                    Image(systemName: "arrow.up.right.square")
-                        .font(.system(size: 15, weight: .semibold))
-                        .foregroundStyle(.secondary)
-                        .frame(width: 38, height: 38)
-                        .background(
-                            Color.primary.opacity(colorScheme == .dark ? 0.08 : 0.05),
-                            in: RoundedRectangle(cornerRadius: 11, style: .continuous)
-                        )
-                        .overlay {
-                            RoundedRectangle(cornerRadius: 11, style: .continuous)
-                                .stroke(Color.primary.opacity(0.06), lineWidth: 0.5)
-                        }
-                }
-                .buttonStyle(.plain)
-                .disabled(workspaceContext.activeWorkspace == nil)
-                .accessibilityLabel(TalkifyLocalized.string("workspace.view_current_project"))
-            }
         }
         .padding(.horizontal, 16)
         .padding(.top, 14)
@@ -502,7 +509,7 @@ struct WorkspaceHubView: View {
                     }
                     .foregroundStyle(selectedTab == tab ? Color.accentColor : Color.secondary)
                     .frame(maxWidth: .infinity)
-                    .padding(.vertical, 8)
+                    .padding(.vertical, 5)
                     .background {
                         if selectedTab == tab {
                             RoundedRectangle(cornerRadius: 9, style: .continuous)

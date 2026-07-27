@@ -11,6 +11,7 @@ enum SettingsNavigationDestination: Identifiable, Hashable {
     case detail(SettingsSection)
     case pointsCenter
     case subscriptionCenter
+    case pointsLedgerView
     
     var id: String {
         switch self {
@@ -20,6 +21,8 @@ enum SettingsNavigationDestination: Identifiable, Hashable {
             return "pointsCenter"
         case .subscriptionCenter:
             return "subscriptionCenter"
+        case .pointsLedgerView:
+            return "pointsLedgerView"
         }
     }
 }

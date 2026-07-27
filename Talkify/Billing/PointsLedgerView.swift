@@ -147,6 +147,7 @@ final class PointsLedgerViewModel: ObservableObject {
 }
 
 struct PointsLedgerView: View {
+    @Environment(\.colorScheme) private var colorScheme
     @StateObject var viewModel: PointsLedgerViewModel
 
     var body: some View {
@@ -154,7 +155,7 @@ struct PointsLedgerView: View {
             filterBar
             content
         }
-        .background(Color.underPageBackground)
+        .background(pageBackground)
         .navigationTitle("点数明细")
 #if os(iOS)
         .navigationBarTitleDisplayMode(.inline)
@@ -167,6 +168,10 @@ struct PointsLedgerView: View {
                 await viewModel.load()
             }
         }
+    }
+    
+    var pageBackground: some View {
+        Color(hex: colorScheme == .dark ? "080A09" : "F3F7FB")
     }
 }
 

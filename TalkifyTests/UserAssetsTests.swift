@@ -136,6 +136,160 @@ final class UserImageNormalizerTests: XCTestCase {
     }
 }
 
+final class WorkspaceLocalAssetTests: XCTestCase {
+    private var root: URL!
+    private var managedRoot: URL!
+    private var workspace: URL!
+    private var store: ManagedUserAssetFileStore!
+    private var stager: TalkifyWorkspaceLocalAssetStager!
+
+    override func setUpWithError() throws {
+        root = FileManager.default.temporaryDirectory
+            .appendingPathComponent("talkify-local-assets-\(UUID().uuidString)")
+        managedRoot = root.appendingPathComponent("managed", isDirectory: true)
+        workspace = root.appendingPathComponent("workspace", isDirectory: true)
+        try FileManager.default.createDirectory(at: workspace, withIntermediateDirectories: true)
+        store = try ManagedUserAssetFileStore(rootURL: managedRoot)
+        stager = TalkifyWorkspaceLocalAssetStager(
+            fileStore: store,
+            normalizer: UserImageNormalizer(fileStore: store)
+        )
+    }
+
+    override func tearDownWithError() throws {
+        try? FileManager.default.removeItem(at: root)
+    }
+
+    func testStagesPDFWithDigestAndPreviewRevalidation() async throws {
+        let source = root.appendingPathComponent("spec.pdf")
+        try Data("%PDF-1.7\nfixture".utf8).write(to: source)
+        let id = UUID().uuidString
+        let ref = try await stager.stage(
+            attachment: DraftAttachmentReference(
+                id: id,
+                displayName: "spec.pdf",
+                resourceURI: source.absoluteString
+            ),
+            workspaceRoot: workspace
+        )
+
+        XCTAssertEqual(ref.id, id.lowercased())
+        XCTAssertEqual(ref.kind, "pdf")
+        XCTAssertEqual(ref.mimeType, "application/pdf")
+        XCTAssertEqual(ref.relativePath, "user-assets/\(id.lowercased())/spec.pdf")
+        XCTAssertEqual(
+            ref.sha256,
+            try TalkifyWorkspaceLocalAssetStager.sha256(
+                of: workspace.appendingPathComponent(ref.relativePath)
+            )
+        )
+
+        let resolver = TalkifyLocalUserAssetPreviewResolver()
+        let preview = try await resolver.previewURL(
+            for: ref,
+            conversationID: "conversation-1",
+            workspaceRoot: workspace
+        )
+        XCTAssertEqual(preview.path, workspace.appendingPathComponent(ref.relativePath).path)
+
+        try Data("%PDF-1.7\nchanged".utf8).write(to: preview)
+        do {
+            _ = try await resolver.previewURL(
+                for: ref,
+                conversationID: "conversation-1",
+                workspaceRoot: workspace
+            )
+            XCTFail("A changed staged asset must not be exposed")
+        } catch {
+            XCTAssertTrue(true)
+        }
+    }
+
+    func testDuplicateBytesUseDistinctNoOverwritePaths() async throws {
+        let source = root.appendingPathComponent("notes.txt")
+        try Data("same content".utf8).write(to: source)
+        let firstID = UUID().uuidString
+        let secondID = UUID().uuidString
+        let first = try await stager.stage(
+            attachment: .init(
+                id: firstID,
+                displayName: "notes.txt",
+                resourceURI: source.absoluteString
+            ),
+            workspaceRoot: workspace
+        )
+        let second = try await stager.stage(
+            attachment: .init(
+                id: secondID,
+                displayName: "notes.txt",
+                resourceURI: source.absoluteString
+            ),
+            workspaceRoot: workspace
+        )
+        XCTAssertNotEqual(first.relativePath, second.relativePath)
+        XCTAssertEqual(first.sha256, second.sha256)
+        let firstURL = workspace.appendingPathComponent(first.relativePath)
+        let secondURL = workspace.appendingPathComponent(second.relativePath)
+        XCTAssertEqual(try Data(contentsOf: firstURL), try Data(contentsOf: secondURL))
+        let firstAttributes = try FileManager.default.attributesOfItem(atPath: firstURL.path)
+        let secondAttributes = try FileManager.default.attributesOfItem(atPath: secondURL.path)
+        XCTAssertEqual(
+            firstAttributes[.systemFileNumber] as? NSNumber,
+            secondAttributes[.systemFileNumber] as? NSNumber
+        )
+    }
+
+    func testRejectsWorkspaceAssetDirectorySymlinkEscape() async throws {
+        let outside = root.appendingPathComponent("outside", isDirectory: true)
+        try FileManager.default.createDirectory(at: outside, withIntermediateDirectories: true)
+        try FileManager.default.createSymbolicLink(
+            at: workspace.appendingPathComponent("user-assets"),
+            withDestinationURL: outside
+        )
+        let source = root.appendingPathComponent("notes.txt")
+        try Data("content".utf8).write(to: source)
+
+        do {
+            _ = try await stager.stage(
+                attachment: .init(
+                    id: UUID().uuidString,
+                    displayName: "notes.txt",
+                    resourceURI: source.absoluteString
+                ),
+                workspaceRoot: workspace
+            )
+            XCTFail("A symlink escape must be rejected")
+        } catch TalkifyLocalAssetError.unsafeWorkspace {
+            XCTAssertTrue(true)
+        }
+    }
+
+    func testRejectsOversizedDocumentBeforeCopy() async throws {
+        let source = root.appendingPathComponent("large.txt")
+        let handle = FileManager.default.createFile(
+            atPath: source.path,
+            contents: nil
+        ) ? try FileHandle(forWritingTo: source) : nil
+        XCTAssertNotNil(handle)
+        try handle?.truncate(atOffset: UInt64(TalkifyLocalAssetPolicy.maximumDocumentBytes + 1))
+        try handle?.close()
+
+        do {
+            _ = try await stager.stage(
+                attachment: .init(
+                    id: UUID().uuidString,
+                    displayName: "large.txt",
+                    resourceURI: source.absoluteString
+                ),
+                workspaceRoot: workspace
+            )
+            XCTFail("An oversized document must be rejected")
+        } catch TalkifyLocalAssetError.tooLarge {
+            XCTAssertTrue(true)
+        }
+    }
+}
+
 private actor MockAuthorization: UserAssetAuthorizationProviding {
     private(set) var refreshCount = 0
     func userAssetAccessToken() async throws -> String { refreshCount == 0 ? "old" : "new" }
