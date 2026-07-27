@@ -41,12 +41,16 @@ struct SubscriptionView: View {
                     }
                     
                     ToolbarItem(placement: toolbarActionPlacement) {
-                        
-                         footerLinkButton(title: viewModel.restoreButtonTitle) {
-                             Task {
-                                 await viewModel.restorePurchase()
-                             }
-                         }
+                        Button {
+                            Task {
+                                await viewModel.restorePurchase()
+                            }
+                        } label: {
+                            Text(viewModel.restoreButtonTitle)
+                                .foregroundColor(footerColor)
+                                .padding(.horizontal, 5)
+                        }
+                        .buttonStyle(.plain)
                          .disabled(viewModel.isRestoring)
 
                     }
@@ -830,24 +834,10 @@ private struct CompactSubscriptionProductCard: View {
                     .lineLimit(2)
                     .multilineTextAlignment(.leading)
                 
-                HStack {
-                    if let periodText {
-                        Text(periodText)
-                            .font(.system(size: 11, weight: .medium))
-                            .foregroundColor(subtitleColor)
-                    }
-                    Spacer()
-                    if isRecommended {
-                        Text(TalkifyLocalized.string("billing.subscription.recommended"))
-                            .font(.system(size: 9, weight: .bold))
-                            .foregroundColor(recommendedTextColor)
-                            .padding(.horizontal, 6)
-                            .padding(.vertical, 4)
-                            .background(
-                                Capsule()
-                                    .fill(recommendedBackground)
-                            )
-                    }
+                if let periodText {
+                    Text(periodText)
+                        .font(.system(size: 11, weight: .medium))
+                        .foregroundColor(subtitleColor)
                 }
                 
                 VStack(alignment: .leading, spacing: 2) {
@@ -868,12 +858,23 @@ private struct CompactSubscriptionProductCard: View {
                         .font(.system(size: 13, weight: .semibold))
                         .foregroundColor(isSelected ? selectedAccent : subtitleColor)
                     
-                    Text(isSelected ? TalkifyLocalized.string("billing.subscription.selected") : TalkifyLocalized.string("billing.subscription.select"))
-                        .font(.system(size: 11, weight: .semibold))
-                        .foregroundColor(isSelected ? selectedAccent : subtitleColor)
+//                    Text(isSelected ? TalkifyLocalized.string("billing.subscription.selected") : TalkifyLocalized.string("billing.subscription.select"))
+//                        .font(.system(size: 11, weight: .semibold))
+//                        .foregroundColor(isSelected ? selectedAccent : subtitleColor)
                     
                     Spacer()
                     
+                    if isRecommended {
+                        Text(TalkifyLocalized.string("billing.subscription.recommended"))
+                            .font(.system(size: 9, weight: .bold))
+                            .foregroundColor(recommendedTextColor)
+                            .padding(.horizontal, 6)
+                            .padding(.vertical, 4)
+                            .background(
+                                Capsule()
+                                    .fill(recommendedBackground)
+                            )
+                    }
                 }
             }
             .padding(.horizontal, 14)

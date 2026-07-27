@@ -100,7 +100,7 @@ final class SubscriptionViewModel: ObservableObject {
         if isRestoring {
             return TalkifyLocalized.string("billing.restoring")
         }
-        return publicPage?.restoreButtonTitle ?? TalkifyLocalized.string("billing.restore_purchases")
+        return /*publicPage?.restoreButtonTitle ?? */TalkifyLocalized.string("billing.restore_purchases")
     }
 
     var termsURLString: String {
@@ -123,7 +123,7 @@ final class SubscriptionViewModel: ObservableObject {
         guard let selectedProduct else { return "" }
         let price = displayPrice(for: selectedProduct)
         if selectedProduct.pointAmount > 0 {
-            return "\(price) · 赠送 \(selectedProduct.pointAmount) 点"
+            return "\(price) · \(String(format: TalkifyLocalized.string("billing.point_gift_format"), String(selectedProduct.pointAmount)))"
         }
         return price
     }
@@ -197,7 +197,7 @@ final class SubscriptionViewModel: ObservableObject {
                 return [
                     .init(
                         icon: "sparkles",
-                        title: "赠送 \(product.pointAmount) 点",
+                        title: String(format: TalkifyLocalized.string("billing.point_gift_format"), String(product.pointAmount)),
                         detail: "购买后点数自动发放到钱包",
                         highlighted: true
                     )
@@ -247,7 +247,7 @@ final class SubscriptionViewModel: ObservableObject {
         if product.pointAmount > 0 {
             lines.append(.init(
                 icon: "sparkles",
-                title: "赠送 \(product.pointAmount) 点",
+                title: String(format: TalkifyLocalized.string("billing.point_gift_format"), String(product.pointAmount)),
                 detail: "开通后自动发放",
                 highlighted: true
             ))
@@ -263,12 +263,12 @@ final class SubscriptionViewModel: ObservableObject {
     func productPeriodText(_ product: BillingProduct) -> String? {
         guard let periodUnit = product.periodUnit,
               let periodCount = product.periodCount else { return nil }
-        return "每\(periodCount)\(localizedPeriodUnit(periodUnit))"
+        return String(format: TalkifyLocalized.string("billing.period_format"), "\(periodCount)\(localizedPeriodUnit(periodUnit))")
     }
 
     func productPointGiftText(_ product: BillingProduct) -> String? {
         guard product.pointAmount > 0 else { return nil }
-        return "赠送 \(product.pointAmount) 点"
+        return String(format: TalkifyLocalized.string("billing.point_gift_format"), String(product.pointAmount))
     }
 
     func isSelected(_ product: BillingProduct) -> Bool {
@@ -429,10 +429,10 @@ final class SubscriptionViewModel: ObservableObject {
 
     private func localizedPeriodUnit(_ rawValue: String) -> String {
         switch rawValue {
-        case "month": return "月"
-        case "year": return "年"
-        case "week": return "周"
-        case "day": return "天"
+        case "month": return TalkifyLocalized.string("billing.period.month")
+        case "year": return TalkifyLocalized.string("billing.period.year")
+        case "week": return TalkifyLocalized.string("billing.period.week")
+        case "day": return TalkifyLocalized.string("billing.period.day")
         default: return rawValue
         }
     }
@@ -493,7 +493,7 @@ final class SubscriptionViewModel: ObservableObject {
 
     private func collectFeatureKeys(from products: [BillingProduct]) -> [(key: String, title: String)] {
         var keys: [(String, String)] = [
-            ("points", "赠送点数"),
+            ("points", TalkifyLocalized.string("billing.point_gift_format")),
             ("1080p", "1080p 输出"),
             ("watermark", "去水印"),
             ("priority", "优先队列"),
@@ -514,7 +514,7 @@ final class SubscriptionViewModel: ObservableObject {
 
     private func comparisonValue(for key: String, product: BillingProduct) -> String {
         if key == "points" {
-            return product.pointAmount > 0 ? "\(product.pointAmount) 点" : "—"
+            return product.pointAmount > 0 ? String(format: TalkifyLocalized.string("billing.point_gift_format"), String(product.pointAmount)) : "—"
         }
 
         if let benefitItems = product.benefitItems,

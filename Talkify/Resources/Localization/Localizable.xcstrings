@@ -4819,6 +4819,360 @@
         }
       }
     },
+    "billing.period.day": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "day"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "天"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "天"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "日"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "일"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tag"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "jour"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "día"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "dia"
+          }
+        }
+      }
+    },
+    "billing.period.month": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "month"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "月"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "月"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ヶ月"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "개월"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Monat"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "mois"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "mes"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "mês"
+          }
+        }
+      }
+    },
+    "billing.period.week": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "week"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "周"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "週"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "週間"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "주"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Woche"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "semaine"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "semana"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "semana"
+          }
+        }
+      }
+    },
+    "billing.period.year": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "year"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "年"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "年"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "年"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "년"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Jahr"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "an"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "año"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ano"
+          }
+        }
+      }
+    },
+    "billing.period_format": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Every %@"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "每%@"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "每%@"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ごと"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@마다"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Alle %@"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tous les %@"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cada %@"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A cada %@"
+          }
+        }
+      }
+    },
+    "billing.point_gift_format": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "+%@ Points Gift"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "赠送 %@ 点"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "贈送 %@ 點"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ポイントプレゼント"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@포인트 증정"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "+%@ Punkte Geschenk"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "+%@ points offerts"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "+%@ puntos de regalo"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "+%@ pontos de presente"
+          }
+        }
+      }
+    },
     "billing.points.got_it": {
       "extractionState": "manual",
       "localizations": {
@@ -6179,22 +6533,28 @@
     "billing.restore_by_transaction_id": {
       "extractionState": "manual",
       "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Abonnementübersicht mit der ursprünglichen Transaktions-ID wiederhergestellt."
+          }
+        },
         "en": {
           "stringUnit": {
             "state": "translated",
             "value": "Subscription summary restored using the original transaction ID."
           }
         },
-        "zh-Hans": {
+        "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "已按原始订阅交易号恢复当前订阅摘要。"
+            "value": "Resumen de suscripción restaurado usando el ID de transacción original."
           }
         },
-        "zh-Hant": {
+        "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "已按原始訂閱交易號恢復當前訂閱摘要。"
+            "value": "Résumé de l'abonnement restauré à l'aide de l'ID de transaction d'origine."
           }
         },
         "ja": {
@@ -6209,28 +6569,22 @@
             "value": "원래 거래 ID를 사용하여 구독 요약이 복원되었습니다."
           }
         },
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Abonnementübersicht mit der ursprünglichen Transaktions-ID wiederhergestellt."
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Résumé de l'abonnement restauré à l'aide de l'ID de transaction d'origine."
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Resumen de suscripción restaurado usando el ID de transacción original."
-          }
-        },
         "pt-BR": {
           "stringUnit": {
             "state": "translated",
             "value": "Resumo da assinatura restaurado usando o ID da transação original."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "已按原始订阅交易号恢复当前订阅摘要。"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "已按原始訂閱交易號恢復當前訂閱摘要。"
           }
         }
       }
@@ -6238,22 +6592,28 @@
     "billing.restore_complete": {
       "extractionState": "manual",
       "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Wiederherstellung abgeschlossen"
+          }
+        },
         "en": {
           "stringUnit": {
             "state": "translated",
             "value": "Restore completed"
           }
         },
-        "zh-Hans": {
+        "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "恢复购买已完成"
+            "value": "Restauración completada"
           }
         },
-        "zh-Hant": {
+        "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "恢復購買已完成"
+            "value": "Restauration terminée"
           }
         },
         "ja": {
@@ -6268,28 +6628,22 @@
             "value": "구매 복원 완료"
           }
         },
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Wiederherstellung abgeschlossen"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Restauration terminée"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Restauración completada"
-          }
-        },
         "pt-BR": {
           "stringUnit": {
             "state": "translated",
             "value": "Restauração concluída"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "恢复购买已完成"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "恢復購買已完成"
           }
         }
       }
@@ -6297,22 +6651,28 @@
     "billing.restore_hint": {
       "extractionState": "manual",
       "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dient zur Wiederherstellung noch nicht gutgeschriebener App Store-Transaktionen. Verbrauchbare Punktpakete können nicht wie Abonnements wiederhergestellt werden."
+          }
+        },
         "en": {
           "stringUnit": {
             "state": "translated",
             "value": "Used to recover App Store transactions not yet credited. Consumable point packs cannot be restored like subscriptions."
           }
         },
-        "zh-Hans": {
+        "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "用于补发尚未入账的 App Store 交易；消耗型点数包不能像订阅一样恢复"
+            "value": "Se usa para recuperar transacciones de App Store aún no acreditadas. Los paquetes de puntos consumibles no se pueden restaurar como las suscripciones."
           }
         },
-        "zh-Hant": {
+        "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "用於補發尚未入帳的 App Store 交易；消耗型點數包不能像訂閱一樣恢復"
+            "value": "Utilisé pour récupérer les transactions App Store non encore créditées. Les packs de points consommables ne peuvent pas être restaurés comme les abonnements."
           }
         },
         "ja": {
@@ -6327,28 +6687,22 @@
             "value": "아직 입금되지 않은 App Store 거래를 복구하는 데 사용됩니다. 소비형 포인트 팩은 구독처럼 복원할 수 없습니다."
           }
         },
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Dient zur Wiederherstellung noch nicht gutgeschriebener App Store-Transaktionen. Verbrauchbare Punktpakete können nicht wie Abonnements wiederhergestellt werden."
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Utilisé pour récupérer les transactions App Store non encore créditées. Les packs de points consommables ne peuvent pas être restaurés comme les abonnements."
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Se usa para recuperar transacciones de App Store aún no acreditadas. Los paquetes de puntos consumibles no se pueden restaurar como las suscripciones."
-          }
-        },
         "pt-BR": {
           "stringUnit": {
             "state": "translated",
             "value": "Usado para recuperar transações da App Store ainda não creditadas. Pacotes de pontos consumíveis não podem ser restaurados como assinaturas."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "用于补发尚未入账的 App Store 交易；消耗型点数包不能像订阅一样恢复"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "用於補發尚未入帳的 App Store 交易；消耗型點數包不能像訂閱一樣恢復"
           }
         }
       }
@@ -6356,22 +6710,28 @@
     "billing.restore_no_active_subscription": {
       "extractionState": "manual",
       "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Wiederherstellungsprozess abgeschlossen, aber kein aktives Abonnement gefunden."
+          }
+        },
         "en": {
           "stringUnit": {
             "state": "translated",
             "value": "Restore process completed, but no active subscription was found."
           }
         },
-        "zh-Hans": {
+        "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "恢复流程已完成，但当前没有有效订阅。"
+            "value": "Proceso de restauración completado, pero no se encontró ninguna suscripción activa."
           }
         },
-        "zh-Hant": {
+        "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "恢復流程已完成，但當前沒有有效訂閱。"
+            "value": "Processus de restauration terminé, mais aucun abonnement actif n'a été trouvé."
           }
         },
         "ja": {
@@ -6386,28 +6746,22 @@
             "value": "복원 프로세스가 완료되었지만 활성 구독을 찾을 수 없습니다."
           }
         },
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Wiederherstellungsprozess abgeschlossen, aber kein aktives Abonnement gefunden."
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Processus de restauration terminé, mais aucun abonnement actif n'a été trouvé."
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Proceso de restauración completado, pero no se encontró ninguna suscripción activa."
-          }
-        },
         "pt-BR": {
           "stringUnit": {
             "state": "translated",
             "value": "Processo de restauração concluído, mas nenhuma assinatura ativa foi encontrada."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "恢复流程已完成，但当前没有有效订阅。"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "恢復流程已完成，但當前沒有有效訂閱。"
           }
         }
       }
@@ -6415,22 +6769,28 @@
     "billing.restore_no_transactions": {
       "extractionState": "manual",
       "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Keine wiederherstellbaren Transaktionen im App Store gefunden. Bitte geben Sie die original_transaction_id ein und versuchen Sie es erneut."
+          }
+        },
         "en": {
           "stringUnit": {
             "state": "translated",
             "value": "No restorable transactions found in App Store. Please enter the original_transaction_id and try again."
           }
         },
-        "zh-Hans": {
+        "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "未从 App Store 找到可恢复交易，请输入 original_transaction_id 后重试。"
+            "value": "No se encontraron transacciones restaurables en App Store. Ingresa el original_transaction_id e inténtalo de nuevo."
           }
         },
-        "zh-Hant": {
+        "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "未從 App Store 找到可恢復交易，請輸入 original_transaction_id 後重試。"
+            "value": "Aucune transaction restaurable trouvée dans l'App Store. Veuillez saisir l'original_transaction_id et réessayer."
           }
         },
         "ja": {
@@ -6445,28 +6805,22 @@
             "value": "App Store에서 복원 가능한 거래를 찾을 수 없습니다. original_transaction_id를 입력하고 다시 시도하세요."
           }
         },
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Keine wiederherstellbaren Transaktionen im App Store gefunden. Bitte geben Sie die original_transaction_id ein und versuchen Sie es erneut."
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Aucune transaction restaurable trouvée dans l'App Store. Veuillez saisir l'original_transaction_id et réessayer."
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "No se encontraron transacciones restaurables en App Store. Ingresa el original_transaction_id e inténtalo de nuevo."
-          }
-        },
         "pt-BR": {
           "stringUnit": {
             "state": "translated",
             "value": "Nenhuma transação restaurável encontrada na App Store. Digite o original_transaction_id e tente novamente."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "未从 App Store 找到可恢复交易，请输入 original_transaction_id 后重试。"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "未從 App Store 找到可恢復交易，請輸入 original_transaction_id 後重試。"
           }
         }
       }
@@ -6474,22 +6828,28 @@
     "billing.restore_purchases": {
       "extractionState": "manual",
       "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Käufe wiederherstellen"
+          }
+        },
         "en": {
           "stringUnit": {
             "state": "translated",
             "value": "Restore Purchases"
           }
         },
-        "zh-Hans": {
+        "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "恢复购买"
+            "value": "Restaurar compras"
           }
         },
-        "zh-Hant": {
+        "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "恢復購買"
+            "value": "Restaurer les achats"
           }
         },
         "ja": {
@@ -6504,28 +6864,22 @@
             "value": "구매 복원"
           }
         },
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Käufe wiederherstellen"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Restaurer les achats"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Restaurar compras"
-          }
-        },
         "pt-BR": {
           "stringUnit": {
             "state": "translated",
             "value": "Restaurar compras"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "恢复购买"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "恢復購買"
           }
         }
       }
@@ -6533,22 +6887,28 @@
     "billing.restore_request_complete_no_subscription": {
       "extractionState": "manual",
       "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Wiederherstellungsanfrage abgeschlossen, aber derzeit ist kein Abonnementstatus verfügbar."
+          }
+        },
         "en": {
           "stringUnit": {
             "state": "translated",
             "value": "Restore request completed, but no subscription status is currently available."
           }
         },
-        "zh-Hans": {
+        "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "恢复请求已完成，但当前没有可用订阅状态。"
+            "value": "Solicitud de restauración completada, pero no hay estado de suscripción disponible actualmente."
           }
         },
-        "zh-Hant": {
+        "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "恢復請求已完成，但當前沒有可用訂閱狀態。"
+            "value": "Demande de restauration terminée, mais aucun statut d'abonnement n'est actuellement disponible."
           }
         },
         "ja": {
@@ -6563,28 +6923,22 @@
             "value": "복원 요청이 완료되었지만 현재 사용 가능한 구독 상태가 없습니다."
           }
         },
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Wiederherstellungsanfrage abgeschlossen, aber derzeit ist kein Abonnementstatus verfügbar."
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Demande de restauration terminée, mais aucun statut d'abonnement n'est actuellement disponible."
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Solicitud de restauración completada, pero no hay estado de suscripción disponible actualmente."
-          }
-        },
         "pt-BR": {
           "stringUnit": {
             "state": "translated",
             "value": "Solicitação de restauração concluída, mas nenhum status de assinatura está disponível no momento."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "恢复请求已完成，但当前没有可用订阅状态。"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "恢復請求已完成，但當前沒有可用訂閱狀態。"
           }
         }
       }
@@ -6592,22 +6946,28 @@
     "billing.restore_subscription": {
       "extractionState": "manual",
       "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Käufe wiederherstellen"
+          }
+        },
         "en": {
           "stringUnit": {
             "state": "translated",
             "value": "Restore Purchases"
           }
         },
-        "zh-Hans": {
+        "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "恢复购买"
+            "value": "Restaurar compras"
           }
         },
-        "zh-Hant": {
+        "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "恢復購買"
+            "value": "Restaurer les achats"
           }
         },
         "ja": {
@@ -6622,28 +6982,22 @@
             "value": "구매 복원"
           }
         },
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Käufe wiederherstellen"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Restaurer les achats"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Restaurar compras"
-          }
-        },
         "pt-BR": {
           "stringUnit": {
             "state": "translated",
             "value": "Restaurar compras"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "恢复购买"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "恢復購買"
           }
         }
       }
@@ -6651,22 +7005,28 @@
     "billing.restore_success_with_subscription": {
       "extractionState": "manual",
       "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mit App Store synchronisiert und auf dem Server verifiziert. Aktuelles Abonnement wurde wiederhergestellt."
+          }
+        },
         "en": {
           "stringUnit": {
             "state": "translated",
             "value": "Synced with App Store and verified on server. Current subscription has been restored."
           }
         },
-        "zh-Hans": {
+        "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "已通过 App Store 同步并完成服务端验单，当前订阅已恢复。"
+            "value": "Sincronizado con App Store y verificado en el servidor. La suscripción actual ha sido restaurada."
           }
         },
-        "zh-Hant": {
+        "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "已通過 App Store 同步並完成伺服器驗單，當前訂閱已恢復。"
+            "value": "Synchronisé avec l'App Store et vérifié sur le serveur. L'abonnement actuel a été restauré."
           }
         },
         "ja": {
@@ -6681,28 +7041,22 @@
             "value": "App Store와 동기화되고 서버에서 확인되었습니다. 현재 구독이 복원되었습니다."
           }
         },
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Mit App Store synchronisiert und auf dem Server verifiziert. Aktuelles Abonnement wurde wiederhergestellt."
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Synchronisé avec l'App Store et vérifié sur le serveur. L'abonnement actuel a été restauré."
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Sincronizado con App Store y verificado en el servidor. La suscripción actual ha sido restaurada."
-          }
-        },
         "pt-BR": {
           "stringUnit": {
             "state": "translated",
             "value": "Sincronizado com a App Store e verificado no servidor. A assinatura atual foi restaurada."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "已通过 App Store 同步并完成服务端验单，当前订阅已恢复。"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "已通過 App Store 同步並完成伺服器驗單，當前訂閱已恢復。"
           }
         }
       }
@@ -6710,22 +7064,28 @@
     "billing.restoring": {
       "extractionState": "manual",
       "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Wiederherstellung…"
+          }
+        },
         "en": {
           "stringUnit": {
             "state": "translated",
             "value": "Restoring…"
           }
         },
-        "zh-Hans": {
+        "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "恢复中..."
+            "value": "Restaurando…"
           }
         },
-        "zh-Hant": {
+        "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "恢復中..."
+            "value": "Restauration…"
           }
         },
         "ja": {
@@ -6740,28 +7100,22 @@
             "value": "복원 중…"
           }
         },
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Wiederherstellung…"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Restauration…"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Restaurando…"
-          }
-        },
         "pt-BR": {
           "stringUnit": {
             "state": "translated",
             "value": "Restaurando…"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "恢复中..."
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "恢復中..."
           }
         }
       }
@@ -20502,9 +20856,7 @@
     "当前暂未获取到可订阅商品": {},
     "当前订阅已生效": {},
     "恢复": {},
-    "恢复中...": {},
     "恢复失败": {},
-    "恢复购买": {},
     "打开会话": {},
     "搜索会话或文件...": {},
     "搜索项目": {},
