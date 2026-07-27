@@ -217,9 +217,9 @@ struct AccountMenuContent: View {
                     .foregroundStyle(metric.utilizationPct >= 90 ? Color.orange : Color.secondary)
             }
             HStack {
-                Text("\(TalkifyLocalized.string("workspace.remaining_format")) \(formatted(max(metric.unitsLimit - metric.unitsUsed, 0)))")
+                Text(String(format: TalkifyLocalized.string("workspace.remaining_format"), formatted(max(metric.unitsRemaining, 0))))
                 Spacer()
-                Text("\(TalkifyLocalized.string("workspace.reset_immediately")) \(formattedResetDate(metric.resetsAt))")
+                Text(String(format: TalkifyLocalized.string("settings.reset_on"), formattedResetDate(metric.resetsAt)))
             }
             .font(.system(size: 12))
             .foregroundStyle(.tertiary)

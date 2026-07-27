@@ -569,9 +569,9 @@ struct SettingsDetailView: View {
                     icon: "paperplane",
                     iconTint: Color(hex: "2E7CF6"),
                     title: TalkifyLocalized.string("settings.support.contact_email"),
-                    subtitle: "support@talkify.ai"
+                    subtitle: "code@objc.com"
                 ) {
-                    openURL(URL(string: "mailto:support@talkify.ai")!)
+                    openURL(URL(string: "mailto:code@objc.com")!)
                 }
                 .overlay(alignment: .bottom) { Divider().padding(.leading, 30) }
 
@@ -581,7 +581,7 @@ struct SettingsDetailView: View {
                     title: TalkifyLocalized.string("settings.support.feedback"),
                     subtitle: TalkifyLocalized.string("settings.support.feedback_desc")
                 ) {
-                    openURL(URL(string: "mailto:feedback@talkify.ai")!)
+                    openURL(URL(string: "mailto:code@objc.com")!)
                 }
             }
 

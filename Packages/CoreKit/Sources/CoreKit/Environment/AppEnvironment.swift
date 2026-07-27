@@ -16,13 +16,15 @@ import Observation
  */
 
 public struct AgreementURLs {
-    //  App Store 隐私政策 URL
-    public static let privacy = URL(string: "https://objc.com/privacy?standalone=1")!
-    public static let terms = URL(string: "https://objc.com/terms?standalone=1")!
-    public static let content = URL(string: "https://objc.com/content-policy?standalone=1")!
-    public static let algorithmDisclosure = URL(string: "https://objc.com/algorithm-disclosure?standalone=1")!
-    public static let paid = URL(string: "https://objc.com/pricing-terms?standalone=1")!
-    public static let AIData = URL(string: "https://objc.com/ai-data-processing?standalone=1")!
+    /// 法律文档托管于 GitHub，确保链接始终可用。
+    private static let legalBase = "https://github.com/tuxi/Talkify/blob/main/docs/legal"
+
+    public static let privacy = URL(string: "\(legalBase)/privacy.md")!
+    public static let terms = URL(string: "\(legalBase)/terms.md")!
+    public static let content = URL(string: "\(legalBase)/content-policy.md")!
+    public static let algorithmDisclosure = URL(string: "\(legalBase)/algorithm-disclosure.md")!
+    public static let AIData = URL(string: "\(legalBase)/ai-data-processing.md")!
+    public static let paid = URL(string: "\(legalBase)/pricing-terms.md")!
 }
 
 public enum AppEnvironment: String, CaseIterable, Codable, Sendable, Identifiable {
