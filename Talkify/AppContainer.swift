@@ -237,12 +237,12 @@ final class AppContainer {
     }
 
     func makeAgentClient() -> RuntimeClient {
-        #if os(iOS)
-        // iOS: 客户端只持有动态 RuntimeEnvironment。Runtime 的启动必须由稳定的
-        // lifecycle 入口显式 await，不能在 SwiftUI body 构建依赖时产生副作用。
+        #if os(iOS) || os(macOS)
+        // Apple app hosts use the in-process Runtime on an OS-assigned loopback port.
+        // Startup stays in a stable lifecycle entry point, outside SwiftUI body evaluation.
         return DefaultAgentClient.fromRuntime(credentialStore: agentCredentialStore)
         #else
-        // macOS: 连接独立运行的 Talkify Agent runtime（127.0.0.1:8797）。
+        // Unsupported embedded hosts may still connect to a separately managed server.
         let env = RuntimeEnvironment(host: "127.0.0.1", port: 8797)
         return DefaultAgentClient(environment: env, credentialStore: agentCredentialStore)
         #endif
@@ -256,10 +256,9 @@ final class AppContainer {
             timelineExtensions: timelineExtensions,
             conversationRendererMode: .web,
             onAuthExpired: { [credentialStore] in
-                // iOS: runtime 收到 401 → 用最新凭证热重载
-                // macOS: Token 刷新由 AuthManager 的 Alamofire RequestInterceptor 自动处理，
-                //        CredentialStore 每次请求实时读取 authManager.token，无需手动重载。
-                #if os(iOS)
+                // The embedded runtime owns its provider, so refresh its injected
+                // credentials after either Apple host observes an auth expiry.
+                #if os(iOS) || os(macOS)
                 try? await AgentRuntime.shared.reconfigure(with: credentialStore)
                 #endif
             },
@@ -277,10 +276,10 @@ final class AppContainer {
         )
     }
 
-    // MARK: - Credential Injection (iOS)
+    // MARK: - Embedded Runtime
 
     func ensureAgentRuntimeStarted() async {
-        #if os(iOS)
+        #if os(iOS) || os(macOS)
         _ = try? await AgentRuntime.shared.ensureStarted(
             with: agentCredentialStore
         )

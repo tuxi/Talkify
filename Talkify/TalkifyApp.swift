@@ -10,8 +10,19 @@ import AgentKit
 import CoreKit
 import FeatureAuth
 import FileViewerKit
+#if os(macOS)
+import AppKit
+#endif
 
 let keychainGroupID = "NKW67GFDHM.com.objc.chat.shared"
+
+#if os(macOS)
+private final class TalkifyApplicationDelegate: NSObject, NSApplicationDelegate {
+    func applicationWillTerminate(_ notification: Notification) {
+        AgentRuntime.shared.stop()
+    }
+}
+#endif
 
 @main
 struct TalkifyApp: App {
@@ -19,6 +30,10 @@ struct TalkifyApp: App {
     private var container: AppContainer
     private let environmentManager: EnvironmentManager
     private let deviceManager = DeviceManager(keychainGroupId: keychainGroupID)
+    #if os(macOS)
+    @NSApplicationDelegateAdaptor(TalkifyApplicationDelegate.self)
+    private var applicationDelegate
+    #endif
     
     @State private var pendingWorkspaceItem: WorkspaceItem?
     

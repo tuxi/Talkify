@@ -93,6 +93,8 @@ public struct WorkspaceView: View {
             .task {
 #if os(iOS)
                 store.startLifecycleNetworkMonitor()
+#endif
+#if os(iOS) || os(macOS)
                 await container.ensureAgentRuntimeStarted()
 #endif
                 await store.handleAppBecameActive()
@@ -547,7 +549,7 @@ extension WorkspaceView {
             return username
         }
         if let userID = authManager.token?.userId {
-            return String(format: TalkifyLocalized.string("workspace.user_label"), userID)
+            return String(format: TalkifyLocalized.string("workspace.user_label"), "\(userID)")
         }
         return TalkifyLocalized.string("workspace.account")
     }
