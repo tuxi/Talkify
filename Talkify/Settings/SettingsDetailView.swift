@@ -585,26 +585,26 @@ struct SettingsDetailView: View {
                 }
             }
 
-            sectionTitle(TalkifyLocalized.string("settings.support.help_section"))
-                .padding(.top, 12)
-            settingsCard {
-                supportLinkRow(
-                    icon: "sparkles.rectangle.stack",
-                    iconTint: Color(hex: "8B5CF6"),
-                    title: TalkifyLocalized.string("settings.support.user_guide"),
-                    subtitle: TalkifyLocalized.string("settings.support.user_guide_desc"),
-                    trailingText: TalkifyLocalized.string("settings.coming_soon")
-                ) { }
-                .overlay(alignment: .bottom) { Divider().padding(.leading, 30) }
-
-                supportLinkRow(
-                    icon: "play.rectangle.on.rectangle",
-                    iconTint: Color(hex: "F59E0B"),
-                    title: TalkifyLocalized.string("settings.support.beginner_guide"),
-                    subtitle: TalkifyLocalized.string("settings.support.beginner_guide_desc"),
-                    trailingText: TalkifyLocalized.string("settings.coming_soon")
-                ) { }
-            }
+//            sectionTitle(TalkifyLocalized.string("settings.support.help_section"))
+//                .padding(.top, 12)
+//            settingsCard {
+//                supportLinkRow(
+//                    icon: "sparkles.rectangle.stack",
+//                    iconTint: Color(hex: "8B5CF6"),
+//                    title: TalkifyLocalized.string("settings.support.user_guide"),
+//                    subtitle: TalkifyLocalized.string("settings.support.user_guide_desc"),
+//                    trailingText: TalkifyLocalized.string("settings.coming_soon")
+//                ) { }
+//                .overlay(alignment: .bottom) { Divider().padding(.leading, 30) }
+//
+//                supportLinkRow(
+//                    icon: "play.rectangle.on.rectangle",
+//                    iconTint: Color(hex: "F59E0B"),
+//                    title: TalkifyLocalized.string("settings.support.beginner_guide"),
+//                    subtitle: TalkifyLocalized.string("settings.support.beginner_guide_desc"),
+//                    trailingText: TalkifyLocalized.string("settings.coming_soon")
+//                ) { }
+//            }
         }
     }
 

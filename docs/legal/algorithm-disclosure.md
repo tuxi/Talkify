@@ -111,4 +111,4 @@ DeepSeek 大语言模型生成合成算法基于 Transformer 架构与大规模�
 
 若用户对本算法公示内容有疑问、建议或投诉举报，可通过以下联系方式联系我们：
 
-- **电子邮件**：support@talkify.ai
+- **电子邮件**：code@objc.com

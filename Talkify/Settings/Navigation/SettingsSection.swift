@@ -24,7 +24,7 @@ enum SettingsSection: String, CaseIterable, Identifiable {
     var group: Group {
         switch self {
         case .profile, .usage, .account: .personal
-        case .support, .about: .integrations
+        case .support, .about: .personal
         }
     }
     var title: String {

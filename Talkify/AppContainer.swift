@@ -223,6 +223,10 @@ final class AppContainer {
             await toolRegistry.register(RecordAudioTool())
             await toolRegistry.register(TranscribeAudioTool())
             await toolRegistry.register(ExtractArchiveTool())
+            
+            await toolRegistry.register(CreatePDFTool())
+            await toolRegistry.register(MergePDFsTool())
+            await toolRegistry.register(SplitPDFTool())
 #if os(iOS)
             await toolRegistry.register(ScanDocumentTool())
 #endif
