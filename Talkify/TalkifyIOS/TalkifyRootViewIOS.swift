@@ -124,10 +124,18 @@ struct TalkifyRootView: View {
                 ChatDrawerWorkspace(dependencies: container.makeAgentDependencies())
             }
         }
+        .id(container.runtimeServers.activeIdentityRevision)
         .sheet(isPresented: providerOnboardingBinding) {
             ProviderOnboardingView(
                 hasCompletedOnboarding: $hasCompletedProviderOnboarding
             )
+        }
+        .sheet(isPresented: .init(get: {
+            return container.authManager.showLoginSheet
+        }, set: {
+            container.authManager.showLoginSheet = $0
+        })) {
+            AuthView(viewModel: container.makeAuthViewModel())
         }
     }
 

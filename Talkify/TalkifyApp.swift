@@ -96,13 +96,6 @@ struct TalkifyApp: App {
                 .environment(\.openURL, OpenURLAction(handler: { url in
                     return handleDeepLink(url)
                 }))
-                .sheet(isPresented: .init(get: {
-                    return container.authManager.showLoginSheet
-                }, set: {
-                    container.authManager.showLoginSheet = $0
-                })) {
-                    AuthView(viewModel: container.makeAuthViewModel())
-                }
         }
         
     }

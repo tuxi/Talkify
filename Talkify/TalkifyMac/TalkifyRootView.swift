@@ -20,6 +20,7 @@ struct TalkifyRootView: View {
 
     var body: some View {
         WorkspaceView(dependencies: container.makeAgentDependencies())
+            .id(container.runtimeServers.activeIdentityRevision)
             .sheet(isPresented: providerOnboardingBinding) {
                 ProviderOnboardingView(
                     hasCompletedOnboarding: $hasCompletedProviderOnboarding

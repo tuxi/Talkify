@@ -3,6 +3,13 @@ import AgentKit
 @testable import Talkify
 
 final class ProviderTemplateTests: XCTestCase {
+    func testIntegrationSettingsKeepServersBeforeProvidersAndModels() {
+        XCTAssertEqual(
+            SettingsSection.allCases.filter { $0.group == .integrations },
+            [.servers, .providers, .models]
+        )
+    }
+
     func testBuiltInTemplatesHaveUniqueIDsAndSupportedTransports() {
         let templates = TalkifyProviderTemplate.builtIn
         XCTAssertEqual(Set(templates.map(\.id)).count, templates.count)

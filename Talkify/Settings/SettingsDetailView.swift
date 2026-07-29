@@ -97,6 +97,9 @@ struct SettingsDetailView: View {
                         gatewayDisconnectedView
                             .navigationTitle(TalkifyLocalized.string("settings.item.account"))
                     }
+                case .servers:
+                    RuntimeServerSettingsView()
+                        .navigationTitle(Text(verbatim: "服务器"))
                 case .providers:
                     ProviderSettingsView()
                         .navigationTitle("提供商")

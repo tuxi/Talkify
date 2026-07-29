@@ -79,6 +79,7 @@ final class AppContainer {
     let deviceManager: DeviceManager
     private let agentCredentialStore: AppCredentialStore
     let providerConnections: ProviderConnectionStore
+    let runtimeServers: RuntimeServerCoordinator
     private let providerConfigurationQueue = RuntimeProviderConfigurationApplyQueue()
     private var desiredProviderConfiguration: PendingProviderConfiguration?
     private var providerCatalogsByRevision: [UInt64: ProviderCatalogSnapshot] = [:]
@@ -200,6 +201,7 @@ final class AppContainer {
             modelSettings: modelSettings,
             gatewayCredentialStore: agentCredentialStore
         )
+        self.runtimeServers = RuntimeServerCoordinator()
 
         self.toolRegistry = ToolRegistry()
         self.conversationNotifications = ConversationNotificationCoordinator()
@@ -251,12 +253,15 @@ final class AppContainer {
         }
     }
 
-    func makeAgentClient() -> RuntimeClient {
+    func makeAgentClient() -> any RuntimeClient {
         #if os(iOS) || os(macOS)
-        // Apple app hosts use the in-process Runtime on an OS-assigned loopback port.
-        // This local transport is intentionally independent from Talkify Gateway
-        // credentials. Provider credentials are injected into AgentRuntime instead.
-        return DefaultAgentClient.fromRuntime()
+        // Phase A exposes only the reserved Embedded connection. Phase C extends
+        // RuntimeServerCoordinator without changing this host construction path.
+        do {
+            return try runtimeServers.makeActiveClient()
+        } catch {
+            preconditionFailure("Invalid active Runtime Server in Phase A: \(error)")
+        }
         #else
         // Unsupported embedded hosts may still connect to a separately managed server.
         let env = RuntimeEnvironment(host: "127.0.0.1", port: 8797)
@@ -315,6 +320,7 @@ final class AppContainer {
             _ = try await AgentRuntime.shared.ensureStarted(
                 with: providerConnections.credentialStore
             )
+            runtimeServers.embeddedStatusMonitor.markConnected()
             let queuedRevision = await providerConfigurationQueue.pendingRevision()
             if desiredProviderConfiguration == nil,
                queuedRevision == nil,
@@ -558,6 +564,7 @@ final class AppContainer {
                     _ = try await AgentRuntime.shared.ensureStarted(
                         with: providerConnections.credentialStore
                     )
+                    runtimeServers.embeddedStatusMonitor.markConnected()
                     await finishApplyingProviderConfiguration(staged)
                 } else {
                     // Runtime startup owns the final start and catalog publication.
