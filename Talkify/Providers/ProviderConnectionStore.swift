@@ -1,6 +1,44 @@
 import Foundation
 import AgentKit
 
+struct ProviderCatalogSnapshot: Sendable {
+    let models: [UnifiedModelDescriptor]
+    let defaultModelID: String?
+}
+
+enum ProviderRuntimeActivityPolicy {
+    static func blockingDescriptions(
+        in snapshot: RuntimeActivitySnapshot
+    ) -> [String] {
+        snapshot.sessions.compactMap { activity in
+            var reasons: [String] = []
+            let state = activity.state.lowercased()
+            let terminalStates: Set<String> = ["idle", "done", "failed", "cancelled"]
+
+            if activity.effectiveActiveTurnID != nil,
+               !terminalStates.contains(state) {
+                reasons.append("turn=\(activity.effectiveActiveTurnID ?? "-")")
+            }
+            if let position = activity.queuePosition, position > 0 {
+                reasons.append("queue=\(position)")
+            }
+            if let count = activity.pendingApprovalCount, count > 0 {
+                reasons.append("approvals=\(count)")
+            }
+            if let count = activity.pendingClientToolCount, count > 0 {
+                reasons.append("clientTools=\(count)")
+            }
+
+            guard !reasons.isEmpty else { return nil }
+            return "\(activity.sessionID){state=\(activity.state),\(reasons.joined(separator: ","))}"
+        }
+    }
+
+    static func hasActiveRuntimeWork(_ snapshot: RuntimeActivitySnapshot) -> Bool {
+        !blockingDescriptions(in: snapshot).isEmpty
+    }
+}
+
 enum ProviderConnectionStoreError: Error, LocalizedError {
     case apiKeyRequired
 
@@ -22,6 +60,9 @@ final class ProviderConnectionStore {
 
     private let modelSettings: ModelSettingsStore
     var onStructuralChange: (() -> Void)?
+    private(set) var isApplyingRuntimeConfiguration = false
+    private(set) var runtimeConfigurationError: String?
+    private(set) var runtimeConfigurationWaitDescription: String?
 
     init(
         modelSettings: ModelSettingsStore,
@@ -118,13 +159,60 @@ final class ProviderConnectionStore {
 
     func setDefaultModel(_ id: String?) {
         catalog.setDefaultModel(id: id)
-        modelSettings.applyUnifiedCatalog(catalog)
         onStructuralChange?()
     }
 
     func reloadCatalog() {
         catalog.reload(from: registry)
-        modelSettings.applyUnifiedCatalog(catalog)
+    }
+
+    func catalogSnapshot() -> ProviderCatalogSnapshot {
+        ProviderCatalogSnapshot(
+            models: catalog.models,
+            defaultModelID: catalog.defaultModelID
+        )
+    }
+
+    func markRuntimeConfigurationPending() {
+        isApplyingRuntimeConfiguration = true
+        runtimeConfigurationError = nil
+        runtimeConfigurationWaitDescription = nil
+        // Runtime restart creates a short interval where neither the old nor
+        // the new alias set is safe to submit. An explicit empty catalog keeps
+        // Composer editable while disabling model selection and sending.
+        modelSettings.applyUnifiedCatalog([], defaultModelID: nil)
+    }
+
+    func markRuntimeConfigurationFailed(_ error: Error) {
+        isApplyingRuntimeConfiguration = true
+        runtimeConfigurationError = error.localizedDescription
+        runtimeConfigurationWaitDescription = nil
+    }
+
+    func markRuntimeConfigurationWaiting(_ description: String?) {
+        isApplyingRuntimeConfiguration = true
+        runtimeConfigurationError = nil
+        runtimeConfigurationWaitDescription = description
+    }
+
+    /// Publishes only the catalog that the embedded Runtime has successfully
+    /// configured. Registry edits stay invisible to Composer until this point,
+    /// preventing it from sending an alias that the running Runtime does not know.
+    func publishAppliedCatalog(
+        _ snapshot: ProviderCatalogSnapshot,
+        hasPendingConfiguration: Bool
+    ) {
+        isApplyingRuntimeConfiguration = hasPendingConfiguration
+        guard !hasPendingConfiguration else {
+            modelSettings.applyUnifiedCatalog([], defaultModelID: nil)
+            return
+        }
+        modelSettings.applyUnifiedCatalog(
+            snapshot.models,
+            defaultModelID: snapshot.defaultModelID
+        )
+        runtimeConfigurationError = nil
+        runtimeConfigurationWaitDescription = nil
     }
 
     private func didMutateRegistry() {

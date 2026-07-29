@@ -13,6 +13,7 @@ struct ProviderSettingsView: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 28) {
+            runtimeConfigurationStatus
 
             if !store.connections.isEmpty {
                 providerSection(title: "已连接的提供商") {
@@ -61,6 +62,34 @@ struct ProviderSettingsView: View {
             }
         } message: { connection in
             Text("历史会话会保留，但使用“\(connection.displayName)”模型的会话在重新选择模型前不能发送消息。")
+        }
+    }
+
+    @ViewBuilder
+    private var runtimeConfigurationStatus: some View {
+        if store.isApplyingRuntimeConfiguration {
+            HStack(alignment: .top, spacing: 10) {
+                ProgressView()
+                    .controlSize(.small)
+                VStack(alignment: .leading, spacing: 3) {
+                    Text("正在应用配置")
+                        .font(.system(size: 14, weight: .medium))
+                    Text(
+                        store.runtimeConfigurationError
+                            ?? store.runtimeConfigurationWaitDescription
+                            ?? "新模型会在本地 Runtime 配置生效后出现在会话中。"
+                    )
+                    .font(.caption)
+                    .foregroundStyle(
+                        store.runtimeConfigurationError == nil
+                            ? Color.secondary
+                            : Color.red
+                    )
+                }
+            }
+            .padding(12)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .background(Color.accentColor.opacity(0.08), in: RoundedRectangle(cornerRadius: 10))
         }
     }
 
@@ -483,11 +512,24 @@ struct ModelCatalogSettingsView: View {
             Text("模型")
                 .font(.system(size: 30, weight: .semibold))
 
-            if store.catalog.models.isEmpty {
+            if store.isApplyingRuntimeConfiguration {
+                HStack(spacing: 10) {
+                    ProgressView()
+                        .controlSize(.small)
+                    Text("正在应用 Provider 配置，新模型暂不可选择。")
+                        .foregroundStyle(.secondary)
+                }
+            }
+
+            if container.modelSettings.unifiedModelGroups.isEmpty {
                 ContentUnavailableView(
-                    "尚未连接模型",
+                    store.isApplyingRuntimeConfiguration ? "模型配置中" : "尚未连接模型",
                     systemImage: "sparkles",
-                    description: Text("连接提供商并配置模型后，可在每个会话中独立选择。")
+                    description: Text(
+                        store.isApplyingRuntimeConfiguration
+                            ? "Runtime 准备完成后，模型会自动出现在会话中。"
+                            : "连接提供商并配置模型后，可在每个会话中独立选择。"
+                    )
                 )
             } else {
                 ForEach(container.modelSettings.unifiedModelGroups, id: \.connectionID) { group in

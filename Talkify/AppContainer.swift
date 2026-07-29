@@ -64,6 +64,11 @@ struct NetworkConfig: ApiConfiguration {
     var decrypter: ApiDecrypter? = nil
 }
 
+private struct PendingProviderConfiguration {
+    let generated: GeneratedRuntimeProviderConfiguration
+    let catalog: ProviderCatalogSnapshot
+}
+
 @MainActor
 @Observable
 final class AppContainer {
@@ -75,7 +80,12 @@ final class AppContainer {
     private let agentCredentialStore: AppCredentialStore
     let providerConnections: ProviderConnectionStore
     private let providerConfigurationQueue = RuntimeProviderConfigurationApplyQueue()
+    private var desiredProviderConfiguration: PendingProviderConfiguration?
+    private var providerCatalogsByRevision: [UInt64: ProviderCatalogSnapshot] = [:]
+    private var configuredProviderCatalogAwaitingRuntimeStart: ProviderCatalogSnapshot?
+    private var providerConfigurationStageTask: Task<Void, Never>?
     private var providerConfigurationApplyTask: Task<Void, Never>?
+    private var lastProviderConfigurationBlockerLog: String?
     
     private let baseHeaders: [String: String]
     private(set) var apiProvider: ApiProvider?
@@ -299,12 +309,27 @@ final class AppContainer {
                 try AgentRuntime.shared.configureProviderConnections(
                     makeRuntimeProviderConfiguration()
                 )
+                configuredProviderCatalogAwaitingRuntimeStart =
+                    providerConnections.catalogSnapshot()
             }
             _ = try await AgentRuntime.shared.ensureStarted(
                 with: providerConnections.credentialStore
             )
+            let queuedRevision = await providerConfigurationQueue.pendingRevision()
+            if desiredProviderConfiguration == nil,
+               queuedRevision == nil,
+               let catalogToPublish = configuredProviderCatalogAwaitingRuntimeStart {
+                providerConnections.publishAppliedCatalog(
+                    catalogToPublish,
+                    hasPendingConfiguration: false
+                )
+                configuredProviderCatalogAwaitingRuntimeStart = nil
+            } else if queuedRevision != nil {
+                beginProviderConfigurationApplyLoopIfNeeded()
+            }
         } catch {
             DLLog("⚠️ Agent Runtime 启动失败：\(error)")
+            providerConnections.markRuntimeConfigurationFailed(error)
         }
         #endif
     }
@@ -427,11 +452,33 @@ final class AppContainer {
     }
 
     private func stageProviderConfigurationApply() {
-        guard let generated = try? makeRuntimeProviderConfiguration() else { return }
-        Task { [weak self] in
+        providerConnections.markRuntimeConfigurationPending()
+        do {
+            desiredProviderConfiguration = PendingProviderConfiguration(
+                generated: try makeRuntimeProviderConfiguration(),
+                catalog: providerConnections.catalogSnapshot()
+            )
+            beginProviderConfigurationStageLoopIfNeeded()
+        } catch {
+            providerConnections.markRuntimeConfigurationFailed(error)
+            DLLog("⚠️ Provider 配置生成失败：\(error)")
+        }
+    }
+
+    private func beginProviderConfigurationStageLoopIfNeeded() {
+        guard providerConfigurationStageTask == nil else { return }
+        providerConfigurationStageTask = Task { @MainActor [weak self] in
             guard let self else { return }
-            _ = await providerConfigurationQueue.stage(generated)
-            beginProviderConfigurationApplyLoopIfNeeded()
+            while !Task.isCancelled, let desired = desiredProviderConfiguration {
+                desiredProviderConfiguration = nil
+                let revision = await providerConfigurationQueue.stage(desired.generated)
+                providerCatalogsByRevision[revision] = desired.catalog
+                DLLog(
+                    "Provider 配置已排队：revision=\(revision)，models=\(desired.catalog.models.count)"
+                )
+                beginProviderConfigurationApplyLoopIfNeeded()
+            }
+            providerConfigurationStageTask = nil
         }
     }
 
@@ -439,44 +486,128 @@ final class AppContainer {
         guard providerConfigurationApplyTask == nil else { return }
         providerConfigurationApplyTask = Task { @MainActor [weak self] in
             guard let self else { return }
-            defer { providerConfigurationApplyTask = nil }
+            await runProviderConfigurationApplyLoop()
+            providerConfigurationApplyTask = nil
 
-            while !Task.isCancelled {
-                guard AgentRuntime.shared.isAlive else {
-                    let emptySnapshot = RuntimeActivitySnapshot(
-                        cursor: 0,
-                        sessions: []
-                    )
-                    if let staged = await providerConfigurationQueue
-                        .configurationIfRuntimeIdle(emptySnapshot) {
-                        do {
-                            try AgentRuntime.shared.configureProviderConnections(staged.configuration)
-                            await providerConfigurationQueue.markApplied(revision: staged.revision)
-                        } catch {
-                            DLLog("⚠️ Provider 配置暂存失败：\(error)")
-                        }
-                    }
-                    return
-                }
+            // A stage can land while the loop is awaiting its final pending check.
+            // Re-check after clearing the task so that change cannot lose its wake-up.
+            if await providerConfigurationQueue.pendingRevision() != nil {
+                beginProviderConfigurationApplyLoopIfNeeded()
+            }
+        }
+    }
 
-                guard let snapshot = try? await makeAgentClient().activitySnapshot(),
-                      let staged = await providerConfigurationQueue
-                        .configurationIfRuntimeIdle(snapshot) else {
+    private func runProviderConfigurationApplyLoop() async {
+        while !Task.isCancelled {
+            guard await providerConfigurationQueue.pendingRevision() != nil else {
+                return
+            }
+
+            let activitySnapshot: RuntimeActivitySnapshot
+            if AgentRuntime.shared.isAlive {
+                do {
+                    activitySnapshot = try await makeAgentClient().activitySnapshot()
+                } catch {
+                    providerConnections.markRuntimeConfigurationFailed(error)
+                    DLLog("⚠️ Provider 配置等待 Runtime 空闲失败：\(error)")
                     try? await Task.sleep(for: .seconds(1))
                     continue
                 }
+            } else {
+                activitySnapshot = RuntimeActivitySnapshot(cursor: 0, sessions: [])
+            }
 
-                do {
+            let blockingDescriptions = ProviderRuntimeActivityPolicy.blockingDescriptions(
+                in: activitySnapshot
+            )
+            if !blockingDescriptions.isEmpty {
+                let summary = blockingDescriptions.joined(separator: "; ")
+                providerConnections.markRuntimeConfigurationWaiting(
+                    "正在等待 \(blockingDescriptions.count) 个会话结束。"
+                )
+                if summary != lastProviderConfigurationBlockerLog {
+                    lastProviderConfigurationBlockerLog = summary
+                    DLLog("Provider 配置等待 Runtime 空闲：\(summary)")
+                }
+                try? await Task.sleep(for: .seconds(1))
+                continue
+            }
+            lastProviderConfigurationBlockerLog = nil
+            providerConnections.markRuntimeConfigurationWaiting(nil)
+
+            // Code-Agent 1.2.1 serializes an idle queue position as `0`.
+            // AgentKit's current queue helper treats every non-nil position as
+            // active, so pass an explicit idle snapshot after the host has
+            // applied the protocol-correct `position > 0` policy above.
+            let idleSnapshot = RuntimeActivitySnapshot(
+                generatedAt: activitySnapshot.generatedAt,
+                cursor: activitySnapshot.cursor,
+                isDelta: activitySnapshot.isDelta,
+                sessions: []
+            )
+            guard let staged = await providerConfigurationQueue
+                .configurationIfRuntimeIdle(idleSnapshot) else {
+                try? await Task.sleep(for: .seconds(1))
+                continue
+            }
+
+            do {
+                if AgentRuntime.shared.isAlive {
                     AgentRuntime.shared.stop()
                     try AgentRuntime.shared.configureProviderConnections(staged.configuration)
                     _ = try await AgentRuntime.shared.ensureStarted(
                         with: providerConnections.credentialStore
                     )
+                    await finishApplyingProviderConfiguration(staged)
+                } else {
+                    // Runtime startup owns the final start and catalog publication.
+                    // Installing the YAML here keeps a pre-start registry mutation,
+                    // but does not expose its aliases to Composer prematurely.
+                    try AgentRuntime.shared.configureProviderConnections(staged.configuration)
+                    configuredProviderCatalogAwaitingRuntimeStart =
+                        providerCatalogsByRevision[staged.revision]
                     await providerConfigurationQueue.markApplied(revision: staged.revision)
-                } catch {
-                    DLLog("⚠️ Provider 配置应用失败：\(error)")
-                    try? await Task.sleep(for: .seconds(1))
+                    providerCatalogsByRevision.removeValue(forKey: staged.revision)
+                    providerCatalogsByRevision = providerCatalogsByRevision.filter {
+                        $0.key > staged.revision
+                    }
+                    DLLog(
+                        "Provider 配置已写入待启动 Runtime：revision=\(staged.revision)"
+                    )
+                    return
                 }
+            } catch {
+                providerConnections.markRuntimeConfigurationFailed(error)
+                DLLog("⚠️ Provider 配置应用失败：\(error)")
+                try? await Task.sleep(for: .seconds(1))
+            }
+        }
+    }
+
+    private func finishApplyingProviderConfiguration(
+        _ staged: StagedRuntimeProviderConfiguration
+    ) async {
+        await providerConfigurationQueue.markApplied(revision: staged.revision)
+        guard let catalog = providerCatalogsByRevision.removeValue(
+            forKey: staged.revision
+        ) else { return }
+
+        let queuedRevision = await providerConfigurationQueue.pendingRevision()
+        let hasPendingConfiguration =
+            desiredProviderConfiguration != nil
+            || queuedRevision != nil
+        providerConnections.publishAppliedCatalog(
+            catalog,
+            hasPendingConfiguration: hasPendingConfiguration
+        )
+        configuredProviderCatalogAwaitingRuntimeStart = nil
+        DLLog(
+            "Provider 配置已生效：revision=\(staged.revision)，models=\(catalog.models.count)，hasPending=\(hasPendingConfiguration)"
+        )
+
+        if !hasPendingConfiguration {
+            providerCatalogsByRevision = providerCatalogsByRevision.filter {
+                $0.key > staged.revision
             }
         }
     }
