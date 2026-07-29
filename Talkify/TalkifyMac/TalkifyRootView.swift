@@ -21,7 +21,10 @@ struct TalkifyRootView: View {
         if container.authManager.isLoggedIn {
             WorkspaceView(dependencies: container.makeAgentDependencies())
         } else {
-            AuthView(viewModel: container.makeAuthViewModel())
+            AuthView(
+                viewModel: container.makeAuthViewModel(),
+                showsAppleSignIn: AppDistribution.current.supportsNativeAppleSignIn
+            )
         }
         
     }

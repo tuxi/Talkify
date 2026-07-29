@@ -176,9 +176,10 @@ struct SettingsDetailView: View {
                 
                 activityInsightsSection(usage: usage)
                     .padding(.top, 44)
-                
+#if DEBUG
                 quickModeBanner
                     .padding(.top, 44)
+#endif
             }
         }
         .padding(.bottom, 56)

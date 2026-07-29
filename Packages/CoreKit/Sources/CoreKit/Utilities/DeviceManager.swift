@@ -27,7 +27,7 @@ public final class DeviceManager {
     private(set) var deviceId: String?
     
     // MARK: - 初始化
-    public init(keychainGroupId: String) {
+    public init(keychainGroupId: String? = nil) {
         self.keychainGroupId = keychainGroupId
     }
     

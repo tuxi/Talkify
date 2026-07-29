@@ -14,7 +14,13 @@ import FileViewerKit
 import AppKit
 #endif
 
-let keychainGroupID = "NKW67GFDHM.com.objc.chat.shared"
+#if os(macOS) && TALKIFY_MAC_DIRECT
+// Direct distribution deliberately avoids restricted entitlements so that
+// Developer ID signing does not require a provisioning profile.
+let keychainGroupID: String? = nil
+#else
+let keychainGroupID: String? = "NKW67GFDHM.com.objc.chat.shared"
+#endif
 
 #if os(macOS)
 private final class TalkifyApplicationDelegate: NSObject, NSApplicationDelegate {

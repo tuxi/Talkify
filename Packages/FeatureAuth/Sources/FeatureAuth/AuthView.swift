@@ -19,11 +19,13 @@ public struct AuthView: View {
     @State private var isAgreementAccepted = true
     @State private var agreementURL: URL?
     @FocusState private var focusedField: Field?
+    private let showsAppleSignIn: Bool
 
     private enum Field { case phone, captcha }
 
-    public init(viewModel: AuthViewModel) {
+    public init(viewModel: AuthViewModel, showsAppleSignIn: Bool = true) {
         self.viewModel = viewModel
+        self.showsAppleSignIn = showsAppleSignIn
     }
 
     public var body: some View {
@@ -114,11 +116,12 @@ private extension AuthView {
             }
 
             #if canImport(AuthenticationServices)
-            appleSignInButton
+            if showsAppleSignIn {
+                appleSignInButton
+                dividerTitle(TalkifyLocalized.string("auth.divider_or"))
+                    .padding(.vertical, 26)
+            }
             #endif
-
-            dividerTitle(TalkifyLocalized.string("auth.divider_or"))
-                .padding(.vertical, 26)
 
             VStack(spacing: 14) {
                 phoneField

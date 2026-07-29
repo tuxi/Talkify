@@ -54,6 +54,9 @@
 		A10000000000000000000002 /* UserAssetsTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserAssetsTests.swift; sourceTree = "<group>"; };
 		A10000000000000000000004 /* TalkifyTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = TalkifyTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		B20000000000000000000003 /* TalkifyShareExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = TalkifyShareExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		C30000000000000000000001 /* TalkifyMacCommon.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = TalkifyMacCommon.xcconfig; sourceTree = "<group>"; };
+		C30000000000000000000002 /* TalkifyMacAppStore.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = TalkifyMacAppStore.xcconfig; sourceTree = "<group>"; };
+		C30000000000000000000003 /* TalkifyMacDirect.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = TalkifyMacDirect.xcconfig; sourceTree = "<group>"; };
 		D0962009300B17250005EBC6 /* Talkify.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Talkify.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
@@ -124,6 +127,16 @@
 			path = TalkifyTests;
 			sourceTree = "<group>";
 		};
+		C30000000000000000000004 /* Configurations */ = {
+			isa = PBXGroup;
+			children = (
+				C30000000000000000000002 /* TalkifyMacAppStore.xcconfig */,
+				C30000000000000000000003 /* TalkifyMacDirect.xcconfig */,
+				C30000000000000000000001 /* TalkifyMacCommon.xcconfig */,
+			);
+			path = Configurations;
+			sourceTree = "<group>";
+		};
 		D0935522300EEFCF006C3962 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
@@ -134,6 +147,7 @@
 		D0962000300B17250005EBC6 = {
 			isa = PBXGroup;
 			children = (
+				C30000000000000000000004 /* Configurations */,
 				D096200B300B17250005EBC6 /* Talkify */,
 				B20000000000000000000004 /* TalkifyShareExtension */,
 				A10000000000000000000007 /* TalkifyTests */,
@@ -460,6 +474,152 @@
 			};
 			name = Release;
 		};
+		C30000000000000000000010 /* Debug-MacAppStore */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				DEVELOPMENT_TEAM = NKW67GFDHM;
+				ENABLE_TESTABILITY = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				ONLY_ACTIVE_ARCH = YES;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+			};
+			name = "Debug-MacAppStore";
+		};
+		C30000000000000000000011 /* Release-MacAppStore */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				DEVELOPMENT_TEAM = NKW67GFDHM;
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				SWIFT_COMPILATION_MODE = wholemodule;
+			};
+			name = "Release-MacAppStore";
+		};
+		C30000000000000000000012 /* Debug-MacDirect */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				DEVELOPMENT_TEAM = NKW67GFDHM;
+				ENABLE_TESTABILITY = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				ONLY_ACTIVE_ARCH = YES;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+			};
+			name = "Debug-MacDirect";
+		};
+		C30000000000000000000013 /* Release-MacDirect */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				DEVELOPMENT_TEAM = NKW67GFDHM;
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				SWIFT_COMPILATION_MODE = wholemodule;
+			};
+			name = "Release-MacDirect";
+		};
+		C30000000000000000000020 /* Debug-MacAppStore */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = C30000000000000000000002 /* TalkifyMacAppStore.xcconfig */;
+			buildSettings = {
+				CURRENT_PROJECT_VERSION = 48;
+			};
+			name = "Debug-MacAppStore";
+		};
+		C30000000000000000000021 /* Release-MacAppStore */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = C30000000000000000000002 /* TalkifyMacAppStore.xcconfig */;
+			buildSettings = {
+				CURRENT_PROJECT_VERSION = 48;
+			};
+			name = "Release-MacAppStore";
+		};
+		C30000000000000000000022 /* Debug-MacDirect */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = C30000000000000000000003 /* TalkifyMacDirect.xcconfig */;
+			buildSettings = {
+				CURRENT_PROJECT_VERSION = 48;
+			};
+			name = "Debug-MacDirect";
+		};
+		C30000000000000000000023 /* Release-MacDirect */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = C30000000000000000000003 /* TalkifyMacDirect.xcconfig */;
+			buildSettings = {
+				CURRENT_PROJECT_VERSION = 48;
+			};
+			name = "Release-MacDirect";
+		};
+		D057EB3830190DF800CBD707 /* Debug-MacAppStore */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				PRODUCT_NAME = TalkifyTests;
+			};
+			name = "Debug-MacAppStore";
+		};
+		D057EB3930190DF800CBD707 /* Release-MacAppStore */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				PRODUCT_NAME = TalkifyTests;
+			};
+			name = "Release-MacAppStore";
+		};
+		D057EB3A30190DF800CBD707 /* Debug-MacDirect */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				PRODUCT_NAME = TalkifyTests;
+			};
+			name = "Debug-MacDirect";
+		};
+		D057EB3B30190DF800CBD707 /* Release-MacDirect */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				PRODUCT_NAME = TalkifyTests;
+			};
+			name = "Release-MacDirect";
+		};
+		D057EB3C30190DF800CBD707 /* Debug-MacAppStore */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				PRODUCT_NAME = TalkifyShareExtension;
+			};
+			name = "Debug-MacAppStore";
+		};
+		D057EB3D30190DF800CBD707 /* Release-MacAppStore */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				PRODUCT_NAME = TalkifyShareExtension;
+			};
+			name = "Release-MacAppStore";
+		};
+		D057EB3E30190DF800CBD707 /* Debug-MacDirect */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				PRODUCT_NAME = TalkifyShareExtension;
+			};
+			name = "Debug-MacDirect";
+		};
+		D057EB3F30190DF800CBD707 /* Release-MacDirect */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				PRODUCT_NAME = TalkifyShareExtension;
+			};
+			name = "Release-MacDirect";
+		};
 		D0962012300B17270005EBC6 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -584,7 +744,7 @@
 				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = NO;
 				CODE_SIGN_ENTITLEMENTS = Talkify/Talkify.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 47;
+				CURRENT_PROJECT_VERSION = 48;
 				DEVELOPMENT_TEAM = NKW67GFDHM;
 				ENABLE_APP_SANDBOX = YES;
 				"ENABLE_APP_SANDBOX[sdk=macosx*]" = NO;
@@ -634,7 +794,7 @@
 				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = NO;
 				CODE_SIGN_ENTITLEMENTS = Talkify/Talkify.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 47;
+				CURRENT_PROJECT_VERSION = 48;
 				DEVELOPMENT_TEAM = NKW67GFDHM;
 				ENABLE_APP_SANDBOX = YES;
 				"ENABLE_APP_SANDBOX[sdk=macosx*]" = NO;
@@ -684,6 +844,10 @@
 			buildConfigurations = (
 				A1000000000000000000000D /* Debug */,
 				A1000000000000000000000E /* Release */,
+				D057EB3830190DF800CBD707 /* Debug-MacAppStore */,
+				D057EB3930190DF800CBD707 /* Release-MacAppStore */,
+				D057EB3A30190DF800CBD707 /* Debug-MacDirect */,
+				D057EB3B30190DF800CBD707 /* Release-MacDirect */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
@@ -693,6 +857,10 @@
 			buildConfigurations = (
 				B20000000000000000000013 /* Debug */,
 				B20000000000000000000014 /* Release */,
+				D057EB3C30190DF800CBD707 /* Debug-MacAppStore */,
+				D057EB3D30190DF800CBD707 /* Release-MacAppStore */,
+				D057EB3E30190DF800CBD707 /* Debug-MacDirect */,
+				D057EB3F30190DF800CBD707 /* Release-MacDirect */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
@@ -702,6 +870,10 @@
 			buildConfigurations = (
 				D0962012300B17270005EBC6 /* Debug */,
 				D0962013300B17270005EBC6 /* Release */,
+				C30000000000000000000010 /* Debug-MacAppStore */,
+				C30000000000000000000011 /* Release-MacAppStore */,
+				C30000000000000000000012 /* Debug-MacDirect */,
+				C30000000000000000000013 /* Release-MacDirect */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
@@ -711,6 +883,10 @@
 			buildConfigurations = (
 				D0962015300B17270005EBC6 /* Debug */,
 				D0962016300B17270005EBC6 /* Release */,
+				C30000000000000000000020 /* Debug-MacAppStore */,
+				C30000000000000000000021 /* Release-MacAppStore */,
+				C30000000000000000000022 /* Debug-MacDirect */,
+				C30000000000000000000023 /* Release-MacDirect */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;

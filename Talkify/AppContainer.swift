@@ -280,9 +280,23 @@ final class AppContainer {
 
     func ensureAgentRuntimeStarted() async {
         #if os(iOS) || os(macOS)
-        _ = try? await AgentRuntime.shared.ensureStarted(
-            with: agentCredentialStore
-        )
+        do {
+            if !AgentRuntime.shared.isAlive {
+                var configuration = EmbeddedRuntimeConfiguration.platformDefault()
+                #if os(macOS) && TALKIFY_MAC_APP_STORE
+                configuration.profile = .sandboxed
+                configuration.executableSearchPaths = []
+                #elseif os(macOS) && TALKIFY_MAC_DIRECT
+                configuration.profile = .fullDesktop
+                #endif
+                try AgentRuntime.shared.configure(configuration)
+            }
+            _ = try await AgentRuntime.shared.ensureStarted(
+                with: agentCredentialStore
+            )
+        } catch {
+            DLLog("⚠️ Agent Runtime 启动失败：\(error)")
+        }
         #endif
     }
     

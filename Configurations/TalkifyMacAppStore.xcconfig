@@ -1,0 +1,7 @@
+#include "TalkifyMacCommon.xcconfig"
+
+CODE_SIGN_ENTITLEMENTS = Talkify/TalkifyMacAppStore.entitlements
+ENABLE_APP_SANDBOX = YES
+ENABLE_USER_SELECTED_FILES = readwrite
+REGISTER_APP_GROUPS = YES
+SWIFT_ACTIVE_COMPILATION_CONDITIONS = $(inherited) TALKIFY_MAC_APP_STORE
