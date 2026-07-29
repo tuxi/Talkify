@@ -255,12 +255,10 @@ final class AppContainer {
 
     func makeAgentClient() -> any RuntimeClient {
         #if os(iOS) || os(macOS)
-        // Phase A exposes only the reserved Embedded connection. Phase C extends
-        // RuntimeServerCoordinator without changing this host construction path.
         do {
             return try runtimeServers.makeActiveClient()
         } catch {
-            preconditionFailure("Invalid active Runtime Server in Phase A: \(error)")
+            preconditionFailure("Invalid active Runtime Server: \(error)")
         }
         #else
         // Unsupported embedded hosts may still connect to a separately managed server.
@@ -271,15 +269,18 @@ final class AppContainer {
 
     func makeAgentDependencies() -> AgentDependencies {
         let credentialStore = providerConnections.credentialStore
+        let serverConnectionID = runtimeServers.activeConnectionID
         return AgentDependencies(
             client: makeAgentClient(),
             toolRegistry: toolRegistry,
             timelineExtensions: timelineExtensions,
             conversationRendererMode: .web,
-            onAuthExpired: { [credentialStore] in
+            onAuthExpired: { [weak self, credentialStore] in
                 // The embedded runtime owns its provider, so refresh its injected
                 // credentials after either Apple host observes an auth expiry.
                 #if os(iOS) || os(macOS)
+                guard self?.runtimeServers.activeConnectionID
+                    == RuntimeServerConnection.embeddedID else { return }
                 try? await AgentRuntime.shared.reconfigure(with: credentialStore)
                 #endif
             },
@@ -292,7 +293,10 @@ final class AppContainer {
             userAssetPreviewResolver: userAssetPreviewResolver,
             localUserAssetPreviewResolver: localUserAssetPreviewResolver,
             onAttentionEvent: { [conversationNotifications] event in
-                conversationNotifications.handle(event)
+                conversationNotifications.handle(
+                    event,
+                    serverConnectionID: serverConnectionID
+                )
             }
         )
     }
@@ -300,6 +304,22 @@ final class AppContainer {
     // MARK: - Embedded Runtime
 
     func ensureAgentRuntimeStarted() async {
+        #if os(iOS) || os(macOS)
+        guard runtimeServers.activeConnection.kind == .embedded else {
+            await refreshActiveRuntimeContext()
+            return
+        }
+        await ensureEmbeddedRuntimeStarted()
+        if await hasPendingProviderConfiguration() {
+            providerConnections.markRuntimeConfigurationPending()
+            beginProviderConfigurationApplyLoopIfNeeded()
+        } else {
+            await refreshActiveRuntimeContext()
+        }
+        #endif
+    }
+
+    private func ensureEmbeddedRuntimeStarted() async {
         #if os(iOS) || os(macOS)
         do {
             if !AgentRuntime.shared.isAlive {
@@ -338,6 +358,54 @@ final class AppContainer {
             providerConnections.markRuntimeConfigurationFailed(error)
         }
         #endif
+    }
+
+    func refreshActiveRuntimeContext() async {
+        do {
+            let context = try await runtimeServers.refreshActiveContext()
+            publishRuntimeServerModels(context)
+        } catch {
+            modelSettings.applyUnifiedCatalog([], defaultModelID: nil)
+            DLLog("⚠️ 当前 Runtime Server 上下文刷新失败：\(error)")
+        }
+    }
+
+    func activateRuntimeServer(
+        connectionID: String,
+        allowingActiveWorkInterruption: Bool = false
+    ) async throws {
+        var hasPendingEmbeddedConfiguration = false
+        if connectionID == RuntimeServerConnection.embeddedID {
+            await ensureEmbeddedRuntimeStarted()
+            hasPendingEmbeddedConfiguration = await hasPendingProviderConfiguration()
+        }
+        let context = try await runtimeServers.activate(
+            connectionID: connectionID,
+            allowingActiveWorkInterruption: allowingActiveWorkInterruption
+        )
+        if connectionID == RuntimeServerConnection.embeddedID,
+           hasPendingEmbeddedConfiguration {
+            providerConnections.markRuntimeConfigurationPending()
+            beginProviderConfigurationApplyLoopIfNeeded()
+        } else {
+            publishRuntimeServerModels(context)
+        }
+    }
+
+    private func publishRuntimeServerModels(
+        _ context: RuntimeServerActiveContext
+    ) {
+        modelSettings.applyUnifiedCatalog(
+            context.models,
+            defaultModelID: context.defaultModelID
+        )
+    }
+
+    private func hasPendingProviderConfiguration() async -> Bool {
+        if desiredProviderConfiguration != nil || providerConfigurationStageTask != nil {
+            return true
+        }
+        return await providerConfigurationQueue.pendingRevision() != nil
     }
     
     private static func makeAuthorizedApiProvider(
@@ -458,7 +526,9 @@ final class AppContainer {
     }
 
     private func stageProviderConfigurationApply() {
-        providerConnections.markRuntimeConfigurationPending()
+        if runtimeServers.activeConnection.kind == .embedded {
+            providerConnections.markRuntimeConfigurationPending()
+        }
         do {
             desiredProviderConfiguration = PendingProviderConfiguration(
                 generated: try makeRuntimeProviderConfiguration(),
@@ -497,7 +567,8 @@ final class AppContainer {
 
             // A stage can land while the loop is awaiting its final pending check.
             // Re-check after clearing the task so that change cannot lose its wake-up.
-            if await providerConfigurationQueue.pendingRevision() != nil {
+            if runtimeServers.activeConnection.kind == .embedded,
+               await providerConfigurationQueue.pendingRevision() != nil {
                 beginProviderConfigurationApplyLoopIfNeeded()
             }
         }
@@ -506,6 +577,12 @@ final class AppContainer {
     private func runProviderConfigurationApplyLoop() async {
         while !Task.isCancelled {
             guard await providerConfigurationQueue.pendingRevision() != nil else {
+                return
+            }
+            // Provider credentials and generated YAML belong exclusively to the
+            // embedded Runtime. Keep the staged revision until Embedded becomes
+            // active again; never stop or inspect an External Server here.
+            guard runtimeServers.activeConnection.kind == .embedded else {
                 return
             }
 
@@ -558,6 +635,9 @@ final class AppContainer {
             }
 
             do {
+                guard runtimeServers.activeConnection.kind == .embedded else {
+                    return
+                }
                 if AgentRuntime.shared.isAlive {
                     AgentRuntime.shared.stop()
                     try AgentRuntime.shared.configureProviderConnections(staged.configuration)

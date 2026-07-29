@@ -65,14 +65,22 @@ struct ChatDrawerWorkspace: View {
             .onDisappear {
                 store.handleWorkspaceDisappeared()
             }
-            .onChange(of: container.conversationNotifications.pendingSessionID, initial: true) { _, sessionID in
-                guard let sessionID else { return }
+            .onChange(of: container.conversationNotifications.pendingConversation, initial: true) { _, identity in
+                guard let identity else { return }
                 Task {
+                    guard identity.serverConnectionID
+                        == container.runtimeServers.activeConnectionID else {
+                        try? await container.activateRuntimeServer(
+                            connectionID: identity.serverConnectionID
+                        )
+                        return
+                    }
+                    let sessionID = identity.conversationID
                     if !store.listViewModel.conversations.contains(where: { $0.id == sessionID }) {
                         await store.listViewModel.refresh()
                     }
                     store.selectConversation(sessionID: sessionID)
-                    container.conversationNotifications.consumePendingSessionID(sessionID)
+                    container.conversationNotifications.consumePendingConversation(identity)
                 }
             }
     }
@@ -143,6 +151,7 @@ struct TalkifyRootView: View {
         Binding(
             get: {
                 !hasCompletedProviderOnboarding
+                    && container.runtimeServers.activeConnection.kind == .embedded
                     && !container.providerConnections.hasAvailableModels
                     && !container.authManager.showLoginSheet
             },

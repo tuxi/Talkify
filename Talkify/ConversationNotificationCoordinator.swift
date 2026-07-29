@@ -14,7 +14,7 @@ import CoreKit
 @MainActor
 @Observable
 final class ConversationNotificationCoordinator: NSObject, UNUserNotificationCenterDelegate {
-    private(set) var pendingSessionID: String?
+    private(set) var pendingConversation: RuntimeConversationIdentity?
 
     private let center: UNUserNotificationCenter
 
@@ -24,16 +24,24 @@ final class ConversationNotificationCoordinator: NSObject, UNUserNotificationCen
         center.delegate = self
     }
 
-    func handle(_ event: ConversationAttentionEvent) {
-        Task { await deliver(event) }
+    func handle(
+        _ event: ConversationAttentionEvent,
+        serverConnectionID: String
+    ) {
+        Task {
+            await deliver(event, serverConnectionID: serverConnectionID)
+        }
     }
 
-    func consumePendingSessionID(_ sessionID: String) {
-        guard pendingSessionID == sessionID else { return }
-        pendingSessionID = nil
+    func consumePendingConversation(_ identity: RuntimeConversationIdentity) {
+        guard pendingConversation == identity else { return }
+        pendingConversation = nil
     }
 
-    private func deliver(_ event: ConversationAttentionEvent) async {
+    private func deliver(
+        _ event: ConversationAttentionEvent,
+        serverConnectionID: String
+    ) async {
         var settings = await center.notificationSettings()
         if settings.authorizationStatus == .notDetermined {
             _ = try? await center.requestAuthorization(options: [.alert, .sound, .badge])
@@ -50,7 +58,10 @@ final class ConversationNotificationCoordinator: NSObject, UNUserNotificationCen
         #endif
         guard canDeliver else { return }
 
-        let notification = notificationContent(for: event)
+        let notification = notificationContent(
+            for: event,
+            serverConnectionID: serverConnectionID
+        )
         let request = UNNotificationRequest(
             identifier: notification.identifier,
             content: notification.content,
@@ -60,7 +71,8 @@ final class ConversationNotificationCoordinator: NSObject, UNUserNotificationCen
     }
 
     private func notificationContent(
-        for event: ConversationAttentionEvent
+        for event: ConversationAttentionEvent,
+        serverConnectionID: String
     ) -> (identifier: String, content: UNMutableNotificationContent) {
         let content = UNMutableNotificationContent()
         content.sound = .default
@@ -96,14 +108,15 @@ final class ConversationNotificationCoordinator: NSObject, UNUserNotificationCen
             }
         }
 
-        content.threadIdentifier = sessionID
+        content.threadIdentifier = "\(serverConnectionID).\(sessionID)"
         content.userInfo = [
+            "server_connection_id": serverConnectionID,
             "session_id": sessionID,
             "turn_id": turnID ?? "",
             "sequence": String(sequence),
         ]
         return (
-            "conversation-attention.\(sessionID).\(sequence)",
+            "conversation-attention.\(serverConnectionID).\(sessionID).\(sequence)",
             content
         )
     }
@@ -122,9 +135,15 @@ final class ConversationNotificationCoordinator: NSObject, UNUserNotificationCen
         withCompletionHandler completionHandler: @escaping () -> Void
     ) {
         let sessionID = response.notification.request.content.userInfo["session_id"] as? String
-        if let sessionID, !sessionID.isEmpty {
+        let serverConnectionID = response.notification.request.content
+            .userInfo["server_connection_id"] as? String
+        if let sessionID, !sessionID.isEmpty,
+           let serverConnectionID, !serverConnectionID.isEmpty {
             Task { @MainActor [weak self] in
-                self?.pendingSessionID = sessionID
+                self?.pendingConversation = RuntimeConversationIdentity(
+                    serverConnectionID: serverConnectionID,
+                    conversationID: sessionID
+                )
             }
         }
         completionHandler()

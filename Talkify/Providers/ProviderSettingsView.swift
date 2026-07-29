@@ -10,27 +10,34 @@ struct ProviderSettingsView: View {
     @State private var errorMessage: String?
 
     private var store: ProviderConnectionStore { container.providerConnections }
+    private var isExternalServerActive: Bool {
+        container.runtimeServers.activeConnection.kind != .embedded
+    }
 
     var body: some View {
         VStack(alignment: .leading, spacing: 28) {
-            runtimeConfigurationStatus
+            if isExternalServerActive {
+                externalServerNotice
+            } else {
+                runtimeConfigurationStatus
 
-            if !store.connections.isEmpty {
-                providerSection(title: "已连接的提供商") {
-                    ForEach(store.connections) { connection in
-                        connectedRow(connection)
-                        if connection.id != store.connections.last?.id {
-                            Divider()
+                if !store.connections.isEmpty {
+                    providerSection(title: "已连接的提供商") {
+                        ForEach(store.connections) { connection in
+                            connectedRow(connection)
+                            if connection.id != store.connections.last?.id {
+                                Divider()
+                            }
                         }
                     }
                 }
-            }
 
-            providerSection(title: "可连接的提供商") {
-                ForEach(TalkifyProviderTemplate.builtIn) { template in
-                    availableRow(template)
-                    if template.id != TalkifyProviderTemplate.builtIn.last?.id {
-                        Divider()
+                providerSection(title: "可连接的提供商") {
+                    ForEach(TalkifyProviderTemplate.builtIn) { template in
+                        availableRow(template)
+                        if template.id != TalkifyProviderTemplate.builtIn.last?.id {
+                            Divider()
+                        }
                     }
                 }
             }
@@ -63,6 +70,18 @@ struct ProviderSettingsView: View {
         } message: { connection in
             Text("历史会话会保留，但使用“\(connection.displayName)”模型的会话在重新选择模型前不能发送消息。")
         }
+    }
+
+    private var externalServerNotice: some View {
+        ContentUnavailableView {
+            Label("提供商由外部服务器管理", systemImage: "server.rack")
+        } description: {
+            Text(
+                "当前连接的是“\(container.runtimeServers.activeConnection.displayName)”。"
+                + "Talkify 只读取该 CodeAgent Server 发布的模型，不会查看或修改它的 Provider 与 API Key。"
+            )
+        }
+        .frame(maxWidth: .infinity, minHeight: 360)
     }
 
     @ViewBuilder
@@ -506,13 +525,21 @@ struct ModelCatalogSettingsView: View {
     @Environment(AppContainer.self) private var container
 
     private var store: ProviderConnectionStore { container.providerConnections }
+    private var isExternalServerActive: Bool {
+        container.runtimeServers.activeConnection.kind != .embedded
+    }
+    private var activeDefaultModelID: String? {
+        isExternalServerActive
+            ? container.runtimeServers.activeContext?.defaultModelID
+            : store.catalog.defaultModelID
+    }
 
     var body: some View {
         VStack(alignment: .leading, spacing: 28) {
             Text("模型")
                 .font(.system(size: 30, weight: .semibold))
 
-            if store.isApplyingRuntimeConfiguration {
+            if !isExternalServerActive && store.isApplyingRuntimeConfiguration {
                 HStack(spacing: 10) {
                     ProgressView()
                         .controlSize(.small)
@@ -523,12 +550,14 @@ struct ModelCatalogSettingsView: View {
 
             if container.modelSettings.unifiedModelGroups.isEmpty {
                 ContentUnavailableView(
-                    store.isApplyingRuntimeConfiguration ? "模型配置中" : "尚未连接模型",
+                    !isExternalServerActive && store.isApplyingRuntimeConfiguration
+                        ? "模型配置中"
+                        : "尚无可用模型",
                     systemImage: "sparkles",
                     description: Text(
-                        store.isApplyingRuntimeConfiguration
+                        !isExternalServerActive && store.isApplyingRuntimeConfiguration
                             ? "Runtime 准备完成后，模型会自动出现在会话中。"
-                            : "连接提供商并配置模型后，可在每个会话中独立选择。"
+                            : "当前 Runtime Server 没有发布可用模型。"
                     )
                 )
             } else {
@@ -573,15 +602,19 @@ struct ModelCatalogSettingsView: View {
             }
             Spacer()
             Button {
+                guard !isExternalServerActive else { return }
                 store.setDefaultModel(model.id)
             } label: {
-                if store.catalog.defaultModelID == model.id {
+                if activeDefaultModelID == model.id {
                     Label("默认", systemImage: "checkmark")
+                } else if isExternalServerActive {
+                    Text("服务器模型")
                 } else {
                     Text("设为默认")
                 }
             }
             .buttonStyle(.borderless)
+            .disabled(isExternalServerActive)
         }
         .padding(.vertical, 14)
     }

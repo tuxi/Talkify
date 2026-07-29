@@ -114,9 +114,9 @@ public struct WorkspaceView: View {
             .onDisappear {
                 store.handleWorkspaceDisappeared()
             }
-            .onChange(of: container.conversationNotifications.pendingSessionID, initial: true) { _, sessionID in
-                guard let sessionID else { return }
-                Task { await openNotificationSession(sessionID) }
+            .onChange(of: container.conversationNotifications.pendingConversation, initial: true) { _, identity in
+                guard let identity else { return }
+                Task { await openNotificationConversation(identity) }
             }
     }
     
@@ -182,7 +182,16 @@ public struct WorkspaceView: View {
         router.navigate(to: destination)
     }
     
-    private func openNotificationSession(_ sessionID: String) async {
+    private func openNotificationConversation(
+        _ identity: RuntimeConversationIdentity
+    ) async {
+        guard identity.serverConnectionID == container.runtimeServers.activeConnectionID else {
+            try? await container.activateRuntimeServer(
+                connectionID: identity.serverConnectionID
+            )
+            return
+        }
+        let sessionID = identity.conversationID
         if !store.listViewModel.conversations.contains(where: { $0.id == sessionID }) {
             await store.listViewModel.refresh()
         }
@@ -192,7 +201,7 @@ public struct WorkspaceView: View {
         if horizontalSizeClass == .compact {
             router.path = [.conversationDetail(conversation: conversation)]
         }
-        container.conversationNotifications.consumePendingSessionID(sessionID)
+        container.conversationNotifications.consumePendingConversation(identity)
     }
     
     // MARK: - iPad / macOS (regular) — NavigationSplitView
