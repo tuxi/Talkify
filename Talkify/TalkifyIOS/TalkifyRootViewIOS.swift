@@ -129,9 +129,6 @@ struct TalkifyRootView: View {
                 hasCompletedOnboarding: $hasCompletedProviderOnboarding
             )
         }
-        .fullScreenCover(isPresented: loginBinding) {
-            AuthView(viewModel: container.makeAuthViewModel())
-        }
     }
 
     private var providerOnboardingBinding: Binding<Bool> {

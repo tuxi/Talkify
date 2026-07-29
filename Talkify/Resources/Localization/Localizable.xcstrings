@@ -11053,6 +11053,9 @@
     "Reasoning" : {
 
     },
+    "Runtime 准备完成后，模型会自动出现在会话中。" : {
+
+    },
     "settings.about.ai_data_processing" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -25716,7 +25719,16 @@
     "模型" : {
 
     },
+    "模型配置中" : {
+
+    },
     "正在保存…" : {
+
+    },
+    "正在应用 Provider 配置，新模型暂不可选择。" : {
+
+    },
+    "正在应用配置" : {
 
     },
     "添加模型" : {

@@ -126,7 +126,7 @@ struct SettingsDetailView: View {
             Text("连接 Talkify Gateway 后查看账户、订阅、余额和用量。")
         } actions: {
             Button("连接 Talkify Gateway") {
-                authManager.showLoginSheet = true
+                authManager.requireLogin()
             }
             .buttonStyle(.borderedProminent)
         }
