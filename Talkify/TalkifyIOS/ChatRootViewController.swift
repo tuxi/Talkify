@@ -79,7 +79,11 @@ final class ChatRootViewController: UIViewController {
         self.store = store
         self.container = container
         self.dependencies = dependencies
-        self.workspaceContext = IOSWorkspaceContext(store: store)
+        self.workspaceContext = IOSWorkspaceContext(
+            store: store,
+            serverConnectionID: container.runtimeServers.activeConnectionID,
+            serverKind: container.runtimeServers.activeConnection.kind
+        )
         self.drawerVC = WorkspaceHubViewController(
             store: store,
             workspaceContext: workspaceContext,
@@ -100,11 +104,16 @@ final class ChatRootViewController: UIViewController {
 
         view.backgroundColor = .clear
 
-        // 必须在 addChild / access view 之前注入 provider，
-        // 否则 WorkspaceHubViewController.viewDidLoad 中创建的
-        // WorkspaceHubView 会拿到 nil 的 fileProvider。
-        drawerVC.fileProvider = fileProvider
-        chatVC.fileProvider = fileProvider
+        // External Server 返回的是服务器文件路径，不能交给 iPhone 的
+        // FileManager provider 读取。等 Runtime Workspace 文件 API 接入前，
+        // External 模式只展示服务器会话和工作区投影。
+        if !workspaceContext.isExternalServer {
+            // 必须在 addChild / access view 之前注入 provider，
+            // 否则 WorkspaceHubViewController.viewDidLoad 中创建的
+            // WorkspaceHubView 会拿到 nil 的 fileProvider。
+            drawerVC.fileProvider = fileProvider
+            chatVC.fileProvider = fileProvider
+        }
 
         // Drawer (behind, stationary)
         addChild(drawerVC)

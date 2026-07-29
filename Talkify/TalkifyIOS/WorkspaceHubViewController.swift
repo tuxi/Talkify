@@ -75,11 +75,7 @@ final class WorkspaceHubViewController: UIViewController {
             },
             onNewChat: { [weak self] in
                 guard let self else { return }
-                if let workspace = self.workspaceContext.activeWorkspace {
-                    self.workspaceContext.activate(workspace, in: self.store)
-                } else {
-                    self.store.beginDraft()
-                }
+                self.workspaceContext.beginDraft(in: self.store)
                 self.onSelectedConversation?()
             },
             onSettings: { [weak self] section in

@@ -18,24 +18,76 @@ import AgentKit
 @MainActor
 @Observable
 final class IOSWorkspaceContext {
-    private(set) var activeWorkspace: Workspace?
+    struct Selection: Identifiable, Hashable {
+        let serverConnectionID: String
+        let groupingID: String
+        let displayName: String
+        let workspace: Workspace?
+        let isServerDerived: Bool
 
-    init(store: WorkspaceStore) {
-        activeWorkspace = Self.initialWorkspace(in: store)
+        var id: String {
+            "\(serverConnectionID)::\(groupingID)"
+        }
+    }
+
+    let serverConnectionID: String
+    let serverKind: RuntimeServerKind
+    private(set) var activeSelection: Selection?
+
+    init(
+        store: WorkspaceStore,
+        serverConnectionID: String = RuntimeServerConnection.embeddedID,
+        serverKind: RuntimeServerKind = .embedded
+    ) {
+        self.serverConnectionID = serverConnectionID
+        self.serverKind = serverKind
+        self.activeSelection = Self.initialSelection(
+            in: store,
+            serverConnectionID: serverConnectionID,
+            serverKind: serverKind
+        )
+    }
+
+    var isExternalServer: Bool {
+        serverKind != .embedded
+    }
+
+    var activeWorkspace: Workspace? {
+        activeSelection?.workspace
     }
 
     var activeGroupingID: String? {
-        activeWorkspace.map(Self.groupingID(for:))
+        activeSelection?.groupingID
     }
 
-    func availableWorkspaces(in store: WorkspaceStore) -> [Workspace] {
-        var result: [Workspace] = []
+    var activeDisplayName: String? {
+        activeSelection?.displayName
+    }
+
+    func availableSelections(in store: WorkspaceStore) -> [Selection] {
+        var result: [Selection] = []
         var seenGroupingIDs: Set<String> = []
 
-        for workspace in store.recentWorkspaces.workspaces + store.projects.projects {
-            let groupingID = Self.groupingID(for: workspace)
-            guard seenGroupingIDs.insert(groupingID).inserted else { continue }
-            result.append(workspace)
+        if !isExternalServer {
+            for workspace in store.recentWorkspaces.workspaces + store.projects.projects {
+                let selection = Self.selection(
+                    for: workspace,
+                    serverConnectionID: serverConnectionID
+                )
+                guard seenGroupingIDs.insert(selection.groupingID).inserted else { continue }
+                result.append(selection)
+            }
+        }
+
+        let conversations = store.listViewModel.conversations
+            + store.listViewModel.archivedConversations
+        for conversation in conversations {
+            let selection = Self.selection(
+                for: conversation,
+                serverConnectionID: serverConnectionID
+            )
+            guard seenGroupingIDs.insert(selection.groupingID).inserted else { continue }
+            result.append(selection)
         }
         return result
     }
@@ -48,11 +100,40 @@ final class IOSWorkspaceContext {
         return source.filter { $0.workspaceGroupingID == activeGroupingID }
     }
 
-    /// 切换项目会建立该项目的本地草稿，使右侧内容和抽屉上下文同步。
-    /// 不会创建 Runtime 会话；首条消息发送时仍沿用 AgentKit 的延迟创建语义。
-    func activate(_ workspace: Workspace, in store: WorkspaceStore) {
-        activeWorkspace = workspace
+    /// 切换内嵌项目会建立本地草稿；External Server 只切换浏览分组，
+    /// 避免浏览远端目录时提前改变会话状态。
+    func activate(_ selection: Selection, in store: WorkspaceStore) {
+        activeSelection = selection
+        if isExternalServer {
+            if let selectedConversation = store.selectedConversation,
+               selectedConversation.workspaceGroupingID != selection.groupingID {
+                store.selectedConversation = nil
+            }
+            return
+        }
+        guard let workspace = selection.workspace else {
+            store.selectedConversation = conversations(in: store).first
+            return
+        }
         store.beginDraft()
+        store.selectWorkspace(workspace)
+    }
+
+    func activate(_ workspace: Workspace, in store: WorkspaceStore) {
+        let selection = availableSelections(in: store).first {
+            $0.workspace?.id == workspace.id
+        } ?? Self.selection(
+            for: workspace,
+            serverConnectionID: serverConnectionID
+        )
+        activate(selection, in: store)
+    }
+
+    /// 只有用户明确点击“新对话”时才为当前服务器工作区创建草稿。
+    /// 浏览 External 工作区本身不应污染草稿或 iPhone 本地项目状态。
+    func beginDraft(in store: WorkspaceStore) {
+        store.beginDraft()
+        guard let workspace = activeWorkspace else { return }
         store.selectWorkspace(workspace)
     }
 
@@ -60,21 +141,42 @@ final class IOSWorkspaceContext {
     func synchronize(with conversation: ConversationRef?, in store: WorkspaceStore) {
         guard let conversation else {
             if let draftWorkspace = store.draft?.workspace {
-                activeWorkspace = draftWorkspace
+                activeSelection = Self.selection(
+                    for: draftWorkspace,
+                    serverConnectionID: serverConnectionID
+                )
             }
             return
         }
 
-        if let matching = availableWorkspaces(in: store).first(where: {
-            Self.groupingID(for: $0) == conversation.workspaceGroupingID
+        if let matching = availableSelections(in: store).first(where: {
+            $0.groupingID == conversation.workspaceGroupingID
         }) {
-            activeWorkspace = matching
+            activeSelection = matching
             return
         }
 
-        let path = conversation.inferredBaseWorkspacePath ?? conversation.workspacePath
-        guard !path.isEmpty else { return }
-        activeWorkspace = Workspace(url: URL(fileURLWithPath: path))
+        activeSelection = Self.selection(
+            for: conversation,
+            serverConnectionID: serverConnectionID
+        )
+    }
+
+    /// 会话列表由 Runtime 异步加载。External Server 的 Mac 路径不会进入
+    /// iPhone 的本地 recent/projects，因此列表刷新后要从 ConversationRef
+    /// 建立展示投影，不能等待用户先选择一个本地目录。
+    func reconcile(in store: WorkspaceStore) {
+        let selections = availableSelections(in: store)
+        if let activeSelection,
+           let current = selections.first(where: { $0.id == activeSelection.id }) {
+            self.activeSelection = current
+            return
+        }
+        if let selectedConversation = store.selectedConversation {
+            synchronize(with: selectedConversation, in: store)
+            return
+        }
+        activeSelection = selections.first
     }
 
     func contains(_ conversation: ConversationRef) -> Bool {
@@ -82,27 +184,85 @@ final class IOSWorkspaceContext {
         return conversation.workspaceGroupingID == activeGroupingID
     }
 
-    private static func initialWorkspace(in store: WorkspaceStore) -> Workspace? {
+    private static func initialSelection(
+        in store: WorkspaceStore,
+        serverConnectionID: String,
+        serverKind: RuntimeServerKind
+    ) -> Selection? {
         if let draftWorkspace = store.draft?.workspace {
-            return draftWorkspace
+            return selection(
+                for: draftWorkspace,
+                serverConnectionID: serverConnectionID
+            )
         }
         if let conversation = store.selectedConversation {
-            let candidates = store.recentWorkspaces.workspaces + store.projects.projects
-            if let matching = candidates.first(where: {
-                groupingID(for: $0) == conversation.workspaceGroupingID
-            }) {
-                return matching
-            }
-            let path = conversation.inferredBaseWorkspacePath ?? conversation.workspacePath
-            if !path.isEmpty {
-                return Workspace(url: URL(fileURLWithPath: path))
+            return selection(
+                for: conversation,
+                serverConnectionID: serverConnectionID
+            )
+        }
+        if serverKind != .embedded {
+            return store.listViewModel.conversations.first.map {
+                selection(
+                    for: $0,
+                    serverConnectionID: serverConnectionID
+                )
             }
         }
-        return store.recentWorkspaces.workspaces.first ?? store.projects.projects.first
+        return (store.recentWorkspaces.workspaces.first ?? store.projects.projects.first)
+            .map {
+                selection(
+                    for: $0,
+                    serverConnectionID: serverConnectionID
+                )
+            }
     }
 
-    private static func groupingID(for workspace: Workspace) -> String {
-        "path:\(workspace.url.canonicalPathForGrouping)"
+    private static func selection(
+        for workspace: Workspace,
+        serverConnectionID: String
+    ) -> Selection {
+        Selection(
+            serverConnectionID: serverConnectionID,
+            groupingID: "path:\(workspace.url.canonicalPathForGrouping)",
+            displayName: workspace.name,
+            workspace: workspace,
+            isServerDerived: false
+        )
+    }
+
+    private static func selection(
+        for conversation: ConversationRef,
+        serverConnectionID: String
+    ) -> Selection {
+        let path = conversationBaseWorkspacePath(conversation)
+        return Selection(
+            serverConnectionID: serverConnectionID,
+            groupingID: conversation.workspaceGroupingID,
+            displayName: conversation.workspaceGroupingName,
+            workspace: path.map {
+                Workspace(url: URL(fileURLWithPath: $0, isDirectory: true))
+            },
+            isServerDerived: true
+        )
+    }
+
+    private static func conversationBaseWorkspacePath(
+        _ conversation: ConversationRef
+    ) -> String? {
+        if let baseWorkspaceID = conversation.baseWorkspaceID,
+           baseWorkspaceID.hasPrefix("/") {
+            return baseWorkspaceID
+        }
+        if let rootPath = conversation.workspace?.localRootPath,
+           !rootPath.isEmpty {
+            return rootPath
+        }
+        if let inferredBaseWorkspacePath = conversation.inferredBaseWorkspacePath {
+            return inferredBaseWorkspacePath
+        }
+        guard !conversation.workspacePath.isEmpty else { return nil }
+        return conversation.workspacePath
     }
 }
 #endif

@@ -263,36 +263,38 @@ private struct EmbeddedRuntimeServerCard: View {
                 lastConnectedAt: coordinator.embeddedDiagnostics.lastConnectedAt
             )
 
-            HStack(spacing: 10) {
-                if !isActive {
-                    Button("设为当前服务器", action: onActivate)
-                        .buttonStyle(.borderedProminent)
-                }
-                Button {
-                    Task { await checkEmbedded() }
-                } label: {
-                    Label("重新检查", systemImage: "arrow.clockwise")
-                }
-                .buttonStyle(.bordered)
-                .disabled(isChecking || isRestarting)
+            ScrollView(.horizontal) {
+                HStack(spacing: 10) {
+                    if !isActive {
+                        Button("设为当前服务器", action: onActivate)
+                            .buttonStyle(.borderedProminent)
+                    }
+                    Button {
+                        Task { await checkEmbedded() }
+                    } label: {
+                        Label("重新检查", systemImage: "arrow.clockwise")
+                    }
+                    .buttonStyle(.bordered)
+                    .disabled(isChecking || isRestarting)
 
-                Button {
-                    Task { await prepareRestart() }
-                } label: {
-                    Label("重启 Runtime", systemImage: "power")
-                }
-                .buttonStyle(.bordered)
-                .disabled(
-                    isChecking
-                        || isRestarting
-                        || container.providerConnections.isApplyingRuntimeConfiguration
-                )
+                    Button {
+                        Task { await prepareRestart() }
+                    } label: {
+                        Label("重启 Runtime", systemImage: "power")
+                    }
+                    .buttonStyle(.bordered)
+                    .disabled(
+                        isChecking
+                            || isRestarting
+                            || container.providerConnections.isApplyingRuntimeConfiguration
+                    )
 
-                Spacer()
-                Button("查看诊断", action: onDiagnostics)
-                    .buttonStyle(.borderless)
+                    Spacer()
+                    Button("查看诊断", action: onDiagnostics)
+                        .buttonStyle(.borderless)
+                }
+
             }
-
             if let operationError {
                 Text(operationError)
                     .font(.footnote)

@@ -47,6 +47,12 @@ struct WorkspaceHubView: View {
     
     
     var tabs: [HubTab] {
+        if workspaceContext.isExternalServer {
+            return [
+                .conversations,
+                .search
+            ]
+        }
         if DeviceInfo.isPadLayout {
             return [
                 .conversations,
@@ -109,7 +115,10 @@ struct WorkspaceHubView: View {
 
     var body: some View {
         Group {
-            if workspaceContext.activeWorkspace == nil {
+            if workspaceContext.activeSelection == nil,
+               workspaceContext.isExternalServer {
+                externalServerEmptyState
+            } else if workspaceContext.activeSelection == nil {
                 WorkspaceProjectLauncher(
                     canImport: store.projects.isAvailable,
                     canClone: store.supportsPublicGitClone,
@@ -138,15 +147,19 @@ struct WorkspaceHubView: View {
         }
         .sheet(isPresented: $isWorkspaceSwitcherPresented) {
             WorkspaceSwitcherView(
-                workspaces: workspaceContext.availableWorkspaces(in: store),
-                selectedWorkspaceID: workspaceContext.activeWorkspace?.id,
-                onSelect: { workspace in
-                    workspaceContext.activate(workspace, in: store)
+                selections: workspaceContext.availableSelections(in: store),
+                selectedSelectionID: workspaceContext.activeSelection?.id,
+                onSelect: { selection in
+                    workspaceContext.activate(selection, in: store)
                     isWorkspaceSwitcherPresented = false
                 },
-                onCreate: { requestAcquisition(.create) },
-                onImport: { requestAcquisition(.importFolder) },
-                onClone: store.supportsPublicGitClone
+                onCreate: workspaceContext.isExternalServer
+                    ? nil
+                    : { requestAcquisition(.create) },
+                onImport: workspaceContext.isExternalServer
+                    ? nil
+                    : { requestAcquisition(.importFolder) },
+                onClone: !workspaceContext.isExternalServer && store.supportsPublicGitClone
                     ? { requestAcquisition(.cloneGit) }
                     : nil
             )
@@ -206,8 +219,12 @@ struct WorkspaceHubView: View {
             Text(workspaceExportError ?? TalkifyLocalized.string("common.error.unknown"))
         }
         .onAppear {
-            store.projects.reload()
-            if workspaceContext.activeWorkspace == nil {
+            if !workspaceContext.isExternalServer {
+                store.projects.reload()
+            }
+            workspaceContext.reconcile(in: store)
+            if workspaceContext.activeSelection == nil,
+               !workspaceContext.isExternalServer {
                 store.beginDraft()
                 workspaceContext.synchronize(with: nil, in: store)
             }
@@ -222,6 +239,9 @@ struct WorkspaceHubView: View {
         }
         .onChange(of: selectedConversation?.id) { _, _ in
             workspaceContext.synchronize(with: selectedConversation, in: store)
+        }
+        .onChange(of: store.listViewModel.revision, initial: true) { _, _ in
+            workspaceContext.reconcile(in: store)
         }
     }
 
@@ -376,42 +396,20 @@ struct WorkspaceHubView: View {
                 }
                 .contentShape(Rectangle())
                 .contextMenu {
-                    Button {
-                        exportWorkspace()
-                    } label: {
-                        HStack {
-                            Group {
-                                if isExportingWorkspace {
-                                    ProgressView()
-                                        .controlSize(.small)
-                                } else {
-                                    Image(systemName: "square.and.arrow.up")
-                                        .font(.system(size: 15, weight: .semibold))
+                    if !workspaceContext.isExternalServer {
+                        Button {
+                            exportWorkspace()
+                        } label: {
+                            HStack {
+                                Group {
+                                    if isExportingWorkspace {
+                                        ProgressView()
+                                            .controlSize(.small)
+                                    } else {
+                                        Image(systemName: "square.and.arrow.up")
+                                            .font(.system(size: 15, weight: .semibold))
+                                    }
                                 }
-                            }
-                            .foregroundStyle(.secondary)
-                            .frame(width: 38, height: 38)
-                            .background(
-                                Color.primary.opacity(colorScheme == .dark ? 0.08 : 0.05),
-                                in: RoundedRectangle(cornerRadius: 11, style: .continuous)
-                            )
-                            .overlay {
-                                RoundedRectangle(cornerRadius: 11, style: .continuous)
-                                    .stroke(Color.primary.opacity(0.06), lineWidth: 0.5)
-                            }
-                            Text(isExportingWorkspace ? TalkifyLocalized.string("workspace.exporting_project") : TalkifyLocalized.string("workspace.export_project"))
-                        }
-                    }
-                    .buttonStyle(.plain)
-                    .disabled(isExportingWorkspace || fileProvider == nil)
-                    .accessibilityLabel(isExportingWorkspace ? TalkifyLocalized.string("workspace.exporting_project") : TalkifyLocalized.string("workspace.export_project"))
-                    Divider()
-                    Button {
-                        onWorkspaceBrowserRequested?()
-                    } label: {
-                        HStack {
-                            Image(systemName: "arrow.up.right.square")
-                                .font(.system(size: 15, weight: .semibold))
                                 .foregroundStyle(.secondary)
                                 .frame(width: 38, height: 38)
                                 .background(
@@ -422,12 +420,46 @@ struct WorkspaceHubView: View {
                                     RoundedRectangle(cornerRadius: 11, style: .continuous)
                                         .stroke(Color.primary.opacity(0.06), lineWidth: 0.5)
                                 }
-                            Text(TalkifyLocalized.string("workspace.view_current_project"))
+                                Text(isExportingWorkspace ? TalkifyLocalized.string("workspace.exporting_project") : TalkifyLocalized.string("workspace.export_project"))
+                            }
                         }
+                        .buttonStyle(.plain)
+                        .disabled(isExportingWorkspace || fileProvider == nil)
+                        .accessibilityLabel(isExportingWorkspace ? TalkifyLocalized.string("workspace.exporting_project") : TalkifyLocalized.string("workspace.export_project"))
+                        Divider()
+                        Button {
+                            onWorkspaceBrowserRequested?()
+                        } label: {
+                            HStack {
+                                Image(systemName: "arrow.up.right.square")
+                                    .font(.system(size: 15, weight: .semibold))
+                                    .foregroundStyle(.secondary)
+                                    .frame(width: 38, height: 38)
+                                    .background(
+                                        Color.primary.opacity(colorScheme == .dark ? 0.08 : 0.05),
+                                        in: RoundedRectangle(cornerRadius: 11, style: .continuous)
+                                    )
+                                    .overlay {
+                                        RoundedRectangle(cornerRadius: 11, style: .continuous)
+                                            .stroke(Color.primary.opacity(0.06), lineWidth: 0.5)
+                                    }
+                                Text(TalkifyLocalized.string("workspace.view_current_project"))
+                            }
+                        }
+                        .buttonStyle(.plain)
+                        .disabled(workspaceContext.activeWorkspace == nil)
+                        .accessibilityLabel(TalkifyLocalized.string("workspace.view_current_project"))
+                    } else {
+                        Button {
+                            onSettings?(.servers)
+                        } label: {
+                            Label(
+                                TalkifyLocalized.string("打开服务器设置"),
+                                systemImage: "server.rack"
+                            )
+                        }
+                        .buttonStyle(.plain)
                     }
-                    .buttonStyle(.plain)
-                    .disabled(workspaceContext.activeWorkspace == nil)
-                    .accessibilityLabel(TalkifyLocalized.string("workspace.view_current_project"))
                 }
             }
             .buttonStyle(.plain)
@@ -441,7 +473,8 @@ struct WorkspaceHubView: View {
     }
 
     private var currentWorkspaceName: String {
-        workspaceContext.activeWorkspace?.name ?? TalkifyLocalized.string("workspace.select_project")
+        workspaceContext.activeDisplayName
+            ?? TalkifyLocalized.string("workspace.select_project")
     }
 
     @ViewBuilder
@@ -460,6 +493,8 @@ struct WorkspaceHubView: View {
                         .frame(width: 5, height: 5)
                     Text(workspaceStatus.title)
                 }
+            } else if workspaceContext.isExternalServer {
+                Text(verbatim: container.runtimeServers.activeConnection.displayName)
             } else if workspaceContext.activeWorkspace?.branch == nil {
                 Text(verbatim: TalkifyLocalized.string("workspace.local_workspace"))
             }
@@ -570,7 +605,7 @@ struct WorkspaceHubView: View {
             case .search:
                 GlobalSearchView(
                     store: store,
-                    fileProvider: fileProvider,
+                    fileProvider: workspaceContext.isExternalServer ? nil : fileProvider,
                     workspaceContext: workspaceContext,
                     onSelectConversation: { ref in
                         selectedConversation = ref
@@ -585,6 +620,34 @@ struct WorkspaceHubView: View {
         .transition(.opacity)
         .animation(.easeInOut(duration: 0.16), value: selectedTab)
         .frame(maxHeight: .infinity)
+    }
+
+    private var externalServerEmptyState: some View {
+        VStack(spacing: 16) {
+            Spacer()
+            Image(systemName: "server.rack")
+                .font(.system(size: 34, weight: .medium))
+                .foregroundStyle(.secondary)
+            VStack(spacing: 6) {
+                Text("当前服务器暂无工作区")
+                    .font(.headline)
+                Text("在 Mac 上创建会话后，工作区和对话会显示在这里。")
+                    .font(.subheadline)
+                    .foregroundStyle(.secondary)
+                    .multilineTextAlignment(.center)
+            }
+            Button {
+                onSettings?(.servers)
+            } label: {
+                Label(
+                    TalkifyLocalized.string("打开服务器设置"),
+                    systemImage: "gearshape"
+                )
+            }
+            .buttonStyle(.bordered)
+            Spacer()
+        }
+        .padding(24)
     }
 
     private func fileNavigationBinding(for workspace: Workspace?) -> Binding<WorkspaceFileNavigationState> {
@@ -670,21 +733,21 @@ private extension ConversationActivityState {
 
 private struct WorkspaceSwitcherView: View {
     @Environment(\.dismiss) private var dismiss
-    let workspaces: [Workspace]
-    let selectedWorkspaceID: String?
-    let onSelect: (Workspace) -> Void
-    let onCreate: () -> Void
-    let onImport: () -> Void
+    let selections: [IOSWorkspaceContext.Selection]
+    let selectedSelectionID: String?
+    let onSelect: (IOSWorkspaceContext.Selection) -> Void
+    let onCreate: (() -> Void)?
+    let onImport: (() -> Void)?
     let onClone: (() -> Void)?
 
     @State private var query = ""
 
-    private var filteredWorkspaces: [Workspace] {
+    private var filteredSelections: [IOSWorkspaceContext.Selection] {
         let trimmed = query.trimmingCharacters(in: .whitespacesAndNewlines)
-        guard !trimmed.isEmpty else { return workspaces }
-        return workspaces.filter {
-            $0.name.localizedCaseInsensitiveContains(trimmed)
-                || $0.url.path.localizedCaseInsensitiveContains(trimmed)
+        guard !trimmed.isEmpty else { return selections }
+        return selections.filter {
+            $0.displayName.localizedCaseInsensitiveContains(trimmed)
+                || ($0.workspace?.url.path.localizedCaseInsensitiveContains(trimmed) == true)
         }
     }
 
@@ -692,15 +755,15 @@ private struct WorkspaceSwitcherView: View {
         NavigationStack {
             List {
 
-                if filteredWorkspaces.isEmpty {
+                if filteredSelections.isEmpty {
                     if !query.isEmpty {
                         ContentUnavailableView.search(text: query)
                     }
                 } else {
                     Section(TalkifyLocalized.string("workspace.projects_section")) {
-                        ForEach(filteredWorkspaces) { workspace in
+                        ForEach(filteredSelections) { selection in
                             Button {
-                                onSelect(workspace)
+                                onSelect(selection)
                             } label: {
                                 HStack(spacing: 12) {
                                     Image(systemName: "folder")
@@ -710,19 +773,26 @@ private struct WorkspaceSwitcherView: View {
                                         .background(
                                             Color.accentColor.opacity(0.12),
                                             in: RoundedRectangle(cornerRadius: 9, style: .continuous)
-                                        )
+                                    )
                                     VStack(alignment: .leading, spacing: 2) {
-                                        Text(workspace.name)
+                                        Text(selection.displayName)
                                             .foregroundStyle(.primary)
                                             .lineLimit(1)
-                                        if let branch = workspace.branch {
+                                        if let branch = selection.workspace?.branch,
+                                           !branch.isEmpty {
                                             Label(branch, systemImage: "arrow.triangle.branch")
                                                 .font(.caption)
                                                 .foregroundStyle(.secondary)
+                                        } else if selection.isServerDerived,
+                                                  let path = selection.workspace?.url.path {
+                                            Text(path)
+                                                .font(.caption)
+                                                .foregroundStyle(.secondary)
+                                                .lineLimit(1)
                                         }
                                     }
                                     Spacer()
-                                    if workspace.id == selectedWorkspaceID {
+                                    if selection.id == selectedSelectionID {
                                         Image(systemName: "checkmark")
                                             .fontWeight(.semibold)
                                             .foregroundStyle(Color.accentColor)
@@ -731,23 +801,29 @@ private struct WorkspaceSwitcherView: View {
                             }
                             .buttonStyle(.plain)
                             .listRowBackground(
-                                workspace.id == selectedWorkspaceID
+                                selection.id == selectedSelectionID
                                     ? Color.accentColor.opacity(0.07)
                                     : Color.clear
                             )
                         }
                     }
                 }
-                Section(TalkifyLocalized.string("workspace.add_workspace_section")) {
-                    Button(action: onCreate) {
-                        Label(TalkifyLocalized.string("workspace.new_blank_workspace"), systemImage: "folder.badge.plus")
-                    }
-                    Button(action: onImport) {
-                        Label(TalkifyLocalized.string("workspace.import_from_files"), systemImage: "square.and.arrow.down")
-                    }
-                    if let onClone {
-                        Button(action: onClone) {
-                            Label(TalkifyLocalized.string("workspace.clone_git_repo"), systemImage: "arrow.down.circle")
+                if onCreate != nil || onImport != nil || onClone != nil {
+                    Section(TalkifyLocalized.string("workspace.add_workspace_section")) {
+                        if let onCreate {
+                            Button(action: onCreate) {
+                                Label(TalkifyLocalized.string("workspace.new_blank_workspace"), systemImage: "folder.badge.plus")
+                            }
+                        }
+                        if let onImport {
+                            Button(action: onImport) {
+                                Label(TalkifyLocalized.string("workspace.import_from_files"), systemImage: "square.and.arrow.down")
+                            }
+                        }
+                        if let onClone {
+                            Button(action: onClone) {
+                                Label(TalkifyLocalized.string("workspace.clone_git_repo"), systemImage: "arrow.down.circle")
+                            }
                         }
                     }
                 }
