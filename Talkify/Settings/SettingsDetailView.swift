@@ -22,6 +22,7 @@ struct SettingsDetailView: View {
     @Environment(AgentManager.self) private var agentManager
     @Environment(UserManager.self) private var userManager
     @Environment(AuthManager.self) private var authManager
+    @Environment(AppContainer.self) private var container
     
     let section: SettingsSection
     
@@ -73,14 +74,35 @@ struct SettingsDetailView: View {
             VStack(alignment: .leading, spacing: 0) {
                 switch section {
                 case .profile:
-                    profileSettings
-                        .navigationTitle(TalkifyLocalized.string("settings.item.profile"))
+                    if authManager.isRegistered {
+                        profileSettings
+                            .navigationTitle(TalkifyLocalized.string("settings.item.profile"))
+                    } else {
+                        gatewayDisconnectedView
+                            .navigationTitle(TalkifyLocalized.string("settings.item.profile"))
+                    }
                 case .usage:
-                    usageBillingSettings
-                        .navigationTitle(TalkifyLocalized.string("settings.item.usage"))
+                    if authManager.isRegistered {
+                        usageBillingSettings
+                            .navigationTitle(TalkifyLocalized.string("settings.item.usage"))
+                    } else {
+                        gatewayDisconnectedView
+                            .navigationTitle(TalkifyLocalized.string("settings.item.usage"))
+                    }
                 case .account:
-                    accountSettings
-                        .navigationTitle(TalkifyLocalized.string("settings.item.account"))
+                    if authManager.isRegistered {
+                        accountSettings
+                            .navigationTitle(TalkifyLocalized.string("settings.item.account"))
+                    } else {
+                        gatewayDisconnectedView
+                            .navigationTitle(TalkifyLocalized.string("settings.item.account"))
+                    }
+                case .providers:
+                    ProviderSettingsView()
+                        .navigationTitle("提供商")
+                case .models:
+                    ModelCatalogSettingsView()
+                        .navigationTitle("模型")
                 case .support:
                     supportSettings
                         .navigationTitle(TalkifyLocalized.string("settings.item.support"))
@@ -95,6 +117,20 @@ struct SettingsDetailView: View {
             .padding(.bottom, 56)
         })
         .background(Color.primary.opacity(0.018))
+    }
+
+    private var gatewayDisconnectedView: some View {
+        ContentUnavailableView {
+            Label("未连接 Talkify Gateway", systemImage: "person.crop.circle.badge.plus")
+        } description: {
+            Text("连接 Talkify Gateway 后查看账户、订阅、余额和用量。")
+        } actions: {
+            Button("连接 Talkify Gateway") {
+                authManager.showLoginSheet = true
+            }
+            .buttonStyle(.borderedProminent)
+        }
+        .frame(maxWidth: .infinity, minHeight: 420)
     }
     
     // MARK: - General
@@ -360,7 +396,9 @@ struct SettingsDetailView: View {
             dangerZoneCard
         }
         .task {
-            await userManager.refreshProfileIfNeeded(maxAge: 0)
+            if authManager.isRegistered {
+                await userManager.refreshProfileIfNeeded(maxAge: 0)
+            }
         }
     }
 
@@ -418,8 +456,7 @@ struct SettingsDetailView: View {
                     }
                 }
                 Button(role: .destructive) {
-                    authManager.logout()
-                    userManager.clear()
+                    Task { await container.disconnectGateway() }
                 } label: {
                     Label(TalkifyLocalized.string("workspace.sign_out"), systemImage: "rectangle.portrait.and.arrow.right")
                         .font(.system(size: 15, weight: .medium))
@@ -551,7 +588,9 @@ struct SettingsDetailView: View {
             }
         }
         .task {
-            agentManager.fetchUsage()
+            if authManager.isRegistered {
+                agentManager.fetchUsage()
+            }
         }
     }
     
@@ -780,7 +819,7 @@ struct SettingsDetailView: View {
     // MARK: - Computed properties
     
     private var accountName: String {
-        guard authManager.isLoggedIn else { return TalkifyLocalized.string("workspace.not_logged_in") }
+        guard authManager.isRegistered else { return TalkifyLocalized.string("workspace.not_logged_in") }
         return authManager.displayNickname ?? userManager.profile?.nickname ?? "Unknow"
     }
     
@@ -828,8 +867,7 @@ struct SettingsDetailView: View {
         do {
             try await userManager.deleteAccount()
             showDeleteAccountConfirmation = false
-            userManager.clear()
-            authManager.logout()
+            await container.disconnectGateway()
         } catch {
             deleteAccountError = error.localizedDescription
         }

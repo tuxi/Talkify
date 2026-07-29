@@ -19,6 +19,8 @@ final class AppCredentialStore: CredentialStore, Sendable {
     
     func resolve(_ target: AgentKit.CredentialTarget) async throws -> AgentKit.Credential? {
         guard target == .gateway else { return nil }
+        let isConnected = await MainActor.run { authManager.isRegistered }
+        guard isConnected else { return nil }
 
         // 不直接读取缓存 token：首次 WS 连接可能和启动期 token refresh 并发。
         // getValidAccessToken() 会等待正在进行的刷新，并在临期时主动刷新。
@@ -41,7 +43,7 @@ final class AppCredentialStore: CredentialStore, Sendable {
 
     func all() async throws -> AgentKit.CredentialMap {
         var map = CredentialMap()
-        if let cred = try await resolve(.gateway) {
+        if let cred = try? await resolve(.gateway) {
             map[.gateway] = cred
         }
         return map

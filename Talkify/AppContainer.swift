@@ -73,6 +73,9 @@ final class AppContainer {
     let billingManager: BillingManager
     let deviceManager: DeviceManager
     private let agentCredentialStore: AppCredentialStore
+    let providerConnections: ProviderConnectionStore
+    private let providerConfigurationQueue = RuntimeProviderConfigurationApplyQueue()
+    private var providerConfigurationApplyTask: Task<Void, Never>?
     
     private let baseHeaders: [String: String]
     private(set) var apiProvider: ApiProvider?
@@ -181,9 +184,12 @@ final class AppContainer {
         // AgentKit 账户与用量服务复用 Talkify 的授权 API Provider。
         self.agentManager = AgentManager(apiProvider: apiProvider)
 
-        // ModelSettingsStore 通过 GatewayService 主动获取模型列表。
-        // agentManager 实现 GatewayService 协议，提供 Gateway API 访问。
-        self.modelSettings = ModelSettingsStore(service: agentManager)
+        // The Composer is driven exclusively by the unified multi-connection catalog.
+        self.modelSettings = ModelSettingsStore()
+        self.providerConnections = ProviderConnectionStore(
+            modelSettings: modelSettings,
+            gatewayCredentialStore: agentCredentialStore
+        )
 
         self.toolRegistry = ToolRegistry()
         self.conversationNotifications = ConversationNotificationCoordinator()
@@ -194,19 +200,18 @@ final class AppContainer {
         self.timelineExtensions = []
         #endif
 
-        // 注入 AgentKit 全局凭证存储：基于 AuthManager，不写 Keychain
-        CredentialSettings.store = agentCredentialStore
-
-        // 从旧 AgentSettings 迁移到新 CredentialStore（仅一次）
-        CredentialSettings.migrateFromLegacyIfNeeded()
+        // Runtime receives Gateway credentials from AuthManager and direct-provider
+        // credentials from the AgentKit Keychain store.
+        CredentialSettings.store = providerConnections.credentialStore
 
         // P1: 注册客户端工具（Go 服务端无法执行的本地工具）
         registerClientTools()
 
-        // 通过 ModelSettingsStore 从 Gateway 获取模型列表
-        Task {
-            await modelSettings.refreshModels()
+        providerConnections.onStructuralChange = { [weak self] in
+            self?.stageProviderConfigurationApply()
         }
+        migrateLegacyProviderState()
+        synchronizeGatewayConnectionWithIdentity()
         Task.detached(priority: .utility) { [userAssetFileStore] in
             userAssetFileStore.removeExpiredFiles()
         }
@@ -239,17 +244,18 @@ final class AppContainer {
     func makeAgentClient() -> RuntimeClient {
         #if os(iOS) || os(macOS)
         // Apple app hosts use the in-process Runtime on an OS-assigned loopback port.
-        // Startup stays in a stable lifecycle entry point, outside SwiftUI body evaluation.
-        return DefaultAgentClient.fromRuntime(credentialStore: agentCredentialStore)
+        // This local transport is intentionally independent from Talkify Gateway
+        // credentials. Provider credentials are injected into AgentRuntime instead.
+        return DefaultAgentClient.fromRuntime()
         #else
         // Unsupported embedded hosts may still connect to a separately managed server.
         let env = RuntimeEnvironment(host: "127.0.0.1", port: 8797)
-        return DefaultAgentClient(environment: env, credentialStore: agentCredentialStore)
+        return DefaultAgentClient(environment: env, credentialStore: providerConnections.credentialStore)
         #endif
     }
 
     func makeAgentDependencies() -> AgentDependencies {
-        let credentialStore = agentCredentialStore
+        let credentialStore = providerConnections.credentialStore
         return AgentDependencies(
             client: makeAgentClient(),
             toolRegistry: toolRegistry,
@@ -290,9 +296,12 @@ final class AppContainer {
                 configuration.profile = .fullDesktop
                 #endif
                 try AgentRuntime.shared.configure(configuration)
+                try AgentRuntime.shared.configureProviderConnections(
+                    makeRuntimeProviderConfiguration()
+                )
             }
             _ = try await AgentRuntime.shared.ensureStarted(
-                with: agentCredentialStore
+                with: providerConnections.credentialStore
             )
         } catch {
             DLLog("⚠️ Agent Runtime 启动失败：\(error)")
@@ -330,6 +339,203 @@ final class AppContainer {
 
     func makeBillingService() -> BillingService {
         BillingService(apiProvider: makeApiProvider())
+    }
+
+    // MARK: - Provider Connections
+
+    func requestGatewayConnection() {
+        authManager.showLoginSheet = true
+    }
+
+    func synchronizeGatewayConnectionWithIdentity() {
+        guard authManager.isRegistered else {
+            if providerConnections.gatewayConnection != nil {
+                providerConnections.removeGatewayConnection()
+            }
+            clearGatewayAccountCaches()
+            return
+        }
+
+        Task { [weak self] in
+            guard let self else { return }
+            await refreshGatewayConnection()
+        }
+    }
+
+    func disconnectGateway() async {
+        if authManager.isRegistered {
+            try? await makeAuthService().logout()
+        }
+        authManager.logout()
+        providerConnections.removeGatewayConnection()
+        clearGatewayAccountCaches()
+        await userAssetPreviewResolver.clearCache()
+    }
+
+    func refreshGatewayConnection() async {
+        guard authManager.isRegistered else { return }
+        do {
+            let response = try await agentManager.fetchModels()
+            let models = response.models
+                .filter { $0.available != false }
+                .map(Self.providerModel)
+            try providerConnections.upsertGateway(
+                baseURL: gatewayAgentBaseURL,
+                models: models,
+                allowsInsecurePrivateNetworkHTTP: allowsLocalGatewayHTTP
+            )
+            if let descriptor = providerConnections.catalog.models.first(where: {
+                $0.connectionID == ProviderConnection.talkifyGatewayID
+                    && $0.wireModelID == response.defaultModel
+            }) {
+                providerConnections.setDefaultModel(descriptor.id)
+            }
+            await userManager.refreshProfileIfNeeded(maxAge: 0)
+            await billingManager.refreshAllIfNeeded(maxAge: 0)
+            agentManager.fetchUsage()
+        } catch {
+            DLLog("⚠️ Gateway Provider 刷新失败：\(error)")
+        }
+    }
+
+    private func clearGatewayAccountCaches() {
+        userManager.clear()
+        billingManager.clear()
+        agentManager.clear()
+    }
+
+    private static func providerModel(_ model: GatewayModel) -> ProviderModel {
+        let category = model.category?.lowercased() ?? ""
+        return ProviderModel(
+            id: model.id,
+            displayName: model.displayName,
+            contextWindow: model.contextWindow,
+            supportsTools: model.supportsToolCalls ?? true,
+            supportsReasoning: category.contains("reason") || category.contains("think")
+        )
+    }
+
+    private func makeRuntimeProviderConfiguration() throws -> GeneratedRuntimeProviderConfiguration {
+        let connections = providerConnections.registry.enabledConnections
+        guard !connections.unifiedModels.isEmpty else {
+            return try RuntimeProviderConfigurationBuilder.buildEmpty()
+        }
+        return try RuntimeProviderConfigurationBuilder.build(
+            connections: connections,
+            defaultModelID: providerConnections.catalog.defaultModelID
+        )
+    }
+
+    private func stageProviderConfigurationApply() {
+        guard let generated = try? makeRuntimeProviderConfiguration() else { return }
+        Task { [weak self] in
+            guard let self else { return }
+            _ = await providerConfigurationQueue.stage(generated)
+            beginProviderConfigurationApplyLoopIfNeeded()
+        }
+    }
+
+    private func beginProviderConfigurationApplyLoopIfNeeded() {
+        guard providerConfigurationApplyTask == nil else { return }
+        providerConfigurationApplyTask = Task { @MainActor [weak self] in
+            guard let self else { return }
+            defer { providerConfigurationApplyTask = nil }
+
+            while !Task.isCancelled {
+                guard AgentRuntime.shared.isAlive else {
+                    let emptySnapshot = RuntimeActivitySnapshot(
+                        cursor: 0,
+                        sessions: []
+                    )
+                    if let staged = await providerConfigurationQueue
+                        .configurationIfRuntimeIdle(emptySnapshot) {
+                        do {
+                            try AgentRuntime.shared.configureProviderConnections(staged.configuration)
+                            await providerConfigurationQueue.markApplied(revision: staged.revision)
+                        } catch {
+                            DLLog("⚠️ Provider 配置暂存失败：\(error)")
+                        }
+                    }
+                    return
+                }
+
+                guard let snapshot = try? await makeAgentClient().activitySnapshot(),
+                      let staged = await providerConfigurationQueue
+                        .configurationIfRuntimeIdle(snapshot) else {
+                    try? await Task.sleep(for: .seconds(1))
+                    continue
+                }
+
+                do {
+                    AgentRuntime.shared.stop()
+                    try AgentRuntime.shared.configureProviderConnections(staged.configuration)
+                    _ = try await AgentRuntime.shared.ensureStarted(
+                        with: providerConnections.credentialStore
+                    )
+                    await providerConfigurationQueue.markApplied(revision: staged.revision)
+                } catch {
+                    DLLog("⚠️ Provider 配置应用失败：\(error)")
+                    try? await Task.sleep(for: .seconds(1))
+                }
+            }
+        }
+    }
+
+    private func migrateLegacyProviderState() {
+        if authManager.isRegistered, providerConnections.gatewayConnection == nil {
+            try? providerConnections.upsertGateway(
+                baseURL: gatewayAgentBaseURL,
+                models: [],
+                allowsInsecurePrivateNetworkHTTP: allowsLocalGatewayHTTP
+            )
+        }
+
+        let migrationKey = "talkify.provider-connections.legacy-key.v2"
+        guard !UserDefaults.standard.bool(forKey: migrationKey),
+              providerConnections.registry.connection(id: "deepseek") == nil else {
+            return
+        }
+        let legacyKey = AgentSettings.apiKey.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !legacyKey.isEmpty,
+              let template = TalkifyProviderTemplate.builtIn.first(where: { $0.id == "deepseek" }),
+              let baseURL = template.baseURL else {
+            UserDefaults.standard.set(true, forKey: migrationKey)
+            return
+        }
+        let connection = ProviderConnection(
+            id: "deepseek",
+            providerID: template.id,
+            displayName: template.displayName,
+            transport: .openAIChatCompletions,
+            authentication: .apiKey,
+            baseURL: baseURL,
+            models: template.models
+        )
+        Task { [weak self] in
+            guard let self else { return }
+            do {
+                try await providerConnections.save(
+                    connection,
+                    apiKey: legacyKey,
+                    isNew: true
+                )
+                UserDefaults.standard.set(true, forKey: migrationKey)
+            } catch {
+                DLLog("⚠️ 旧 DeepSeek 凭证迁移失败：\(error)")
+            }
+        }
+    }
+
+    private var gatewayAgentBaseURL: URL {
+        environmentManager.currentConfig.apiBaseURL.appendingPathComponent("agent")
+    }
+
+    private var allowsLocalGatewayHTTP: Bool {
+        #if DEBUG
+        true
+        #else
+        false
+        #endif
     }
     
     // MARK: - ApiProvider 工厂方法（按需创建）

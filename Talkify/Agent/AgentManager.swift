@@ -104,6 +104,15 @@ public final class AgentManager {
         let models: ModelsResponse = try await apiProvider.request(endpoint: AgentApi.models)
         return models
     }
+
+    public func clear() {
+        refreshTask?.cancel()
+        refreshTask = nil
+        usage = nil
+        usageError = nil
+        isRedeemingResetCard = false
+        redeemIdempotencyKeys.removeAll()
+    }
 }
 
 // MARK: - GatewayService

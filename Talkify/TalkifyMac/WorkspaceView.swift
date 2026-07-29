@@ -316,13 +316,6 @@ public struct WorkspaceView: View {
                 workspaceBrowserInitialPath = items.first(where: { $0.rootPath == resolved })?.rootPath ?? resolved
                 showWorkspaceBrowser = true
             }
-            .onChange(of: container.authManager.isLoggedIn) { _, loggedIn in
-                if !loggedIn {
-                    sharedImportRequest = nil
-                    showWorkspaceBrowser = false
-                    filePreviewPath = nil
-                }
-            }
 #endif
             .onChange(of: store.selectedConversation, { oldValue, newValue in
                 store.isInspectorPresented = false
@@ -442,7 +435,19 @@ extension WorkspaceView {
     /// 平台适配的账户菜单入口：
     /// - macOS：`AppMenu`（NSPopover），跟随触发视图锚定。
     /// - iOS (iPad)：`Button` + SwiftUI `.popover`。
+    @ViewBuilder
     private var footer: some View {
+        if !authManager.isRegistered {
+            Button {
+                showSettings = true
+            } label: {
+                Label(TalkifyLocalized.string("workspace.settings"), systemImage: "gearshape")
+                    .frame(maxWidth: .infinity, alignment: .leading)
+            }
+            .buttonStyle(.plain)
+            .padding(.horizontal, 16)
+            .padding(.vertical, 13)
+        } else {
         #if os(macOS)
         AppMenu(
             presentation: .fixedToTrigger(preferredEdge: .maxY)
@@ -458,7 +463,9 @@ extension WorkspaceView {
                 onRefreshCards: { agentManager.refreshResetCards() },
                 onRedeemResetCard: { agentManager.redeemResetCard($0) },
                 onSettings: { showSettings = true },
-                onLogout: { authManager.logout() }
+                onLogout: {
+                    Task { await container.disconnectGateway() }
+                }
             )
         } label: {
             accountLabel
@@ -494,16 +501,19 @@ extension WorkspaceView {
                     showSettings = true
                     showAccountPopover = false
                 },
-                onLogout: { authManager.logout() }
+                onLogout: {
+                    Task { await container.disconnectGateway() }
+                }
             )
         }
         .task { await loadAccountDataIfNeeded() }
         #endif
+        }
     }
     
     /// 登录后加载账户资料与用量。
     private func loadAccountDataIfNeeded() async {
-        guard authManager.isLoggedIn, authManager.isRegistered else { return }
+        guard authManager.isRegistered else { return }
         await userManager.refreshProfileIfNeeded()
         agentManager.fetchUsage()
     }
@@ -529,7 +539,7 @@ extension WorkspaceView {
     }
     
     private var accountName: String {
-        guard authManager.isLoggedIn else { return TalkifyLocalized.string("workspace.not_logged_in") }
+        guard authManager.isRegistered else { return TalkifyLocalized.string("workspace.not_logged_in") }
 
         let candidates = [
             userManager.profile?.nickname,

@@ -80,23 +80,16 @@ struct TalkifyApp: App {
                 .environment(container.billingManager)
                 .environment(environmentManager)
                 .environment(deviceManager)
-                .onChange(of: container.authManager.isLoggedIn, { oldValue, newValue in
-                    if newValue {
-                        Task {
-                            await container.modelSettings.refreshModels()
-                        }
-                    }
+                .onChange(of: container.authManager.isRegistered, { _, _ in
+                    container.synchronizeGatewayConnectionWithIdentity()
                 })
                 .onChange(of: container.authManager.token?.userId) { _, _ in
                     Task { await container.userAssetPreviewResolver.clearCache() }
                 }
                 .onAppear {
                     Task { @MainActor in
-                        await container.authManager.ensureInitialIdentity()
-//                        toggleConnect()
                         if container.authManager.isRegistered {
-                            await container.userManager.refreshProfileIfNeeded(maxAge: 0)
-                            await container.billingManager.refreshAllIfNeeded(maxAge: 0)
+                            await container.refreshGatewayConnection()
                         }
                     }
                 }

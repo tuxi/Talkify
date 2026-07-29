@@ -15,18 +15,42 @@ import FeatureAuth
 struct TalkifyRootView: View {
     
     @Environment(AppContainer.self) private var container
+    @AppStorage("provider.onboarding.completed.v1")
+    private var hasCompletedProviderOnboarding = false
 
     var body: some View {
-        
-        if container.authManager.isLoggedIn {
-            WorkspaceView(dependencies: container.makeAgentDependencies())
-        } else {
+        WorkspaceView(dependencies: container.makeAgentDependencies())
+            .sheet(isPresented: providerOnboardingBinding) {
+                ProviderOnboardingView(
+                    hasCompletedOnboarding: $hasCompletedProviderOnboarding
+                )
+            }
+            .sheet(isPresented: loginBinding) {
             AuthView(
                 viewModel: container.makeAuthViewModel(),
                 showsAppleSignIn: AppDistribution.current.supportsNativeAppleSignIn
             )
         }
-        
+    }
+
+    private var providerOnboardingBinding: Binding<Bool> {
+        Binding(
+            get: {
+                !hasCompletedProviderOnboarding
+                    && !container.providerConnections.hasAvailableModels
+                    && !container.authManager.showLoginSheet
+            },
+            set: { presented in
+                if !presented { hasCompletedProviderOnboarding = true }
+            }
+        )
+    }
+
+    private var loginBinding: Binding<Bool> {
+        Binding(
+            get: { container.authManager.showLoginSheet },
+            set: { container.authManager.showLoginSheet = $0 }
+        )
     }
 }
 

@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		A10000000000000000000001 /* UserAssetsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000000000000000000002 /* UserAssetsTests.swift */; };
+		C40000000000000000000001 /* ProviderTemplateTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C40000000000000000000002 /* ProviderTemplateTests.swift */; };
 		A10000000000000000000003 /* AgentKit in Frameworks */ = {isa = PBXBuildFile; productRef = D0962064300B1D160005EBC6 /* AgentKit */; };
 		B20000000000000000000001 /* TalkifyShareExtension.appex in Embed App Extensions */ = {isa = PBXBuildFile; fileRef = B20000000000000000000003 /* TalkifyShareExtension.appex */; platformFilter = ios; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		D0935524300EEFCF006C3962 /* ClientToolsKit in Frameworks */ = {isa = PBXBuildFile; productRef = D0935523300EEFCF006C3962 /* ClientToolsKit */; };
@@ -52,6 +53,7 @@
 
 /* Begin PBXFileReference section */
 		A10000000000000000000002 /* UserAssetsTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserAssetsTests.swift; sourceTree = "<group>"; };
+		C40000000000000000000002 /* ProviderTemplateTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProviderTemplateTests.swift; sourceTree = "<group>"; };
 		A10000000000000000000004 /* TalkifyTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = TalkifyTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		B20000000000000000000003 /* TalkifyShareExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = TalkifyShareExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		C30000000000000000000001 /* TalkifyMacCommon.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = TalkifyMacCommon.xcconfig; sourceTree = "<group>"; };
@@ -123,6 +125,7 @@
 			isa = PBXGroup;
 			children = (
 				A10000000000000000000002 /* UserAssetsTests.swift */,
+				C40000000000000000000002 /* ProviderTemplateTests.swift */,
 			);
 			path = TalkifyTests;
 			sourceTree = "<group>";
@@ -342,6 +345,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				A10000000000000000000001 /* UserAssetsTests.swift in Sources */,
+				C40000000000000000000001 /* ProviderTemplateTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

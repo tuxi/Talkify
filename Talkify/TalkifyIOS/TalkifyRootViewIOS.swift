@@ -109,21 +109,49 @@ private struct ChatRootViewRepresentable: UIViewControllerRepresentable {
 struct TalkifyRootView: View {
 
     @Environment(AppContainer.self) private var container
+    @AppStorage("provider.onboarding.completed.v1")
+    private var hasCompletedProviderOnboarding = false
 
     private var isPad: Bool {
         UIDevice.current.userInterfaceIdiom == .pad
     }
 
     var body: some View {
-        if container.authManager.isLoggedIn {
+        Group {
             if isPad {
                 WorkspaceView(dependencies: container.makeAgentDependencies())
             } else {
                 ChatDrawerWorkspace(dependencies: container.makeAgentDependencies())
             }
-        } else {
+        }
+        .sheet(isPresented: providerOnboardingBinding) {
+            ProviderOnboardingView(
+                hasCompletedOnboarding: $hasCompletedProviderOnboarding
+            )
+        }
+        .fullScreenCover(isPresented: loginBinding) {
             AuthView(viewModel: container.makeAuthViewModel())
         }
+    }
+
+    private var providerOnboardingBinding: Binding<Bool> {
+        Binding(
+            get: {
+                !hasCompletedProviderOnboarding
+                    && !container.providerConnections.hasAvailableModels
+                    && !container.authManager.showLoginSheet
+            },
+            set: { presented in
+                if !presented { hasCompletedProviderOnboarding = true }
+            }
+        )
+    }
+
+    private var loginBinding: Binding<Bool> {
+        Binding(
+            get: { container.authManager.showLoginSheet },
+            set: { container.authManager.showLoginSheet = $0 }
+        )
     }
 }
 

@@ -414,7 +414,7 @@ final class SubscriptionViewModel: ObservableObject {
     }
 
     private func handleTransactionUpdate(_ transaction: StoreKit.Transaction) async {
-        guard authManager.isLoggedIn else { return }
+        guard authManager.isRegistered else { return }
         guard !handledTransactionIDs.contains(transaction.id) else { return }
 
         do {

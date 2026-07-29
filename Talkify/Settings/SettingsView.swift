@@ -46,13 +46,8 @@ public struct SettingsView: View {
             }
         }
         .task {
-            if authManager.isLoggedIn {
+            if authManager.isRegistered {
                 agentManager.fetchUsage()
-            }
-        }
-        .onChange(of: authManager.isLoggedIn) { _, newValue in
-            if !newValue {
-                onClose()
             }
         }
     }
@@ -181,9 +176,9 @@ public struct SettingsView: View {
                                 }
                             }
                         }
-                        if horizontalSizeClass == .compact {
+                        if horizontalSizeClass == .compact && authManager.isRegistered {
                             Button(role: .destructive) {
-                                authManager.logout()
+                                Task { await container.disconnectGateway() }
                             } label: {
                                 Label(TalkifyLocalized.string("workspace.sign_out"), systemImage: "rectangle.portrait.and.arrow.right")
                                     .font(.system(size: 15, weight: .medium))
@@ -254,10 +249,10 @@ public struct SettingsView: View {
                         
                     }
                     // 底部退出登录按钮（针对 Compact 宽度显示）
-                    if horizontalSizeClass == .compact {
+                    if horizontalSizeClass == .compact && authManager.isRegistered {
                         Section {
                             Button(role: .destructive) {
-                                authManager.logout()
+                                Task { await container.disconnectGateway() }
                             } label: {
                                 Label(TalkifyLocalized.string("workspace.sign_out"), systemImage: "rectangle.portrait.and.arrow.right")
                                     .font(.system(size: 16, weight: .medium))
@@ -287,11 +282,10 @@ public struct SettingsView: View {
     }
     
     private var accountName: String {
-        guard authManager.isLoggedIn else { return TalkifyLocalized.string("workspace.not_logged_in") }
+        guard authManager.isRegistered else { return TalkifyLocalized.string("workspace.not_logged_in") }
         return authManager.displayNickname ?? userManager.profile?.nickname ?? "Unknow"
     }
     
     private var accountInitial: String { String(accountName.prefix(1)).uppercased() }
     
 }
-
