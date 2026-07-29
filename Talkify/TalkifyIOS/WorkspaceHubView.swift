@@ -24,6 +24,7 @@ struct WorkspaceHubView: View {
 
     @Environment(\.colorScheme) private var colorScheme
     @Environment(WorkspaceStore.self) private var store
+    @Environment(AppContainer.self) private var container
 
     // MARK: - Bindings & Callbacks
 
@@ -38,7 +39,7 @@ struct WorkspaceHubView: View {
     /// 新建对话 → store.beginDraft() + 关闭抽屉
     var onNewChat: (() -> Void)?
     /// 打开设置
-    var onSettings: (() -> Void)?
+    var onSettings: ((SettingsSection) -> Void)?
     /// 预览文件 → 关闭抽屉 + 打开 FilePreviewHost
     var onFileSelected: ((String) -> Void)?
     /// 工作区 ZIP 准备完成 → 由宿主展示系统分享面板
@@ -116,7 +117,7 @@ struct WorkspaceHubView: View {
                     onCreate: { requestAcquisition(.create) },
                     onImport: { requestAcquisition(.importFolder) },
                     onClone: { requestAcquisition(.cloneGit) },
-                    onSettings: { onSettings?() }
+                    onSettings: { onSettings?(.account) }
                 )
             } else {
                 VStack(spacing: 0) {
@@ -599,40 +600,48 @@ struct WorkspaceHubView: View {
 
     // MARK: - Bottom Bar
     private var bottomBar: some View {
-        HStack(spacing: 10) {
-            Button {
-                onNewChat?()
-            } label: {
-                HStack(spacing: 7) {
-                    Image(systemName: "square.and.pencil")
-                    Text(store.draft == nil ? TalkifyLocalized.string("workspace.new_conversation") : TalkifyLocalized.string("workspace.continue_draft"))
+        VStack(spacing: 8) {
+            if container.runtimeServers.activeConnection.kind != .embedded {
+                ActiveRuntimeServerIndicator(style: .sidebar) {
+                    onSettings?(.servers)
                 }
-                .font(.system(size: 15, weight: .semibold))
-                .foregroundStyle(.white)
-                .padding(.horizontal, 14)
-                .frame(maxWidth: .infinity, minHeight: 42)
-                .background(
-                    Color.accentColor,
-                    in: RoundedRectangle(cornerRadius: 13, style: .continuous)
-                )
-                .shadow(color: Color.accentColor.opacity(0.18), radius: 8, y: 3)
             }
-            .buttonStyle(.plain)
 
-            Button {
-                onSettings?()
-            } label: {
-                Image(systemName: "gearshape")
-                    .font(.system(size: 17, weight: .medium))
-                    .foregroundStyle(.secondary)
-                    .frame(width: 42, height: 42)
+            HStack(spacing: 10) {
+                Button {
+                    onNewChat?()
+                } label: {
+                    HStack(spacing: 7) {
+                        Image(systemName: "square.and.pencil")
+                        Text(store.draft == nil ? TalkifyLocalized.string("workspace.new_conversation") : TalkifyLocalized.string("workspace.continue_draft"))
+                    }
+                    .font(.system(size: 15, weight: .semibold))
+                    .foregroundStyle(.white)
+                    .padding(.horizontal, 14)
+                    .frame(maxWidth: .infinity, minHeight: 42)
                     .background(
-                        Color.primary.opacity(colorScheme == .dark ? 0.09 : 0.055),
+                        Color.accentColor,
                         in: RoundedRectangle(cornerRadius: 13, style: .continuous)
                     )
+                    .shadow(color: Color.accentColor.opacity(0.18), radius: 8, y: 3)
+                }
+                .buttonStyle(.plain)
+
+                Button {
+                    onSettings?(.account)
+                } label: {
+                    Image(systemName: "gearshape")
+                        .font(.system(size: 17, weight: .medium))
+                        .foregroundStyle(.secondary)
+                        .frame(width: 42, height: 42)
+                        .background(
+                            Color.primary.opacity(colorScheme == .dark ? 0.09 : 0.055),
+                            in: RoundedRectangle(cornerRadius: 13, style: .continuous)
+                        )
+                }
+                .buttonStyle(.plain)
+                .accessibilityLabel(TalkifyLocalized.string("workspace.settings"))
             }
-            .buttonStyle(.plain)
-            .accessibilityLabel(TalkifyLocalized.string("workspace.settings"))
         }
         .padding(.horizontal, 16)
         .padding(.top, 10)

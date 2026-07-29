@@ -22,7 +22,7 @@ public struct SettingsView: View {
     @Environment(\.horizontalSizeClass) private var horizontalSizeClass
     
     private let onClose: () -> Void
-    @State private var selection: SettingsSection = .account
+    @State private var selection: SettingsSection
     @State private var searchText = ""
     
     @AppStorage("settings.defaultPermission") private var defaultPermission = true
@@ -33,8 +33,12 @@ public struct SettingsView: View {
 
     @State var router = SettingsRouter()
     
-    public init(onClose: @escaping () -> Void = {}) {
+    init(
+        initialSection: SettingsSection = .account,
+        onClose: @escaping () -> Void = {}
+    ) {
         self.onClose = onClose
+        self._selection = State(initialValue: initialSection)
     }
 
     public var body: some View {
@@ -72,6 +76,10 @@ public struct SettingsView: View {
                     }
 #endif
                 }
+        }
+        .task {
+            guard router.path.isEmpty, selection != .account else { return }
+            router.navigate(to: .detail(selection))
         }
         .withSettingsSheetDestinations(sheetDestinations: $router.presentedSheet, container: container)
         .withSettingsCoverDestinations(coverDestinations: $router.presentedCover)

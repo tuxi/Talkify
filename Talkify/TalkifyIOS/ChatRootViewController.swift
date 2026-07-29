@@ -82,7 +82,8 @@ final class ChatRootViewController: UIViewController {
         self.workspaceContext = IOSWorkspaceContext(store: store)
         self.drawerVC = WorkspaceHubViewController(
             store: store,
-            workspaceContext: workspaceContext
+            workspaceContext: workspaceContext,
+            container: container
         )
         self.chatVC = ChatViewController(store: store, dependencies: dependencies)
         super.init(nibName: nil, bundle: nil)
@@ -127,8 +128,8 @@ final class ChatRootViewController: UIViewController {
             self?.setDrawer(open: false, animated: true)
         }
 
-        drawerVC.onSettingsTap = { [weak self] in
-            self?.handleSettingsTap()
+        drawerVC.onSettingsTap = { [weak self] section in
+            self?.handleSettingsTap(initialSection: section)
         }
 
         drawerVC.onWorkspaceBrowserRequested = { [weak self] in
@@ -321,8 +322,10 @@ final class ChatRootViewController: UIViewController {
         }
     }
     
-    private func handleSettingsTap() {
-        let settingsView = SettingsView { [weak self] in
+    private func handleSettingsTap(
+        initialSection: SettingsSection = .account
+    ) {
+        let settingsView = SettingsView(initialSection: initialSection) { [weak self] in
             self?.dismiss(animated: true)
         }
             .environment(container.authManager)

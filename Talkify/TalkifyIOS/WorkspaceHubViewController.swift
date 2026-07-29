@@ -26,18 +26,24 @@ final class WorkspaceHubViewController: UIViewController {
     let workspaceContext: IOSWorkspaceContext
     var searchText: String = ""
     var fileProvider: WorkspaceFileContentProvider?
+    let container: AppContainer
 
     var onSelectedConversation: (() -> Void)?
-    var onSettingsTap: (() -> Void)?
+    var onSettingsTap: ((SettingsSection) -> Void)?
     var onWorkspaceBrowserRequested: (() -> Void)?
     var onFileSelected: ((String) -> Void)?
     var onWorkspaceExportReady: ((URL) -> Void)?
 
     // MARK: - Init
 
-    init(store: WorkspaceStore, workspaceContext: IOSWorkspaceContext) {
+    init(
+        store: WorkspaceStore,
+        workspaceContext: IOSWorkspaceContext,
+        container: AppContainer
+    ) {
         self.store = store
         self.workspaceContext = workspaceContext
+        self.container = container
         super.init(nibName: nil, bundle: nil)
     }
 
@@ -76,8 +82,8 @@ final class WorkspaceHubViewController: UIViewController {
                 }
                 self.onSelectedConversation?()
             },
-            onSettings: { [weak self] in
-                self?.onSettingsTap?()
+            onSettings: { [weak self] section in
+                self?.onSettingsTap?(section)
             },
             onFileSelected: { [weak self] path in
                 self?.onFileSelected?(path)
@@ -87,6 +93,7 @@ final class WorkspaceHubViewController: UIViewController {
             }
         )
         .environment(store)
+        .environment(container)
 
         let rootController = UIHostingController(rootView: AnyView(hubView))
         rootController.view.backgroundColor = .clear

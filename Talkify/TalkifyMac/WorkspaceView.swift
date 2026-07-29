@@ -35,6 +35,7 @@ public struct WorkspaceView: View {
     @State private var columnVisibility: NavigationSplitViewVisibility = .all
     
     @State private var showSettings = false
+    @State private var settingsInitialSection: SettingsSection = .account
     @State private var showAccountPopover = false
     
 #if os(iOS)
@@ -209,7 +210,7 @@ public struct WorkspaceView: View {
     @ViewBuilder
     private var standardLayout: some View {
         if showSettings {
-            SettingsView {
+            SettingsView(initialSection: settingsInitialSection) {
                 showSettings = false
             }
         } else {
@@ -369,7 +370,7 @@ public struct WorkspaceView: View {
                         columnVisibility = .detailOnly
                         store.beginDraft()
                     },
-                    onSettings: { showSettings = true },
+                    onSettings: { openSettings($0) },
                     onFileSelected: { filePreviewPath = $0 },
                     onWorkspaceExportReady: { exportArchiveURL = $0 }
                 )
@@ -446,9 +447,19 @@ extension WorkspaceView {
     /// - iOS (iPad)：`Button` + SwiftUI `.popover`。
     @ViewBuilder
     private var footer: some View {
+        #if os(macOS)
+        HStack(spacing: 8) {
+            ActiveRuntimeServerIndicator(style: .chip) {
+                openSettings(.servers)
+            }
+            macFooterIdentity
+        }
+        .padding(.horizontal, 12)
+        .padding(.vertical, 10)
+        #else
         if !authManager.isRegistered {
             Button {
-                showSettings = true
+                openSettings()
             } label: {
                 Label(TalkifyLocalized.string("workspace.settings"), systemImage: "gearshape")
                     .frame(maxWidth: .infinity, alignment: .leading)
@@ -457,67 +468,85 @@ extension WorkspaceView {
             .padding(.horizontal, 16)
             .padding(.vertical, 13)
         } else {
-        #if os(macOS)
-        AppMenu(
-            presentation: .fixedToTrigger(preferredEdge: .maxY)
-        ) { resizeMenu in
-            AccountMenuContent(
-                accountName: accountName,
-                accountInitial: accountInitial,
-                usage: agentManager.usage,
-                isRedeemingResetCard: agentManager.isRedeemingResetCard,
-                usageError: agentManager.usageError,
-                onContentSizeChange: resizeMenu,
-                onRefreshUsage: { agentManager.fetchUsage() },
-                onRefreshCards: { agentManager.refreshResetCards() },
-                onRedeemResetCard: { agentManager.redeemResetCard($0) },
-                onSettings: { showSettings = true },
-                onLogout: {
-                    Task { await container.disconnectGateway() }
-                }
-            )
-        } label: {
-            accountLabel
+            Button {
+                showAccountPopover = true
+            } label: {
+                accountLabel
+            }
+            .buttonStyle(.plain)
+            .frame(maxWidth: .infinity)
+            .padding(.horizontal, 16)
+            .padding(.vertical, 13)
+            .accessibilityLabel("\(TalkifyLocalized.string("workspace.account"))：\(accountName)")
+            .popover(isPresented: $showAccountPopover) {
+                AccountMenuContent(
+                    accountName: accountName,
+                    accountInitial: accountInitial,
+                    usage: agentManager.usage,
+                    isRedeemingResetCard: agentManager.isRedeemingResetCard,
+                    usageError: agentManager.usageError,
+                    onContentSizeChange: { _ in },
+                    onRefreshUsage: { agentManager.fetchUsage() },
+                    onRefreshCards: { agentManager.refreshResetCards() },
+                    onRedeemResetCard: { agentManager.redeemResetCard($0) },
+                    onSettings: {
+                        openSettings()
+                        showAccountPopover = false
+                    },
+                    onLogout: {
+                        Task { await container.disconnectGateway() }
+                    }
+                )
+            }
+            .task { await loadAccountDataIfNeeded() }
         }
-        .frame(maxWidth: .infinity)
-        .padding(.horizontal, 16)
-        .padding(.vertical, 13)
-        .accessibilityLabel("\(TalkifyLocalized.string("workspace.account"))：\(accountName)")
-        .task { await loadAccountDataIfNeeded() }
-        #else
-        Button {
-            showAccountPopover = true
-        } label: {
-            accountLabel
-        }
-        .buttonStyle(.plain)
-        .frame(maxWidth: .infinity)
-        .padding(.horizontal, 16)
-        .padding(.vertical, 13)
-        .accessibilityLabel("\(TalkifyLocalized.string("workspace.account"))：\(accountName)")
-        .popover(isPresented: $showAccountPopover) {
-            AccountMenuContent(
-                accountName: accountName,
-                accountInitial: accountInitial,
-                usage: agentManager.usage,
-                isRedeemingResetCard: agentManager.isRedeemingResetCard,
-                usageError: agentManager.usageError,
-                onContentSizeChange: { _ in },
-                onRefreshUsage: { agentManager.fetchUsage() },
-                onRefreshCards: { agentManager.refreshResetCards() },
-                onRedeemResetCard: { agentManager.redeemResetCard($0) },
-                onSettings: {
-                    showSettings = true
-                    showAccountPopover = false
-                },
-                onLogout: {
-                    Task { await container.disconnectGateway() }
-                }
-            )
-        }
-        .task { await loadAccountDataIfNeeded() }
         #endif
+    }
+
+    #if os(macOS)
+    @ViewBuilder
+    private var macFooterIdentity: some View {
+        if !authManager.isRegistered {
+            Button {
+                openSettings()
+            } label: {
+                Label(TalkifyLocalized.string("workspace.settings"), systemImage: "gearshape")
+                    .frame(maxWidth: .infinity, alignment: .leading)
+            }
+            .buttonStyle(.plain)
+            .frame(minHeight: 30)
+        } else {
+            AppMenu(
+                presentation: .fixedToTrigger(preferredEdge: .maxY)
+            ) { resizeMenu in
+                AccountMenuContent(
+                    accountName: accountName,
+                    accountInitial: accountInitial,
+                    usage: agentManager.usage,
+                    isRedeemingResetCard: agentManager.isRedeemingResetCard,
+                    usageError: agentManager.usageError,
+                    onContentSizeChange: resizeMenu,
+                    onRefreshUsage: { agentManager.fetchUsage() },
+                    onRefreshCards: { agentManager.refreshResetCards() },
+                    onRedeemResetCard: { agentManager.redeemResetCard($0) },
+                    onSettings: { openSettings() },
+                    onLogout: {
+                        Task { await container.disconnectGateway() }
+                    }
+                )
+            } label: {
+                accountLabel
+            }
+            .frame(maxWidth: .infinity)
+            .accessibilityLabel("\(TalkifyLocalized.string("workspace.account"))：\(accountName)")
+            .task { await loadAccountDataIfNeeded() }
         }
+    }
+    #endif
+
+    private func openSettings(_ section: SettingsSection = .account) {
+        settingsInitialSection = section
+        showSettings = true
     }
     
     /// 登录后加载账户资料与用量。
