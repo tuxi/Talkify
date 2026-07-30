@@ -52,6 +52,10 @@
 	<string>Talkify uses the camera to capture photos and share them with your AI agent.</string>
 	<key>NSMicrophoneUsageDescription</key>
 	<string>Talkify uses the microphone for voice input to interact with your AI agent.</string>
+	<key>NSBonjourServices</key>
+	<array>
+		<string>_talkify-agent._tcp.</string>
+	</array>
 	<key>NSLocalNetworkUsageDescription</key>
 	<string>Talkify connects to CodeAgent Runtime servers on your local network.</string>
 	<key>NSNetworkClientUsageDescription</key>

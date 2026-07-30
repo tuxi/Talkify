@@ -24,7 +24,10 @@ let keychainGroupID: String? = "NKW67GFDHM.com.objc.chat.shared"
 
 #if os(macOS)
 private final class TalkifyApplicationDelegate: NSObject, NSApplicationDelegate {
+    var sharingController: RuntimeSharingController?
+
     func applicationWillTerminate(_ notification: Notification) {
+        sharingController?.stopSharing()
         AgentRuntime.shared.stop()
     }
 }
@@ -40,11 +43,11 @@ struct TalkifyApp: App {
     @NSApplicationDelegateAdaptor(TalkifyApplicationDelegate.self)
     private var applicationDelegate
     #endif
-    
+
     @State private var pendingWorkspaceItem: WorkspaceItem?
-    
+
     init() {
-        
+
         let environmentManager = EnvironmentManager()
         #if DEBUG
         environmentManager.saveCurrentEnvironment(.local)
@@ -52,7 +55,7 @@ struct TalkifyApp: App {
         environmentManager.saveCurrentEnvironment(.prod)
         #endif
         self.environmentManager = environmentManager
-        
+
         let manager = AuthManager(
             environment: environmentManager.currentEnvironmentSnapshot,
             refreshTokenHandler: { token in
@@ -67,6 +70,9 @@ struct TalkifyApp: App {
             }
         )
         self.container = AppContainer(authManager: manager, environmentManager: environmentManager, deviceManager: deviceManager)
+        #if os(macOS)
+        applicationDelegate.sharingController = container.sharingController
+        #endif
     }
 
     var body: some Scene {

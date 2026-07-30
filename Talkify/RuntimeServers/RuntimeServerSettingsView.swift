@@ -239,6 +239,14 @@ private struct EmbeddedRuntimeServerCard: View {
     @State private var isRestarting = false
     @State private var showsRestartConfirmation = false
     @State private var operationError: String?
+    #if os(macOS)
+    @State private var isTogglingSharing = false
+    @State private var showsQRCode = false
+    @State private var showsDevices = false
+    @State private var sharingError: String?
+    @State private var pendingInvitation: RuntimePairingInvitation?
+    @State private var pendingInvitationPayload: String?
+    #endif
 
     private var coordinator: RuntimeServerCoordinator {
         container.runtimeServers
@@ -295,6 +303,9 @@ private struct EmbeddedRuntimeServerCard: View {
                 }
 
             }
+            #if os(macOS)
+            runtimeSharingSection
+            #endif
             if let operationError {
                 Text(operationError)
                     .font(.footnote)
@@ -309,7 +320,173 @@ private struct EmbeddedRuntimeServerCard: View {
         } message: {
             Text("当前有任务或待处理事项。重启会中断这些任务，且无法自动恢复实时进度。")
         }
+        #if os(macOS)
+        .sheet(isPresented: $showsQRCode) {
+            if let invitation = pendingInvitation,
+               let payload = pendingInvitationPayload {
+                RuntimeSharingQRView(
+                    invitation: invitation,
+                    payload: payload
+                ) {
+                    showsQRCode = false
+                }
+            } else {
+                VStack {
+                    ProgressView()
+                        .progressViewStyle(.circular)
+                    Text("Loading...")
+                }
+            }
+        }
+        .sheet(isPresented: $showsDevices) {
+            RuntimeSharedDevicesView(
+                deviceRegistry: container.sharingController.deviceRegistry
+            ) { deviceID in
+                Task { await revokeSharedDevice(deviceID) }
+            }
+        }
+        #endif
     }
+
+    #if os(macOS)
+    @ViewBuilder
+    private var runtimeSharingSection: some View {
+        let controller = container.sharingController
+        let status = controller.status
+        VStack(alignment: .leading, spacing: 12) {
+            Divider()
+
+            HStack(spacing: 10) {
+                Image(systemName: "wifi.router")
+                    .font(.system(size: 14, weight: .medium))
+                    .foregroundStyle(sharingStatusColor(status.state))
+                Text("局域网共享 Runtime")
+                    .font(.system(size: 15, weight: .semibold))
+                Spacer()
+                Toggle("", isOn: Binding(
+                    get: { controller.isSharing },
+                    set: { newValue in
+                        Task { await toggleSharing(newValue) }
+                    }
+                ))
+                .labelsHidden()
+                .toggleStyle(.switch)
+                .disabled(isTogglingSharing || monitor.status == .offline)
+            }
+
+            HStack(spacing: 6) {
+                Circle()
+                    .fill(sharingStatusColor(status.state))
+                    .frame(width: 7, height: 7)
+                Text(sharingStatusText(status))
+                    .font(.system(size: 13))
+                    .foregroundStyle(.secondary)
+                if status.state == .running, let origin = controller.advertisedOrigin {
+                    Text("·")
+                        .foregroundStyle(.secondary)
+                    Text(origin.absoluteString)
+                        .font(.system(size: 12, design: .monospaced))
+                        .foregroundStyle(.tertiary)
+                        .textSelection(.enabled)
+                }
+            }
+
+            if let sharingError {
+                Text(sharingError)
+                    .font(.system(size: 12))
+                    .foregroundStyle(.red)
+            }
+
+            if status.state == .running {
+                HStack(spacing: 10) {
+                    Button {
+                        prepareQRCode()
+                    } label: {
+                        Label("显示配对二维码", systemImage: "qrcode")
+                            .font(.system(size: 13))
+                    }
+                    .buttonStyle(.bordered)
+                    .controlSize(.small)
+
+                    let activeCount = controller.deviceRegistry.activeDevices.count
+                    Button {
+                        showsDevices = true
+                    } label: {
+                        Label(
+                            activeCount > 0
+                                ? "已配对设备 (\(activeCount))"
+                                : "已配对设备",
+                            systemImage: "iphone.gen3"
+                        )
+                        .font(.system(size: 13))
+                    }
+                    .buttonStyle(.bordered)
+                    .controlSize(.small)
+                }
+            }
+        }
+    }
+
+    private func sharingStatusColor(_ state: RuntimeSharedListenerState) -> Color {
+        switch state {
+        case .stopped: .gray
+        case .starting: .blue
+        case .running: .green
+        case .failed: .red
+        }
+    }
+
+    private func sharingStatusText(_ status: RuntimeSharedListenerStatus) -> String {
+        switch status.state {
+        case .stopped: "共享未开启"
+        case .starting: "正在启动共享..."
+        case .running: "共享已开启 · 端口 \(status.port)"
+        case .failed:
+            if let error = status.lastError, !error.isEmpty {
+                "共享失败：\(error)"
+            } else {
+                "共享失败"
+            }
+        }
+    }
+
+    private func toggleSharing(_ enable: Bool) async {
+        guard !isTogglingSharing else { return }
+        isTogglingSharing = true
+        sharingError = nil
+        let controller = container.sharingController
+        if enable {
+            do {
+                try await controller.startSharing()
+            } catch {
+                sharingError = error.localizedDescription
+            }
+        } else {
+            controller.stopSharing()
+        }
+        isTogglingSharing = false
+    }
+
+    private func prepareQRCode() {
+        let controller = container.sharingController
+        do {
+            let invitation = try controller.createPairingInvitation()
+            pendingInvitation = invitation
+            pendingInvitationPayload = try invitation.encodedPayload()
+            showsQRCode = true
+        } catch {
+            sharingError = error.localizedDescription
+        }
+    }
+
+    private func revokeSharedDevice(_ deviceID: String) async {
+        do {
+            try container.sharingController.revokeDevice(deviceID)
+        } catch {
+            sharingError = error.localizedDescription
+        }
+    }
+    #endif
 
     private func checkEmbedded() async {
         guard !isChecking, !isRestarting else { return }
@@ -394,24 +571,26 @@ private struct ExternalRuntimeServerCard: View {
                 .foregroundStyle(.secondary)
             }
 
-            HStack(spacing: 10) {
-                if !isActive {
-                    Button("设为当前服务器", action: onActivate)
-                        .buttonStyle(.borderedProminent)
-                        .disabled(isSwitching)
-                }
-                Button("重新检查", action: onCheck)
-                    .buttonStyle(.bordered)
-                    .disabled(monitor.status == .checking)
-                Button("编辑", action: onEdit)
-                    .buttonStyle(.bordered)
+            ScrollView(.horizontal) {
+                HStack(spacing: 10) {
+                    if !isActive {
+                        Button("设为当前服务器", action: onActivate)
+                            .buttonStyle(.borderedProminent)
+                            .disabled(isSwitching)
+                    }
+                    Button("重新检查", action: onCheck)
+                        .buttonStyle(.bordered)
+                        .disabled(monitor.status == .checking)
+                    Button("编辑", action: onEdit)
+                        .buttonStyle(.bordered)
 
-                Spacer()
-                Button("查看诊断", action: onDiagnostics)
-                    .buttonStyle(.borderless)
-                if !isActive {
-                    Button("删除", role: .destructive, action: onRemove)
+                    Spacer()
+                    Button("查看诊断", action: onDiagnostics)
                         .buttonStyle(.borderless)
+                    if !isActive {
+                        Button("删除", role: .destructive, action: onRemove)
+                            .buttonStyle(.borderless)
+                    }
                 }
             }
         }
@@ -538,6 +717,9 @@ private struct RuntimeServerEditorView: View {
     @State private var errorMessage: String?
     @State private var testedResult: RuntimeServerPreflightResult?
     @State private var pendingIdentityResult: RuntimeServerPreflightResult?
+    #if os(iOS)
+    @State private var showsPairingScanner = false
+    #endif
 
     init(request: RuntimeServerEditorRequest) {
         self.request = request
@@ -590,6 +772,15 @@ private struct RuntimeServerEditorView: View {
         } message: {
             Text("该地址返回了不同的 Server ID。仅在你确认服务器已重建或更换后继续。")
         }
+        #if os(iOS)
+        .sheet(isPresented: $showsPairingScanner) {
+            RuntimePairingScannerView { connection in
+                endpointText = connection.endpoint?.absoluteString ?? ""
+                displayName = connection.displayName
+                authentication = connection.authentication
+            }
+        }
+        #endif
     }
 
     private var editorHeader: some View {
@@ -630,13 +821,28 @@ private struct RuntimeServerEditorView: View {
             editorSectionTitle("服务器")
 
             editorField("服务器 URL", caption: "CodeAgent Runtime 的 HTTP(S) 地址") {
-                TextField("例如 http://127.0.0.1:8797", text: $endpointText)
+                HStack(spacing: 8) {
+                    TextField("例如 http://127.0.0.1:8797", text: $endpointText)
+                        #if os(iOS)
+                        .textInputAutocapitalization(.never)
+                        .keyboardType(.URL)
+                        #endif
+                        .autocorrectionDisabled()
+                        .runtimeEditorTextField()
                     #if os(iOS)
-                    .textInputAutocapitalization(.never)
-                    .keyboardType(.URL)
+                    if request.connection == nil {
+                        Button {
+                            showsPairingScanner = true
+                        } label: {
+                            Image(systemName: "qrcode.viewfinder")
+                                .font(.system(size: 16, weight: .medium))
+                        }
+                        .buttonStyle(.bordered)
+                        .help("扫码配对 Mac Runtime")
+                        .accessibilityLabel("扫码配对")
+                    }
                     #endif
-                    .autocorrectionDisabled()
-                    .runtimeEditorTextField()
+                }
             }
 
             editorField("显示名称", caption: "可选；留空时使用服务器返回的名称") {
@@ -1010,7 +1216,7 @@ private extension View {
     }
 }
 
-private extension Color {
+extension Color {
     static var platformRuntimeEditorBackground: Color {
         Color.primary.opacity(0.012)
     }

@@ -80,6 +80,9 @@ final class AppContainer {
     private let agentCredentialStore: AppCredentialStore
     let providerConnections: ProviderConnectionStore
     let runtimeServers: RuntimeServerCoordinator
+    #if os(macOS)
+    let sharingController: RuntimeSharingController
+    #endif
     private let providerConfigurationQueue = RuntimeProviderConfigurationApplyQueue()
     private var desiredProviderConfiguration: PendingProviderConfiguration?
     private var providerCatalogsByRevision: [UInt64: ProviderCatalogSnapshot] = [:]
@@ -202,6 +205,9 @@ final class AppContainer {
             gatewayCredentialStore: agentCredentialStore
         )
         self.runtimeServers = RuntimeServerCoordinator()
+        #if os(macOS)
+        self.sharingController = RuntimeSharingController()
+        #endif
 
         self.toolRegistry = ToolRegistry()
         self.conversationNotifications = ConversationNotificationCoordinator()
