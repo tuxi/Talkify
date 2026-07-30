@@ -995,6 +995,7 @@ struct SettingsSidebarRow: View {
             Spacer(minLength: 0)
 //            if section == .account { Image(systemName: "arrow.up.right").font(.system(size: 12, weight: .medium)).foregroundStyle(.tertiary) }
         }
+        .contentShape(Rectangle())
         .foregroundStyle(.primary)
         .padding(.horizontal, 15)
         .padding(.vertical, 8)

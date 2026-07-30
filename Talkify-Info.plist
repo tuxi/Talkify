@@ -48,16 +48,16 @@
 		<key>NSAllowsLocalNetworking</key>
 		<true/>
 	</dict>
-	<key>NSCameraUsageDescription</key>
-	<string>Talkify uses the camera to capture photos and share them with your AI agent.</string>
-	<key>NSMicrophoneUsageDescription</key>
-	<string>Talkify uses the microphone for voice input to interact with your AI agent.</string>
 	<key>NSBonjourServices</key>
 	<array>
 		<string>_talkify-agent._tcp.</string>
 	</array>
+	<key>NSCameraUsageDescription</key>
+	<string>Talkify uses the camera to capture photos and share them with your AI agent.</string>
 	<key>NSLocalNetworkUsageDescription</key>
 	<string>Talkify connects to CodeAgent Runtime servers on your local network.</string>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>Talkify uses the microphone for voice input to interact with your AI agent.</string>
 	<key>NSNetworkClientUsageDescription</key>
 	<string>Talkify uses the network to connect to AI services and enable real-time agent collaboration.</string>
 	<key>NSPhotoLibraryAddUsageDescription</key>
