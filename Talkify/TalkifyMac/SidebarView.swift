@@ -56,9 +56,10 @@ public struct SidebarView: View {
         } label: {
             HStack(spacing: 8) {
                 Image(systemName: "square.and.pencil")
-                    .font(.system(size: 13, weight: .medium))
+                    .font(.system(size: 14, weight: .regular))
+                    .offset(y: -1)
                 Text(verbatim: TalkifyLocalized.string("workspace.new_task"))
-                    .font(.system(size: 16, weight: .semibold))
+                    .font(.system(size: 14, weight: .regular))
                     .frame(maxWidth: .infinity, alignment: .leading)
                     .contentShape(Rectangle())
             }
