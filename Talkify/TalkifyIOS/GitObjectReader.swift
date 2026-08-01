@@ -61,11 +61,28 @@ final class GitObjectReader {
         if raw.hasPrefix("ref:") {
             let ref = raw.dropFirst("ref:".count).trimmingCharacters(in: .whitespaces)
             let refURL = gitDir.appendingPathComponent(ref)
-            guard fileManager.fileExists(atPath: refURL.path) else { return nil }
-            return try String(contentsOf: refURL, encoding: .utf8).trimmingCharacters(in: .whitespacesAndNewlines)
+            if fileManager.fileExists(atPath: refURL.path) {
+                return try String(contentsOf: refURL, encoding: .utf8)
+                    .trimmingCharacters(in: .whitespacesAndNewlines)
+            }
+            return try resolvePackedRef(String(ref))
         }
         // Detached HEAD: raw is already the commit SHA
         return raw.isEmpty ? nil : raw
+    }
+
+    private func resolvePackedRef(_ ref: String) throws -> String? {
+        let packedRefsURL = gitDir.appendingPathComponent("packed-refs")
+        guard fileManager.fileExists(atPath: packedRefsURL.path) else { return nil }
+        let contents = try String(contentsOf: packedRefsURL, encoding: .utf8)
+        for line in contents.split(separator: "\n") {
+            guard !line.hasPrefix("#"), !line.hasPrefix("^") else { continue }
+            let parts = line.split(separator: " ", maxSplits: 1)
+            if parts.count == 2, parts[1] == ref {
+                return String(parts[0])
+            }
+        }
+        return nil
     }
 
     // MARK: - Object Reading
@@ -146,7 +163,14 @@ final class GitObjectReader {
                     return isDir ? nil : sha
                 } else if isDir {
                     // Descend into directory
-                    return try findInTree(bytes: bytes, offset: &offset, components: components, depth: depth + 1)
+                    let childTree = try readObject(sha: sha)
+                    var childOffset = 0
+                    return try findInTree(
+                        bytes: [UInt8](childTree),
+                        offset: &childOffset,
+                        components: components,
+                        depth: depth + 1
+                    )
                 }
             }
             // Continue to next entry
@@ -157,193 +181,64 @@ final class GitObjectReader {
     // MARK: - Decompression
 
     private func decompress(_ data: Data) throws -> Data {
-        // Strip the "blob <size>\0" or "tree <size>\0" or "commit <size>\0" header
-        // The header ends at the first null byte
-        guard let nullIndex = data.firstIndex(of: 0) else {
+        // Apple's COMPRESSION_ZLIB decoder consumes the raw DEFLATE payload;
+        // loose Git objects use an RFC 1950 zlib wrapper (2-byte header + Adler-32).
+        guard data.count > 6 else { throw GitReaderError.invalidObject }
+        let firstByte = data[data.startIndex]
+        let secondByte = data[data.index(after: data.startIndex)]
+        let headerValue = Int(firstByte) << 8 | Int(secondByte)
+        guard firstByte & 0x0F == 8,
+              headerValue.isMultiple(of: 31),
+              secondByte & 0x20 == 0 else {
             throw GitReaderError.invalidObject
         }
-        let compressed = Data(data[(nullIndex + 1)...])
+        let deflated = data.dropFirst(2).dropLast(4)
+        let maximumInflatedSize = 8 * 1_024 * 1_024
+        var capacity = 64 * 1_024
+        var inflated: Data?
 
-        var result = Data()
-        let bufferSize = 32768
-        var sourceBuffer = [UInt8](compressed)
-        var destinationBuffer = [UInt8](repeating: 0, count: bufferSize)
-
-        let status = compression_decode_buffer(
-            &destinationBuffer, bufferSize,
-            &sourceBuffer, sourceBuffer.count,
-            nil,
-            COMPRESSION_ZLIB
-        )
-
-        guard status > 0 else {
-            throw GitReaderError.decompressionFailed
+        while capacity <= maximumInflatedSize {
+            var destination = [UInt8](repeating: 0, count: capacity)
+            let decodedCount = deflated.withUnsafeBytes { sourceBytes in
+                guard let source = sourceBytes.bindMemory(to: UInt8.self).baseAddress else { return 0 }
+                return destination.withUnsafeMutableBufferPointer { destinationBuffer in
+                    compression_decode_buffer(
+                        destinationBuffer.baseAddress!,
+                        capacity,
+                        source,
+                        deflated.count,
+                        nil,
+                        COMPRESSION_ZLIB
+                    )
+                }
+            }
+            if decodedCount > 0, decodedCount < capacity {
+                inflated = Data(destination.prefix(decodedCount))
+                break
+            }
+            capacity *= 2
         }
 
-        result.append(contentsOf: destinationBuffer[0..<status])
-
-        // Continue if there's more data after the initial chunk header
-        if status < bufferSize || result.count > 0 {
-            return result
+        guard let inflated else { throw GitReaderError.decompressionFailed }
+        guard let nullIndex = inflated.firstIndex(of: 0), nullIndex > inflated.startIndex else {
+            throw GitReaderError.invalidHeader
         }
-
-        throw GitReaderError.decompressionFailed
+        let headerData = inflated[..<nullIndex]
+        guard let header = String(data: headerData, encoding: .utf8),
+              let expectedSize = Int(header.split(separator: " ").last ?? "") else {
+            throw GitReaderError.invalidHeader
+        }
+        let payload = Data(inflated[inflated.index(after: nullIndex)...])
+        guard payload.count == expectedSize else {
+            throw GitReaderError.sizeMismatch(expected: expectedSize, actual: payload.count)
+        }
+        return payload
     }
 
     enum GitReaderError: Error {
         case invalidObject
+        case invalidHeader
+        case sizeMismatch(expected: Int, actual: Int)
         case decompressionFailed
-    }
-}
-
-// MARK: - Simple Line Diff
-
-/// A minimal line-based diff generator.
-/// Produces hunks suitable for `FileViewerKit.DiffHunk` and `AgentKit.DiffHunk`.
-enum LineDiffer {
-
-    struct Hunk {
-        let oldStart: Int
-        let newStart: Int
-        let lines: [DiffLineKind]
-    }
-
-    enum DiffLineKind {
-        case unchanged(String)
-        case added(String)
-        case removed(String)
-    }
-
-    /// Compute line-level diff between old and new text.
-    static func diff(old: String, new: String, contextLines: Int = 3) -> [Hunk] {
-        let oldLines = old.split(separator: "\n", omittingEmptySubsequences: false).map(String.init)
-        let newLines = new.split(separator: "\n", omittingEmptySubsequences: false).map(String.init)
-
-        let edits = computeEdits(old: oldLines, new: newLines)
-        guard !edits.isEmpty else { return [] }
-
-        return buildHunks(oldLines: oldLines, newLines: newLines, edits: edits, context: contextLines)
-    }
-
-    // MARK: - Edit Computation (Simplified Myers)
-
-    private enum Edit: Equatable {
-        case equal
-        case insert
-        case delete
-    }
-
-    private static func computeEdits(old: [String], new: [String]) -> [Edit] {
-        let m = old.count
-        let n = new.count
-
-        // LCS-based approach: find longest common subsequence
-        var dp = [[Int]](repeating: [Int](repeating: 0, count: n + 1), count: m + 1)
-
-        for i in 1...m {
-            for j in 1...n {
-                if old[i - 1] == new[j - 1] {
-                    dp[i][j] = dp[i - 1][j - 1] + 1
-                } else {
-                    dp[i][j] = max(dp[i - 1][j], dp[i][j - 1])
-                }
-            }
-        }
-
-        // Backtrack to produce edit script
-        var edits: [Edit] = []
-        var i = m, j = n
-        while i > 0 || j > 0 {
-            if i > 0, j > 0, old[i - 1] == new[j - 1] {
-                edits.append(.equal)
-                i -= 1; j -= 1
-            } else if j > 0, (i == 0 || dp[i][j - 1] >= dp[i - 1][j]) {
-                edits.append(.insert)
-                j -= 1
-            } else {
-                edits.append(.delete)
-                i -= 1
-            }
-        }
-        return edits.reversed()
-    }
-
-    // MARK: - Hunk Building
-
-    private static func buildHunks(
-        oldLines: [String],
-        newLines: [String],
-        edits: [Edit],
-        context: Int
-    ) -> [Hunk] {
-        var hunks: [Hunk] = []
-        var i = 0, oldLine = 0, newLine = 0
-
-        while i < edits.count {
-            // Skip equal lines
-            var skipCount = 0
-            while i + skipCount < edits.count, edits[i + skipCount] == .equal {
-                skipCount += 1
-            }
-            let start = i
-            i += skipCount
-            oldLine += skipCount
-            newLine += skipCount
-
-            guard i < edits.count, edits[i] != .equal else { continue }
-
-            // Collect changed block
-            var changedLines: [DiffLineKind] = []
-            let hunkOldStart = max(0, oldLine - context)
-            let hunkNewStart = max(0, newLine - context)
-
-            // Add preceding context
-            if context > 0, start > 0 {
-                let ctxStart = max(0, start - context)
-                for k in ctxStart..<start {
-                    let oi = oldLine - (start - k)
-                    if oi >= 0, oi < oldLines.count {
-                        changedLines.append(.unchanged(oldLines[oi]))
-                    }
-                }
-            }
-
-            // Add changed lines
-            _ = i  // changeStart marker — keeps i position before processing edits
-            while i < edits.count, edits[i] != .equal {
-                switch edits[i] {
-                case .delete:
-                    if oldLine < oldLines.count {
-                        changedLines.append(.removed(oldLines[oldLine]))
-                    }
-                    oldLine += 1
-                case .insert:
-                    if newLine < newLines.count {
-                        changedLines.append(.added(newLines[newLine]))
-                    }
-                    newLine += 1
-                case .equal:
-                    break
-                }
-                i += 1
-            }
-
-            // Add trailing context
-            var trailingContext = 0
-            while trailingContext < context, i + trailingContext < edits.count, edits[i + trailingContext] == .equal {
-                if newLine + trailingContext < newLines.count {
-                    changedLines.append(.unchanged(newLines[newLine + trailingContext]))
-                }
-                trailingContext += 1
-            }
-
-            hunks.append(Hunk(
-                oldStart: hunkOldStart + 1, // 1-indexed
-                newStart: hunkNewStart + 1,
-                lines: changedLines
-            ))
-        }
-
-        return hunks
     }
 }

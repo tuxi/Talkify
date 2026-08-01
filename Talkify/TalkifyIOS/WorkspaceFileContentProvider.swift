@@ -11,6 +11,12 @@ import AgentKit
 import FileViewerKit
 import CoreKit
 
+private struct WorkspaceCanonicalTextChange {
+    let original: String
+    let modified: String
+    let fileChange: FileViewerKit.FileChange
+}
+
 // MARK: - Workspace File Node
 
 /// 轻量 `FileNode` 实现，直接映射 `FileManager` 的文件系统条目。
@@ -51,6 +57,8 @@ final class WorkspaceFileContentProvider {
     private let store: WorkspaceStore
     private let workspaceContext: IOSWorkspaceContext
     private let fileManager: FileManager
+    private let maximumDiffTextBytes = 2 * 1_024 * 1_024
+    private let maximumDiffCells = 4_000_000
 
     init(
         store: WorkspaceStore,
@@ -181,6 +189,103 @@ final class WorkspaceFileContentProvider {
     private func fileViewerContent(for filePath: String) async throws -> FileViewerKit.FileContent {
         try await localFileProvider().content(for: filePath)
     }
+
+    /// Loads the two text snapshots once and projects them into FileViewerKit's
+    /// canonical diff model. AgentKit compatibility is handled at one boundary below.
+    private func canonicalTextChange(for filePath: String) throws -> WorkspaceCanonicalTextChange? {
+        guard let root = workspaceRoot,
+              let relativePath = workspaceRelativePath(filePath, root: root),
+              let gitReader = GitObjectReader(workspaceRoot: root) else {
+            return nil
+        }
+
+        let original = try gitReader.contentAtHead(for: relativePath)
+        let workingURL = URL(fileURLWithPath: root, isDirectory: true)
+            .appendingPathComponent(relativePath)
+            .standardizedFileURL
+        let modified: String?
+        if fileManager.fileExists(atPath: workingURL.path) {
+            let values = try workingURL.resourceValues(forKeys: [.isRegularFileKey])
+            guard values.isRegularFile == true else { return nil }
+            let data = try Data(contentsOf: workingURL, options: [.mappedIfSafe])
+            guard let text = String(data: data, encoding: .utf8) else {
+                throw FileViewerKit.FilePreviewError.unsupportedType(
+                    "Cannot diff non-UTF-8 file: \(relativePath)"
+                )
+            }
+            modified = text
+        } else {
+            modified = nil
+        }
+
+        guard original != nil || modified != nil else { return nil }
+        let oldText = original ?? ""
+        let newText = modified ?? ""
+        guard oldText != newText else { return nil }
+        guard oldText.utf8.count <= maximumDiffTextBytes,
+              newText.utf8.count <= maximumDiffTextBytes else {
+            throw FileViewerKit.FilePreviewError.unsupportedType(
+                "Diff text exceeds the \(Int64(maximumDiffTextBytes).formattedFileSize) preview limit"
+            )
+        }
+        let oldLineCount = Self.lineCount(in: oldText)
+        let newLineCount = Self.lineCount(in: newText)
+        guard oldLineCount * newLineCount <= maximumDiffCells else {
+            throw FileViewerKit.FilePreviewError.unsupportedType(
+                "Diff is too large to calculate safely"
+            )
+        }
+
+        let status: FileViewerKit.ChangeStatus
+        switch (original, modified) {
+        case (nil, .some): status = .added
+        case (.some, nil): status = .deleted
+        case (.some, .some): status = .modified
+        case (nil, nil): return nil
+        }
+
+        let hunks = FileViewerKit.LineDiffBuilder.diff(old: oldText, new: newText)
+        let addedCount = hunks.flatMap(\.lines).filter {
+            if case .added = $0 { return true }
+            return false
+        }.count
+        let removedCount = hunks.flatMap(\.lines).filter {
+            if case .removed = $0 { return true }
+            return false
+        }.count
+
+        return WorkspaceCanonicalTextChange(
+            original: oldText,
+            modified: newText,
+            fileChange: FileViewerKit.FileChange(
+                filePath: relativePath,
+                status: status,
+                summary: "\(addedCount) 行新增, \(removedCount) 行删除",
+                hunks: hunks
+            )
+        )
+    }
+
+    private func workspaceRelativePath(_ filePath: String, root: String) -> String? {
+        let rootURL = URL(fileURLWithPath: root, isDirectory: true)
+            .resolvingSymlinksInPath()
+            .standardizedFileURL
+        let candidate = (filePath.hasPrefix("/")
+            ? URL(fileURLWithPath: filePath)
+            : rootURL.appendingPathComponent(filePath))
+            .resolvingSymlinksInPath()
+            .standardizedFileURL
+        let rootPrefix = rootURL.path.hasSuffix("/") ? rootURL.path : rootURL.path + "/"
+        guard candidate.path.hasPrefix(rootPrefix) else { return nil }
+        return String(candidate.path.dropFirst(rootPrefix.count))
+    }
+
+    nonisolated private static func lineCount(in text: String) -> Int {
+        guard !text.isEmpty else { return 0 }
+        return text.reduce(into: 1) { count, character in
+            if character == "\n" { count += 1 }
+        }
+    }
 }
 
 private enum WorkspaceContentImportError: LocalizedError {
@@ -203,60 +308,7 @@ extension WorkspaceFileContentProvider: FileViewerKit.FileContentProvider {
     }
 
     func changes(for filePath: String, baseRef: String?) async throws -> FileViewerKit.FileChange? {
-        guard let root = workspaceRoot else { return nil }
-        guard let gitReader = GitObjectReader(workspaceRoot: root) else { return nil }
-
-        let absPath = resolveAbsolutePath(filePath)
-        guard fileManager.fileExists(atPath: absPath) else { return nil }
-
-        // Get file content at HEAD from git
-        guard let oldContent = try? gitReader.contentAtHead(for: filePath) else { return nil }
-
-        // Check if file is new (exists in working tree but not in HEAD)
-        let currentData = try Data(contentsOf: URL(fileURLWithPath: absPath))
-        guard let newContent = String(data: currentData, encoding: .utf8) else { return nil }
-
-        // Determine status
-        let status: FileViewerKit.ChangeStatus
-        if oldContent == newContent {
-            return nil // No changes
-        }
-
-        let fileExistsInGit = (try? gitReader.contentAtHead(for: filePath)) != nil
-        if !fileExistsInGit {
-            status = .added
-        } else {
-            status = .modified
-        }
-
-        // Compute diff hunks
-        let hunks = LineDiffer.diff(old: oldContent, new: newContent)
-        let fileHunks: [FileViewerKit.DiffHunk] = hunks.map { hunk in
-            let lines: [FileViewerKit.DiffLine] = hunk.lines.map { kind in
-                switch kind {
-                case .unchanged(let t): return .unchanged(t)
-                case .added(let t):     return .added(t)
-                case .removed(let t):   return .removed(t)
-                }
-            }
-            return FileViewerKit.DiffHunk(oldStart: hunk.oldStart, newStart: hunk.newStart, lines: lines)
-        }
-
-        let addedCount = hunks.flatMap(\.lines).filter {
-            if case .added = $0 { return true }; return false
-        }.count
-        let removedCount = hunks.flatMap(\.lines).filter {
-            if case .removed = $0 { return true }; return false
-        }.count
-
-        let summary = "\(addedCount) 行新增, \(removedCount) 行删除"
-
-        return FileViewerKit.FileChange(
-            filePath: filePath,
-            status: status,
-            summary: summary,
-            hunks: fileHunks
-        )
+        try canonicalTextChange(for: filePath)?.fileChange
     }
 
     func children(of directoryPath: String) async throws -> [any FileViewerKit.FileNode] {
@@ -320,40 +372,12 @@ extension WorkspaceFileContentProvider: AgentKit.FileContentProvider {
     }
 
     func changes(for filePath: String, baseRef: String?) async throws -> AgentKit.DiffContent? {
-        guard let root = workspaceRoot else { return nil }
-        guard let gitReader = GitObjectReader(workspaceRoot: root) else { return nil }
-
-        let absPath = resolveAbsolutePath(filePath)
-        guard fileManager.fileExists(atPath: absPath) else { return nil }
-
-        guard let oldContent = try? gitReader.contentAtHead(for: filePath) else { return nil }
-        let currentData = try Data(contentsOf: URL(fileURLWithPath: absPath))
-        guard let newContent = String(data: currentData, encoding: .utf8) else { return nil }
-
-        guard oldContent != newContent else { return nil }
-
-        let hunks = LineDiffer.diff(old: oldContent, new: newContent)
-        let diffHunks: [AgentKit.DiffHunk] = hunks.map { hunk in
-            let lines: [AgentKit.DiffLine] = hunk.lines.map { kind in
-                switch kind {
-                case .unchanged(let t): return .unchanged(t)
-                case .added(let t):     return .added(t)
-                case .removed(let t):   return .removed(t)
-                }
-            }
-            let oldCount = lines.filter { if case .removed = $0 { true } else { false } }.count
-            let newCount = lines.filter { if case .added = $0 { true } else { false } }.count
-            return AgentKit.DiffHunk(
-                id: "\(hunk.oldStart)-\(hunk.newStart)",
-                oldStart: hunk.oldStart,
-                oldCount: max(oldCount, 1),
-                newStart: hunk.newStart,
-                newCount: max(newCount, 1),
-                lines: lines
-            )
-        }
-
-        return AgentKit.DiffContent(original: oldContent, modified: newContent, hunks: diffHunks)
+        guard let change = try canonicalTextChange(for: filePath) else { return nil }
+        return AgentKitDiffCompatibilityAdapter.content(
+            original: change.original,
+            modified: change.modified,
+            hunks: change.fileChange.hunks
+        )
     }
 }
 
