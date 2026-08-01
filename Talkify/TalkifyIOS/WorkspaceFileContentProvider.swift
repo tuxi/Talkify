@@ -169,14 +169,17 @@ final class WorkspaceFileContentProvider {
 
     /// FileViewerKit owns live-file path validation, type detection and size limits.
     /// The legacy AgentKit protocol below only projects its typed result to text.
-    private func fileViewerContent(for filePath: String) async throws -> FileViewerKit.FileContent {
+    private func localFileProvider() throws -> FileViewerKit.LocalFileContentProvider {
         guard let workspaceRoot else {
-            throw FileViewerKit.FilePreviewError.fileNotFound(path: filePath)
+            throw WorkspaceContentImportError.noActiveWorkspace
         }
-        let provider = FileViewerKit.LocalFileContentProvider(
+        return FileViewerKit.LocalFileContentProvider(
             rootURL: URL(fileURLWithPath: workspaceRoot, isDirectory: true)
         )
-        return try await provider.content(for: filePath)
+    }
+
+    private func fileViewerContent(for filePath: String) async throws -> FileViewerKit.FileContent {
+        try await localFileProvider().content(for: filePath)
     }
 }
 
@@ -284,6 +287,18 @@ extension WorkspaceFileContentProvider: FileViewerKit.FileContentProvider {
 
     func supportsPreview(for filePath: String) -> Bool {
         FileViewerKit.FileTypeDetector.supportsPreview(for: filePath)
+    }
+
+    func textChunk(
+        for filePath: String,
+        offset: Int64,
+        length: Int
+    ) async throws -> FileViewerKit.TextFileChunk? {
+        try await localFileProvider().textChunk(
+            for: filePath,
+            offset: offset,
+            length: length
+        )
     }
 }
 
