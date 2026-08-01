@@ -19,7 +19,6 @@ private struct ChatDetailWrapper: View {
     let onMenuTapped: () -> Void
     /// AgentKit 的 FileContentProvider，用于 InspectorNavigationView
     let fileProvider: (any AgentKit.FileContentProvider)?
-    let onInspectorFilesRequested: () -> Void
 
     @State private var router = AgentRouter()
     @State private var showInspector = false
@@ -47,7 +46,9 @@ private struct ChatDetailWrapper: View {
                 fileProvider: fileProvider,
                 usesNavigationStack: true,
                 workspaceState: store.inspectorWorkspaceState,
-                onOpenFiles: onInspectorFilesRequested
+                workspaceRoot: store.selectedConversation.map {
+                    URL(fileURLWithPath: $0.workspacePath, isDirectory: true)
+                }
             )
             .presentationDetents([.medium, .large])
             .presentationDragIndicator(.visible)
@@ -79,7 +80,6 @@ final class ChatViewController: UIViewController {
     var onMaskTap: (() -> Void)?
     /// AgentKit 的 FileContentProvider，注入到 ChatDetailWrapper 用于 InspectorNavigationView
     var fileProvider: (any AgentKit.FileContentProvider)?
-    var onInspectorFilesRequested: (() -> Void)?
 
     private let store: WorkspaceStore
     private let dependencies: AgentDependencies
@@ -136,10 +136,7 @@ final class ChatViewController: UIViewController {
             store: store,
             dependencies: dependencies,
             onMenuTapped: { [weak self] in self?.onMenuTap?() },
-            fileProvider: fileProvider,
-            onInspectorFilesRequested: { [weak self] in
-                self?.onInspectorFilesRequested?()
-            }
+            fileProvider: fileProvider
         )
         let host = UIHostingController(rootView: detailView)
         host.view.backgroundColor = .clear

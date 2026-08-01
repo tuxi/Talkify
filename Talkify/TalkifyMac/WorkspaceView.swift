@@ -74,9 +74,8 @@ public struct WorkspaceView: View {
             fileProvider: fileProviderForInspector,
             usesNavigationStack: true,
             workspaceState: store.inspectorWorkspaceState,
-            onOpenFiles: {
-                store.isInspectorPresented = false
-                showWorkspaceBrowser = true
+            workspaceRoot: store.selectedConversation.map {
+                URL(fileURLWithPath: $0.workspacePath, isDirectory: true)
             }
         )
         .environment(\.workflowStore, store.workflowStore)
@@ -86,7 +85,10 @@ public struct WorkspaceView: View {
             selection: store.inspectorSelection,
             fileProvider: nil,
             usesNavigationStack: false,
-            workspaceState: store.inspectorWorkspaceState
+            workspaceState: store.inspectorWorkspaceState,
+            workspaceRoot: store.selectedConversation.map {
+                URL(fileURLWithPath: $0.workspacePath, isDirectory: true)
+            }
         )
             .environment(\.workflowStore, store.workflowStore)
             .environment(\.runtimeClient, store.client)
