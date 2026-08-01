@@ -19,6 +19,7 @@ private struct ChatDetailWrapper: View {
     let onMenuTapped: () -> Void
     /// AgentKit 的 FileContentProvider，用于 InspectorNavigationView
     let fileProvider: (any AgentKit.FileContentProvider)?
+    let onInspectorFilesRequested: () -> Void
 
     @State private var router = AgentRouter()
     @State private var showInspector = false
@@ -41,9 +42,11 @@ private struct ChatDetailWrapper: View {
                 }
         }
         .sheet(isPresented: $showInspector) {
-            InspectorNavigationView(
-                initialSelection: store.inspectorSelection,
-                fileProvider: fileProvider
+            TalkifyInspectorWorkbench(
+                selection: store.inspectorSelection,
+                fileProvider: fileProvider,
+                usesNavigationStack: true,
+                onOpenFiles: onInspectorFilesRequested
             )
             .presentationDetents([.medium, .large])
             .presentationDragIndicator(.visible)
@@ -75,6 +78,7 @@ final class ChatViewController: UIViewController {
     var onMaskTap: (() -> Void)?
     /// AgentKit 的 FileContentProvider，注入到 ChatDetailWrapper 用于 InspectorNavigationView
     var fileProvider: (any AgentKit.FileContentProvider)?
+    var onInspectorFilesRequested: (() -> Void)?
 
     private let store: WorkspaceStore
     private let dependencies: AgentDependencies
@@ -131,7 +135,10 @@ final class ChatViewController: UIViewController {
             store: store,
             dependencies: dependencies,
             onMenuTapped: { [weak self] in self?.onMenuTap?() },
-            fileProvider: fileProvider
+            fileProvider: fileProvider,
+            onInspectorFilesRequested: { [weak self] in
+                self?.onInspectorFilesRequested?()
+            }
         )
         let host = UIHostingController(rootView: detailView)
         host.view.backgroundColor = .clear

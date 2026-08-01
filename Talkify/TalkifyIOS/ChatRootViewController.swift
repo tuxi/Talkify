@@ -156,6 +156,12 @@ final class ChatRootViewController: UIViewController {
         chatVC.onMenuTap = { [weak self] in
             self?.setDrawer(open: self?.isDrawerOpen == false, animated: true)
         }
+
+        chatVC.onInspectorFilesRequested = { [weak self] in
+            guard let self else { return }
+            self.store.isInspectorPresented = false
+            self.showWorkspaceBrowser(initialWorkspace: self.currentWorkspaceItem())
+        }
         
         chatVC.onMaskTap = { [weak self] in
             if self?.isDrawerOpen == true {

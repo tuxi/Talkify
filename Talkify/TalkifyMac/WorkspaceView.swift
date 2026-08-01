@@ -64,20 +64,28 @@ public struct WorkspaceView: View {
 #endif
     }
     
-    /// Inspector 内容视图。iOS 用 NavigationStack 容器，macOS 用平铺切换。
-    /// macOS 上的 NavigationStack 会与 NavigationSplitView 的 inspector 列导航状态冲突，
-    /// 导致 `comparisonTypeMismatch` 崩溃，暂时回退到 InspectorView。
+    /// Inspector 工作台。iOS 启用内部 NavigationStack，macOS 暂时使用平铺详情，
+    /// 避免与 NavigationSplitView inspector 列的导航状态冲突。
     @ViewBuilder
     private var inspectorContent: some View {
 #if os(iOS)
-        InspectorNavigationView(
-            initialSelection: store.inspectorSelection,
-            fileProvider: fileProviderForInspector
+        TalkifyInspectorWorkbench(
+            selection: store.inspectorSelection,
+            fileProvider: fileProviderForInspector,
+            usesNavigationStack: true,
+            onOpenFiles: {
+                store.isInspectorPresented = false
+                showWorkspaceBrowser = true
+            }
         )
         .environment(\.workflowStore, store.workflowStore)
         .environment(\.runtimeClient, store.client)
 #else
-        InspectorView(selection: store.inspectorSelection)
+        TalkifyInspectorWorkbench(
+            selection: store.inspectorSelection,
+            fileProvider: nil,
+            usesNavigationStack: false
+        )
             .environment(\.workflowStore, store.workflowStore)
             .environment(\.runtimeClient, store.client)
 #endif
