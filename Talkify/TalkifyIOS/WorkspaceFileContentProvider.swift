@@ -165,30 +165,18 @@ final class WorkspaceFileContentProvider {
         }
     }
 
-    // MARK: - FileType Detection
+    // MARK: - Shared Preview Content
 
-    private enum DetectedType {
-        case text, image, video, pdf, binary
-    }
-
-    private func detectType(_ path: String) -> DetectedType {
-        let ext = (path as NSString).pathExtension.lowercased()
-        switch ext {
-        case "png", "jpg", "jpeg", "gif", "heic", "webp", "bmp", "tiff":
-            return .image
-        case "mp4", "mov", "m4v", "avi", "mkv":
-            return .video
-        case "pdf":
-            return .pdf
-        case "swift", "m", "h", "c", "cpp", "mm", "kt", "java", "py", "rb", "go",
-             "rs", "ts", "js", "json", "xml", "yaml", "yml", "plist", "xcconfig",
-             "md", "txt", "csv", "html", "css", "sh", "zsh", "bash", "toml",
-             "gradle", "podspec", "pbxproj", "entitlements", "storyboard",
-             "xib", "strings", "gitignore", "lock", "resolved":
-            return .text
-        default:
-            return .binary
+    /// FileViewerKit owns live-file path validation, type detection and size limits.
+    /// The legacy AgentKit protocol below only projects its typed result to text.
+    private func fileViewerContent(for filePath: String) async throws -> FileViewerKit.FileContent {
+        guard let workspaceRoot else {
+            throw FileViewerKit.FilePreviewError.fileNotFound(path: filePath)
         }
+        let provider = FileViewerKit.LocalFileContentProvider(
+            rootURL: URL(fileURLWithPath: workspaceRoot, isDirectory: true)
+        )
+        return try await provider.content(for: filePath)
     }
 }
 
@@ -208,34 +196,7 @@ private enum WorkspaceContentImportError: LocalizedError {
 extension WorkspaceFileContentProvider: FileViewerKit.FileContentProvider {
 
     func content(for filePath: String) async throws -> FileViewerKit.FileContent {
-        let absPath = resolveAbsolutePath(filePath)
-        guard fileManager.fileExists(atPath: absPath) else {
-            throw FileViewerKit.FilePreviewError.fileNotFound(path: filePath)
-        }
-
-        let url = URL(fileURLWithPath: absPath)
-
-        switch detectType(filePath) {
-        case .text:
-            let data = try Data(contentsOf: url)
-            if let text = String(data: data, encoding: .utf8) {
-                return .text(text)
-            }
-            return .binary(name: url.lastPathComponent, size: Int64(data.count))
-
-        case .image:
-            return .image(url)
-
-        case .video:
-            return .video(url)
-
-        case .pdf:
-            return .pdf(url)
-
-        case .binary:
-            let size = (try? url.resourceValues(forKeys: [.fileSizeKey]).fileSize).map(Int64.init) ?? 0
-            return .binary(name: url.lastPathComponent, size: size)
-        }
+        try await fileViewerContent(for: filePath)
     }
 
     func changes(for filePath: String, baseRef: String?) async throws -> FileViewerKit.FileChange? {
@@ -322,11 +283,7 @@ extension WorkspaceFileContentProvider: FileViewerKit.FileContentProvider {
     }
 
     func supportsPreview(for filePath: String) -> Bool {
-        let ext = (filePath as NSString).pathExtension.lowercased()
-        return ["swift", "m", "h", "c", "cpp", "mm", "kt", "java", "py", "rb",
-                "go", "rs", "ts", "js", "json", "xml", "yaml", "yml", "md",
-                "txt", "csv", "html", "css", "sh", "png", "jpg", "jpeg",
-                "gif", "heic", "mp4", "mov", "pdf"].contains(ext)
+        FileViewerKit.FileTypeDetector.supportsPreview(for: filePath)
     }
 }
 
@@ -335,15 +292,16 @@ extension WorkspaceFileContentProvider: FileViewerKit.FileContentProvider {
 extension WorkspaceFileContentProvider: AgentKit.FileContentProvider {
 
     func content(for filePath: String) async throws -> String {
-        let absPath = resolveAbsolutePath(filePath)
-        guard fileManager.fileExists(atPath: absPath) else {
-            throw FileViewerKit.FilePreviewError.fileNotFound(path: filePath)
+        switch try await fileViewerContent(for: filePath) {
+        case .text(let text):
+            return text
+        case .oversizedText(_, let size, let limit):
+            throw FileViewerKit.FilePreviewError.unsupportedType(
+                "Text file is \(size.formattedFileSize); preview limit is \(limit.formattedFileSize)"
+            )
+        case .image, .video, .pdf, .binary:
+            throw FileViewerKit.FilePreviewError.unsupportedType("Non-text file: \(filePath)")
         }
-        let data = try Data(contentsOf: URL(fileURLWithPath: absPath))
-        guard let text = String(data: data, encoding: .utf8) else {
-            throw FileViewerKit.FilePreviewError.unsupportedType("Binary file: \(filePath)")
-        }
-        return text
     }
 
     func changes(for filePath: String, baseRef: String?) async throws -> AgentKit.DiffContent? {
