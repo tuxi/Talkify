@@ -1107,6 +1107,13 @@ private struct WorkspaceConversationListView: View {
     @State private var operationError: String?
     @State private var showsArchived = false
 
+    private var conversationItems: [ConversationListItem] {
+        let itemsByID = Dictionary(uniqueKeysWithValues: store.listViewModel.conversationItems.map {
+            ($0.id, $0)
+        })
+        return conversations.compactMap { itemsByID[$0.id] }
+    }
+
     var body: some View {
         VStack(spacing: 0) {
             HStack {
@@ -1141,7 +1148,8 @@ private struct WorkspaceConversationListView: View {
                 }
                 .scrollIndicators(.hidden, axes: .vertical)
             } else {
-                List(conversations, id: \.id) { conversation in
+                List(conversationItems) { item in
+                    let conversation = item.ref
                     Button {
                         selected = conversation
                     } label: {
@@ -1153,7 +1161,6 @@ private struct WorkspaceConversationListView: View {
                         )
                     }
                     .buttonStyle(.plain)
-                    .id("\(conversation.id)-\(store.listViewModel.rowRevision(for: conversation.id))")
                     .listRowInsets(.init(top: 1, leading: 12, bottom: 1, trailing: 12))
                     .listRowSeparator(.hidden)
                     .listRowBackground(Color.clear)
@@ -1177,8 +1184,7 @@ private struct WorkspaceConversationListView: View {
                     }
                     .contextMenu {
                         Button {
-                            renameTarget = conversation
-                            renameText = conversation.name ?? ""
+                            beginRename(conversationID: conversation.id, fallback: conversation)
                         } label: {
                             Label(TalkifyLocalized.string("workspace.rename"), systemImage: "pencil")
                         }
@@ -1289,15 +1295,22 @@ private struct WorkspaceConversationListView: View {
                selected?.id == updated.id {
                 selected = updated
             }
-            await store.refreshConversationList()
         }
+    }
+
+    /// A UIKit-hosted `List` may retain its context-menu closure beyond a row
+    /// redraw. Read the current list item when the action is tapped.
+    private func beginRename(conversationID: String, fallback: ConversationRef) {
+        let current = store.listViewModel.conversations.first(where: { $0.id == conversationID })
+            ?? fallback
+        renameTarget = current
+        renameText = current.name ?? ""
     }
 
     private func archive(_ conversation: ConversationRef) {
         Task {
             do {
                 _ = try await store.archiveConversation(conversation)
-                await store.refreshConversationList()
             }
             catch { operationError = error.localizedDescription }
         }
