@@ -15,13 +15,14 @@ import DesignKit
 ///
 /// 两种布局均通过 SettingsRouter 驱动导航。
 public struct SettingsView: View {
+    @Environment(\.dismiss) private var dismiss
     @Environment(AgentManager.self) private var agentManager
     @Environment(UserManager.self) private var userManager
     @Environment(AuthManager.self) private var authManager
     @Environment(AppContainer.self) private var container
     @Environment(\.horizontalSizeClass) private var horizontalSizeClass
     
-    private let onClose: () -> Void
+    private let onClose: (() -> Void)?
     @State private var selection: SettingsSection
     @State private var searchText = ""
     
@@ -35,7 +36,7 @@ public struct SettingsView: View {
     
     init(
         initialSection: SettingsSection = .account,
-        onClose: @escaping () -> Void = {}
+        onClose: (() -> Void)? = nil
     ) {
         self.onClose = onClose
         self._selection = State(initialValue: initialSection)
@@ -66,7 +67,8 @@ public struct SettingsView: View {
 #if os(iOS)
                     ToolbarItem(placement: .topBarTrailing) {
                         Button {
-                            onClose()
+//                            onClose()
+                            dismiss()
                         } label: {
                             Image(systemName: "xmark")
                                 .font(.system(size: 16))
@@ -109,7 +111,9 @@ public struct SettingsView: View {
     private func settingsSidebar(navigateWithRouter: Bool) -> some View {
         VStack(spacing: 0) {
             if horizontalSizeClass == .regular {
-                Button(action: onClose) {
+                Button {
+                    onClose?()
+                } label: {
                     Label(TalkifyLocalized.string("settings.back"), systemImage: "arrow.left")
                         .font(.system(size: 15, weight: .medium))
                         .foregroundStyle(.secondary)

@@ -1153,6 +1153,7 @@ private struct WorkspaceConversationListView: View {
                         )
                     }
                     .buttonStyle(.plain)
+                    .id("\(conversation.id)-\(store.listViewModel.rowRevision(for: conversation.id))")
                     .listRowInsets(.init(top: 1, leading: 12, bottom: 1, trailing: 12))
                     .listRowSeparator(.hidden)
                     .listRowBackground(Color.clear)
@@ -1288,12 +1289,16 @@ private struct WorkspaceConversationListView: View {
                selected?.id == updated.id {
                 selected = updated
             }
+            await store.refreshConversationList()
         }
     }
 
     private func archive(_ conversation: ConversationRef) {
         Task {
-            do { _ = try await store.archiveConversation(conversation) }
+            do {
+                _ = try await store.archiveConversation(conversation)
+                await store.refreshConversationList()
+            }
             catch { operationError = error.localizedDescription }
         }
     }

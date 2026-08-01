@@ -253,6 +253,7 @@ final class ChatRootViewController: UIViewController {
     private func setDrawer(open: Bool, animated: Bool) {
         guard isDrawerOpen != open else { return }
         isDrawerOpen = open
+        store.setConversationListVisible(open)
 
         // Dismiss keyboard before sliding, so it doesn't linger over the drawer.
         chatVC.view.endEditing(true)
@@ -295,6 +296,7 @@ final class ChatRootViewController: UIViewController {
         case .ended, .cancelled:
             let velocityX = gesture.velocity(in: view).x
             isDrawerOpen = nextOffset > drawerWidth * 0.45 || velocityX > 600
+            store.setConversationListVisible(isDrawerOpen)
             applyChatFrame(animated: true)
             gesture.setTranslation(.zero, in: view)
 
@@ -323,6 +325,7 @@ final class ChatRootViewController: UIViewController {
             let velocityX = gesture.velocity(in: view).x
             // Close if dragged more than 55 % of the way or flicked left fast enough.
             isDrawerOpen = nextOffset > drawerWidth * 0.55 && velocityX > -300
+            store.setConversationListVisible(isDrawerOpen)
             applyChatFrame(animated: true)
             gesture.setTranslation(.zero, in: view)
 
@@ -334,9 +337,7 @@ final class ChatRootViewController: UIViewController {
     private func handleSettingsTap(
         initialSection: SettingsSection = .account
     ) {
-        let settingsView = SettingsView(initialSection: initialSection) { [weak self] in
-            self?.dismiss(animated: true)
-        }
+        let settingsView = SettingsView(initialSection: initialSection)
             .environment(container.authManager)
             .environment(container.agentManager)
             .environment(container.userManager)
