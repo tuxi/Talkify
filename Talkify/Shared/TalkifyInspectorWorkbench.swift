@@ -32,15 +32,34 @@ struct TalkifyInspectorWorkbench: View {
     }
 
     private func tabContent(_ tab: InspectorTabState) -> AnyView? {
-        guard tab.entry == .files, let workspaceRoot else { return nil }
-        return AnyView(
-            TalkifyInspectorFileWorkspace(
-                rootURL: workspaceRoot,
-                selectedPath: Binding(
-                    get: { tab.session.selectedFilePath },
-                    set: { tab.session.selectedFilePath = $0 }
+        guard let workspaceRoot else { return nil }
+        switch tab.entry {
+        case .files:
+            return AnyView(
+                TalkifyInspectorFileWorkspace(
+                    rootURL: workspaceRoot,
+                    selectedPath: Binding(
+                        get: { tab.session.selectedFilePath },
+                        set: { tab.session.selectedFilePath = $0 }
+                    )
                 )
             )
-        )
+        case .review:
+            #if os(macOS)
+            return AnyView(
+                TalkifyInspectorReviewWorkspace(
+                    rootURL: workspaceRoot,
+                    selectedPath: Binding(
+                        get: { tab.session.selectedReviewFilePath },
+                        set: { tab.session.selectedReviewFilePath = $0 }
+                    )
+                )
+            )
+            #else
+            return nil
+            #endif
+        default:
+            return nil
+        }
     }
 }
