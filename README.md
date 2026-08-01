@@ -50,10 +50,10 @@ Xcode 会自动解析 Swift Package 依赖：本地包（AgentKit、CoreKit、De
 
 ### 选择 Scheme 并运行
 
-| Scheme | 用途 |
-|---|---|
-| `Talkify` | 开发调试 |
-| `Talkify-MacAppStore` | Mac App Store 分发（沙盒 + 受控 entitlements） |
+| Scheme | 用途                                      |
+|---|-----------------------------------------|
+| `Talkify` | iOS 客户端                                 |
+| `Talkify-MacAppStore` | Mac App Store 分发（沙盒 + 受控 entitlements）  |
 | `Talkify-MacDirect` | 直接分发（Developer ID 签名，避免受限 entitlements） |
 
 按 `⌘R` 运行。
