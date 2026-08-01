@@ -73,6 +73,7 @@ public struct WorkspaceView: View {
             selection: store.inspectorSelection,
             fileProvider: fileProviderForInspector,
             usesNavigationStack: true,
+            workspaceState: store.inspectorWorkspaceState,
             onOpenFiles: {
                 store.isInspectorPresented = false
                 showWorkspaceBrowser = true
@@ -84,7 +85,8 @@ public struct WorkspaceView: View {
         TalkifyInspectorWorkbench(
             selection: store.inspectorSelection,
             fileProvider: nil,
-            usesNavigationStack: false
+            usesNavigationStack: false,
+            workspaceState: store.inspectorWorkspaceState
         )
             .environment(\.workflowStore, store.workflowStore)
             .environment(\.runtimeClient, store.client)

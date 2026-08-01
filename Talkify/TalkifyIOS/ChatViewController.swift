@@ -46,6 +46,7 @@ private struct ChatDetailWrapper: View {
                 selection: store.inspectorSelection,
                 fileProvider: fileProvider,
                 usesNavigationStack: true,
+                workspaceState: store.inspectorWorkspaceState,
                 onOpenFiles: onInspectorFilesRequested
             )
             .presentationDetents([.medium, .large])
