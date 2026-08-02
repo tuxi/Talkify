@@ -8,6 +8,10 @@ final class GitWorkingTreeReviewProvider: FileReviewProvider, @unchecked Sendabl
     private let fileManager: FileManager
     private let maximumTextBytes = 2 * 1_024 * 1_024
     private let maximumDiffCells = 4_000_000
+    private let snapshotLock = NSLock()
+    private var reviewedLineSnapshots: [String: [String]] = [:]
+
+    var supportsUnchangedLineLoading: Bool { true }
 
     init(rootURL: URL, fileManager: FileManager = .default) {
         self.rootURL = rootURL.resolvingSymlinksInPath().standardizedFileURL
@@ -21,6 +25,7 @@ final class GitWorkingTreeReviewProvider: FileReviewProvider, @unchecked Sendabl
         )
         let entries = Self.parseStatus(statusData)
         var changes: [FileChange] = []
+        var lineSnapshots: [String: [String]] = [:]
         changes.reserveCapacity(entries.count)
         for entry in entries {
             try Task.checkCancellation()
@@ -29,12 +34,33 @@ final class GitWorkingTreeReviewProvider: FileReviewProvider, @unchecked Sendabl
                 rootURL: rootURL,
                 fileManager: fileManager,
                 maximumTextBytes: maximumTextBytes,
-                maximumDiffCells: maximumDiffCells
+                maximumDiffCells: maximumDiffCells,
+                lineSnapshots: &lineSnapshots
             ) {
                 changes.append(change)
             }
         }
+        replaceReviewedLineSnapshots(with: lineSnapshots)
         return changes
+    }
+
+    func unchangedLines(
+        for filePath: String,
+        startingAt lineNumber: Int,
+        count: Int
+    ) async throws -> [String] {
+        guard lineNumber > 0, count > 0 else {
+            throw FileReviewProviderError.invalidLineRange
+        }
+        guard let lines = reviewedLineSnapshot(for: filePath) else {
+            throw FileReviewProviderError.staleSnapshot
+        }
+        let lowerBound = lineNumber - 1
+        let upperBound = lowerBound + count
+        guard lowerBound >= 0, upperBound <= lines.count else {
+            throw FileReviewProviderError.staleSnapshot
+        }
+        return Array(lines[lowerBound..<upperBound])
     }
 
     private struct StatusEntry: Sendable {
@@ -79,7 +105,8 @@ final class GitWorkingTreeReviewProvider: FileReviewProvider, @unchecked Sendabl
         rootURL: URL,
         fileManager: FileManager,
         maximumTextBytes: Int,
-        maximumDiffCells: Int
+        maximumDiffCells: Int,
+        lineSnapshots: inout [String: [String]]
     ) throws -> FileChange? {
         let headData = try? runGit(["show", "HEAD:\(entry.path)"], at: rootURL)
         let workingData = try readWorkingData(
@@ -124,6 +151,7 @@ final class GitWorkingTreeReviewProvider: FileReviewProvider, @unchecked Sendabl
             )
         }
 
+        lineSnapshots[entry.path] = lines(in: workingData == nil ? oldText : newText)
         let hunks = LineDiffBuilder.diff(old: oldText, new: newText)
         let added = hunks.flatMap(\.lines).filter { if case .added = $0 { true } else { false } }.count
         let removed = hunks.flatMap(\.lines).filter { if case .removed = $0 { true } else { false } }.count
@@ -133,6 +161,23 @@ final class GitWorkingTreeReviewProvider: FileReviewProvider, @unchecked Sendabl
             summary: "+\(added) −\(removed)",
             hunks: hunks
         )
+    }
+
+    private func replaceReviewedLineSnapshots(with snapshots: [String: [String]]) {
+        snapshotLock.lock()
+        reviewedLineSnapshots = snapshots
+        snapshotLock.unlock()
+    }
+
+    private func reviewedLineSnapshot(for filePath: String) -> [String]? {
+        snapshotLock.lock()
+        defer { snapshotLock.unlock() }
+        return reviewedLineSnapshots[filePath]
+    }
+
+    private static func lines(in text: String) -> [String] {
+        guard !text.isEmpty else { return [] }
+        return text.split(separator: "\n", omittingEmptySubsequences: false).map(String.init)
     }
 
     private static func readWorkingData(
