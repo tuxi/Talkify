@@ -269,15 +269,6 @@ public struct WorkspaceView: View {
                         }
 #endif
 #if os(macOS)
-                        .frame(maxWidth: 800)
-                        // 关键：给 detail 列一个小于内容最大宽度、但不低于下限的稳定理想宽度。
-                        // 之前的问题：即使外层加 .frame(maxWidth: .infinity)，内层 .frame(maxWidth: 800)
-                        // 仍让 detail 列上报理想宽 800；inspector 展开时 NavigationSplitView 按
-                        // 侧栏+detail+inspector 的理想宽（≈260+800+320=1380）计算窗口首选宽度，
-                        // 窗口比这小就会整个向右撑大。
-                        // 现在理想宽=360，三栏首选宽度约 980；同时避免 idealWidth 低于 minWidth
-                        // 在 NSSplitView 实时拖拽时形成约束反馈。Inspector 始终向左占用 detail 区域：
-                        // 空间足够时内容仍保持 800 固定宽度居中，窗口过窄时才压缩内容。
                         .frame(minWidth: 180, idealWidth: 360, maxWidth: .infinity)
 #endif
                         .navigationTitle(store.activeConversationViewModel?.conversation?.name ?? "")
@@ -348,7 +339,7 @@ public struct WorkspaceView: View {
             }
 #endif
             .onChange(of: store.selectedConversation, { oldValue, newValue in
-                store.isInspectorPresented = false
+//                store.isInspectorPresented = false
             })
             .withAgentSheetDestinations(sheetDestinations: $router.presentedSheet, dependencies: dependencies)
             .withAgentCoverDestinations(coverDestinations: $router.presentedCover, dependencies: dependencies)
@@ -659,7 +650,7 @@ private extension View {
 #if os(iOS)
         self.inspectorColumnWidth(320)
 #else
-        self.inspectorColumnWidth(min: 280, ideal: 360, max: 720)
+        self.inspectorColumnWidth(min: 180, ideal: 280, max: 380)
 #endif
     }
 }
