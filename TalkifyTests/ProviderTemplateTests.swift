@@ -78,6 +78,21 @@ final class ProviderTemplateTests: XCTestCase {
         )
     }
 
+    func testPausedSessionAwaitingUserInputDoesNotBlockConfigurationApply() {
+        let snapshot = RuntimeActivitySnapshot(
+            sessions: [
+                RuntimeSessionActivity(
+                    sessionID: "paused-session",
+                    activeTurnID: "turn-1",
+                    state: "paused",
+                    queuePosition: 0
+                )
+            ]
+        )
+
+        XCTAssertFalse(ProviderRuntimeActivityPolicy.hasActiveRuntimeWork(snapshot))
+    }
+
     @MainActor
     func testSavedProviderIsNotPublishedBeforeRuntimeConfigurationApplies() async throws {
         let suiteName = "ProviderTemplateTests.\(UUID().uuidString)"

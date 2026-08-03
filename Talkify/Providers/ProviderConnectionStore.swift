@@ -13,10 +13,15 @@ enum ProviderRuntimeActivityPolicy {
         snapshot.sessions.compactMap { activity in
             var reasons: [String] = []
             let state = activity.state.lowercased()
-            let terminalStates: Set<String> = ["idle", "done", "failed", "cancelled"]
+            // States that do not block a Runtime restart. `paused` means the
+            // turn is suspended awaiting user input and will never resolve on
+            // its own — treating it as blocking deadlocks the apply loop while
+            // the user sees no actionable prompt. Unknown states intentionally
+            // remain blocking (fail-closed).
+            let nonBlockingStates: Set<String> = ["idle", "done", "failed", "cancelled", "paused"]
 
             if activity.effectiveActiveTurnID != nil,
-               !terminalStates.contains(state) {
+               !nonBlockingStates.contains(state) {
                 reasons.append("turn=\(activity.effectiveActiveTurnID ?? "-")")
             }
             if let position = activity.queuePosition, position > 0 {
