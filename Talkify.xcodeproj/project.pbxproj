@@ -424,7 +424,7 @@
 				APPLICATION_EXTENSION_API_ONLY = YES;
 				CODE_SIGN_ENTITLEMENTS = TalkifyShareExtension/TalkifyShareExtension.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 50;
+				CURRENT_PROJECT_VERSION = 51;
 				DEVELOPMENT_TEAM = NKW67GFDHM;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = TalkifyShareExtension/Info.plist;
@@ -454,7 +454,7 @@
 				APPLICATION_EXTENSION_API_ONLY = YES;
 				CODE_SIGN_ENTITLEMENTS = TalkifyShareExtension/TalkifyShareExtension.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 50;
+				CURRENT_PROJECT_VERSION = 51;
 				DEVELOPMENT_TEAM = NKW67GFDHM;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = TalkifyShareExtension/Info.plist;
@@ -540,7 +540,7 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = C30000000000000000000002 /* TalkifyMacAppStore.xcconfig */;
 			buildSettings = {
-				CURRENT_PROJECT_VERSION = 50;
+				CURRENT_PROJECT_VERSION = 51;
 			};
 			name = "Debug-MacAppStore";
 		};
@@ -548,7 +548,7 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = C30000000000000000000002 /* TalkifyMacAppStore.xcconfig */;
 			buildSettings = {
-				CURRENT_PROJECT_VERSION = 50;
+				CURRENT_PROJECT_VERSION = 51;
 			};
 			name = "Release-MacAppStore";
 		};
@@ -556,7 +556,7 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = C30000000000000000000003 /* TalkifyMacDirect.xcconfig */;
 			buildSettings = {
-				CURRENT_PROJECT_VERSION = 50;
+				CURRENT_PROJECT_VERSION = 51;
 			};
 			name = "Debug-MacDirect";
 		};
@@ -564,7 +564,7 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = C30000000000000000000003 /* TalkifyMacDirect.xcconfig */;
 			buildSettings = {
-				CURRENT_PROJECT_VERSION = 50;
+				CURRENT_PROJECT_VERSION = 51;
 			};
 			name = "Release-MacDirect";
 		};
@@ -752,7 +752,7 @@
 				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = NO;
 				CODE_SIGN_ENTITLEMENTS = Talkify/Talkify.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 50;
+				CURRENT_PROJECT_VERSION = 51;
 				DEVELOPMENT_TEAM = NKW67GFDHM;
 				ENABLE_APP_SANDBOX = YES;
 				"ENABLE_APP_SANDBOX[sdk=macosx*]" = NO;
@@ -802,7 +802,7 @@
 				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = NO;
 				CODE_SIGN_ENTITLEMENTS = Talkify/Talkify.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 50;
+				CURRENT_PROJECT_VERSION = 51;
 				DEVELOPMENT_TEAM = NKW67GFDHM;
 				ENABLE_APP_SANDBOX = YES;
 				"ENABLE_APP_SANDBOX[sdk=macosx*]" = NO;
