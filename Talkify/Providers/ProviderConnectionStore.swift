@@ -178,6 +178,39 @@ final class ProviderConnectionStore {
         )
     }
 
+    // MARK: - connection-flattening (Wave 3)
+
+    /// connection-flattening v2: 把当前所有连接序列化为 connectionsJSON
+    /// （non-secret connection DEFINITIONS）。经 AgentKit 的
+    /// `RuntimeProviderConfigurationBuilder.buildConnectionsJSON` 构建，
+    /// 不手拼 wire。ProviderConnection.id 与 connectionsJSON 的 connection id
+    /// 1:1 对应（已是唯一小写 slug）。
+    func buildConnectionsJSON() throws -> String {
+        try RuntimeProviderConfigurationBuilder.buildConnectionsJSON(
+            connections: registry.connections
+        )
+    }
+
+    /// Test seam: serialize an explicit connection list through the same
+    /// AgentKit builder the runtime channel uses, without touching the registry.
+    static func buildConnectionsJSONForTesting(
+        connections: [ProviderConnection]
+    ) throws -> String {
+        try RuntimeProviderConfigurationBuilder.buildConnectionsJSON(
+            connections: connections
+        )
+    }
+
+    /// secretsJSON（connection-flattening bridging）：同时输出 v1 namespaced
+    /// （`{namespace}/{name}`）与 v2 flat（connection id）两种 key，使新旧
+    /// runtime 都能解析。value 形状两种模式下字节一致。Gateway 命名空间路由
+    /// （gateway → AppCredentialStore，llm → KeychainCredentialStore）保持
+    /// 不变，由 CompositeCredentialStore 负责。
+    func secretsJSONForInjection() async -> String {
+        let map = (try? await credentialStore.all()) ?? CredentialMap()
+        return map.toSecretsJSON(keyMode: .dual)
+    }
+
     func markRuntimeConfigurationPending() {
         isApplyingRuntimeConfiguration = true
         runtimeConfigurationError = nil

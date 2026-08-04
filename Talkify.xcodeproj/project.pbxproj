@@ -9,6 +9,7 @@
 /* Begin PBXBuildFile section */
 		A10000000000000000000001 /* UserAssetsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000000000000000000002 /* UserAssetsTests.swift */; };
 		A10000000000000000000003 /* AgentKit in Frameworks */ = {isa = PBXBuildFile; productRef = D0962064300B1D160005EBC6 /* AgentKit */; };
+		A1000000000000000000000F /* ClientToolsKit in Frameworks */ = {isa = PBXBuildFile; productRef = D0935523300EEFCF006C3962 /* ClientToolsKit */; };
 		B20000000000000000000001 /* TalkifyShareExtension.appex in Embed App Extensions */ = {isa = PBXBuildFile; fileRef = B20000000000000000000003 /* TalkifyShareExtension.appex */; platformFilter = ios; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		C40000000000000000000001 /* ProviderTemplateTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C40000000000000000000002 /* ProviderTemplateTests.swift */; };
 		D0935524300EEFCF006C3962 /* ClientToolsKit in Frameworks */ = {isa = PBXBuildFile; productRef = D0935523300EEFCF006C3962 /* ClientToolsKit */; };
@@ -94,6 +95,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				A10000000000000000000003 /* AgentKit in Frameworks */,
+				A1000000000000000000000F /* ClientToolsKit in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -188,6 +190,7 @@
 			name = TalkifyTests;
 			packageProductDependencies = (
 				D0962064300B1D160005EBC6 /* AgentKit */,
+				D0935523300EEFCF006C3962 /* ClientToolsKit */,
 			);
 			productName = TalkifyTests;
 			productReference = A10000000000000000000004 /* TalkifyTests.xctest */;

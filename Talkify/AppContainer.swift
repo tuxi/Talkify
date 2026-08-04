@@ -222,6 +222,13 @@ final class AppContainer {
         // credentials from the AgentKit Keychain store.
         CredentialSettings.store = providerConnections.credentialStore
 
+        // C2.3: AgentKit A2.3 删除了旧 env-name secretsJSON 通道
+        // （AgentSettings.secretsJSON()）。`CredentialSettings.migrateFromLegacyIfNeeded()`
+        // 在 AgentKit 内部没有调用点，宿主启动路径必须显式调用，否则旧
+        // AgentSettings.apiKey Keychain 值不会迁入 CredentialMap，注入将收到 "{}"。
+        // 必须先设置 store（上一行），迁移才会写入宿主 Keychain。
+        CredentialSettings.migrateFromLegacyIfNeeded()
+
         // P1: 注册客户端工具（Go 服务端无法执行的本地工具）
         registerClientTools()
 
@@ -274,20 +281,33 @@ final class AppContainer {
     }
 
     func makeAgentDependencies() -> AgentDependencies {
-        let credentialStore = providerConnections.credentialStore
         let serverConnectionID = runtimeServers.activeConnectionID
         return AgentDependencies(
             client: makeAgentClient(),
             toolRegistry: toolRegistry,
             timelineExtensions: timelineExtensions,
             conversationRendererMode: .web,
-            onAuthExpired: { [weak self, credentialStore] in
+            onAuthExpired: { [weak self] in
                 // The embedded runtime owns its provider, so refresh its injected
                 // credentials after either Apple host observes an auth expiry.
                 #if os(iOS) || os(macOS)
                 guard self?.runtimeServers.activeConnectionID
                     == RuntimeServerConnection.embeddedID else { return }
-                try? await AgentRuntime.shared.reconfigure(with: credentialStore)
+                do {
+                    // C4: 经 3-arg 新通道重注入。AppCredentialStore.resolve 会
+                    // 等待/触发 OAuth 刷新，因此 secretsJSON 含刷新后的新 token；
+                    // connectionsJSON 一并持久化供 restart() 保留。dual key 模式
+                    // 同时输出 v1 namespaced 与 v2 flat key，覆盖新旧 runtime。
+                    let connectionsJSON = try self?.providerConnections.buildConnectionsJSON() ?? ""
+                    let secretsJSON = await self?.providerConnections.secretsJSONForInjection() ?? "{}"
+                    try AgentRuntime.shared.reconfigure(
+                        connectionsJSON: connectionsJSON,
+                        secretsJSON: secretsJSON,
+                        modelName: ""
+                    )
+                } catch {
+                    DLLog("⚠️ auth_expired 重注入失败：\(error)")
+                }
                 #endif
             },
             localStateStore: userAssetLocalStateStore,
@@ -346,6 +366,14 @@ final class AppContainer {
             _ = try await AgentRuntime.shared.ensureStarted(
                 with: providerConnections.credentialStore
             )
+            // C1: connectionsJSON 经新 3-arg 通道持久化（AgentRuntime restart()
+            // 时保留，待 gomobile ABI 携带后透传）；secretsJSON 以 dual 模式
+            // （v1 namespaced + v2 flat key）重注入，覆盖新旧 runtime。
+            try AgentRuntime.shared.reconfigure(
+                connectionsJSON: try providerConnections.buildConnectionsJSON(),
+                secretsJSON: await providerConnections.secretsJSONForInjection(),
+                modelName: ""
+            )
             runtimeServers.embeddedStatusMonitor.markConnected()
             let queuedRevision = await providerConfigurationQueue.pendingRevision()
             if desiredProviderConfiguration == nil,
@@ -401,9 +429,38 @@ final class AppContainer {
     private func publishRuntimeServerModels(
         _ context: RuntimeServerActiveContext
     ) {
+        // v2 catalog fix: context.models may be empty; extract from modelCatalog.connections
+        let models: [UnifiedModelDescriptor] = context.modelCatalog.connections.flatMap { connection in
+            connection.models.compactMap { (model: RuntimeServerModelDescriptor) -> UnifiedModelDescriptor? in
+                guard model.available else { return nil }
+                let modalities = Set(
+                    model.inputModalities.compactMap(ProviderInputModality.init(rawValue:))
+                )
+                return UnifiedModelDescriptor(
+                    serverConnectionID: context.serverConnectionID,
+                    connectionID: connection.id,
+                    providerID: connection.providerID,
+                    providerDisplayName: connection.displayName,
+                    runtimeAlias: model.runtimeAlias,
+                    wireModelID: model.wireModelID,
+                    displayName: model.displayName,
+                    contextWindow: model.contextWindow,
+                    supportsTools: model.supportsTools,
+                    supportsReasoning: model.supportsReasoning,
+                    inputModalities: modalities.isEmpty ? [.text] : modalities,
+                    billingSource: connection.billingSource
+                )
+            }
+        }
+        
+        // v2 catalog: defaultRuntimeAlias in modelCatalog, fallback to context.defaultModelID
+        let defaultModelID = context.modelCatalog.defaultRuntimeAlias.isEmpty
+            ? context.defaultModelID
+            : context.modelCatalog.defaultRuntimeAlias
+        
         modelSettings.applyUnifiedCatalog(
-            context.models,
-            defaultModelID: context.defaultModelID
+            models,
+            defaultModelID: defaultModelID
         )
     }
 
@@ -649,6 +706,11 @@ final class AppContainer {
                     try AgentRuntime.shared.configureProviderConnections(staged.configuration)
                     _ = try await AgentRuntime.shared.ensureStarted(
                         with: providerConnections.credentialStore
+                    )
+                    try AgentRuntime.shared.reconfigure(
+                        connectionsJSON: try providerConnections.buildConnectionsJSON(),
+                        secretsJSON: await providerConnections.secretsJSONForInjection(),
+                        modelName: ""
                     )
                     runtimeServers.embeddedStatusMonitor.markConnected()
                     await finishApplyingProviderConfiguration(staged)
