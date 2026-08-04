@@ -99,3 +99,4 @@ iOSInjectionProject/
 .codeagent
 .claude
 .codeagent/settings.local.json
+/dist
