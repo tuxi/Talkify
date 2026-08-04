@@ -59,8 +59,11 @@ struct TalkifyProviderTemplate: Identifiable, Hashable {
             kind: .apiKey,
             baseURL: URL(string: "https://dashscope.aliyuncs.com/compatible-mode/v1")!,
             models: [
-                ProviderModel(id: "qwen3-coder-plus", displayName: "Qwen3 Coder Plus"),
-                ProviderModel(id: "qwen-plus", displayName: "Qwen Plus"),
+                ProviderModel(id: "qwen3.7-plus", displayName: "Qwen3.7 Plus"),
+                ProviderModel(id: "qwen3.7-max", displayName: "Qwen3.7 Max"),
+                ProviderModel(id: "qwen3.7-flash", displayName: "Qwen3.7 Flash"),
+                ProviderModel(id: "qwen3.8-max", displayName: "Qwen3.8 Max"),
+                ProviderModel(id: "glm-5.2", displayName: "GLM-5.2"),
             ]
         ),
         .init(
@@ -71,8 +74,8 @@ struct TalkifyProviderTemplate: Identifiable, Hashable {
             kind: .apiKey,
             baseURL: URL(string: "https://open.bigmodel.cn/api/paas/v4")!,
             models: [
-                ProviderModel(id: "glm-5", displayName: "GLM-5", supportsReasoning: true),
-                ProviderModel(id: "glm-4.5", displayName: "GLM-4.5", supportsReasoning: true),
+                ProviderModel(id: "glm-5.2", displayName: "GLM-5.2", supportsReasoning: true),
+                ProviderModel(id: "glm-4.7", displayName: "GLM-4.7", supportsReasoning: true),
             ]
         ),
         .init(
