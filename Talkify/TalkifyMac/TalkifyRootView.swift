@@ -27,11 +27,11 @@ struct TalkifyRootView: View {
                 )
             }
             .sheet(isPresented: loginBinding) {
-            AuthView(
-                viewModel: container.makeAuthViewModel(),
-                showsAppleSignIn: AppDistribution.current.supportsNativeAppleSignIn
-            )
-        }
+                AuthView(
+                    viewModel: container.makeAuthViewModel(),
+                    showsAppleSignIn: AppDistribution.current.supportsNativeAppleSignIn
+                )
+            }
     }
 
     private var providerOnboardingBinding: Binding<Bool> {

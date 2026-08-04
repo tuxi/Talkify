@@ -221,11 +221,7 @@ public struct WorkspaceView: View {
     
     @ViewBuilder
     private var standardLayout: some View {
-        if showSettings {
-            SettingsView(initialSection: settingsInitialSection) {
-                showSettings = false
-            }
-        } else {
+        ZStack {
             NavigationSplitView(columnVisibility: $columnVisibility) {
 #if os(iOS)
                 workspaceHubSidebar
@@ -235,20 +231,13 @@ public struct WorkspaceView: View {
                             workspaceContext = IOSWorkspaceContext(store: store)
                         }
                     }
-//                    .navigationTitle("Code")
-//                    .searchable(
-//                        text: $searchText,
-//                        placement: .navigationBarDrawer,
-//                        prompt: "搜索会话…"
-//                    )
-//                    .navigationBarTitleDisplayMode(.large)
 #else
                 VStack {
                     SidebarView(showSettings: $showSettings)
                     Divider()
                     footer
                 }
-                    .platformSidebarColumnWidth()
+                .platformSidebarColumnWidth()
 #endif
             } detail: {
                 NavigationStack(path: $router.path) {
@@ -339,13 +328,21 @@ public struct WorkspaceView: View {
             }
 #endif
             .onChange(of: store.selectedConversation, { oldValue, newValue in
-//                store.isInspectorPresented = false
+                //                store.isInspectorPresented = false
             })
             .withAgentSheetDestinations(sheetDestinations: $router.presentedSheet, dependencies: dependencies)
             .withAgentCoverDestinations(coverDestinations: $router.presentedCover, dependencies: dependencies)
             .environment(router)
             .environment(store)
+            
+            if showSettings {
+                SettingsView(initialSection: settingsInitialSection) {
+                    showSettings = false
+                }
+                .background(Color(nsColor: .windowBackgroundColor)) // 不透明，挡住下层
+            }
         }
+        .toolbar(showSettings ? .hidden : .automatic, for: .windowToolbar) // 打开设置时隐藏窗口 chrome
     }
     
 #if os(iOS)
