@@ -28,7 +28,11 @@ private final class TalkifyApplicationDelegate: NSObject, NSApplicationDelegate 
 
     func applicationWillTerminate(_ notification: Notification) {
         sharingController?.stopSharing()
+        #if os(macOS)
+        CodeAgentDaemon.shared.stop()
+        #else
         AgentRuntime.shared.stop()
+        #endif
     }
 }
 #endif

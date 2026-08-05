@@ -290,9 +290,9 @@ final class AppContainer {
             onAuthExpired: { [weak self] in
                 // The embedded runtime owns its provider, so refresh its injected
                 // credentials after either Apple host observes an auth expiry.
-                #if os(iOS) || os(macOS)
+#if canImport(CodeAgentRuntime)
                 guard self?.runtimeServers.activeConnectionID
-                    == RuntimeServerConnection.embeddedID else { return }
+                        == RuntimeServerConnection.embeddedID else { return }
                 do {
                     // C4: 经 3-arg 新通道重注入。AppCredentialStore.resolve 会
                     // 等待/触发 OAuth 刷新，因此 secretsJSON 含刷新后的新 token；
@@ -308,7 +308,7 @@ final class AppContainer {
                 } catch {
                     DLLog("⚠️ auth_expired 重注入失败：\(error)")
                 }
-                #endif
+#endif
             },
             localStateStore: userAssetLocalStateStore,
             userAssetPicker: { [userAssetPicker] in
@@ -330,7 +330,13 @@ final class AppContainer {
     // MARK: - Embedded Runtime
 
     func ensureAgentRuntimeStarted() async {
-        #if os(iOS) || os(macOS)
+        #if os(macOS)
+        // macOS (Direct + App Store): launch codeagentd as a standalone daemon.
+        // The daemon reads ~/.codeagent/settings.json (shared with CLI) and
+        // inherits a login-shell PATH — no hardcoded PATH hacks needed.
+        await ensureDaemonStarted()
+        #elseif os(iOS)
+        // iOS: use the embedded gomobile runtime (only option on iOS).
         guard runtimeServers.activeConnection.kind == .embedded else {
             await refreshActiveRuntimeContext()
             return
@@ -345,17 +351,80 @@ final class AppContainer {
         #endif
     }
 
+    #if os(macOS)
+    /// Launch codeagentd, register it as a local RuntimeServerConnection,
+    /// and set it as the active server.
+    ///
+    /// On failure the daemon is retried once; if it still fails the embedded
+    /// runtime is used as a last-resort fallback. The active connection is
+    /// logged prominently so you always know which backend is serving requests.
+    private func ensureDaemonStarted() async {
+        let daemon = CodeAgentDaemon.shared
+        if !daemon.isRunning {
+            // One-shot retry for transient failures (e.g. port-file race).
+            for attempt in 1...2 {
+                do {
+                    try daemon.start()
+                    try await daemon.waitForReady(timeout: 10.0)
+
+                    guard let endpoint = daemon.endpoint else {
+                        throw CodeAgentDaemonError.portNotResolved
+                    }
+                    let connection = try RuntimeServerConnection.external(
+                        id: "talkify-local-daemon",
+                        displayName: "本地 CodeAgent 服务",
+                        endpoint: endpoint,
+                        authentication: .bearer,
+                        platform: .macOS
+                    )
+                    // If a stale daemon record from an earlier launch is still
+                    // the active connection, switch away first so we can remove it.
+                    if runtimeServers.registry.activeConnectionID == connection.id {
+                        _ = try? runtimeServers.registry.setActive(
+                            connectionID: RuntimeServerConnection.embeddedID
+                        )
+                    }
+                    _ = try? runtimeServers.registry.remove(
+                        connectionID: connection.id
+                    )
+                    try runtimeServers.registry.upsert(connection)
+                    try runtimeServers.registry.setActive(connectionID: connection.id)
+                    try await runtimeServers.injectBearerToken(
+                        for: connection.id,
+                        token: daemon.accessToken
+                    )
+
+                    DLLog("✅ [RUNTIME] 活跃后端：codeagentd daemon (port \(daemon.port), pid \(daemon.processID))")
+                    await refreshActiveRuntimeContext()
+                    return
+                } catch {
+                    DLLog("⚠️ [RUNTIME] daemon 启动失败 (attempt \(attempt)/2): \(error)")
+                    daemon.stop()
+                    if attempt < 2 { try? await Task.sleep(for: .milliseconds(500)) }
+                }
+            }
+
+            // Daemon failed after retries — keep it set as active but
+            // mark it offline. The user can retry via Runtime Server settings.
+            DLLog("⚠️ [RUNTIME] daemon 彻底失败，请在设置中重试或手动添加服务")
+            _ = try? runtimeServers.registry.setActive(
+                connectionID: RuntimeServerConnection.embeddedID
+            )
+            return
+        }
+        await refreshActiveRuntimeContext()
+    }
+
+    func stopDaemonIfNeeded() {
+        CodeAgentDaemon.shared.stop()
+    }
+    #endif
+
     private func ensureEmbeddedRuntimeStarted() async {
-        #if os(iOS) || os(macOS)
+        #if os(iOS)
         do {
             if !AgentRuntime.shared.isAlive {
                 var configuration = EmbeddedRuntimeConfiguration.platformDefault()
-                #if os(macOS) && TALKIFY_MAC_APP_STORE
-                configuration.profile = .sandboxed
-                configuration.executableSearchPaths = []
-                #elseif os(macOS) && TALKIFY_MAC_DIRECT
-                configuration.profile = .fullDesktop
-                #endif
                 try AgentRuntime.shared.configure(configuration)
                 try AgentRuntime.shared.configureProviderConnections(
                     makeRuntimeProviderConfiguration()
@@ -408,15 +477,18 @@ final class AppContainer {
         connectionID: String,
         allowingActiveWorkInterruption: Bool = false
     ) async throws {
+        #if os(iOS)
         var hasPendingEmbeddedConfiguration = false
         if connectionID == RuntimeServerConnection.embeddedID {
             await ensureEmbeddedRuntimeStarted()
             hasPendingEmbeddedConfiguration = await hasPendingProviderConfiguration()
         }
+        #endif
         let context = try await runtimeServers.activate(
             connectionID: connectionID,
             allowingActiveWorkInterruption: allowingActiveWorkInterruption
         )
+        #if os(iOS)
         if connectionID == RuntimeServerConnection.embeddedID,
            hasPendingEmbeddedConfiguration {
             providerConnections.markRuntimeConfigurationPending()
@@ -424,6 +496,9 @@ final class AppContainer {
         } else {
             publishRuntimeServerModels(context)
         }
+        #else
+        publishRuntimeServerModels(context)
+        #endif
     }
 
     private func publishRuntimeServerModels(
@@ -638,6 +713,7 @@ final class AppContainer {
     }
 
     private func runProviderConfigurationApplyLoop() async {
+#if canImport(CodeAgentRuntime)
         while !Task.isCancelled {
             guard await providerConfigurationQueue.pendingRevision() != nil else {
                 return
@@ -737,6 +813,7 @@ final class AppContainer {
                 try? await Task.sleep(for: .seconds(1))
             }
         }
+#endif
     }
 
     private func finishApplyingProviderConfiguration(

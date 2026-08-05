@@ -52,6 +52,27 @@
 		};
 /* End PBXCopyFilesBuildPhase section */
 
+/* Begin PBXShellScriptBuildPhase section */
+		DA4E206721955B44D68BD1F7 /* Copy codeagentd */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+				"$(SRCROOT)/build/codeagentd",
+			);
+			name = "Copy codeagentd";
+			outputPaths = (
+				"$(BUILT_PRODUCTS_DIR)/$(CONTENTS_FOLDER_PATH)/Resources/codeagentd",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/bash;
+			shellScript = "set -e\nBINARY=\"${SRCROOT}/build/codeagentd\"\nif [ ! -f \"$BINARY\" ]; then\n  echo \"error: $BINARY not found\" >&2\n  echo \"  Run: ./scripts/build-codeagentd.sh\" >&2\n  exit 1\nfi\ncp \"$BINARY\" \"${BUILT_PRODUCTS_DIR}/${CONTENTS_FOLDER_PATH}/Resources/codeagentd\"\necho \"Copied codeagentd to app bundle\"\n";
+		};
+/* End PBXShellScriptBuildPhase section */
+
+
+
 /* Begin PBXFileReference section */
 		A10000000000000000000002 /* UserAssetsTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserAssetsTests.swift; sourceTree = "<group>"; };
 		A10000000000000000000004 /* TalkifyTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = TalkifyTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -223,6 +244,7 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = D0962014300B17270005EBC6 /* Build configuration list for PBXNativeTarget "Talkify" */;
 			buildPhases = (
+				DA4E206721955B44D68BD1F7 /* Build codeagentd */,
 				D0962005300B17250005EBC6 /* Sources */,
 				D0962006300B17250005EBC6 /* Frameworks */,
 				D0962007300B17250005EBC6 /* Resources */,
@@ -427,7 +449,7 @@
 				APPLICATION_EXTENSION_API_ONLY = YES;
 				CODE_SIGN_ENTITLEMENTS = TalkifyShareExtension/TalkifyShareExtension.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 53;
+				CURRENT_PROJECT_VERSION = 54;
 				DEVELOPMENT_TEAM = NKW67GFDHM;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = TalkifyShareExtension/Info.plist;
@@ -457,7 +479,7 @@
 				APPLICATION_EXTENSION_API_ONLY = YES;
 				CODE_SIGN_ENTITLEMENTS = TalkifyShareExtension/TalkifyShareExtension.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 53;
+				CURRENT_PROJECT_VERSION = 54;
 				DEVELOPMENT_TEAM = NKW67GFDHM;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = TalkifyShareExtension/Info.plist;
@@ -543,7 +565,7 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = C30000000000000000000002 /* TalkifyMacAppStore.xcconfig */;
 			buildSettings = {
-				CURRENT_PROJECT_VERSION = 53;
+				CURRENT_PROJECT_VERSION = 54;
 			};
 			name = "Debug-MacAppStore";
 		};
@@ -551,7 +573,7 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = C30000000000000000000002 /* TalkifyMacAppStore.xcconfig */;
 			buildSettings = {
-				CURRENT_PROJECT_VERSION = 53;
+				CURRENT_PROJECT_VERSION = 54;
 			};
 			name = "Release-MacAppStore";
 		};
@@ -559,7 +581,7 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = C30000000000000000000003 /* TalkifyMacDirect.xcconfig */;
 			buildSettings = {
-				CURRENT_PROJECT_VERSION = 53;
+				CURRENT_PROJECT_VERSION = 54;
 			};
 			name = "Debug-MacDirect";
 		};
@@ -567,7 +589,7 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = C30000000000000000000003 /* TalkifyMacDirect.xcconfig */;
 			buildSettings = {
-				CURRENT_PROJECT_VERSION = 53;
+				CURRENT_PROJECT_VERSION = 54;
 			};
 			name = "Release-MacDirect";
 		};
@@ -755,7 +777,7 @@
 				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = NO;
 				CODE_SIGN_ENTITLEMENTS = Talkify/Talkify.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 53;
+				CURRENT_PROJECT_VERSION = 54;
 				DEVELOPMENT_TEAM = NKW67GFDHM;
 				ENABLE_APP_SANDBOX = YES;
 				"ENABLE_APP_SANDBOX[sdk=macosx*]" = NO;
@@ -805,7 +827,7 @@
 				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = NO;
 				CODE_SIGN_ENTITLEMENTS = Talkify/Talkify.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 53;
+				CURRENT_PROJECT_VERSION = 54;
 				DEVELOPMENT_TEAM = NKW67GFDHM;
 				ENABLE_APP_SANDBOX = YES;
 				"ENABLE_APP_SANDBOX[sdk=macosx*]" = NO;
