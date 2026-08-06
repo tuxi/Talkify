@@ -11,7 +11,7 @@ struct ProviderSettingsView: View {
 
     private var store: ProviderConnectionStore { container.providerConnections }
     private var isExternalServerActive: Bool {
-        container.runtimeServers.activeConnection.kind != .embedded
+        container.runtimeServers.activeConnection.kind == .remote
     }
 
     var body: some View {
@@ -19,24 +19,28 @@ struct ProviderSettingsView: View {
             if isExternalServerActive {
                 externalServerNotice
             } else {
-                runtimeConfigurationStatus
+                if store.isDaemonOffline {
+                    daemonOfflineNotice
+                } else {
+                    runtimeConfigurationStatus
 
-                if !store.connections.isEmpty {
-                    providerSection(title: "已连接的提供商") {
-                        ForEach(store.connections) { connection in
-                            connectedRow(connection)
-                            if connection.id != store.connections.last?.id {
-                                Divider()
+                    if !store.connections.isEmpty {
+                        providerSection(title: "已连接的提供商") {
+                            ForEach(store.connections) { connection in
+                                connectedRow(connection)
+                                if connection.id != store.connections.last?.id {
+                                    Divider()
+                                }
                             }
                         }
                     }
-                }
 
-                providerSection(title: "可连接的提供商") {
-                    ForEach(TalkifyProviderTemplate.builtIn) { template in
-                        availableRow(template)
-                        if template.id != TalkifyProviderTemplate.builtIn.last?.id {
-                            Divider()
+                    providerSection(title: "可连接的提供商") {
+                        ForEach(TalkifyProviderTemplate.builtIn) { template in
+                            availableRow(template)
+                            if template.id != TalkifyProviderTemplate.builtIn.last?.id {
+                                Divider()
+                            }
                         }
                     }
                 }
@@ -46,6 +50,18 @@ struct ProviderSettingsView: View {
                 Text(errorMessage)
                     .font(.footnote)
                     .foregroundStyle(.red)
+            }
+
+            if let secretsError = store.lastSecretsPushError {
+                Text("模型凭据同步失败：\(secretsError)")
+                    .font(.footnote)
+                    .foregroundStyle(.orange)
+            }
+
+            if let fileError = store.sharedSecretsFileError {
+                Text("共享凭据文件写入失败：\(fileError)")
+                    .font(.footnote)
+                    .foregroundStyle(.orange)
             }
         }
         .frame(maxWidth: 780, alignment: .leading)
@@ -80,6 +96,17 @@ struct ProviderSettingsView: View {
                 "当前连接的是“\(container.runtimeServers.activeConnection.displayName)”。"
                 + "Talkify 只读取该 CodeAgent Server 发布的模型，不会查看或修改它的 Provider 与 API Key。"
             )
+        }
+        .frame(maxWidth: .infinity, minHeight: 360)
+    }
+
+    /// Stage ③: degraded state when the desktop codeagentd daemon is not
+    /// reachable for /v1/providers management.
+    private var daemonOfflineNotice: some View {
+        ContentUnavailableView {
+            Label("Runtime 不可达", systemImage: "server.rack")
+        } description: {
+            Text("本地 CodeAgent 服务未运行，提供商配置暂不可用。请稍后重试，或在 Runtime 服务器设置中重新连接。")
         }
         .frame(maxWidth: .infinity, minHeight: 360)
     }
@@ -145,6 +172,11 @@ struct ProviderSettingsView: View {
                     .font(.system(size: 13))
                     .foregroundStyle(.secondary)
                     .lineLimit(1)
+                if store.pendingRestartConnectionIDs.contains(connection.id) {
+                    Text("已保存，重启后生效")
+                        .font(.system(size: 12))
+                        .foregroundStyle(.orange)
+                }
             }
             Spacer()
             if connection.isTalkifyGateway {

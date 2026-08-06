@@ -395,6 +395,37 @@ final class AppContainer {
                     )
 
                     DLLog("✅ [RUNTIME] 活跃后端：codeagentd daemon (port \(daemon.port), pid \(daemon.processID))")
+
+                    // Stage ③: install the desktop provider store via AgentKit.
+                    // On the desktop path the local registry becomes a read-only
+                    // cache and provider definitions are managed through the
+                    // runtime's /v1/providers API.
+                    if let providerStore = try? runtimeServers.makeProviderStore() {
+                        providerConnections.providerStore = providerStore
+                        // One-time migration: UserDefaults connections → runtime.
+                        await providerConnections.migrateToRuntimeProviderManagementIfNeeded(
+                            store: providerStore
+                        )
+                    }
+
+                    // A2 secrets push: install the daemon secrets client and push
+                    // the Keychain llm credentials so the runtime's injected
+                    // resolver has them and GET /v1/runtime/models reports
+                    // available=true without a restart.
+                    if let endpoint = daemon.endpoint {
+                        providerConnections.secretsClient = RuntimeSecretsClient(
+                            baseURL: endpoint,
+                            token: daemon.accessToken
+                        )
+                        providerConnections.onSecretsPushed = { [weak self] in
+                            Task { await self?.refreshActiveRuntimeContext() }
+                        }
+                        await providerConnections.pushLLMCredentialsToDaemon()
+                        // Shared file: also write ~/.codeagent/secrets.json so
+                        // the runtime CLI/TUI (separate process) reuses the keys.
+                        await providerConnections.writeSharedSecretsFile()
+                    }
+
                     await refreshActiveRuntimeContext()
                     return
                 } catch {
@@ -465,6 +496,7 @@ final class AppContainer {
 
     func refreshActiveRuntimeContext() async {
         do {
+            await providerConnections.refreshCacheFromRuntime()
             let context = try await runtimeServers.refreshActiveContext()
             publishRuntimeServerModels(context)
         } catch {
