@@ -19,6 +19,11 @@
   <img src="https://img.shields.io/badge/SPM-4FC08D?style=flat&logo=swift&logoColor=white" alt="Swift Package Manager" />
 </p>
 
+<p align="center">
+  <img src="docs/talkify-screenshot.jpeg" alt="Talkify 界面预览" width="960" />
+</p>
+<p align="center"><em>工作区对话 · 本地改动分析 · Inspector 文件树</em></p>
+
 ---
 
 ## 功能特性
