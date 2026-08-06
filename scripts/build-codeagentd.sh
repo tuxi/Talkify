@@ -41,7 +41,7 @@ cd "${CODE_AGENT_DIR}"
 
 echo "==> Building codeagentd for macOS arm64 (version: ${VERSION})"
 GOOS=darwin GOARCH=arm64 go build \
-    -ldflags="-s -w -X code-agent/internal/buildinfo.Version=${VERSION}" \
+    -ldflags="-s -w -X code-agent/internal/buildinfo.Version=${VERSION} -extldflags '-Wl,-no_fixup_chains,-pagezero_size,0x1000,-image_base,0x100000000' -linkmode=external" \
     -o "${OUTPUT}" \
     ./cmd/codeagentd
 
