@@ -214,7 +214,7 @@ actor TalkifyWorkspaceLocalAssetStager: LocalUserAssetStaging {
 
         let root = try canonicalWorkspaceRoot(workspaceRoot)
         let assetDirectory = root
-            .appendingPathComponent("user-assets", isDirectory: true)
+            .appendingPathComponent(".codeagent/user-assets", isDirectory: true)
             .appendingPathComponent(id, isDirectory: true)
         try createContainedDirectory(assetDirectory, root: root)
         let destination = assetDirectory.appendingPathComponent(prepared.filename)
