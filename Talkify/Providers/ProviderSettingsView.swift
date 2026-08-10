@@ -36,9 +36,9 @@ struct ProviderSettingsView: View {
                     }
 
                     providerSection(title: "可连接的提供商") {
-                        ForEach(TalkifyProviderTemplate.builtIn) { template in
+                        ForEach(store.talkifyTemplates) { template in
                             availableRow(template)
-                            if template.id != TalkifyProviderTemplate.builtIn.last?.id {
+                            if template.id != store.talkifyTemplates.last?.id {
                                 Divider()
                             }
                         }
@@ -254,7 +254,7 @@ struct ProviderSettingsView: View {
     }
 
     private func providerIcon(_ providerID: String) -> some View {
-        let symbol = TalkifyProviderTemplate.builtIn
+        let symbol = store.talkifyTemplates
             .first(where: { $0.id == providerID })?.systemImage ?? "server.rack"
         return Image(systemName: symbol)
             .font(.system(size: 18))
@@ -305,26 +305,50 @@ enum ProviderEditorRequest: Identifiable {
 private struct ProviderModelDraft: Identifiable {
     let id = UUID()
     var wireModelID: String = ""
+    var runtimeAlias: String = ""
+    var api: String = ""
     var displayName: String = ""
     var contextWindow: String = ""
+    var temperature: String = ""
     var supportsTools = true
     var supportsReasoning = false
+    var inputModalities: Set<ProviderInputModality> = [.text]
+    var inputPricePerM: String = ""
+    var outputPricePerM: String = ""
+    var cacheInputPricePerM: String = ""
+    var webSearch = false
 
     init(model: ProviderModel? = nil) {
         wireModelID = model?.id ?? ""
+        runtimeAlias = model?.runtimeAlias ?? ""
+        api = model?.api ?? ""
         displayName = model?.displayName ?? ""
         contextWindow = model?.contextWindow.map(String.init) ?? ""
+        temperature = model?.temperature.map { String(format: "%.2f", $0) } ?? ""
         supportsTools = model?.supportsTools ?? true
         supportsReasoning = model?.supportsReasoning ?? false
+        inputModalities = model?.inputModalities ?? [.text]
+        inputPricePerM = model?.inputPricePerMillion.map { String(format: "%.2f", $0) } ?? ""
+        outputPricePerM = model?.outputPricePerMillion.map { String(format: "%.2f", $0) } ?? ""
+        cacheInputPricePerM = model?.cacheInputPricePerMillion.map { String(format: "%.2f", $0) } ?? ""
+        webSearch = model?.webSearch ?? false
     }
 
     var providerModel: ProviderModel {
         ProviderModel(
             id: wireModelID.trimmingCharacters(in: .whitespacesAndNewlines),
+            runtimeAlias: runtimeAlias.trimmingCharacters(in: .whitespacesAndNewlines).nilIfEmpty,
+            api: api.trimmingCharacters(in: .whitespacesAndNewlines).nilIfEmpty,
             displayName: displayName.trimmingCharacters(in: .whitespacesAndNewlines).nilIfEmpty,
             contextWindow: Int(contextWindow),
+            temperature: Double(temperature),
             supportsTools: supportsTools,
-            supportsReasoning: supportsReasoning
+            supportsReasoning: supportsReasoning,
+            inputModalities: inputModalities,
+            inputPricePerMillion: Double(inputPricePerM),
+            outputPricePerMillion: Double(outputPricePerM),
+            cacheInputPricePerMillion: Double(cacheInputPricePerM),
+            webSearch: webSearch
         )
     }
 }
@@ -419,6 +443,7 @@ struct ProviderEditorView: View {
                                 }
                                 .buttonStyle(.borderless)
                             }
+                            TextField("Runtime Alias（可选）", text: $model.runtimeAlias)
                             TextField("显示名称（可选）", text: $model.displayName)
                             TextField("Context Window（可选）", text: $model.contextWindow)
                                 #if os(iOS)
@@ -426,6 +451,26 @@ struct ProviderEditorView: View {
                                 #endif
                             Toggle("Tool Calling", isOn: $model.supportsTools)
                             Toggle("Reasoning", isOn: $model.supportsReasoning)
+                            Toggle("Web Search", isOn: $model.webSearch)
+                            DisclosureGroup("高级") {
+                                TextField("API Override（可选）", text: $model.api)
+                                TextField("Temperature（可选）", text: $model.temperature)
+                                    #if os(iOS)
+                                    .keyboardType(.decimalPad)
+                                    #endif
+                                TextField("Input Price/M（可选）", text: $model.inputPricePerM)
+                                    #if os(iOS)
+                                    .keyboardType(.decimalPad)
+                                    #endif
+                                TextField("Output Price/M（可选）", text: $model.outputPricePerM)
+                                    #if os(iOS)
+                                    .keyboardType(.decimalPad)
+                                    #endif
+                                TextField("Cache Input Price/M（可选）", text: $model.cacheInputPricePerM)
+                                    #if os(iOS)
+                                    .keyboardType(.decimalPad)
+                                    #endif
+                            }
                         }
                         .padding(.vertical, 6)
                     }

@@ -891,20 +891,23 @@ final class AppContainer {
             return
         }
         let legacyKey = AgentSettings.apiKey.trimmingCharacters(in: .whitespacesAndNewlines)
-        guard !legacyKey.isEmpty,
-              let template = TalkifyProviderTemplate.builtIn.first(where: { $0.id == "deepseek" }),
-              let baseURL = template.baseURL else {
+        guard !legacyKey.isEmpty else {
             UserDefaults.standard.set(true, forKey: migrationKey)
             return
         }
+        let deepseekBaseURL = URL(string: "https://api.deepseek.com")!
+        let deepseekModels: [ProviderModel] = [
+            ProviderModel(id: "deepseek-v4-flash", runtimeAlias: "deepseek", contextWindow: 1_000_000, supportsTools: true, supportsReasoning: true, inputPricePerMillion: 0.16, outputPricePerMillion: 0.32, webSearch: true),
+            ProviderModel(id: "deepseek-v4-pro", runtimeAlias: "deepseek-pro", contextWindow: 1_000_000, supportsTools: true, supportsReasoning: true, inputPricePerMillion: 0.45, outputPricePerMillion: 0.90),
+        ]
         let connection = ProviderConnection(
             id: "deepseek",
-            providerID: template.id,
-            displayName: template.displayName,
+            providerID: "deepseek",
+            displayName: "DeepSeek",
             transport: .openAIChatCompletions,
             authentication: .apiKey,
-            baseURL: baseURL,
-            models: template.models
+            baseURL: deepseekBaseURL,
+            models: deepseekModels
         )
         Task { [weak self] in
             guard let self else { return }

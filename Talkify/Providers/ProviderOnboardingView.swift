@@ -35,7 +35,8 @@ struct ProviderOnboardingView: View {
                     subtitle: "连接 DeepSeek、Qwen、GLM、OpenRouter 或自定义服务",
                     symbol: "key"
                 ) {
-                    if let template = TalkifyProviderTemplate.builtIn.first(where: {
+                    let templates = container.providerConnections.talkifyTemplates
+                    if let template = templates.first(where: {
                         $0.id == "deepseek"
                     }) {
                         editor = .create(template)
@@ -47,7 +48,8 @@ struct ProviderOnboardingView: View {
                     subtitle: "连接本机或局域网中的 Ollama",
                     symbol: "desktopcomputer"
                 ) {
-                    if let template = TalkifyProviderTemplate.builtIn.first(where: {
+                    let templates = container.providerConnections.talkifyTemplates
+                    if let template = templates.first(where: {
                         $0.id == "ollama"
                     }) {
                         editor = .create(template)

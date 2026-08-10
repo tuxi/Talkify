@@ -599,6 +599,9 @@
         }
       }
     },
+    "API Override（可选）" : {
+
+    },
     "API 密钥" : {
 
     },
@@ -9576,6 +9579,9 @@
         }
       }
     },
+    "Cache Input Price/M（可选）" : {
+
+    },
     "common.action.cancel" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -11063,6 +11069,9 @@
         }
       }
     },
+    "Input Price/M（可选）" : {
+
+    },
     "Loading..." : {
 
     },
@@ -11078,7 +11087,13 @@
     "OpenAI-compatible" : {
 
     },
+    "Output Price/M（可选）" : {
+
+    },
     "Reasoning" : {
+
+    },
+    "Runtime Alias（可选）" : {
 
     },
     "Runtime 不可达" : {
@@ -19813,6 +19828,9 @@
     "Talkify 无需登录即可使用工作区。连接任意服务商后，即可在会话中发送消息。" : {
 
     },
+    "Temperature（可选）" : {
+
+    },
     "Tool Calling" : {
 
     },
@@ -20072,6 +20090,9 @@
           }
         }
       }
+    },
+    "Web Search" : {
+
     },
     "workspace.account" : {
       "extractionState" : "manual",
@@ -26000,6 +26021,9 @@
 
     },
     "重新检查" : {
+
+    },
+    "高级" : {
 
     },
     "高级设置" : {

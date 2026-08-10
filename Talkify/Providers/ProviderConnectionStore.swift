@@ -100,6 +100,17 @@ final class ProviderConnectionStore {
     /// ("persisted, restart required"). Shown in the settings page.
     private(set) var pendingRestartConnectionIDs: Set<String> = []
 
+    /// Provider templates fetched from the runtime (GET /v1/provider-templates).
+    /// Empty on iOS embedded (no server); the app falls back to the local
+    /// "custom" template only.
+    private(set) var providerTemplates: [RuntimeProviderTemplate] = []
+
+    /// Templates converted to the chater presentation model, combining runtime
+    /// templates with the local "custom" fallback.
+    var talkifyTemplates: [TalkifyProviderTemplate] {
+        TalkifyProviderTemplate.all(from: providerTemplates)
+    }
+
     init(
         modelSettings: ModelSettingsStore,
         gatewayCredentialStore: any CredentialStore,
@@ -227,6 +238,16 @@ final class ProviderConnectionStore {
         }
     }
 
+    /// Fetch provider templates from the runtime. No-op on iOS embedded.
+    func loadProviderTemplates(store: (any ProviderStore)? = nil) async {
+        guard let store = store ?? providerStore else { return }
+        do {
+            providerTemplates = try await store.listProviderTemplates()
+        } catch {
+            providerStoreLogger.error("加载 provider 模板失败：\(error.localizedDescription, privacy: .public)")
+        }
+    }
+
     /// Rebuild the local registry cache from listProviders() (desktop).
     /// Also re-GETs /v1/runtime/models to refresh the model list.
     func refreshCacheFromRuntime(store: (any ProviderStore)? = nil) async {
@@ -236,6 +257,7 @@ final class ProviderConnectionStore {
             let connections = providers.map { $0.asProviderConnection() }
             try registry.replaceAll(connections)
             reloadCatalog()
+            await loadProviderTemplates(store: store)
             onStructuralChange?()
         } catch {
             runtimeConfigurationError = error.localizedDescription

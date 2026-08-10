@@ -15,101 +15,59 @@ struct TalkifyProviderTemplate: Identifiable, Hashable {
     let systemImage: String
     let kind: Kind
     let baseURL: URL?
+    let api: String?
+    let env: String?
     let models: [ProviderModel]
 
-    static let builtIn: [TalkifyProviderTemplate] = [
-        .init(
-            id: ProviderConnection.talkifyGatewayID,
-            displayName: "Talkify Gateway",
-            summary: "使用 Talkify 账户、订阅模型和云端能力",
-            systemImage: "person.crop.circle.badge.checkmark",
-            kind: .gateway,
-            baseURL: nil,
-            models: []
-        ),
-        .init(
-            id: "deepseek",
-            displayName: "DeepSeek",
-            summary: "使用 DeepSeek API 密钥连接",
-            systemImage: "brain.head.profile",
-            kind: .apiKey,
-            baseURL: URL(string: "https://api.deepseek.com")!,
-            models: [
-                ProviderModel(
-                    id: "deepseek-v4-flash",
-                    displayName: "DeepSeek V4 Flash",
-                    contextWindow: 1_000_000,
-                    supportsTools: true,
-                    supportsReasoning: true
-                ),
-                ProviderModel(
-                    id: "deepseek-v4-pro",
-                    displayName: "DeepSeek V4 Pro",
-                    contextWindow: 1_000_000,
-                    supportsTools: true,
-                    supportsReasoning: true
-                ),
-            ]
-        ),
-        .init(
-            id: "qwen",
-            displayName: "Alibaba Qwen",
-            summary: "使用阿里云百炼 OpenAI 兼容接口",
-            systemImage: "cloud",
-            kind: .apiKey,
-            baseURL: URL(string: "https://dashscope.aliyuncs.com/compatible-mode/v1")!,
-            models: [
-                ProviderModel(id: "qwen3.7-plus", displayName: "Qwen3.7 Plus"),
-                ProviderModel(id: "qwen3.7-max", displayName: "Qwen3.7 Max"),
-                ProviderModel(id: "qwen3.7-flash", displayName: "Qwen3.7 Flash"),
-                ProviderModel(id: "qwen3.8-max", displayName: "Qwen3.8 Max"),
-                ProviderModel(id: "glm-5.2", displayName: "GLM-5.2"),
-            ]
-        ),
-        .init(
-            id: "zhipu",
-            displayName: "Zhipu GLM",
-            summary: "使用智谱 OpenAI 兼容接口",
-            systemImage: "sparkles",
-            kind: .apiKey,
-            baseURL: URL(string: "https://open.bigmodel.cn/api/paas/v4")!,
-            models: [
-                ProviderModel(id: "glm-5.2", displayName: "GLM-5.2", supportsReasoning: true),
-                ProviderModel(id: "glm-4.7", displayName: "GLM-4.7", supportsReasoning: true),
-            ]
-        ),
-        .init(
-            id: "openrouter",
-            displayName: "OpenRouter",
-            summary: "通过一个 API 密钥使用多个模型",
-            systemImage: "point.3.connected.trianglepath.dotted",
-            kind: .apiKey,
-            baseURL: URL(string: "https://openrouter.ai/api/v1")!,
-            models: [
-                ProviderModel(id: "openrouter/auto", displayName: "OpenRouter Auto"),
-            ]
-        ),
-        .init(
-            id: "ollama",
-            displayName: "Ollama",
-            summary: "连接本机或局域网中的 Ollama",
-            systemImage: "desktopcomputer",
-            kind: .local,
-            baseURL: URL(string: "http://127.0.0.1:11434")!,
-            models: [
-                ProviderModel(id: "qwen3", displayName: "Qwen3"),
-            ]
-        ),
-        .init(
-            id: "openai-compatible",
-            displayName: "自定义提供商",
-            summary: "配置任意 OpenAI-compatible 或 Ollama 连接",
-            systemImage: "slider.horizontal.3",
-            kind: .custom,
-            baseURL: nil,
-            models: []
-        ),
-    ]
+    /// Build the template list from runtime-fetched templates plus a local
+    /// "custom" entry. The runtime's `builtinConnections` is the single source
+    /// of truth for known services; the custom template covers arbitrary
+    /// OpenAI-compatible / Ollama connections that have no server-side builtin.
+    static func all(from runtimeTemplates: [RuntimeProviderTemplate]) -> [TalkifyProviderTemplate] {
+        var out = runtimeTemplates.map { template in
+            let kind = Kind.fromRuntime(template.kind)
+            return TalkifyProviderTemplate(
+                id: template.id,
+                displayName: template.displayName ?? template.id,
+                summary: template.summary ?? "",
+                systemImage: systemImageFor(kind: kind, id: template.id),
+                kind: kind,
+                baseURL: template.baseURL.flatMap(URL.init(string:)),
+                api: template.api,
+                env: template.env,
+                models: (template.models ?? []).map { m in
+                    ProviderModel(
+                        id: m.id,
+                        runtimeAlias: m.runtimeAlias,
+                        contextWindow: m.contextWindow,
+                        supportsTools: m.supportsTools ?? true,
+                        supportsReasoning: m.supportsReasoning ?? false,
+                        inputModalities: Set((m.inputModalities ?? []).compactMap {
+                            ProviderInputModality(rawValue: $0)
+                        }),
+                        inputPricePerMillion: m.inputPricePerMillion,
+                        outputPricePerMillion: m.outputPricePerMillion,
+                        webSearch: m.webSearch ?? false
+                    )
+                }
+            )
+        }
+        out.append(customTemplate)
+        return out
+    }
+
+    /// Local-only "custom" template for arbitrary OpenAI-compatible / Ollama connections.
+    static let customTemplate = TalkifyProviderTemplate(
+        id: "openai-compatible",
+        displayName: "自定义提供商",
+        summary: "配置任意 OpenAI-compatible 或 Ollama 连接",
+        systemImage: "slider.horizontal.3",
+        kind: .custom,
+        baseURL: nil,
+        api: nil,
+        env: nil,
+        models: []
+    )
 
     func suggestedConnectionID(existing: Set<String>) -> String {
         guard existing.contains(id) else { return id }
@@ -118,5 +76,32 @@ struct TalkifyProviderTemplate: Identifiable, Hashable {
             suffix += 1
         }
         return "\(id)-\(suffix)"
+    }
+
+    private static func systemImageFor(kind: Kind, id: String) -> String {
+        switch kind {
+        case .gateway: return "person.crop.circle.badge.checkmark"
+        case .local:  return "desktopcomputer"
+        case .apiKey:
+            switch id {
+            case "deepseek":   return "brain.head.profile"
+            case "qwen":       return "cloud"
+            case "glm":        return "sparkles"
+            case "openrouter": return "point.3.connected.trianglepath.dotted"
+            default:           return "key"
+            }
+        case .custom: return "slider.horizontal.3"
+        }
+    }
+}
+
+private extension TalkifyProviderTemplate.Kind {
+    static func fromRuntime(_ kind: String?) -> TalkifyProviderTemplate.Kind {
+        switch kind {
+        case "gateway": return .gateway
+        case "local":   return .local
+        case "api_key": return .apiKey
+        default:        return .custom
+        }
     }
 }
