@@ -40,6 +40,7 @@ struct TalkifyProviderTemplate: Identifiable, Hashable {
                         id: m.id,
                         runtimeAlias: m.runtimeAlias,
                         contextWindow: m.contextWindow,
+                        temperature: m.temperature,
                         supportsTools: m.supportsTools ?? true,
                         supportsReasoning: m.supportsReasoning ?? false,
                         inputModalities: Set((m.inputModalities ?? []).compactMap {

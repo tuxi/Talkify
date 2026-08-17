@@ -94,7 +94,7 @@ public extension EnvironmentRegistry {
         #if DEBUG
         configs[.local] = AppEnvironmentConfig(
             environment: .local,
-            apiBaseURL: URL(string: "http://192.168.1.13:12221/api/v1")!,
+            apiBaseURL: URL(string: "http://192.168.1.10:12221/api/v1")!,
         )
         #endif
         return EnvironmentRegistry(configs: configs, defaultEnvironment: .prod)

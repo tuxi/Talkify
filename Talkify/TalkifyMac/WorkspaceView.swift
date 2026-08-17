@@ -339,10 +339,14 @@ public struct WorkspaceView: View {
                 SettingsView(initialSection: settingsInitialSection) {
                     showSettings = false
                 }
+                #if os(macOS)
                 .background(Color(nsColor: .windowBackgroundColor)) // 不透明，挡住下层
+                #endif
             }
         }
+#if os(macOS)
         .toolbar(showSettings ? .hidden : .automatic, for: .windowToolbar) // 打开设置时隐藏窗口 chrome
+#endif
     }
     
 #if os(iOS)
