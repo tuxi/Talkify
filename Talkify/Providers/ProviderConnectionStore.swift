@@ -4,11 +4,9 @@ import OSLog
 
 private let providerStoreLogger = Logger(subsystem: "com.objc.chat", category: "ProviderStore")
 
-struct ProviderCatalogSnapshot: Sendable {
-    let models: [UnifiedModelDescriptor]
-    let defaultModelID: String?
-}
-
+/// Classifies active Runtime work for the server-switch guard. It no longer
+/// gates the (removed) provider apply loop, but the Runtime Server settings page
+/// still uses it to warn before switching away from a busy server.
 enum ProviderRuntimeActivityPolicy {
     static func blockingDescriptions(
         in snapshot: RuntimeActivitySnapshot
@@ -16,11 +14,6 @@ enum ProviderRuntimeActivityPolicy {
         snapshot.sessions.compactMap { activity in
             var reasons: [String] = []
             let state = activity.state.lowercased()
-            // States that do not block a Runtime restart. `paused` means the
-            // turn is suspended awaiting user input and will never resolve on
-            // its own — treating it as blocking deadlocks the apply loop while
-            // the user sees no actionable prompt. Unknown states intentionally
-            // remain blocking (fail-closed).
             let nonBlockingStates: Set<String> = ["idle", "done", "failed", "cancelled", "paused"]
 
             if activity.effectiveActiveTurnID != nil,
@@ -67,24 +60,18 @@ final class ProviderConnectionStore {
     let directCredentialStore: KeychainCredentialStore
 
     private let modelSettings: ModelSettingsStore
-    var onStructuralChange: (() -> Void)?
+    /// Invoked when a provider definition was persisted but needs a runtime
+    /// restart to take effect (`applied == false`). AppContainer injects the
+    /// embedded restart on iOS; the desktop daemon surfaces a restart hint.
+    var onRuntimeRestartNeeded: (() async -> Void)?
     private(set) var isApplyingRuntimeConfiguration = false
     private(set) var runtimeConfigurationError: String?
-    private(set) var runtimeConfigurationWaitDescription: String?
 
-    /// Desktop provider store (AgentKit `any ProviderStore`). Non-nil only when
-    /// connected to a codeagentd daemon (`.local`/`.remote` active runtime) —
-    /// built via `RuntimeServerCoordinator.makeProviderStore()`.
-    /// When set, provider definitions are managed via the runtime's /v1/providers
-    /// and the local registry becomes a read-only cache. iOS embedded keeps nil
-    /// and uses the local registry + injection path.
+    /// Provider store (AgentKit `any ProviderStore`). Non-nil whenever the active
+    /// runtime (daemon or embedded) exposes its HTTP management surface. Provider
+    /// definitions are managed via /v1/providers and the local registry is a
+    /// read-only cache on every platform.
     var providerStore: (any ProviderStore)?
-
-    /// Desktop daemon secrets client (POST /v1/secrets). Non-nil only when the
-    /// codeagentd daemon is active. Pushes Keychain llm credentials into the
-    /// daemon's injected resolver so GET /v1/runtime/models reports
-    /// available=true without a restart.
-    var secretsClient: RuntimeSecretsClient?
 
     /// Called after a successful secrets push — AppContainer uses it to
     /// re-GET /v1/runtime/models so the model list reflects available=true.
@@ -101,8 +88,6 @@ final class ProviderConnectionStore {
     private(set) var pendingRestartConnectionIDs: Set<String> = []
 
     /// Provider templates fetched from the runtime (GET /v1/provider-templates).
-    /// Empty on iOS embedded (no server); the app falls back to the local
-    /// "custom" template only.
     private(set) var providerTemplates: [RuntimeProviderTemplate] = []
 
     /// Templates converted to the chater presentation model, combining runtime
@@ -167,24 +152,25 @@ final class ProviderConnectionStore {
             }
         }
         if let store = providerStore {
-            // Desktop: definition over HTTP, credential value stays in Keychain.
+            // Definition over HTTP; credential value stays in Keychain.
             let result = try await store.upsertProvider(connection.asRuntimeProviderDefinition())
             if result.applied {
                 pendingRestartConnectionIDs.remove(connection.id)
                 await refreshCacheFromRuntime(store: store)
             } else {
                 pendingRestartConnectionIDs.insert(connection.id)
+                await restartRuntimeIfNeeded(store: store)
             }
         } else {
-            // iOS embedded (or daemon offline): local registry + injection.
+            // Daemon offline fallback: keep the local registry write path.
             try registry.upsert(connection)
-            didMutateRegistry()
+            reloadCatalog()
         }
     }
 
     func remove(connectionID: String) async throws {
         guard let connection = registry.connection(id: connectionID) else {
-            // Desktop cache may already be refreshed; allow delete anyway.
+            // Cache may already be refreshed; allow delete anyway.
             if let store = providerStore {
                 let result = try await store.deleteProvider(id: connectionID)
                 if result.applied {
@@ -192,13 +178,12 @@ final class ProviderConnectionStore {
                     await refreshCacheFromRuntime(store: store)
                 } else {
                     pendingRestartConnectionIDs.insert(connectionID)
+                    await restartRuntimeIfNeeded(store: store)
                 }
             }
             return
         }
-        
-        
-        
+
         if let store = providerStore {
             let result = try await store.deleteProvider(id: connectionID)
             if result.applied {
@@ -206,10 +191,12 @@ final class ProviderConnectionStore {
                 await refreshCacheFromRuntime(store: store)
             } else {
                 pendingRestartConnectionIDs.insert(connectionID)
+                await restartRuntimeIfNeeded(store: store)
             }
+        } else {
+            _ = registry.remove(connectionID: connectionID)
+            reloadCatalog()
         }
-        _ = registry.remove(connectionID: connectionID)
-        didMutateRegistry()
         if connection.authentication == .apiKey {
             try await credentialStore.remove(.llm(connection.id))
         }
@@ -227,6 +214,7 @@ final class ProviderConnectionStore {
                         await refreshCacheFromRuntime(store: store)
                     } else {
                         pendingRestartConnectionIDs.insert(connectionID)
+                        await restartRuntimeIfNeeded(store: store)
                     }
                 } catch {
                     runtimeConfigurationError = error.localizedDescription
@@ -234,11 +222,21 @@ final class ProviderConnectionStore {
             }
         } else {
             registry.setEnabled(enabled, connectionID: connectionID)
-            didMutateRegistry()
+            reloadCatalog()
         }
     }
 
-    /// Fetch provider templates from the runtime. No-op on iOS embedded.
+    /// Shared `applied == false` path: the definition is persisted but the live
+    /// runtime is unchanged. On iOS AppContainer injects an embedded restart;
+    /// the desktop daemon only marks the connection for a restart hint.
+    private func restartRuntimeIfNeeded(store: any ProviderStore) async {
+        isApplyingRuntimeConfiguration = true
+        defer { isApplyingRuntimeConfiguration = false }
+        await onRuntimeRestartNeeded?()
+        await refreshCacheFromRuntime(store: store)
+    }
+
+    /// Fetch provider templates from the runtime.
     func loadProviderTemplates(store: (any ProviderStore)? = nil) async {
         guard let store = store ?? providerStore else { return }
         do {
@@ -248,7 +246,7 @@ final class ProviderConnectionStore {
         }
     }
 
-    /// Rebuild the local registry cache from listProviders() (desktop).
+    /// Rebuild the local registry cache from listProviders().
     /// Also re-GETs /v1/runtime/models to refresh the model list.
     func refreshCacheFromRuntime(store: (any ProviderStore)? = nil) async {
         guard let store = store ?? providerStore else { return }
@@ -258,15 +256,13 @@ final class ProviderConnectionStore {
             try registry.replaceAll(connections)
             reloadCatalog()
             await loadProviderTemplates(store: store)
-            onStructuralChange?()
         } catch {
             runtimeConfigurationError = error.localizedDescription
         }
     }
 
-    /// One-time migration: existing UserDefaults connections → PUT to runtime
-    /// (reuse buildConnectionsJSON mapping), then registry becomes a read-only
-    /// cache on desktop. Guarded by a UserDefaults flag so it runs once.
+    /// One-time migration: existing UserDefaults connections → PUT to runtime,
+    /// then registry becomes a read-only cache. Guarded by a UserDefaults flag.
     func migrateToRuntimeProviderManagementIfNeeded(store: any ProviderStore) async {
         let migrationKey = "talkify.provider-connections.migrated-to-http.v1"
         guard !UserDefaults.standard.bool(forKey: migrationKey) else { return }
@@ -298,7 +294,7 @@ final class ProviderConnectionStore {
 
     /// Whether the desktop runtime (codeagentd daemon) is reachable for
     /// /v1/providers management. When offline, the settings page shows a
-    /// degraded state and writes fall back to the local registry + injection.
+    /// degraded state and writes fall back to the local registry.
     var isDaemonOffline: Bool {
         // On desktop, a providerStore is only installed once the daemon started;
         // a nil store on macOS means no daemon / not yet ready.
@@ -310,34 +306,32 @@ final class ProviderConnectionStore {
     }
 
     /// A2 secrets push: read the Keychain llm credentials from the composite
-    /// credential store and POST them to the daemon's /v1/secrets, so
+    /// credential store and POST them to the runtime's /v1/secrets, so
     /// GET /v1/runtime/models can rebuild the catalog with available=true.
     ///
     /// - `only`: when set, pushes just that target (credential change path).
-    ///   When nil, pushes ALL llm entries (daemon start path). Idempotent.
+    ///   When nil, pushes ALL llm entries (start path). Idempotent.
     func pushLLMCredentialsToDaemon(only target: CredentialTarget? = nil) async {
-        guard let secretsClient = secretsClient else { return }
+        guard let store = providerStore else { return }
         let entries = await sharedLLMSecretsEntries(only: target)
         guard !entries.isEmpty else { return }
         do {
-            try await secretsClient.push(entries)
+            try await store.pushSecrets(entries)
             lastSecretsPushError = nil
             onSecretsPushed?()
         } catch {
             lastSecretsPushError = error.localizedDescription
             providerStoreLogger.error(
-                "推送 llm secrets 到 daemon 失败：\(error.localizedDescription, privacy: .public)"
+                "推送 llm secrets 到 runtime 失败：\(error.localizedDescription, privacy: .public)"
             )
         }
     }
 
-    /// Shared llm/* → secrets-envelope mapping, used by both the A2 daemon push
+    /// Shared llm/* → secrets-envelope mapping, used by both the A2 secrets push
     /// (POST /v1/secrets) and the shared ~/.codeagent/secrets.json file write.
-    private func sharedLLMSecretsEntries(only target: CredentialTarget? = nil) async -> [String: RuntimeSecretsBodyEntry] {
+    private func sharedLLMSecretsEntries(only target: CredentialTarget? = nil) async -> [String: RuntimeSecretEntry] {
         let map = (try? await credentialStore.all()) ?? CredentialMap()
-        return SharedSecretsFile.llmEntries(from: map, only: target).mapValues {
-            RuntimeSecretsBodyEntry(type: $0.type, secret: $0.secret)
-        }
+        return SharedSecretsFile.llmEntries(from: map, only: target)
     }
 
     /// Shared-file write: mirror the A2 push timing — daemon-start full write
@@ -360,7 +354,7 @@ final class ProviderConnectionStore {
         baseURL: URL,
         models: [ProviderModel],
         allowsInsecurePrivateNetworkHTTP: Bool = false
-    ) throws {
+    ) async throws {
         let connection = ProviderConnection(
             id: ProviderConnection.talkifyGatewayID,
             providerID: ProviderConnection.talkifyGatewayID,
@@ -373,108 +367,65 @@ final class ProviderConnectionStore {
             isEnabled: true,
             allowsInsecurePrivateNetworkHTTP: allowsInsecurePrivateNetworkHTTP
         )
-        try registry.upsert(connection)
-        didMutateRegistry()
+        if let store = providerStore {
+            let result = try await store.upsertProvider(connection.asRuntimeProviderDefinition())
+            if result.applied {
+                pendingRestartConnectionIDs.remove(connection.id)
+            } else {
+                pendingRestartConnectionIDs.insert(connection.id)
+                await restartRuntimeIfNeeded(store: store)
+            }
+        } else {
+            try registry.upsert(connection)
+            reloadCatalog()
+        }
+        // Gateway token lives in the gateway credential store; push it over
+        // /v1/secrets so the gateway provider resolves without a restart.
+        await pushGatewayCredentialToRuntime()
     }
 
-    func removeGatewayConnection() {
-        _ = registry.remove(connectionID: ProviderConnection.talkifyGatewayID)
-        didMutateRegistry()
+    func removeGatewayConnection() async {
+        if let store = providerStore {
+            if let result = try? await store.deleteProvider(id: ProviderConnection.talkifyGatewayID),
+               !result.applied {
+                pendingRestartConnectionIDs.insert(ProviderConnection.talkifyGatewayID)
+                await restartRuntimeIfNeeded(store: store)
+            } else {
+                await refreshCacheFromRuntime(store: store)
+            }
+        } else {
+            _ = registry.remove(connectionID: ProviderConnection.talkifyGatewayID)
+            reloadCatalog()
+        }
     }
 
     func setDefaultModel(_ id: String?) {
         catalog.setDefaultModel(id: id)
-        onStructuralChange?()
+    }
+
+    /// Push the Gateway account token (gateway/default) into the runtime's
+    /// mutable resolver. Called on login/refresh so the gateway provider stays
+    /// resolvable without restarting.
+    func pushGatewayCredentialToRuntime() async {
+        guard let store = providerStore else { return }
+        guard let cred = try? await credentialStore.resolve(.gateway),
+              cred.kind == .bearer,
+              !cred.secret.isEmpty else { return }
+        do {
+            try await store.pushSecrets([
+                "gateway/default": RuntimeSecretEntry(type: "bearer", secret: cred.secret)
+            ])
+            lastSecretsPushError = nil
+            onSecretsPushed?()
+        } catch {
+            lastSecretsPushError = error.localizedDescription
+            providerStoreLogger.error(
+                "推送 gateway 凭据到 runtime 失败：\(error.localizedDescription, privacy: .public)"
+            )
+        }
     }
 
     func reloadCatalog() {
         catalog.reload(from: registry)
-    }
-
-    func catalogSnapshot() -> ProviderCatalogSnapshot {
-        ProviderCatalogSnapshot(
-            models: catalog.models,
-            defaultModelID: catalog.defaultModelID
-        )
-    }
-
-    // MARK: - connection-flattening (Wave 3)
-
-    /// connection-flattening v2: 把当前所有连接序列化为 connectionsJSON
-    /// （non-secret connection DEFINITIONS）。经 AgentKit 的
-    /// `RuntimeProviderConfigurationBuilder.buildConnectionsJSON` 构建，
-    /// 不手拼 wire。ProviderConnection.id 与 connectionsJSON 的 connection id
-    /// 1:1 对应（已是唯一小写 slug）。
-    func buildConnectionsJSON() throws -> String {
-        try RuntimeProviderConfigurationBuilder.buildConnectionsJSON(
-            connections: registry.connections
-        )
-    }
-
-    /// Test seam: serialize an explicit connection list through the same
-    /// AgentKit builder the runtime channel uses, without touching the registry.
-    static func buildConnectionsJSONForTesting(
-        connections: [ProviderConnection]
-    ) throws -> String {
-        try RuntimeProviderConfigurationBuilder.buildConnectionsJSON(
-            connections: connections
-        )
-    }
-
-    /// secretsJSON（connection-flattening bridging）：同时输出 v1 namespaced
-    /// （`{namespace}/{name}`）与 v2 flat（connection id）两种 key，使新旧
-    /// runtime 都能解析。value 形状两种模式下字节一致。Gateway 命名空间路由
-    /// （gateway → AppCredentialStore，llm → KeychainCredentialStore）保持
-    /// 不变，由 CompositeCredentialStore 负责。
-    func secretsJSONForInjection() async -> String {
-        let map = (try? await credentialStore.all()) ?? CredentialMap()
-        return map.toSecretsJSON(keyMode: .dual)
-    }
-
-    func markRuntimeConfigurationPending() {
-        isApplyingRuntimeConfiguration = true
-        runtimeConfigurationError = nil
-        runtimeConfigurationWaitDescription = nil
-        // Runtime restart creates a short interval where neither the old nor
-        // the new alias set is safe to submit. An explicit empty catalog keeps
-        // Composer editable while disabling model selection and sending.
-        modelSettings.applyUnifiedCatalog([], defaultModelID: nil)
-    }
-
-    func markRuntimeConfigurationFailed(_ error: Error) {
-        isApplyingRuntimeConfiguration = true
-        runtimeConfigurationError = error.localizedDescription
-        runtimeConfigurationWaitDescription = nil
-    }
-
-    func markRuntimeConfigurationWaiting(_ description: String?) {
-        isApplyingRuntimeConfiguration = true
-        runtimeConfigurationError = nil
-        runtimeConfigurationWaitDescription = description
-    }
-
-    /// Publishes only the catalog that the embedded Runtime has successfully
-    /// configured. Registry edits stay invisible to Composer until this point,
-    /// preventing it from sending an alias that the running Runtime does not know.
-    func publishAppliedCatalog(
-        _ snapshot: ProviderCatalogSnapshot,
-        hasPendingConfiguration: Bool
-    ) {
-        isApplyingRuntimeConfiguration = hasPendingConfiguration
-        guard !hasPendingConfiguration else {
-            modelSettings.applyUnifiedCatalog([], defaultModelID: nil)
-            return
-        }
-        modelSettings.applyUnifiedCatalog(
-            snapshot.models,
-            defaultModelID: snapshot.defaultModelID
-        )
-        runtimeConfigurationError = nil
-        runtimeConfigurationWaitDescription = nil
-    }
-
-    private func didMutateRegistry() {
-        reloadCatalog()
-        onStructuralChange?()
     }
 }

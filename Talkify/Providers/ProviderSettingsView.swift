@@ -64,6 +64,9 @@ struct ProviderSettingsView: View {
                     .foregroundStyle(.orange)
             }
         }
+        .task {
+            await store.refreshCacheFromRuntime()
+        }
         .frame(maxWidth: 780, alignment: .leading)
         .sheet(item: $editor) { request in
             ProviderEditorView(request: request, store: store)
@@ -122,7 +125,6 @@ struct ProviderSettingsView: View {
                         .font(.system(size: 14, weight: .medium))
                     Text(
                         store.runtimeConfigurationError
-                            ?? store.runtimeConfigurationWaitDescription
                             ?? "新模型会在本地 Runtime 配置生效后出现在会话中。"
                     )
                     .font(.caption)

@@ -64,11 +64,6 @@ struct NetworkConfig: ApiConfiguration {
     var decrypter: ApiDecrypter? = nil
 }
 
-private struct PendingProviderConfiguration {
-    let generated: GeneratedRuntimeProviderConfiguration
-    let catalog: ProviderCatalogSnapshot
-}
-
 @MainActor
 @Observable
 final class AppContainer {
@@ -83,14 +78,7 @@ final class AppContainer {
     #if os(macOS)
     let sharingController: RuntimeSharingController
     #endif
-    private let providerConfigurationQueue = RuntimeProviderConfigurationApplyQueue()
-    private var desiredProviderConfiguration: PendingProviderConfiguration?
-    private var providerCatalogsByRevision: [UInt64: ProviderCatalogSnapshot] = [:]
-    private var configuredProviderCatalogAwaitingRuntimeStart: ProviderCatalogSnapshot?
-    private var providerConfigurationStageTask: Task<Void, Never>?
-    private var providerConfigurationApplyTask: Task<Void, Never>?
-    private var lastProviderConfigurationBlockerLog: String?
-    
+
     private let baseHeaders: [String: String]
     private(set) var apiProvider: ApiProvider?
     
@@ -232,8 +220,23 @@ final class AppContainer {
         // P1: 注册客户端工具（Go 服务端无法执行的本地工具）
         registerClientTools()
 
-        providerConnections.onStructuralChange = { [weak self] in
-            self?.stageProviderConfigurationApply()
+        // Provider definitions now flow over HTTP /v1/providers. When the runtime
+        // returns `applied == false` (persisted, restart required), the embedded
+        // runtime is restarted in place so the change takes effect immediately.
+        providerConnections.onRuntimeRestartNeeded = { [weak self] in
+            guard let self else { return }
+            #if canImport(CodeAgentRuntime)
+            do {
+                AgentRuntime.shared.stop()
+                _ = try await AgentRuntime.shared.ensureStarted(
+                    with: providerConnections.credentialStore
+                )
+                runtimeServers.embeddedStatusMonitor.markConnected()
+                await refreshActiveRuntimeContext()
+            } catch {
+                DLLog("⚠️ embedded runtime 重启失败：\(error)")
+            }
+            #endif
         }
         migrateLegacyProviderState()
         synchronizeGatewayConnectionWithIdentity()
@@ -257,6 +260,7 @@ final class AppContainer {
             await toolRegistry.register(CreatePDFTool())
             await toolRegistry.register(MergePDFsTool())
             await toolRegistry.register(SplitPDFTool())
+            await toolRegistry.register(ExtractVideoFramesTool())
 #if os(iOS)
             await toolRegistry.register(ScanDocumentTool())
 #endif
@@ -288,27 +292,11 @@ final class AppContainer {
             timelineExtensions: timelineExtensions,
             conversationRendererMode: .web,
             onAuthExpired: { [weak self] in
-                // The embedded runtime owns its provider, so refresh its injected
-                // credentials after either Apple host observes an auth expiry.
-#if canImport(CodeAgentRuntime)
-                guard self?.runtimeServers.activeConnectionID
-                        == RuntimeServerConnection.embeddedID else { return }
-                do {
-                    // C4: 经 3-arg 新通道重注入。AppCredentialStore.resolve 会
-                    // 等待/触发 OAuth 刷新，因此 secretsJSON 含刷新后的新 token；
-                    // connectionsJSON 一并持久化供 restart() 保留。dual key 模式
-                    // 同时输出 v1 namespaced 与 v2 flat key，覆盖新旧 runtime。
-                    let connectionsJSON = try self?.providerConnections.buildConnectionsJSON() ?? ""
-                    let secretsJSON = await self?.providerConnections.secretsJSONForInjection() ?? "{}"
-                    try AgentRuntime.shared.reconfigure(
-                        connectionsJSON: connectionsJSON,
-                        secretsJSON: secretsJSON,
-                        modelName: ""
-                    )
-                } catch {
-                    DLLog("⚠️ auth_expired 重注入失败：\(error)")
-                }
-#endif
+                // The runtime resolves the gateway provider from the injected
+                // gateway/default credential. Re-push the refreshed token over
+                // /v1/secrets so the next turn uses it without a restart.
+                guard let self else { return }
+                await providerConnections.pushGatewayCredentialToRuntime()
             },
             localStateStore: userAssetLocalStateStore,
             userAssetPicker: { [userAssetPicker] in
@@ -342,12 +330,6 @@ final class AppContainer {
             return
         }
         await ensureEmbeddedRuntimeStarted()
-        if await hasPendingProviderConfiguration() {
-            providerConnections.markRuntimeConfigurationPending()
-            beginProviderConfigurationApplyLoopIfNeeded()
-        } else {
-            await refreshActiveRuntimeContext()
-        }
         #endif
     }
 
@@ -408,23 +390,16 @@ final class AppContainer {
                         )
                     }
 
-                    // A2 secrets push: install the daemon secrets client and push
-                    // the Keychain llm credentials so the runtime's injected
-                    // resolver has them and GET /v1/runtime/models reports
-                    // available=true without a restart.
-                    if let endpoint = daemon.endpoint {
-                        providerConnections.secretsClient = RuntimeSecretsClient(
-                            baseURL: endpoint,
-                            token: daemon.accessToken
-                        )
-                        providerConnections.onSecretsPushed = { [weak self] in
-                            Task { await self?.refreshActiveRuntimeContext() }
-                        }
-                        await providerConnections.pushLLMCredentialsToDaemon()
-                        // Shared file: also write ~/.codeagent/secrets.json so
-                        // the runtime CLI/TUI (separate process) reuses the keys.
-                        await providerConnections.writeSharedSecretsFile()
+                    // A2 secrets push: push the Keychain llm credentials over
+                    // /v1/secrets so the runtime's injected resolver has them and
+                    // GET /v1/runtime/models reports available=true without restart.
+                    providerConnections.onSecretsPushed = { [weak self] in
+                        Task { await self?.refreshActiveRuntimeContext() }
                     }
+                    await providerConnections.pushLLMCredentialsToDaemon()
+                    // Shared file: also write ~/.codeagent/secrets.json so
+                    // the runtime CLI/TUI (separate process) reuses the keys.
+                    await providerConnections.writeSharedSecretsFile()
 
                     await refreshActiveRuntimeContext()
                     return
@@ -457,39 +432,30 @@ final class AppContainer {
             if !AgentRuntime.shared.isAlive {
                 var configuration = EmbeddedRuntimeConfiguration.platformDefault()
                 try AgentRuntime.shared.configure(configuration)
-                try AgentRuntime.shared.configureProviderConnections(
-                    makeRuntimeProviderConfiguration()
-                )
-                configuredProviderCatalogAwaitingRuntimeStart =
-                    providerConnections.catalogSnapshot()
             }
             _ = try await AgentRuntime.shared.ensureStarted(
                 with: providerConnections.credentialStore
             )
-            // C1: connectionsJSON 经新 3-arg 通道持久化（AgentRuntime restart()
-            // 时保留，待 gomobile ABI 携带后透传）；secretsJSON 以 dual 模式
-            // （v1 namespaced + v2 flat key）重注入，覆盖新旧 runtime。
-            try AgentRuntime.shared.reconfigure(
-                connectionsJSON: try providerConnections.buildConnectionsJSON(),
-                secretsJSON: await providerConnections.secretsJSONForInjection(),
-                modelName: ""
-            )
-            runtimeServers.embeddedStatusMonitor.markConnected()
-            let queuedRevision = await providerConfigurationQueue.pendingRevision()
-            if desiredProviderConfiguration == nil,
-               queuedRevision == nil,
-               let catalogToPublish = configuredProviderCatalogAwaitingRuntimeStart {
-                providerConnections.publishAppliedCatalog(
-                    catalogToPublish,
-                    hasPendingConfiguration: false
-                )
-                configuredProviderCatalogAwaitingRuntimeStart = nil
-            } else if queuedRevision != nil {
-                beginProviderConfigurationApplyLoopIfNeeded()
+            // Provider management is now HTTP-backed on iOS too: the embedded
+            // runtime persists providers to <DataDir>/.codeagent/settings.json
+            // and exposes /v1/providers + /v1/secrets exactly like the daemon.
+            // Install the HTTP provider store (mirrors ensureDaemonStarted) and
+            // migrate any pre-existing UserDefaults connections once.
+            if providerConnections.providerStore == nil {
+                if let providerStore = try? runtimeServers.makeProviderStore() {
+                    providerConnections.providerStore = providerStore
+                    await providerConnections.migrateToRuntimeProviderManagementIfNeeded(
+                        store: providerStore
+                    )
+                }
             }
+            // A2 secrets push: push the Keychain llm credentials over /v1/secrets
+            // so GET /v1/runtime/models reports available=true without a restart.
+            await providerConnections.pushLLMCredentialsToDaemon()
+            runtimeServers.embeddedStatusMonitor.markConnected()
+            await refreshActiveRuntimeContext()
         } catch {
             DLLog("⚠️ Agent Runtime 启动失败：\(error)")
-            providerConnections.markRuntimeConfigurationFailed(error)
         }
         #endif
     }
@@ -510,27 +476,15 @@ final class AppContainer {
         allowingActiveWorkInterruption: Bool = false
     ) async throws {
         #if os(iOS)
-        var hasPendingEmbeddedConfiguration = false
         if connectionID == RuntimeServerConnection.embeddedID {
             await ensureEmbeddedRuntimeStarted()
-            hasPendingEmbeddedConfiguration = await hasPendingProviderConfiguration()
         }
         #endif
         let context = try await runtimeServers.activate(
             connectionID: connectionID,
             allowingActiveWorkInterruption: allowingActiveWorkInterruption
         )
-        #if os(iOS)
-        if connectionID == RuntimeServerConnection.embeddedID,
-           hasPendingEmbeddedConfiguration {
-            providerConnections.markRuntimeConfigurationPending()
-            beginProviderConfigurationApplyLoopIfNeeded()
-        } else {
-            publishRuntimeServerModels(context)
-        }
-        #else
         publishRuntimeServerModels(context)
-        #endif
     }
 
     private func publishRuntimeServerModels(
@@ -571,13 +525,6 @@ final class AppContainer {
         )
     }
 
-    private func hasPendingProviderConfiguration() async -> Bool {
-        if desiredProviderConfiguration != nil || providerConfigurationStageTask != nil {
-            return true
-        }
-        return await providerConfigurationQueue.pendingRevision() != nil
-    }
-    
     private static func makeAuthorizedApiProvider(
         authManager: AuthManager,
         environmentConfig: AppEnvironmentConfig,
@@ -619,7 +566,7 @@ final class AppContainer {
     func synchronizeGatewayConnectionWithIdentity() {
         guard authManager.isRegistered else {
             if providerConnections.gatewayConnection != nil {
-                providerConnections.removeGatewayConnection()
+                Task { await providerConnections.removeGatewayConnection() }
             }
             clearGatewayAccountCaches()
             return
@@ -636,7 +583,7 @@ final class AppContainer {
             try? await makeAuthService().logout()
         }
         authManager.logout()
-        providerConnections.removeGatewayConnection()
+        await providerConnections.removeGatewayConnection()
         clearGatewayAccountCaches()
         await userAssetPreviewResolver.clearCache()
     }
@@ -648,7 +595,7 @@ final class AppContainer {
             let models = response.models
                 .filter { $0.available != false }
                 .map(Self.providerModel)
-            try providerConnections.upsertGateway(
+            try await providerConnections.upsertGateway(
                 baseURL: gatewayAgentBaseURL,
                 models: models,
                 allowsInsecurePrivateNetworkHTTP: allowsLocalGatewayHTTP
@@ -684,205 +631,16 @@ final class AppContainer {
         )
     }
 
-    private func makeRuntimeProviderConfiguration() throws -> GeneratedRuntimeProviderConfiguration {
-        let connections = providerConnections.registry.enabledConnections
-        guard !connections.unifiedModels.isEmpty else {
-            return try RuntimeProviderConfigurationBuilder.buildEmpty()
-        }
-        return try RuntimeProviderConfigurationBuilder.build(
-            connections: connections,
-            defaultModelID: providerConnections.catalog.defaultModelID
-        )
-    }
-
-    private func stageProviderConfigurationApply() {
-        if runtimeServers.activeConnection.kind == .embedded {
-            providerConnections.markRuntimeConfigurationPending()
-        }
-        do {
-            desiredProviderConfiguration = PendingProviderConfiguration(
-                generated: try makeRuntimeProviderConfiguration(),
-                catalog: providerConnections.catalogSnapshot()
-            )
-            beginProviderConfigurationStageLoopIfNeeded()
-        } catch {
-            providerConnections.markRuntimeConfigurationFailed(error)
-            DLLog("⚠️ Provider 配置生成失败：\(error)")
-        }
-    }
-
-    private func beginProviderConfigurationStageLoopIfNeeded() {
-        guard providerConfigurationStageTask == nil else { return }
-        providerConfigurationStageTask = Task { @MainActor [weak self] in
-            guard let self else { return }
-            while !Task.isCancelled, let desired = desiredProviderConfiguration {
-                desiredProviderConfiguration = nil
-                let revision = await providerConfigurationQueue.stage(desired.generated)
-                providerCatalogsByRevision[revision] = desired.catalog
-                DLLog(
-                    "Provider 配置已排队：revision=\(revision)，models=\(desired.catalog.models.count)"
-                )
-                beginProviderConfigurationApplyLoopIfNeeded()
-            }
-            providerConfigurationStageTask = nil
-        }
-    }
-
-    private func beginProviderConfigurationApplyLoopIfNeeded() {
-        guard providerConfigurationApplyTask == nil else { return }
-        providerConfigurationApplyTask = Task { @MainActor [weak self] in
-            guard let self else { return }
-            await runProviderConfigurationApplyLoop()
-            providerConfigurationApplyTask = nil
-
-            // A stage can land while the loop is awaiting its final pending check.
-            // Re-check after clearing the task so that change cannot lose its wake-up.
-            if runtimeServers.activeConnection.kind == .embedded,
-               await providerConfigurationQueue.pendingRevision() != nil {
-                beginProviderConfigurationApplyLoopIfNeeded()
-            }
-        }
-    }
-
-    private func runProviderConfigurationApplyLoop() async {
-#if canImport(CodeAgentRuntime)
-        while !Task.isCancelled {
-            guard await providerConfigurationQueue.pendingRevision() != nil else {
-                return
-            }
-            // Provider credentials and generated YAML belong exclusively to the
-            // embedded Runtime. Keep the staged revision until Embedded becomes
-            // active again; never stop or inspect an External Server here.
-            guard runtimeServers.activeConnection.kind == .embedded else {
-                return
-            }
-
-            let activitySnapshot: RuntimeActivitySnapshot
-            if AgentRuntime.shared.isAlive {
-                do {
-                    activitySnapshot = try await makeAgentClient().activitySnapshot()
-                } catch {
-                    providerConnections.markRuntimeConfigurationFailed(error)
-                    DLLog("⚠️ Provider 配置等待 Runtime 空闲失败：\(error)")
-                    try? await Task.sleep(for: .seconds(1))
-                    continue
-                }
-            } else {
-                activitySnapshot = RuntimeActivitySnapshot(cursor: 0, sessions: [])
-            }
-
-            let blockingDescriptions = ProviderRuntimeActivityPolicy.blockingDescriptions(
-                in: activitySnapshot
-            )
-            if !blockingDescriptions.isEmpty {
-                let summary = blockingDescriptions.joined(separator: "; ")
-                providerConnections.markRuntimeConfigurationWaiting(
-                    "正在等待 \(blockingDescriptions.count) 个会话结束。"
-                )
-                if summary != lastProviderConfigurationBlockerLog {
-                    lastProviderConfigurationBlockerLog = summary
-                    DLLog("Provider 配置等待 Runtime 空闲：\(summary)")
-                }
-                try? await Task.sleep(for: .seconds(1))
-                continue
-            }
-            lastProviderConfigurationBlockerLog = nil
-            providerConnections.markRuntimeConfigurationWaiting(nil)
-
-            // Code-Agent 1.2.1 serializes an idle queue position as `0`.
-            // AgentKit's current queue helper treats every non-nil position as
-            // active, so pass an explicit idle snapshot after the host has
-            // applied the protocol-correct `position > 0` policy above.
-            let idleSnapshot = RuntimeActivitySnapshot(
-                generatedAt: activitySnapshot.generatedAt,
-                cursor: activitySnapshot.cursor,
-                isDelta: activitySnapshot.isDelta,
-                sessions: []
-            )
-            guard let staged = await providerConfigurationQueue
-                .configurationIfRuntimeIdle(idleSnapshot) else {
-                try? await Task.sleep(for: .seconds(1))
-                continue
-            }
-
-            do {
-                guard runtimeServers.activeConnection.kind == .embedded else {
-                    return
-                }
-                if AgentRuntime.shared.isAlive {
-                    AgentRuntime.shared.stop()
-                    try AgentRuntime.shared.configureProviderConnections(staged.configuration)
-                    _ = try await AgentRuntime.shared.ensureStarted(
-                        with: providerConnections.credentialStore
-                    )
-                    try AgentRuntime.shared.reconfigure(
-                        connectionsJSON: try providerConnections.buildConnectionsJSON(),
-                        secretsJSON: await providerConnections.secretsJSONForInjection(),
-                        modelName: ""
-                    )
-                    runtimeServers.embeddedStatusMonitor.markConnected()
-                    await finishApplyingProviderConfiguration(staged)
-                } else {
-                    // Runtime startup owns the final start and catalog publication.
-                    // Installing the YAML here keeps a pre-start registry mutation,
-                    // but does not expose its aliases to Composer prematurely.
-                    try AgentRuntime.shared.configureProviderConnections(staged.configuration)
-                    configuredProviderCatalogAwaitingRuntimeStart =
-                        providerCatalogsByRevision[staged.revision]
-                    await providerConfigurationQueue.markApplied(revision: staged.revision)
-                    providerCatalogsByRevision.removeValue(forKey: staged.revision)
-                    providerCatalogsByRevision = providerCatalogsByRevision.filter {
-                        $0.key > staged.revision
-                    }
-                    DLLog(
-                        "Provider 配置已写入待启动 Runtime：revision=\(staged.revision)"
-                    )
-                    return
-                }
-            } catch {
-                providerConnections.markRuntimeConfigurationFailed(error)
-                DLLog("⚠️ Provider 配置应用失败：\(error)")
-                try? await Task.sleep(for: .seconds(1))
-            }
-        }
-#endif
-    }
-
-    private func finishApplyingProviderConfiguration(
-        _ staged: StagedRuntimeProviderConfiguration
-    ) async {
-        await providerConfigurationQueue.markApplied(revision: staged.revision)
-        guard let catalog = providerCatalogsByRevision.removeValue(
-            forKey: staged.revision
-        ) else { return }
-
-        let queuedRevision = await providerConfigurationQueue.pendingRevision()
-        let hasPendingConfiguration =
-            desiredProviderConfiguration != nil
-            || queuedRevision != nil
-        providerConnections.publishAppliedCatalog(
-            catalog,
-            hasPendingConfiguration: hasPendingConfiguration
-        )
-        configuredProviderCatalogAwaitingRuntimeStart = nil
-        DLLog(
-            "Provider 配置已生效：revision=\(staged.revision)，models=\(catalog.models.count)，hasPending=\(hasPendingConfiguration)"
-        )
-
-        if !hasPendingConfiguration {
-            providerCatalogsByRevision = providerCatalogsByRevision.filter {
-                $0.key > staged.revision
-            }
-        }
-    }
-
     private func migrateLegacyProviderState() {
         if authManager.isRegistered, providerConnections.gatewayConnection == nil {
-            try? providerConnections.upsertGateway(
-                baseURL: gatewayAgentBaseURL,
-                models: [],
-                allowsInsecurePrivateNetworkHTTP: allowsLocalGatewayHTTP
-            )
+            Task { [weak self] in
+                guard let self else { return }
+                try? await providerConnections.upsertGateway(
+                    baseURL: gatewayAgentBaseURL,
+                    models: [],
+                    allowsInsecurePrivateNetworkHTTP: allowsLocalGatewayHTTP
+                )
+            }
         }
 
         let migrationKey = "talkify.provider-connections.legacy-key.v2"

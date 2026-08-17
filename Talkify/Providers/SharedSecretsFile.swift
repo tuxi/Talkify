@@ -20,18 +20,19 @@ import OSLog
 
 private let sharedSecretsLogger = Logger(subsystem: "com.objc.chat", category: "SharedSecrets")
 
-/// One credential entry in the shared secrets file (same shape as the A2 body).
-struct SharedSecretsBodyEntry: Codable, Sendable, Equatable {
-    let type: String
-    let secret: String
-}
-
 enum SharedSecretsFile {
     /// Absolute URL of `~/.codeagent/secrets.json`.
     static var secretsFileURL: URL {
+        #if os(macOS)
         FileManager.default.homeDirectoryForCurrentUser
             .appendingPathComponent(".codeagent")
             .appendingPathComponent("secrets.json")
+        #else
+        let cfg = EmbeddedRuntimeConfiguration.platformDefault()
+        return cfg.dataDirectory
+            .appendingPathComponent(".codeagent")
+            .appendingPathComponent("secrets.json")
+        #endif
     }
 
     /// Extract the llm/* bearer credentials from a CredentialMap into the
@@ -39,14 +40,14 @@ enum SharedSecretsFile {
     static func llmEntries(
         from map: CredentialMap,
         only target: CredentialTarget? = nil
-    ) -> [String: SharedSecretsBodyEntry] {
-        var entries: [String: SharedSecretsBodyEntry] = [:]
+    ) -> [String: RuntimeSecretEntry] {
+        var entries: [String: RuntimeSecretEntry] = [:]
         for (credentialTarget, credential) in map.entries {
             guard credentialTarget.namespace == "llm",
                   credential.kind == .bearer,
                   !credential.secret.isEmpty else { continue }
             if let target, credentialTarget != target { continue }
-            entries["llm/\(credentialTarget.name)"] = SharedSecretsBodyEntry(
+            entries["llm/\(credentialTarget.name)"] = RuntimeSecretEntry(
                 type: "bearer",
                 secret: credential.secret
             )
@@ -57,7 +58,7 @@ enum SharedSecretsFile {
     /// Write the shared secrets file atomically with 0600 permissions.
     /// Read-merge-write: existing keys (other namespaces) are preserved, the
     /// llm/* entries are brought current.
-    static func write(entries: [String: SharedSecretsBodyEntry]) throws {
+    static func write(entries: [String: RuntimeSecretEntry]) throws {
         let directory = secretsFileURL.deletingLastPathComponent()
         try FileManager.default.createDirectory(
             at: directory,
@@ -66,10 +67,10 @@ enum SharedSecretsFile {
 
         // Read-merge: preserve whatever is already on disk (other apps may have
         // written other namespaces), then overlay current llm/* entries.
-        var merged: [String: SharedSecretsBodyEntry] = [:]
+        var merged: [String: RuntimeSecretEntry] = [:]
         if let existing = try? Data(contentsOf: secretsFileURL),
            let decoded = try? JSONDecoder().decode(
-               [String: SharedSecretsBodyEntry].self,
+               [String: RuntimeSecretEntry].self,
                from: existing
            ) {
             merged = decoded
