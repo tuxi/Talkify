@@ -9,11 +9,14 @@ import SwiftUI
 
 enum SettingsSheetDestination: Identifiable, Equatable {
     case subscription
+    case previewSettingsJSON
     
     var id: String {
         switch self {
         case .subscription:
             return "subscription"
+        case .previewSettingsJSON:
+            return "previewSettingsJSON"
         }
     }
 

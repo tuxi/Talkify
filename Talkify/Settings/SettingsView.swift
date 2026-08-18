@@ -235,7 +235,11 @@ public struct SettingsView: View {
                                     ForEach(sections) { section in
                                         Button {
                                             if navigateWithRouter {
-                                                router.navigate(to: .detail(section))
+                                                if section == .settings {
+                                                    router.presentSheet(.previewSettingsJSON)
+                                                } else {
+                                                    router.navigate(to: .detail(section))
+                                                }
                                             } else {
                                                 selection = section
                                             }

@@ -6,6 +6,8 @@
 //
 
 import SwiftUI
+import FileViewerKit
+import AgentKit
 
 @MainActor
 extension View {
@@ -42,6 +44,38 @@ extension View {
             switch destination {
             case .subscription:
                 SubscriptionView(container: container, viewModel: SubscriptionViewModel(billingManager: container.billingManager, billingService: container.makeBillingService(), authManager: container.authManager))
+            case .previewSettingsJSON:
+#if os(macOS)
+                let home = FileManager.default.homeDirectoryForCurrentUser
+#else
+                let cfg = EmbeddedRuntimeConfiguration.platformDefault()
+                let home = cfg.dataDirectory
+                
+#endif
+                let root = home.appendingPathComponent(".codeagent")
+                let url = root.appendingPathComponent("settings.json")
+                let provider = LocalFileContentProvider(rootURL: root)
+                let selectedPathBind = Binding<String?> {
+                    return url.path
+                } set: { new, ne1 in
+                    
+                }
+
+                FileWorkspaceView(
+                    rootPath: root.path,
+                    provider: provider,
+                    selectedPath:selectedPathBind,
+                    textPreviewRenderer: { filePath, content, language in
+                        AnyView(
+                            AgentCodePreviewView(
+                                filePath: filePath,
+                                content: content,
+                                language: language
+                            )
+                        )
+                    }
+                )
+                .id(root.path)
             }
         }
     }

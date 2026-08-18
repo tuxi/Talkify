@@ -18,14 +18,14 @@ enum SettingsSection: String, CaseIterable, Identifiable {
         }
     }
     case profile, usage, account
-    case servers, providers, models
+    case servers, providers, models, settings
     case support, about
 
     var id: String { rawValue }
     var group: Group {
         switch self {
         case .profile, .usage, .account: .personal
-        case .servers, .providers, .models: .integrations
+        case .servers, .providers, .models, .settings: .integrations
         case .support, .about: .personal
         }
     }
@@ -37,19 +37,21 @@ enum SettingsSection: String, CaseIterable, Identifiable {
         case .servers: "服务器"
         case .providers: "提供商"
         case .models: "模型"
+        case .settings: "配置"
         case .support: TalkifyLocalized.string("settings.item.support")
         case .about: TalkifyLocalized.string("settings.item.about")
         }
     }
     var icon: String {
         switch self {
-        case .profile: "person.crop.circle";
-        case .usage: "chart.bar"; 
-        case .account: "person.badge.key";
+        case .profile: "person.crop.circle"
+        case .usage: "chart.bar"
+        case .account: "person.badge.key"
         case .servers: "server.rack"
         case .providers: "cpu"
         case .models: "sparkles"
-        case .support: "questionmark.bubble";
+        case .settings: "gearshape.2"
+        case .support: "questionmark.bubble"
         case .about: "info.circle"
         }
     }

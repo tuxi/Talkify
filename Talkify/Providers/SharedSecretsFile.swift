@@ -23,16 +23,14 @@ private let sharedSecretsLogger = Logger(subsystem: "com.objc.chat", category: "
 enum SharedSecretsFile {
     /// Absolute URL of `~/.codeagent/secrets.json`.
     static var secretsFileURL: URL {
-        #if os(macOS)
-        FileManager.default.homeDirectoryForCurrentUser
-            .appendingPathComponent(".codeagent")
-            .appendingPathComponent("secrets.json")
-        #else
+#if os(macOS)
+        let home = FileManager.default.homeDirectoryForCurrentUser
+#else
         let cfg = EmbeddedRuntimeConfiguration.platformDefault()
-        return cfg.dataDirectory
-            .appendingPathComponent(".codeagent")
+        let home = cfg.dataDirectory
+#endif
+        return home.appendingPathComponent(".codeagent")
             .appendingPathComponent("secrets.json")
-        #endif
     }
 
     /// Extract the llm/* bearer credentials from a CredentialMap into the
