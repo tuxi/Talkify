@@ -1358,6 +1358,7 @@ private struct WorkspaceConversationRow: View {
                 .fill(showsStatusIndicator ? activityColor : Color.clear)
                 .frame(width: 7, height: 7)
             VStack(alignment: .leading, spacing: 3) {
+                
                 Text(conversation.name ?? conversation.id)
                     .font(.system(size: 15, weight: .medium))
                     .foregroundStyle(.primary)

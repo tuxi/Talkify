@@ -227,8 +227,7 @@ final class AppContainer {
             guard let self else { return }
             #if canImport(CodeAgentRuntime)
             do {
-                AgentRuntime.shared.stop()
-                _ = try await AgentRuntime.shared.ensureStarted(
+                _ = try await AgentRuntime.shared.restart(
                     with: providerConnections.credentialStore
                 )
                 runtimeServers.embeddedStatusMonitor.markConnected()
@@ -429,10 +428,6 @@ final class AppContainer {
     private func ensureEmbeddedRuntimeStarted() async {
         #if os(iOS)
         do {
-            if !AgentRuntime.shared.isAlive {
-                var configuration = EmbeddedRuntimeConfiguration.platformDefault()
-                try AgentRuntime.shared.configure(configuration)
-            }
             _ = try await AgentRuntime.shared.ensureStarted(
                 with: providerConnections.credentialStore
             )

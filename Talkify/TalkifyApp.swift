@@ -31,7 +31,7 @@ private final class TalkifyApplicationDelegate: NSObject, NSApplicationDelegate 
         #if os(macOS)
         CodeAgentDaemon.shared.stop()
         #else
-        AgentRuntime.shared.stop()
+        Task { await AgentRuntime.shared.stop() }
         #endif
     }
 }
