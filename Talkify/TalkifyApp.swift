@@ -51,6 +51,19 @@ struct TalkifyApp: App {
     @State private var pendingWorkspaceItem: WorkspaceItem?
 
     init() {
+        #if os(macOS)
+        // 单实例保护：同一时刻只允许一个 Talkify 实例运行。
+        // 第二个实例会激活已运行的实例并立即退出，避免两个实例各自启动
+        // 同名的 codeagentd 子进程并互相 pkill -9 杀死对方——SIGKILL 会触发
+        // 崩溃自动重启循环，且可能打断共享 sessions.db 的写入（曾导致会话库
+        // 被隔离重建）。守卫放在最前面，确保在任何 daemon 启动之前生效。
+        if let bundleID = Bundle.main.bundleIdentifier,
+           let existing = NSRunningApplication.runningApplications(withBundleIdentifier: bundleID)
+               .first(where: { $0.processIdentifier != ProcessInfo.processInfo.processIdentifier }) {
+            existing.activate(options: [.activateAllWindows])
+            exit(0)
+        }
+        #endif
 
         let environmentManager = EnvironmentManager()
         #if DEBUG

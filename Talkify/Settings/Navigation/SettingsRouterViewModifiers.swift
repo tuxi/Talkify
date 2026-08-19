@@ -45,37 +45,16 @@ extension View {
             case .subscription:
                 SubscriptionView(container: container, viewModel: SubscriptionViewModel(billingManager: container.billingManager, billingService: container.makeBillingService(), authManager: container.authManager))
             case .previewSettingsJSON:
-#if os(macOS)
+                
+        #if os(macOS)
                 let home = FileManager.default.homeDirectoryForCurrentUser
-#else
+        #else
                 let cfg = EmbeddedRuntimeConfiguration.platformDefault()
                 let home = cfg.dataDirectory
                 
-#endif
+        #endif
                 let root = home.appendingPathComponent(".codeagent")
-                let url = root.appendingPathComponent("settings.json")
-                let provider = LocalFileContentProvider(rootURL: root)
-                let selectedPathBind = Binding<String?> {
-                    return url.path
-                } set: { new, ne1 in
-                    
-                }
-
-                FileWorkspaceView(
-                    rootPath: root.path,
-                    provider: provider,
-                    selectedPath:selectedPathBind,
-                    textPreviewRenderer: { filePath, content, language in
-                        AnyView(
-                            AgentCodePreviewView(
-                                filePath: filePath,
-                                content: content,
-                                language: language
-                            )
-                        )
-                    }
-                )
-                .id(root.path)
+                SettingsFileWorkspaceContainer(rootURL: root)
             }
         }
     }
@@ -103,3 +82,48 @@ extension View {
 #endif
     }
 }
+
+struct SettingsFileWorkspaceContainer: View {
+    let rootURL: URL
+    @State var selectedURL: URL?
+    
+    init(rootURL: URL) {
+        self.rootURL = rootURL
+        let url = rootURL.appendingPathComponent("settings.json")
+        self.selectedURL = url
+    }
+    
+    var body: some View {
+        let provider = LocalFileContentProvider(rootURL: rootURL)
+        FileWorkspaceView(
+            rootPath: rootURL.path,
+            provider: provider,
+            selectedPath: .init(get: {
+                selectedURL?.path
+            }, set: { new in
+                if let new, !new.isEmpty {
+                    selectedURL = rootURL.appendingPathComponent(new)
+                } else {
+                    selectedURL = nil
+                }
+            }),
+            textPreviewRenderer: { filePath, content, language in
+                AnyView(
+                    AgentCodePreviewView(
+                        filePath: filePath,
+                        content: content,
+                        language: language
+                    )
+                )
+            }
+        )
+        .id(rootURL.path)
+    }
+}
+
+
+
+
+
+
+

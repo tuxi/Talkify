@@ -116,29 +116,9 @@ struct SettingsDetailView: View {
                     
 #endif
                     let root = home.appendingPathComponent(".codeagent")
-                    let url = root.appendingPathComponent("settings.json")
-                    let provider = LocalFileContentProvider(rootURL: root)
-                    let selectedPathBind = Binding<String?> {
-                        return url.path
-                    } set: { new, ne1 in
-                        
-                    }
                     
-                    FileWorkspaceView(
-                        rootPath: root.path,
-                        provider: provider,
-                        selectedPath:selectedPathBind,
-                        textPreviewRenderer: { filePath, content, language in
-                            AnyView(
-                                AgentCodePreviewView(
-                                    filePath: filePath,
-                                    content: content,
-                                    language: language
-                                )
-                            )
-                        }
-                    )
-                    .navigationTitle(TalkifyLocalized.string("settings.item.config"))
+                    SettingsFileWorkspaceContainer(rootURL: root)
+                        .navigationTitle(TalkifyLocalized.string("settings.item.config"))
                 case .support:
                     supportSettings
                         .navigationTitle(TalkifyLocalized.string("settings.item.support"))

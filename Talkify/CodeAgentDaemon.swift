@@ -234,13 +234,24 @@ final class CodeAgentDaemon: @unchecked Sendable {
         return bytes.base64EncodedString()
     }
 
-    /// Kill any stale codeagentd processes left over from a previous app
+    /// Kill stale codeagentd processes left over from a previous app
     /// launch or crash. These would hold old ports/tokens and interfere
     /// with the new daemon.
+    ///
+    /// Scoped to THIS bundle's daemon binary path: the previous
+    /// `pkill -9 -f codeagentd` matched every process whose command line
+    /// merely contained "codeagentd", so a second Talkify instance would
+    /// SIGKILL the first instance's live daemon (and vice versa), triggering
+    /// the crash-restart loop and risking concurrent writes to the shared
+    /// sessions.db. With the single-instance guard in TalkifyApp, the only
+    /// same-path daemons that can exist here are stale leftovers of this
+    /// very app — killing them is safe and never touches another app's
+    /// process (even one that happens to be named codeagentd).
     private func killExistingDaemons() {
+        guard let daemonURL else { return }
         let task = Process()
         task.executableURL = URL(fileURLWithPath: "/usr/bin/pkill")
-        task.arguments = ["-9", "-f", "codeagentd"]
+        task.arguments = ["-9", "-f", daemonURL.path]
         task.standardOutput = FileHandle.nullDevice
         task.standardError = FileHandle.nullDevice
         try? task.run()
