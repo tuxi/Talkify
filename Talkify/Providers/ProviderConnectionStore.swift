@@ -407,7 +407,10 @@ final class ProviderConnectionStore {
     /// mutable resolver. Called on login/refresh so the gateway provider stays
     /// resolvable without restarting.
     func pushGatewayCredentialToRuntime() async {
-        guard let store = providerStore else { return }
+        guard let store = providerStore else {
+            providerStoreLogger.info("跳过 gateway/default 凭据推送：runtime provider store 尚未就绪")
+            return
+        }
         guard let cred = try? await credentialStore.resolve(.gateway),
               cred.kind == .bearer,
               !cred.secret.isEmpty else { return }
@@ -416,6 +419,7 @@ final class ProviderConnectionStore {
                 "gateway/default": RuntimeSecretEntry(type: "bearer", secret: cred.secret)
             ])
             lastSecretsPushError = nil
+            providerStoreLogger.info("已推送 gateway/default 凭据：type=bearer secret_length=\(cred.secret.count, privacy: .public)")
             onSecretsPushed?()
         } catch {
             lastSecretsPushError = error.localizedDescription

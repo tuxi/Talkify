@@ -447,6 +447,13 @@ final class AppContainer {
             // A2 secrets push: push the Keychain llm credentials over /v1/secrets
             // so GET /v1/runtime/models reports available=true without a restart.
             await providerConnections.pushLLMCredentialsToDaemon()
+            // The gateway connection can be synchronized concurrently with
+            // runtime startup. If that happens before providerStore is
+            // installed, its credential push is intentionally skipped because
+            // there is no /v1/secrets client yet. Retry it after the embedded
+            // provider store is ready so gateway/default is present in the
+            // runtime's mutable resolver for the first model request.
+            await providerConnections.pushGatewayCredentialToRuntime()
             runtimeServers.embeddedStatusMonitor.markConnected()
             await refreshActiveRuntimeContext()
         } catch {
