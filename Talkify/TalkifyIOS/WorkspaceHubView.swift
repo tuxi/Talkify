@@ -1154,7 +1154,7 @@ private struct WorkspaceConversationListView: View {
                         selected = conversation
                     } label: {
                         WorkspaceConversationRow(
-                            conversation: conversation,
+                            conversation: item,
                             activity: store.supervisor.activity(for: conversation),
                             queueReason: store.supervisor.queueReason(for: conversation.id),
                             isSelected: selected?.id == conversation.id
@@ -1347,7 +1347,7 @@ private struct WorkspaceConversationListView: View {
 private struct WorkspaceConversationRow: View {
     @Environment(\.colorScheme) private var colorScheme
 
-    let conversation: ConversationRef
+    let conversation: ConversationListItem
     let activity: ConversationActivityState
     let queueReason: String?
     let isSelected: Bool
@@ -1359,7 +1359,7 @@ private struct WorkspaceConversationRow: View {
                 .frame(width: 7, height: 7)
             VStack(alignment: .leading, spacing: 3) {
                 
-                Text(conversation.name ?? conversation.id)
+                Text(conversation.ref.name ?? conversation.id)
                     .font(.system(size: 15, weight: .medium))
                     .foregroundStyle(.primary)
                     .lineLimit(1)
@@ -1405,7 +1405,7 @@ private struct WorkspaceConversationRow: View {
 
     private var detailText: String? {
         if let queueReason, !queueReason.isEmpty { return queueReason }
-        if let worktree = conversation.worktree { return worktree.branch }
+        if let worktree = conversation.ref.worktree { return worktree.branch }
         switch activity {
         case .running: return "正在运行"
         case .waitingForApproval: return "等待批准"

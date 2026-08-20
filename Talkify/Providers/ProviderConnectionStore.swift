@@ -343,7 +343,10 @@ final class ProviderConnectionStore {
         let entries = await sharedLLMSecretsEntries(only: target)
         guard !entries.isEmpty else { return }
         do {
-            try await store.pushSecrets(entries)
+            try await withRetry(maxAttempts: 3, baseDelay: 1_000_000_000) {
+                try await store.pushSecrets(entries)
+            }
+
             lastSecretsPushError = nil
             onSecretsPushed?()
         } catch {
@@ -461,4 +464,27 @@ final class ProviderConnectionStore {
     func reloadCatalog() {
         catalog.reload(from: registry)
     }
+}
+
+
+/// 带指数退避的异步重试工具
+/// - Parameters:
+///   - maxAttempts: 总尝试次数（含首次）
+///   - baseDelay: 首次失败后的基础等待时间（纳秒），之后每次翻倍
+func withRetry<T>(
+    maxAttempts: Int = 3,
+    baseDelay: UInt64 = 1_000_000_000,
+    operation: () async throws -> T
+) async rethrows -> T {
+    for attempt in 0..<maxAttempts {
+        do {
+            return try await operation()
+        } catch {
+            guard attempt < maxAttempts - 1 else { throw error }
+            let delay = baseDelay * (1 << attempt)
+            try? await Task.sleep(nanoseconds: delay)
+        }
+    }
+    // 理论上不会走到这里，满足编译器
+    fatalError("Unreachable")
 }
