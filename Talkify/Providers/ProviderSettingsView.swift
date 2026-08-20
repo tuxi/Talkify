@@ -662,6 +662,12 @@ struct ModelCatalogSettingsView: View {
             }
         }
         .frame(maxWidth: 780, alignment: .leading)
+        .task {
+            // The provider list and the published runtime model catalog are
+            // separate snapshots. Refresh when this screen appears so models
+            // added while it was off-screen become visible immediately.
+            await container.refreshActiveRuntimeContext()
+        }
     }
 
     private func modelRow(_ model: UnifiedModelDescriptor) -> some View {

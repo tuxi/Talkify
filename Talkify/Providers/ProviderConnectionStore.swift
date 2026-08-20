@@ -77,6 +77,11 @@ final class ProviderConnectionStore {
     /// re-GET /v1/runtime/models so the model list reflects available=true.
     var onSecretsPushed: (() -> Void)?
 
+    /// Called after provider definitions are applied. The host refreshes the
+    /// server-scoped runtime model catalog because provider definitions and the
+    /// published/available model catalog are separate endpoints.
+    var onRuntimeConfigurationApplied: (() async -> Void)?
+
     /// Last secrets-push error, surfaced in the settings page (kept usable).
     private(set) var lastSecretsPushError: String?
 
@@ -157,6 +162,7 @@ final class ProviderConnectionStore {
             if result.applied {
                 pendingRestartConnectionIDs.remove(connection.id)
                 await refreshCacheFromRuntime(store: store)
+                await onRuntimeConfigurationApplied?()
             } else {
                 pendingRestartConnectionIDs.insert(connection.id)
                 await restartRuntimeIfNeeded(store: store)
@@ -176,6 +182,7 @@ final class ProviderConnectionStore {
                 if result.applied {
                     pendingRestartConnectionIDs.remove(connectionID)
                     await refreshCacheFromRuntime(store: store)
+                    await onRuntimeConfigurationApplied?()
                 } else {
                     pendingRestartConnectionIDs.insert(connectionID)
                     await restartRuntimeIfNeeded(store: store)
@@ -189,6 +196,7 @@ final class ProviderConnectionStore {
             if result.applied {
                 pendingRestartConnectionIDs.remove(connectionID)
                 await refreshCacheFromRuntime(store: store)
+                await onRuntimeConfigurationApplied?()
             } else {
                 pendingRestartConnectionIDs.insert(connectionID)
                 await restartRuntimeIfNeeded(store: store)
@@ -212,6 +220,7 @@ final class ProviderConnectionStore {
                     if result.applied {
                         pendingRestartConnectionIDs.remove(connectionID)
                         await refreshCacheFromRuntime(store: store)
+                        await onRuntimeConfigurationApplied?()
                     } else {
                         pendingRestartConnectionIDs.insert(connectionID)
                         await restartRuntimeIfNeeded(store: store)
@@ -258,6 +267,24 @@ final class ProviderConnectionStore {
             await loadProviderTemplates(store: store)
         } catch {
             runtimeConfigurationError = error.localizedDescription
+        }
+    }
+
+    /// Applies a settings.json snapshot immediately. The embedded and daemon
+    /// runtimes also watch the file, but this explicit call gives the settings
+    /// UI an acknowledgement path when it writes a complete document directly.
+    func reloadRuntimeSettings(store: (any ProviderStore)? = nil) async {
+        guard let store = store ?? providerStore else { return }
+        do {
+            try await store.reloadSettings()
+            runtimeConfigurationError = nil
+            await refreshCacheFromRuntime(store: store)
+            onSecretsPushed?()
+        } catch {
+            runtimeConfigurationError = error.localizedDescription
+            providerStoreLogger.error(
+                "重新加载 Runtime settings 失败：\(error.localizedDescription, privacy: .public)"
+            )
         }
     }
 
@@ -371,6 +398,8 @@ final class ProviderConnectionStore {
             let result = try await store.upsertProvider(connection.asRuntimeProviderDefinition())
             if result.applied {
                 pendingRestartConnectionIDs.remove(connection.id)
+                await refreshCacheFromRuntime(store: store)
+                await onRuntimeConfigurationApplied?()
             } else {
                 pendingRestartConnectionIDs.insert(connection.id)
                 await restartRuntimeIfNeeded(store: store)

@@ -237,6 +237,9 @@ final class AppContainer {
             }
             #endif
         }
+        providerConnections.onRuntimeConfigurationApplied = { [weak self] in
+            await self?.refreshActiveRuntimeContext()
+        }
         migrateLegacyProviderState()
         synchronizeGatewayConnectionWithIdentity()
         Task.detached(priority: .utility) { [userAssetFileStore] in
