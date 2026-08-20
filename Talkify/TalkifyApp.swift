@@ -24,10 +24,7 @@ let keychainGroupID: String? = "NKW67GFDHM.com.objc.chat.shared"
 
 #if os(macOS)
 private final class TalkifyApplicationDelegate: NSObject, NSApplicationDelegate {
-    var sharingController: RuntimeSharingController?
-
     func applicationWillTerminate(_ notification: Notification) {
-        sharingController?.stopSharing()
         #if os(macOS)
         CodeAgentDaemon.shared.stop()
         #else
@@ -88,7 +85,6 @@ struct TalkifyApp: App {
         )
         self.container = AppContainer(authManager: manager, environmentManager: environmentManager, deviceManager: deviceManager)
         #if os(macOS)
-        applicationDelegate.sharingController = container.sharingController
         #endif
     }
 

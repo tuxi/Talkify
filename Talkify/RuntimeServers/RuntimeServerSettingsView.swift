@@ -239,14 +239,6 @@ private struct EmbeddedRuntimeServerCard: View {
     @State private var isRestarting = false
     @State private var showsRestartConfirmation = false
     @State private var operationError: String?
-    #if os(macOS)
-    @State private var isTogglingSharing = false
-    @State private var showsQRCode = false
-    @State private var showsDevices = false
-    @State private var sharingError: String?
-    @State private var pendingInvitation: RuntimePairingInvitation?
-    @State private var pendingInvitationPayload: String?
-    #endif
 
     private var coordinator: RuntimeServerCoordinator {
         container.runtimeServers
@@ -303,9 +295,6 @@ private struct EmbeddedRuntimeServerCard: View {
                 }
 
             }
-            #if os(macOS)
-            runtimeSharingSection
-            #endif
             if let operationError {
                 Text(operationError)
                     .font(.footnote)
@@ -320,173 +309,7 @@ private struct EmbeddedRuntimeServerCard: View {
         } message: {
             Text("当前有任务或待处理事项。重启会中断这些任务，且无法自动恢复实时进度。")
         }
-        #if os(macOS)
-        .sheet(isPresented: $showsQRCode) {
-            if let invitation = pendingInvitation,
-               let payload = pendingInvitationPayload {
-                RuntimeSharingQRView(
-                    invitation: invitation,
-                    payload: payload
-                ) {
-                    showsQRCode = false
-                }
-            } else {
-                VStack {
-                    ProgressView()
-                        .progressViewStyle(.circular)
-                    Text("Loading...")
-                }
-            }
-        }
-        .sheet(isPresented: $showsDevices) {
-            RuntimeSharedDevicesView(
-                deviceRegistry: container.sharingController.deviceRegistry
-            ) { deviceID in
-                Task { await revokeSharedDevice(deviceID) }
-            }
-        }
-        #endif
     }
-
-    #if os(macOS)
-    @ViewBuilder
-    private var runtimeSharingSection: some View {
-        let controller = container.sharingController
-        let status = controller.status
-        VStack(alignment: .leading, spacing: 12) {
-            Divider()
-
-            HStack(spacing: 10) {
-                Image(systemName: "wifi.router")
-                    .font(.system(size: 14, weight: .medium))
-                    .foregroundStyle(sharingStatusColor(status.state))
-                Text("局域网共享 Runtime")
-                    .font(.system(size: 15, weight: .semibold))
-                Spacer()
-                Toggle("", isOn: Binding(
-                    get: { controller.isSharing },
-                    set: { newValue in
-                        Task { await toggleSharing(newValue) }
-                    }
-                ))
-                .labelsHidden()
-                .toggleStyle(.switch)
-                .disabled(isTogglingSharing || monitor.status == .offline)
-            }
-
-            HStack(spacing: 6) {
-                Circle()
-                    .fill(sharingStatusColor(status.state))
-                    .frame(width: 7, height: 7)
-                Text(sharingStatusText(status))
-                    .font(.system(size: 13))
-                    .foregroundStyle(.secondary)
-                if status.state == .running, let origin = controller.advertisedOrigin {
-                    Text("·")
-                        .foregroundStyle(.secondary)
-                    Text(origin.absoluteString)
-                        .font(.system(size: 12, design: .monospaced))
-                        .foregroundStyle(.tertiary)
-                        .textSelection(.enabled)
-                }
-            }
-
-            if let sharingError {
-                Text(sharingError)
-                    .font(.system(size: 12))
-                    .foregroundStyle(.red)
-            }
-
-            if status.state == .running {
-                HStack(spacing: 10) {
-                    Button {
-                        prepareQRCode()
-                    } label: {
-                        Label("显示配对二维码", systemImage: "qrcode")
-                            .font(.system(size: 13))
-                    }
-                    .buttonStyle(.bordered)
-                    .controlSize(.small)
-
-                    let activeCount = controller.deviceRegistry.activeDevices.count
-                    Button {
-                        showsDevices = true
-                    } label: {
-                        Label(
-                            activeCount > 0
-                                ? "已配对设备 (\(activeCount))"
-                                : "已配对设备",
-                            systemImage: "iphone.gen3"
-                        )
-                        .font(.system(size: 13))
-                    }
-                    .buttonStyle(.bordered)
-                    .controlSize(.small)
-                }
-            }
-        }
-    }
-
-    private func sharingStatusColor(_ state: RuntimeSharedListenerState) -> Color {
-        switch state {
-        case .stopped: .gray
-        case .starting: .blue
-        case .running: .green
-        case .failed: .red
-        }
-    }
-
-    private func sharingStatusText(_ status: RuntimeSharedListenerStatus) -> String {
-        switch status.state {
-        case .stopped: "共享未开启"
-        case .starting: "正在启动共享..."
-        case .running: "共享已开启 · 端口 \(status.port)"
-        case .failed:
-            if let error = status.lastError, !error.isEmpty {
-                "共享失败：\(error)"
-            } else {
-                "共享失败"
-            }
-        }
-    }
-
-    private func toggleSharing(_ enable: Bool) async {
-        guard !isTogglingSharing else { return }
-        isTogglingSharing = true
-        sharingError = nil
-        let controller = container.sharingController
-        if enable {
-            do {
-                try await controller.startSharing()
-            } catch {
-                sharingError = error.localizedDescription
-            }
-        } else {
-            controller.stopSharing()
-        }
-        isTogglingSharing = false
-    }
-
-    private func prepareQRCode() {
-        let controller = container.sharingController
-        do {
-            let invitation = try controller.createPairingInvitation()
-            pendingInvitation = invitation
-            pendingInvitationPayload = try invitation.encodedPayload()
-            showsQRCode = true
-        } catch {
-            sharingError = error.localizedDescription
-        }
-    }
-
-    private func revokeSharedDevice(_ deviceID: String) async {
-        do {
-            try container.sharingController.revokeDevice(deviceID)
-        } catch {
-            sharingError = error.localizedDescription
-        }
-    }
-    #endif
 
     private func checkEmbedded() async {
         guard !isChecking, !isRestarting else { return }
@@ -538,6 +361,7 @@ private struct EmbeddedRuntimeServerCard: View {
 }
 
 private struct ExternalRuntimeServerCard: View {
+    @Environment(AppContainer.self) private var container
     let connection: RuntimeServerConnection
     let monitor: ExternalRuntimeServerStatusMonitor
     let isActive: Bool
@@ -547,6 +371,16 @@ private struct ExternalRuntimeServerCard: View {
     let onEdit: () -> Void
     let onRemove: () -> Void
     let onDiagnostics: () -> Void
+    
+    @State private var operationError: String?
+    #if os(macOS)
+    @State private var isTogglingSharing = false
+    @State private var showsQRCode = false
+    @State private var showsDevices = false
+    @State private var sharingError: String?
+    @State private var pendingInvitation: RuntimePairingInvitation?
+    @State private var pendingInvitationPayload: String?
+    #endif
 
     var body: some View {
         RuntimeServerCardShell(
@@ -593,8 +427,181 @@ private struct ExternalRuntimeServerCard: View {
                     }
                 }
             }
+#if os(macOS)
+            if connection.kind == .local {
+                runtimeSharingSection
+            }
+#endif
+            if let operationError {
+                Text(operationError)
+                    .font(.footnote)
+                    .foregroundStyle(.red)
+            }
+        }
+#if os(macOS)
+        .sheet(isPresented: $showsQRCode) {
+            if let invitation = pendingInvitation,
+               let payload = pendingInvitationPayload {
+                RuntimeSharingQRView(
+                    invitation: invitation,
+                    payload: payload
+                ) {
+                    showsQRCode = false
+                }
+            } else {
+                VStack {
+                    ProgressView()
+                        .progressViewStyle(.circular)
+                    Text("Loading...")
+                }
+            }
+        }
+        .sheet(isPresented: $showsDevices) {
+            RuntimeSharedDevicesView(
+                devices: container.sharingController.devices
+            ) { deviceID in
+                Task { await revokeSharedDevice(deviceID) }
+            }
+        }
+        #endif
+
+    }
+    
+#if os(macOS)
+@ViewBuilder
+private var runtimeSharingSection: some View {
+    let controller = container.sharingController
+    let status = controller.status
+    VStack(alignment: .leading, spacing: 12) {
+        Divider()
+
+        HStack(spacing: 10) {
+            Image(systemName: "wifi.router")
+                .font(.system(size: 14, weight: .medium))
+                .foregroundStyle(sharingStatusColor(status.state))
+            Text("局域网共享 Runtime")
+                .font(.system(size: 15, weight: .semibold))
+            Spacer()
+            Toggle("", isOn: Binding(
+                get: { controller.isSharing },
+                set: { newValue in
+                    Task { await toggleSharing(newValue) }
+                }
+            ))
+            .labelsHidden()
+            .toggleStyle(.switch)
+            .disabled(isTogglingSharing || monitor.status == .offline)
+        }
+
+        HStack(spacing: 6) {
+            Circle()
+                .fill(sharingStatusColor(status.state))
+                .frame(width: 7, height: 7)
+            Text(sharingStatusText(status))
+                .font(.system(size: 13))
+                .foregroundStyle(.secondary)
+        }
+
+        if let sharingError {
+            Text(sharingError)
+                .font(.system(size: 12))
+                .foregroundStyle(.red)
+        }
+
+        if status.state == .running {
+            HStack(spacing: 10) {
+                Button {
+                    prepareQRCode()
+                } label: {
+                    Label("显示配对二维码", systemImage: "qrcode")
+                        .font(.system(size: 13))
+                }
+                .buttonStyle(.bordered)
+                .controlSize(.small)
+
+                let activeCount = controller.devices.filter {
+                    $0.revokedAt == nil
+                }.count
+                Button {
+                    showsDevices = true
+                } label: {
+                    Label(
+                        activeCount > 0
+                            ? "已配对设备 (\(activeCount))"
+                            : "已配对设备",
+                        systemImage: "iphone.gen3"
+                    )
+                    .font(.system(size: 13))
+                }
+                .buttonStyle(.bordered)
+                .controlSize(.small)
+            }
         }
     }
+}
+
+private func sharingStatusColor(_ state: RuntimeSharedListenerState) -> Color {
+    switch state {
+    case .stopped: .gray
+    case .starting: .blue
+    case .running: .green
+    case .failed: .red
+    }
+}
+
+private func sharingStatusText(_ status: RuntimeSharedListenerStatus) -> String {
+    switch status.state {
+    case .stopped: "共享未开启"
+    case .starting: "正在启动共享..."
+    case .running: "共享已开启 · 端口 \(status.port)"
+    case .failed:
+        if let error = status.lastError, !error.isEmpty {
+            "共享失败：\(error)"
+        } else {
+            "共享失败"
+        }
+    }
+}
+
+private func toggleSharing(_ enable: Bool) async {
+    guard !isTogglingSharing else { return }
+    isTogglingSharing = true
+    sharingError = nil
+    let controller = container.sharingController
+    if enable {
+        do {
+            try await controller.startSharing()
+        } catch {
+            sharingError = error.localizedDescription
+        }
+    } else {
+        await controller.stopSharing()
+    }
+    isTogglingSharing = false
+}
+
+private func prepareQRCode() {
+    let controller = container.sharingController
+    Task {
+        do {
+            let invitation = try await controller.createPairingInvitation()
+            pendingInvitation = invitation
+            pendingInvitationPayload = try invitation.encodedPayload()
+            showsQRCode = true
+        } catch {
+            sharingError = error.localizedDescription
+        }
+    }
+}
+
+private func revokeSharedDevice(_ deviceID: String) async {
+    do {
+        try await container.sharingController.revokeDevice(deviceID)
+    } catch {
+        sharingError = error.localizedDescription
+    }
+}
+#endif
 }
 
 private struct RuntimeServerCardShell<Content: View>: View {

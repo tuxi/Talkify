@@ -76,7 +76,7 @@ final class AppContainer {
     let providerConnections: ProviderConnectionStore
     let runtimeServers: RuntimeServerCoordinator
     #if os(macOS)
-    let sharingController: RuntimeSharingController
+    let sharingController: RuntimeSharingDaemonController
     #endif
 
     private let baseHeaders: [String: String]
@@ -194,7 +194,7 @@ final class AppContainer {
         )
         self.runtimeServers = RuntimeServerCoordinator()
         #if os(macOS)
-        self.sharingController = RuntimeSharingController()
+        self.sharingController = RuntimeSharingDaemonController()
         #endif
 
         self.toolRegistry = ToolRegistry()
@@ -377,6 +377,12 @@ final class AppContainer {
                         for: connection.id,
                         token: daemon.accessToken
                     )
+                    sharingController.configure(
+                        endpoint: endpoint,
+                        managementToken: daemon.accessToken
+                    )
+                    _ = await sharingController.refreshStatus()
+                    _ = await sharingController.refreshDevices()
 
                     DLLog("✅ [RUNTIME] 活跃后端：codeagentd daemon (port \(daemon.port), pid \(daemon.processID))")
 

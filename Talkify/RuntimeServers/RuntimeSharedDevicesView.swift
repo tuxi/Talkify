@@ -13,12 +13,10 @@ import AgentKit
 struct RuntimeSharedDevicesView: View {
     @Environment(\.dismiss) private var dismiss
 
-    let deviceRegistry: RuntimeSharedDeviceRegistry
+    let devices: [RuntimeSharedDevice]
     let onRevoke: (String) -> Void
 
     @State private var pendingRevokeDeviceID: String?
-    @State private var editingDeviceID: String?
-    @State private var editingName = ""
 
     var body: some View {
         VStack(spacing: 0) {
@@ -36,7 +34,7 @@ struct RuntimeSharedDevicesView: View {
                 VStack(alignment: .leading, spacing: 3) {
                     Text("已配对设备")
                         .font(.system(size: 18, weight: .semibold))
-                    let active = deviceRegistry.activeDevices.count
+                    let active = devices.filter { $0.revokedAt == nil }.count
                     Text(
                         active > 0
                             ? "\(active) 台设备已连接"
@@ -63,7 +61,7 @@ struct RuntimeSharedDevicesView: View {
             Divider()
 
             // Content
-            if deviceRegistry.devices.isEmpty {
+            if devices.isEmpty {
                 VStack(spacing: 12) {
                     Image(systemName: "antenna.radiowaves.left.and.right")
                         .font(.system(size: 32))
@@ -76,7 +74,7 @@ struct RuntimeSharedDevicesView: View {
             } else {
                 ScrollView {
                     LazyVStack(spacing: 0) {
-                        ForEach(deviceRegistry.devices) { device in
+                        ForEach(devices) { device in
                             deviceRow(device)
                         }
                     }
@@ -115,12 +113,9 @@ struct RuntimeSharedDevicesView: View {
                 pendingRevokeDeviceID = nil
             }
         } message: { deviceID in
-            if let device = deviceRegistry.devices.first(where: { $0.deviceID == deviceID }) {
+            if let device = devices.first(where: { $0.deviceID == deviceID }) {
                 Text("“\(device.displayName)”将立即断开连接。此操作不可撤销，但设备记录将保留。")
             }
-        }
-        .sheet(item: $editingDeviceID) { deviceID in
-            deviceRenameSheet(deviceID: deviceID)
         }
     }
 
@@ -174,26 +169,14 @@ struct RuntimeSharedDevicesView: View {
             Spacer()
 
             if !isRevoked {
-                HStack(spacing: 6) {
-                    Button {
-                        editingDeviceID = device.deviceID
-                        editingName = device.displayName
-                    } label: {
-                        Image(systemName: "pencil")
-                            .font(.system(size: 11))
-                    }
-                    .buttonStyle(.plain)
-                    .foregroundStyle(.secondary)
-
-                    Button {
-                        pendingRevokeDeviceID = device.deviceID
-                    } label: {
-                        Image(systemName: "xmark.circle.fill")
-                            .font(.system(size: 14))
-                    }
-                    .buttonStyle(.plain)
-                    .foregroundStyle(.red)
+                Button {
+                    pendingRevokeDeviceID = device.deviceID
+                } label: {
+                    Image(systemName: "xmark.circle.fill")
+                        .font(.system(size: 14))
                 }
+                .buttonStyle(.plain)
+                .foregroundStyle(.red)
             }
         }
         .padding(.vertical, 10)
@@ -205,39 +188,6 @@ struct RuntimeSharedDevicesView: View {
         .padding(.vertical, 2)
     }
 
-    // MARK: - Rename Sheet
-
-    private func deviceRenameSheet(deviceID: String) -> some View {
-        VStack(spacing: 18) {
-            Text("重命名设备")
-                .font(.system(size: 18, weight: .semibold))
-            TextField("设备名称", text: $editingName)
-                .textFieldStyle(.roundedBorder)
-                .frame(width: 240)
-
-            HStack(spacing: 12) {
-                Button("取消") {
-                    editingDeviceID = nil
-                }
-                .buttonStyle(.bordered)
-
-                Button("保存") {
-                    if !editingName.trimmingCharacters(
-                        in: .whitespacesAndNewlines
-                    ).isEmpty {
-                        try? deviceRegistry.rename(
-                            deviceID: deviceID,
-                            displayName: editingName
-                        )
-                    }
-                    editingDeviceID = nil
-                }
-                .buttonStyle(.borderedProminent)
-            }
-        }
-        .padding(24)
-        .frame(width: 340, height: 160)
-    }
 }
 
 extension String: @retroactive Identifiable {
