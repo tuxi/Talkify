@@ -447,7 +447,7 @@
 				APPLICATION_EXTENSION_API_ONLY = YES;
 				CODE_SIGN_ENTITLEMENTS = TalkifyShareExtension/TalkifyShareExtension.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 59;
+				CURRENT_PROJECT_VERSION = 60;
 				DEVELOPMENT_TEAM = NKW67GFDHM;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = TalkifyShareExtension/Info.plist;
@@ -457,7 +457,7 @@
 					"@executable_path/Frameworks",
 					"@executable_path/../../Frameworks",
 				);
-				MARKETING_VERSION = 2.0.0;
+				MARKETING_VERSION = 2.0.2;
 				PRODUCT_BUNDLE_IDENTIFIER = com.objc.chat.ShareExtension;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = iphoneos;
@@ -477,7 +477,7 @@
 				APPLICATION_EXTENSION_API_ONLY = YES;
 				CODE_SIGN_ENTITLEMENTS = TalkifyShareExtension/TalkifyShareExtension.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 59;
+				CURRENT_PROJECT_VERSION = 60;
 				DEVELOPMENT_TEAM = NKW67GFDHM;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = TalkifyShareExtension/Info.plist;
@@ -487,7 +487,7 @@
 					"@executable_path/Frameworks",
 					"@executable_path/../../Frameworks",
 				);
-				MARKETING_VERSION = 2.0.0;
+				MARKETING_VERSION = 2.0.2;
 				PRODUCT_BUNDLE_IDENTIFIER = com.objc.chat.ShareExtension;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = iphoneos;
@@ -563,8 +563,8 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = C30000000000000000000002 /* TalkifyMacAppStore.xcconfig */;
 			buildSettings = {
-				CURRENT_PROJECT_VERSION = 59;
-				MARKETING_VERSION = 2.0.0;
+				CURRENT_PROJECT_VERSION = 60;
+				MARKETING_VERSION = 2.0.2;
 			};
 			name = "Debug-MacAppStore";
 		};
@@ -572,8 +572,8 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = C30000000000000000000002 /* TalkifyMacAppStore.xcconfig */;
 			buildSettings = {
-				CURRENT_PROJECT_VERSION = 59;
-				MARKETING_VERSION = 2.0.0;
+				CURRENT_PROJECT_VERSION = 60;
+				MARKETING_VERSION = 2.0.2;
 			};
 			name = "Release-MacAppStore";
 		};
@@ -581,8 +581,8 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = C30000000000000000000003 /* TalkifyMacDirect.xcconfig */;
 			buildSettings = {
-				CURRENT_PROJECT_VERSION = 59;
-				MARKETING_VERSION = 2.0.1;
+				CURRENT_PROJECT_VERSION = 60;
+				MARKETING_VERSION = 2.0.2;
 			};
 			name = "Debug-MacDirect";
 		};
@@ -590,8 +590,8 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = C30000000000000000000003 /* TalkifyMacDirect.xcconfig */;
 			buildSettings = {
-				CURRENT_PROJECT_VERSION = 59;
-				MARKETING_VERSION = 2.0.1;
+				CURRENT_PROJECT_VERSION = 60;
+				MARKETING_VERSION = 2.0.2;
 			};
 			name = "Release-MacDirect";
 		};
@@ -627,6 +627,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				CURRENT_PROJECT_VERSION = "";
+				MARKETING_VERSION = "";
 				PRODUCT_NAME = TalkifyShareExtension;
 			};
 			name = "Debug-MacAppStore";
@@ -635,6 +636,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				CURRENT_PROJECT_VERSION = "";
+				MARKETING_VERSION = "";
 				PRODUCT_NAME = TalkifyShareExtension;
 			};
 			name = "Release-MacAppStore";
@@ -643,6 +645,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				CURRENT_PROJECT_VERSION = "";
+				MARKETING_VERSION = "";
 				PRODUCT_NAME = TalkifyShareExtension;
 			};
 			name = "Debug-MacDirect";
@@ -651,6 +654,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				CURRENT_PROJECT_VERSION = "";
+				MARKETING_VERSION = "";
 				PRODUCT_NAME = TalkifyShareExtension;
 			};
 			name = "Release-MacDirect";
@@ -779,7 +783,7 @@
 				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = NO;
 				CODE_SIGN_ENTITLEMENTS = Talkify/Talkify.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 59;
+				CURRENT_PROJECT_VERSION = 60;
 				DEVELOPMENT_TEAM = NKW67GFDHM;
 				ENABLE_APP_SANDBOX = YES;
 				"ENABLE_APP_SANDBOX[sdk=macosx*]" = NO;
@@ -804,7 +808,7 @@
 				LD_RUNPATH_SEARCH_PATHS = "@executable_path/Frameworks";
 				"LD_RUNPATH_SEARCH_PATHS[sdk=macosx*]" = "@executable_path/../Frameworks";
 				MACOSX_DEPLOYMENT_TARGET = 15;
-				MARKETING_VERSION = 2.0.0;
+				MARKETING_VERSION = 2.0.2;
 				PRODUCT_BUNDLE_IDENTIFIER = com.objc.chat;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				REGISTER_APP_GROUPS = YES;
@@ -829,7 +833,7 @@
 				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = NO;
 				CODE_SIGN_ENTITLEMENTS = Talkify/Talkify.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 59;
+				CURRENT_PROJECT_VERSION = 60;
 				DEVELOPMENT_TEAM = NKW67GFDHM;
 				ENABLE_APP_SANDBOX = YES;
 				"ENABLE_APP_SANDBOX[sdk=macosx*]" = NO;
@@ -854,7 +858,7 @@
 				LD_RUNPATH_SEARCH_PATHS = "@executable_path/Frameworks";
 				"LD_RUNPATH_SEARCH_PATHS[sdk=macosx*]" = "@executable_path/../Frameworks";
 				MACOSX_DEPLOYMENT_TARGET = 15;
-				MARKETING_VERSION = 2.0.0;
+				MARKETING_VERSION = 2.0.2;
 				PRODUCT_BUNDLE_IDENTIFIER = com.objc.chat;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				REGISTER_APP_GROUPS = YES;
