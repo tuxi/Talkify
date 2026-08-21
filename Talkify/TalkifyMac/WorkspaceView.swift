@@ -258,7 +258,7 @@ public struct WorkspaceView: View {
                         }
 #endif
 #if os(macOS)
-                        .frame(minWidth: 180, idealWidth: 360, maxWidth: .infinity)
+                        .frame(minWidth: 80, idealWidth: 280, maxWidth: 650)
 #endif
                         .navigationTitle(store.activeConversationViewModel?.conversation?.name ?? "")
                 }
@@ -639,9 +639,9 @@ private extension View {
     func platformSidebarColumnWidth() -> some View {
 #if os(iOS)
         //        self.navigationSplitViewColumnWidth(320) // iPhone
-        self.navigationSplitViewColumnWidth(min: 200, ideal: 260, max: 330) // iPad
+        self.navigationSplitViewColumnWidth(min: 200, ideal: 260, max: 320) // iPad
 #else
-        self.navigationSplitViewColumnWidth(min: 200, ideal: 260, max: 360)
+        self.navigationSplitViewColumnWidth(min: 160, ideal: 220, max: 339)
 #endif
     }
     
@@ -651,7 +651,7 @@ private extension View {
 #if os(iOS)
         self.inspectorColumnWidth(320)
 #else
-        self.inspectorColumnWidth(min: 180, ideal: 280, max: 380)
+        self.inspectorColumnWidth(min: 150, ideal: 238, max: 800)
 #endif
     }
 }
