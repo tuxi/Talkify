@@ -1,6 +1,7 @@
 import SwiftUI
 import AgentKit
 import CoreKit
+import DesignKit
 
 struct ProviderSettingsView: View {
     @Environment(AppContainer.self) private var container
@@ -454,6 +455,7 @@ struct ProviderEditorView: View {
                             Toggle("Tool Calling", isOn: $model.supportsTools)
                             Toggle("Reasoning", isOn: $model.supportsReasoning)
                             Toggle("Web Search", isOn: $model.webSearch)
+                            ModelCapSelectView(selectedCaps: $model.inputModalities)
                             DisclosureGroup("高级") {
                                 TextField("API Override（可选）", text: $model.api)
                                 TextField("Temperature（可选）", text: $model.temperature)
@@ -707,4 +709,40 @@ struct ModelCatalogSettingsView: View {
 
 private extension String {
     var nilIfEmpty: String? { isEmpty ? nil : self }
+}
+
+struct ModelCapSelectView: View {
+    @Binding var selectedCaps: Set<ProviderInputModality>
+    
+    var body: some View {
+        VStack(alignment: .leading) {
+            Text("模型支持能力")
+                .font(.headline)
+            
+            LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())]) {
+                ForEach(ProviderInputModality.allCases) { cap in
+                    let isSelected = selectedCaps.contains(cap)
+                    Text(cap.displayName)
+                        .padding(.vertical,10)
+                        .frame(maxWidth: .infinity)
+                        .foregroundColor(isSelected ? Color.accentColor : .primary)
+                        .background(isSelected ? Color.accentColor.opacity(0.15) : Color.windowBackground)
+                        .overlay {
+                            RoundedRectangle(cornerRadius: 8)
+                                .stroke(isSelected ? Color.accentColor : Color.primary, lineWidth: isSelected ? 2 : 1)
+                        }
+                        .cornerRadius(8)
+                        .onTapGesture {
+                            // 点击切换选中状态
+                            if selectedCaps.contains(cap) {
+                                selectedCaps.remove(cap)
+                            } else {
+                                selectedCaps.insert(cap)
+                            }
+                        }
+                }
+            }
+            .padding()
+        }
+    }
 }
