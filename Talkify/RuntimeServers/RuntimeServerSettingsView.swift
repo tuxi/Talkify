@@ -397,8 +397,13 @@ private struct ExternalRuntimeServerCard: View {
             )
 
             if monitor.status != .connected, let lastConnectedAt = monitor.lastConnectedAt {
+                let baseText =
+                    "离线时仅可浏览已落盘的本地缓存（只读）。上次同步：\(lastConnectedAt.runtimeServerFormatted)"
+                let text = connection.trustPolicy != nil
+                    ? "\(baseText) Mac 重启导致端口变化时，将自动通过 Bonjour 重新发现并重连。"
+                    : baseText
                 Label(
-                    "离线时仅可浏览已落盘的本地缓存（只读）。上次同步：\(lastConnectedAt.runtimeServerFormatted)",
+                    text,
                     systemImage: "externaldrive.badge.exclamationmark"
                 )
                 .font(.footnote)
@@ -458,7 +463,7 @@ private struct ExternalRuntimeServerCard: View {
         }
         .sheet(isPresented: $showsDevices) {
             RuntimeSharedDevicesView(
-                devices: container.sharingController.devices
+                controller: container.sharingController
             ) { deviceID in
                 Task { await revokeSharedDevice(deviceID) }
             }
@@ -471,7 +476,8 @@ private struct ExternalRuntimeServerCard: View {
 @ViewBuilder
 private var runtimeSharingSection: some View {
     let controller = container.sharingController
-    let status = controller.status
+    @State var status = controller.status
+    @State var devices = controller.devices
     VStack(alignment: .leading, spacing: 12) {
         Divider()
 
@@ -519,7 +525,7 @@ private var runtimeSharingSection: some View {
                 .buttonStyle(.bordered)
                 .controlSize(.small)
 
-                let activeCount = controller.devices.filter {
+                let activeCount = devices.filter {
                     $0.revokedAt == nil
                 }.count
                 Button {
@@ -536,6 +542,14 @@ private var runtimeSharingSection: some View {
                 .buttonStyle(.bordered)
                 .controlSize(.small)
             }
+        }
+    }
+    .task {
+        _ = await controller.refreshStatus()
+        _ = await controller.refreshDevices()
+        await MainActor.run {
+            status = controller.status
+            devices = controller.devices
         }
     }
 }

@@ -13,10 +13,17 @@ import AgentKit
 struct RuntimeSharedDevicesView: View {
     @Environment(\.dismiss) private var dismiss
 
-    let devices: [RuntimeSharedDevice]
+    let controller: RuntimeSharingDaemonController
+    @State private var devices: [RuntimeSharedDevice]
     let onRevoke: (String) -> Void
 
     @State private var pendingRevokeDeviceID: String?
+    
+    init(controller: RuntimeSharingDaemonController, onRevoke: @escaping (String) -> Void, pendingRevokeDeviceID: String? = nil) {
+        self.controller = controller
+        self.onRevoke = onRevoke
+        self.devices = controller.devices
+    }
 
     var body: some View {
         VStack(spacing: 0) {
@@ -117,6 +124,13 @@ struct RuntimeSharedDevicesView: View {
                 Text("“\(device.displayName)”将立即断开连接。此操作不可撤销，但设备记录将保留。")
             }
         }
+        .task {
+            _ = await controller.refreshStatus()
+            _ = await controller.refreshDevices()
+            await MainActor.run {
+                devices = controller.devices
+            }
+        }
     }
 
     // MARK: - Device Row
@@ -148,6 +162,16 @@ struct RuntimeSharedDevicesView: View {
                     Text(device.platform)
                         .font(.system(size: 12))
                         .foregroundStyle(.secondary)
+                    if let os = device.osVersion, !os.isEmpty {
+                        Text("· iOS \(os)")
+                            .font(.system(size: 12))
+                            .foregroundStyle(.secondary)
+                    }
+                    if let app = device.appVersion, !app.isEmpty {
+                        Text("· App \(app)")
+                            .font(.system(size: 12))
+                            .foregroundStyle(.tertiary)
+                    }
                     Text("·")
                         .foregroundStyle(.tertiary)
                     Text(
