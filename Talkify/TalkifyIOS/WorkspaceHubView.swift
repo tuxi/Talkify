@@ -1205,6 +1205,7 @@ private struct WorkspaceConversationListView: View {
                         .disabled(!store.canDeleteConversation(conversation))
                     }
                 }
+                .safeAreaPadding(.bottom, 100)
                 .listStyle(.plain)
                 .scrollContentBackground(.hidden)
                 .refreshable {

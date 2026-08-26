@@ -263,11 +263,9 @@ final class AppContainer {
             await toolRegistry.register(MergePDFsTool())
             await toolRegistry.register(SplitPDFTool())
             await toolRegistry.register(ExtractVideoFramesTool())
+            await toolRegistry.register(ScreenshotTool())
 #if os(iOS)
             await toolRegistry.register(ScanDocumentTool())
-#endif
-#if os(macOS)
-            await toolRegistry.register(ScreenshotTool())
 #endif
         }
     }

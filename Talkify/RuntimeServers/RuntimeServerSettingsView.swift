@@ -164,10 +164,17 @@ struct RuntimeServerSettingsView: View {
     }
 
     private func prepareActivation(_ connection: RuntimeServerConnection) async {
-        guard connection.id != coordinator.activeConnectionID, !isSwitching else { return }
+        if connection.id == coordinator.activeConnectionID {
+            return
+        }
+        if isSwitching {
+            return
+        }
         operationError = nil
         isSwitching = true
-        defer { isSwitching = false }
+        defer {
+            isSwitching = false
+        }
         do {
             let snapshot = try await container.makeAgentClient().activitySnapshot()
             if ProviderRuntimeActivityPolicy.hasActiveRuntimeWork(snapshot) {

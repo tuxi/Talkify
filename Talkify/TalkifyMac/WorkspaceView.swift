@@ -159,6 +159,8 @@ public struct WorkspaceView: View {
                             ConversationDetailView(conversation: conversation)
                         case .draft:
                             ConversationDetailView(conversation: nil)
+                        case .automation:
+                            AutomationDashboardView()
                         }
                     }
                     .inspector(isPresented: $store.isInspectorPresented) {
@@ -182,7 +184,7 @@ public struct WorkspaceView: View {
         .onChange(of: router.path) { _, newPath in
             // 用户返回侧栏时清除选中态，确保再次点同一行仍可触发 push
             if newPath.isEmpty {
-                store.selectedConversation = nil
+                store.selectItem = .draft
             }
         }
         .environment(router)
@@ -241,26 +243,36 @@ public struct WorkspaceView: View {
 #endif
             } detail: {
                 NavigationStack(path: $router.path) {
-                    ConversationDetailView(conversation: store.selectedConversation)
-                        .withAgentNavigationDestinations(router: router, dependencies: dependencies)
-#if os(iOS) // iPad 上关闭sidebar 后增加显示侧栏的按钮
-                        .toolbar {
-                            ToolbarItem(placement: .topBarLeading) {
-                                if columnVisibility == .detailOnly {
-                                    Button {
-                                        columnVisibility = .all
-                                    } label: {
-                                        Image(systemName: "sidebar.left")
-                                            .accessibilityLabel(TalkifyLocalized.string("workspace.show_sidebar"))
+                    switch store.selectItem {
+                    case .conversationDetail(let conversation):
+                        ConversationDetailView(conversation: conversation)
+                            .withAgentNavigationDestinations(router: router, dependencies: dependencies)
+    #if os(iOS) // iPad 上关闭sidebar 后增加显示侧栏的按钮
+                            .toolbar {
+                                ToolbarItem(placement: .topBarLeading) {
+                                    if columnVisibility == .detailOnly {
+                                        Button {
+                                            columnVisibility = .all
+                                        } label: {
+                                            Image(systemName: "sidebar.left")
+                                                .accessibilityLabel(TalkifyLocalized.string("workspace.show_sidebar"))
+                                        }
                                     }
                                 }
                             }
-                        }
-#endif
-#if os(macOS)
-                        .frame(minWidth: 80, idealWidth: 280, maxWidth: 650)
-#endif
-                        .navigationTitle(store.activeConversationViewModel?.conversation?.name ?? "")
+    #endif
+    #if os(macOS)
+                            .frame(minWidth: 80, idealWidth: 280, maxWidth: 650)
+    #endif
+                            .navigationTitle(store.activeConversationViewModel?.conversation?.name ?? "")
+                    case .draft:
+                        ConversationDetailView(conversation: nil)
+                            .frame(minWidth: 80, idealWidth: 280, maxWidth: 650)
+                    case .automation:
+                        AutomationDashboardView()
+                            .frame(minWidth: 80, idealWidth: 280, maxWidth: 650)
+                            .navigationTitle("自动化")
+                    }
                 }
                 .inspector(isPresented: $store.isInspectorPresented) {
                     inspectorContent

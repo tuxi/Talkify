@@ -28,11 +28,28 @@ public struct SidebarView: View {
         @Bindable var store = store
 
         VStack(spacing: 0) {
-            newTaskButton
+            VStack(alignment: .leading, spacing: 15) {
+                newTaskButton
+                automationButton
+            }
+            .padding(.vertical, 10)
 
             ConversationListView(
                 viewModel: store.listViewModel,
-                selected: $store.selectedConversation,
+                selected: .init(get: {
+                    switch store.selectItem {
+                    case .conversationDetail(let conversation):
+                        return conversation
+                    default:
+                        return nil
+                    }
+                }, set: { ref in
+                    if let ref {
+                        store.selectItem = .conversationDetail(conversation: ref)
+                    } else {
+                        store.selectItem = .draft
+                    }
+                }),
                 searchText: searchText
             )
         }
@@ -66,9 +83,26 @@ public struct SidebarView: View {
         }
         .buttonStyle(.plain)
         .padding(.horizontal, 20)
-        .padding(.top, 15)
-        .padding(.bottom, 10)
         .accessibilityHint(TalkifyLocalized.string("workspace.new_draft_hint"))
+    }
+    
+    private var automationButton: some View {
+        Button {
+            store.selectItem = .automation
+        } label: {
+            HStack(spacing: 8) {
+                Image(systemName: "automatic.brakesignal")
+                    .font(.system(size: 14, weight: .regular))
+                    .offset(y: -1)
+                Text(verbatim: TalkifyLocalized.string("Automation"))
+                    .font(.system(size: 14, weight: .regular))
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .contentShape(Rectangle())
+            }
+        }
+        .buttonStyle(.plain)
+        .padding(.horizontal, 20)
+        .accessibilityHint(TalkifyLocalized.string("workspace.automation"))
     }
 }
 
