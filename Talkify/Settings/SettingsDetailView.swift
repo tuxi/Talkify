@@ -107,6 +107,9 @@ struct SettingsDetailView: View {
                 case .models:
                     ModelCatalogSettingsView()
                         .navigationTitle("模型")
+                case .permissions:
+                    PermissionSettingsView()
+                        .navigationTitle("权限")
                 case .settings:
 #if os(macOS)
                     let home = FileManager.default.homeDirectoryForCurrentUser
