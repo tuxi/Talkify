@@ -141,8 +141,11 @@ public final class VideoCacheManager {
             // 监听成功
             successObserver = NotificationCenter.default.addObserver(forName: .videoDidCache, object: nil, queue: .main) { notif in
                 if let cachedURL = notif.userInfo?["url"] as? URL, cachedURL == url {
-                    cleanUp()
-                    continuation.resume(returning: self.localURL(for: url))
+                    DispatchQueue.main.async {
+                        cleanUp()
+                        let item = self.localURL(for: url)
+                        continuation.resume(returning: item)
+                    }
                 }
             }
             
