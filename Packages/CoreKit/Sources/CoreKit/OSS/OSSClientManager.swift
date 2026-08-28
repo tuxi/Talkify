@@ -188,8 +188,12 @@ public actor OSSV2ClientManager {
     ///   - key: OSS 存储路径 (例如 "images/avatar.jpg")
     ///   - contentType: MIME 类型
     /// - Returns: 上传成功后的结果 (包含 ETag 等)
+    /// - Note: 标记 nonisolated，使 SDK 返回的非 Sendable 类型 PutObjectResult
+    ///   不跨越 actor 隔离边界（Swift 6.1 下会报 "cannot be sent from nonisolated context"；
+    ///   Swift 6.2 的 nonisolated-nonsending 默认语义下无此问题，此处统一行为）。
+    ///   依赖的存储属性均为 Sendable let（Client 为 @unchecked Sendable），访问安全。
     @discardableResult
-    public func uploadData(_ data: Data, key: String, contentType: String? = nil) async throws -> PutObjectResult {
+    nonisolated public func uploadData(_ data: Data, key: String, contentType: String? = nil) async throws -> OSSUploadResult {
         // V2 SDK 使用 Body.data 包装
         var request = PutObjectRequest(
             bucket: self.bucket,
@@ -201,7 +205,11 @@ public actor OSSV2ClientManager {
             request.contentType = contentType
         }
         
-        return try await client.putObject(request)
+        let result = try await client.putObject(request)
+        let domain = self.endpoint ?? "\(self.bucket).oss-\(self.region).aliyuncs.com"
+        let url = URL(string: "https://\(domain)/\(key)")!
+        
+        return OSSUploadResult(key: key, fullURL: url, eTag: result.etag)
     }
     
     /// 上传本地文件到 OSS
@@ -209,7 +217,7 @@ public actor OSSV2ClientManager {
     ///   - fileURL: 本地文件路径
     ///   - key: OSS 存储路径
     @discardableResult
-    public func uploadFile(from fileURL: URL, key: String, contentType: String? = nil, isForbidOerwrite: Bool = true, onProgress: (@Sendable (Double) -> Void)? = nil) async throws -> OSSUploadResult {
+    nonisolated public func uploadFile(from fileURL: URL, key: String, contentType: String? = nil, isForbidOerwrite: Bool = true, onProgress: (@Sendable (Double) -> Void)? = nil) async throws -> OSSUploadResult {
         // V2 SDK 使用 Body.file 包装
         var request = PutObjectRequest(
             bucket: self.bucket,
@@ -307,7 +315,8 @@ public actor OSSV2ClientManager {
     }
     
     /// 尝试“秒传”逻辑
-    public func smartUpload(from localURL: URL, directory: String) async throws -> OSSUploadResult {
+    /// - Note: nonisolated 原因同 uploadFile（HeadObjectResult 亦非 Sendable）。
+    nonisolated public func smartUpload(from localURL: URL, directory: String) async throws -> OSSUploadResult {
         let md5 = try localURL.computeMD5()
         let ext = localURL.pathExtension
         
