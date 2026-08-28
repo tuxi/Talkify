@@ -494,7 +494,7 @@ struct WorkspaceHubView: View {
                     Text(workspaceStatus.title)
                 }
             } else if workspaceContext.isExternalServer {
-                Text(verbatim: container.runtimeServers.activeConnection.displayName)
+                Text(verbatim: container.runtimeServers.activeConnection?.displayName ?? "")
             } else if workspaceContext.activeWorkspace?.branch == nil {
                 Text(verbatim: TalkifyLocalized.string("workspace.local_workspace"))
             }
@@ -664,7 +664,7 @@ struct WorkspaceHubView: View {
     // MARK: - Bottom Bar
     private var bottomBar: some View {
         VStack(spacing: 8) {
-            if container.runtimeServers.activeConnection.kind != .embedded {
+            if container.runtimeServers.activeConnection.map({ $0.kind != .embedded }) ?? false {
                 ActiveRuntimeServerIndicator(style: .sidebar) {
                     onSettings?(.servers)
                 }

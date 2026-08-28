@@ -47,7 +47,7 @@ struct TalkifyRootView: View {
         Binding(
             get: {
                 !hasCompletedProviderOnboarding
-                    && container.runtimeServers.activeConnection.kind == .embedded
+                    && container.runtimeServers.activeConnection?.kind == .embedded
                     && !container.providerConnections.hasAvailableModels
                     && !container.authManager.showLoginSheet
             },

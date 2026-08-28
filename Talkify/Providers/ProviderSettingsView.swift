@@ -12,7 +12,7 @@ struct ProviderSettingsView: View {
 
     private var store: ProviderConnectionStore { container.providerConnections }
     private var isExternalServerActive: Bool {
-        container.runtimeServers.activeConnection.kind == .remote
+        container.runtimeServers.activeConnection?.kind == .remote
     }
 
     var body: some View {
@@ -92,14 +92,13 @@ struct ProviderSettingsView: View {
         }
     }
 
+    @ViewBuilder
     private var externalServerNotice: some View {
+        let name = container.runtimeServers.activeConnection?.displayName ?? "未知服务器"
         ContentUnavailableView {
             Label("提供商由外部服务器管理", systemImage: "server.rack")
         } description: {
-            Text(
-                "当前连接的是“\(container.runtimeServers.activeConnection.displayName)”。"
-                + "Talkify 只读取该 CodeAgent Server 发布的模型，不会查看或修改它的 Provider 与 API Key。"
-            )
+            Text(" 当前连接的是[\(name)]。 Talkify 只读取该 CodeAgent Server 发布的模型，不会查看或修改它的 Provider 与 API Key。")
         }
         .frame(maxWidth: .infinity, minHeight: 360)
     }
@@ -607,7 +606,7 @@ struct ModelCatalogSettingsView: View {
 
     private var store: ProviderConnectionStore { container.providerConnections }
     private var isExternalServerActive: Bool {
-        container.runtimeServers.activeConnection.kind != .embedded
+        container.runtimeServers.activeConnection.map { $0.kind != .embedded } ?? false
     }
     private var activeDefaultModelID: String? {
         isExternalServerActive

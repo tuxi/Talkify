@@ -4,6 +4,9 @@
     "" : {
 
     },
+    " 当前连接的是[%@]。 Talkify 只读取该 CodeAgent Server 发布的模型，不会查看或修改它的 Provider 与 API Key。" : {
+
+    },
     "·" : {
 
     },

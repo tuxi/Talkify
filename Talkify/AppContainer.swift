@@ -275,7 +275,11 @@ final class AppContainer {
         do {
             return try runtimeServers.makeActiveClient()
         } catch {
-            preconditionFailure("Invalid active Runtime Server: \(error)")
+            // macOS first launch: no active Runtime Server yet (daemon not
+            // started). Return a placeholder client whose baseURL is nil so
+            // every request fails gracefully. The view rebuilds with a real
+            // client once ensureDaemonStarted() bumps activeRevision.
+            return DefaultAgentClient(environment: .placeholder)
         }
         #else
         // Unsupported embedded hosts may still connect to a separately managed server.
@@ -325,7 +329,7 @@ final class AppContainer {
         await ensureDaemonStarted()
         #elseif os(iOS)
         // iOS: use the embedded gomobile runtime (only option on iOS).
-        guard runtimeServers.activeConnection.kind == .embedded else {
+        guard runtimeServers.activeConnection?.kind == .embedded else {
             await refreshActiveRuntimeContext()
             return
         }
@@ -408,6 +412,10 @@ final class AppContainer {
                     await providerConnections.writeSharedSecretsFile()
 
                     await refreshActiveRuntimeContext()
+                    // Bump activeRevision so WorkspaceView rebuilds with the
+                    // daemon client instead of the placeholder created at
+                    // view-construction time (before daemon was available).
+                    runtimeServers.signalActiveConnectionChanged()
                     return
                 } catch {
                     DLLog("⚠️ [RUNTIME] daemon 启动失败 (attempt \(attempt)/2): \(error)")

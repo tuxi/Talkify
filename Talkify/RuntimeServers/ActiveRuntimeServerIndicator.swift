@@ -12,19 +12,19 @@ struct ActiveRuntimeServerIndicator: View {
     let style: Style
     let onOpenServers: () -> Void
 
-    private var connection: RuntimeServerConnection {
+    private var connection: RuntimeServerConnection? {
         container.runtimeServers.activeConnection
     }
 
     private var monitor: ExternalRuntimeServerStatusMonitor? {
-        guard connection.kind != .embedded else { return nil }
+        guard let connection, connection.kind != .embedded else { return nil }
         return try? container.runtimeServers.externalStatusMonitor(
             connectionID: connection.id
         )
     }
 
     var body: some View {
-        if connection.kind != .embedded {
+        if let connection, connection.kind != .embedded {
             Button(action: onOpenServers) {
                 HStack(spacing: 8) {
                     Circle()
@@ -78,26 +78,28 @@ struct ActiveRuntimeServerIndicator: View {
     }
 
     private var statusPresentation: (title: String, color: Color) {
+        let name = connection?.displayName ?? ""
         guard let monitor else {
-            return (connection.displayName, .orange)
+            return (name, .orange)
         }
         switch monitor.status {
         case .connected:
-            return (connection.displayName, .green)
+            return (name, .green)
         case .starting, .checking, .reconnecting:
-            return ("\(connection.displayName) · 连接中", .orange)
+            return ("\(name) · 连接中", .orange)
         case .offline:
-            return ("\(connection.displayName) · 离线", .orange)
+            return ("\(name) · 离线", .orange)
         case .authenticationRequired, .authenticationFailed:
-            return ("\(connection.displayName) · 认证失败", .red)
+            return ("\(name) · 认证失败", .red)
         case .protocolIncompatible:
-            return ("\(connection.displayName) · 协议不兼容", .red)
+            return ("\(name) · 协议不兼容", .red)
         case .tlsRequired, .configurationError:
-            return ("\(connection.displayName) · 配置错误", .red)
+            return ("\(name) · 配置错误", .red)
         }
     }
 
     private func monitorActiveServer() async {
+        guard let connection else { return }
         while !Task.isCancelled,
               container.runtimeServers.activeConnectionID == connection.id {
             _ = try? await container.runtimeServers.checkExternal(

@@ -82,7 +82,7 @@ final class ChatRootViewController: UIViewController {
         self.workspaceContext = IOSWorkspaceContext(
             store: store,
             serverConnectionID: container.runtimeServers.activeConnectionID,
-            serverKind: container.runtimeServers.activeConnection.kind
+            serverKind: container.runtimeServers.activeConnection?.kind ?? .embedded
         )
         self.drawerVC = WorkspaceHubViewController(
             store: store,
