@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-# build-codeagentd.sh — compile codeagentd for macOS arm64
+# build-codeagentd.sh — compile codeagentd as a macOS universal binary (arm64 + x86_64)
 #
 # Usage (standalone, when you need to build/update the daemon binary):
 #   ./scripts/build-codeagentd.sh [version]
@@ -10,7 +10,12 @@
 # into the app bundle. Run this script separately whenever codeagentd
 # needs to be updated.
 #
-# Output: build/codeagentd (Mach-O 64-bit executable arm64)
+# Output: build/codeagentd (Mach-O universal binary: arm64 + x86_64)
+#
+# Works on both Apple Silicon and Intel Macs. The non-native slice is
+# cross-compiled with CGO_ENABLED=1 and "clang -arch <target>"; this is
+# required because -linkmode=external needs cgo, and Go disables cgo by
+# default when cross-compiling.
 
 set -euo pipefail
 
@@ -39,11 +44,24 @@ fi
 
 cd "${CODE_AGENT_DIR}"
 
-echo "==> Building codeagentd for macOS arm64 (version: ${VERSION})"
-GOOS=darwin GOARCH=arm64 go build \
-    -ldflags="-s -w -X code-agent/internal/buildinfo.Version=${VERSION} -extldflags '-Wl,-no_fixup_chains,-image_base,0x100000000' -linkmode=external" \
-    -o "${OUTPUT}" \
+echo "==> Building codeagentd for macOS universal (arm64 + x86_64) (version: ${VERSION})"
+
+LDFLAGS_COMMON="-s -w -X code-agent/internal/buildinfo.Version=${VERSION} -linkmode=external"
+LDFLAGS_ARM64="${LDFLAGS_COMMON} -extldflags '-Wl,-no_fixup_chains,-image_base,0x100000000'"
+LDFLAGS_AMD64="${LDFLAGS_COMMON} -extldflags '-Wl,-image_base,0x100000000'"
+
+CGO_ENABLED=1 GOOS=darwin GOARCH=arm64 CC="clang -arch arm64" go build \
+    -ldflags="${LDFLAGS_ARM64}" \
+    -o "${OUTPUT}.arm64" \
     ./cmd/codeagentd
+
+CGO_ENABLED=1 GOOS=darwin GOARCH=amd64 CC="clang -arch x86_64" go build \
+    -ldflags="${LDFLAGS_AMD64}" \
+    -o "${OUTPUT}.x86_64" \
+    ./cmd/codeagentd
+
+lipo -create -output "${OUTPUT}" "${OUTPUT}.arm64" "${OUTPUT}.x86_64"
+rm -f "${OUTPUT}.arm64" "${OUTPUT}.x86_64"
 
 echo "==> Built: ${OUTPUT}"
 file "${OUTPUT}"
