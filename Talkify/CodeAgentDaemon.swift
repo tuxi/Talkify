@@ -2,6 +2,7 @@
 import Foundation
 import Security
 import OSLog
+import CoreKit
 
 /// Manages the `codeagentd` child process lifecycle on macOS Direct distribution.
 ///
@@ -130,6 +131,8 @@ final class CodeAgentDaemon: @unchecked Sendable {
         port = try waitForPortFile(at: portFile, timeout: 5.0)
 
         logger.info("codeagentd ready on port \(self.port)")
+        
+        DLLog("codeagentd ready port=\(self.port) accessToken = \(accessToken)")
     }
 
     /// Gracefully shut down the daemon. Sends SIGTERM, waits briefly, then

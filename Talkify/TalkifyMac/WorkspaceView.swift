@@ -161,6 +161,8 @@ public struct WorkspaceView: View {
                             ConversationDetailView(conversation: nil)
                         case .automation:
                             AutomationDashboardView()
+                        case .workflow:
+                            WorkflowDashboardView()
                         }
                     }
                     .inspector(isPresented: $store.isInspectorPresented) {
@@ -272,6 +274,10 @@ public struct WorkspaceView: View {
                         AutomationDashboardView()
                             .frame(minWidth: 80, idealWidth: 280, maxWidth: 650)
                             .navigationTitle("自动化")
+                    case .workflow:
+                        WorkflowDashboardView()
+                            .frame(minWidth: 80, idealWidth: 280, maxWidth: 650)
+                            .navigationTitle("工作流")
                     }
                 }
                 .inspector(isPresented: $store.isInspectorPresented) {

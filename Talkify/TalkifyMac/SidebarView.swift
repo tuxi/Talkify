@@ -31,6 +31,7 @@ public struct SidebarView: View {
             VStack(alignment: .leading, spacing: 15) {
                 newTaskButton
                 automationButton
+                workflowButton
             }
             .padding(.vertical, 10)
 
@@ -103,6 +104,25 @@ public struct SidebarView: View {
         .buttonStyle(.plain)
         .padding(.horizontal, 20)
         .accessibilityHint(TalkifyLocalized.string("workspace.automation"))
+    }
+    
+    private var workflowButton: some View {
+        Button {
+            store.selectItem = .workflow
+        } label: {
+            HStack(spacing: 8) {
+                Image(systemName: "flowchart")
+                    .font(.system(size: 14, weight: .regular))
+                    .offset(y: -1)
+                Text(verbatim: TalkifyLocalized.string(" Workflows"))
+                    .font(.system(size: 14, weight: .regular))
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .contentShape(Rectangle())
+            }
+        }
+        .buttonStyle(.plain)
+        .padding(.horizontal, 20)
+        .accessibilityHint(TalkifyLocalized.string("workspace.workflows"))
     }
 }
 
