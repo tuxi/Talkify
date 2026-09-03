@@ -88,7 +88,7 @@ final class ConversationNotificationCoordinator: NSObject, UNUserNotificationCen
             sequence = seq
             content.title = TalkifyLocalized.string("agent.notification.approval_needed")
             content.body = pendingCount > 1
-                ? String(format: TalkifyLocalized.string("agent.notification.pending_items_many"), pendingCount)
+                ? String(format: TalkifyLocalized.string("agent.notification.pending_items_many"), "\(pendingCount)")
                 : TalkifyLocalized.string("agent.notification.pending_items_one")
 
         case .turnCompleted(let attention):
