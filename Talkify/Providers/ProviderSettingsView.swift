@@ -46,24 +46,6 @@ struct ProviderSettingsView: View {
                     }
                 }
             }
-
-            if let errorMessage {
-                Text(errorMessage)
-                    .font(.footnote)
-                    .foregroundStyle(.red)
-            }
-
-            if let secretsError = store.lastSecretsPushError {
-                Text("模型凭据同步失败：\(secretsError)")
-                    .font(.footnote)
-                    .foregroundStyle(.orange)
-            }
-
-            if let fileError = store.sharedSecretsFileError {
-                Text("共享凭据文件写入失败：\(fileError)")
-                    .font(.footnote)
-                    .foregroundStyle(.orange)
-            }
         }
         .task {
             await store.refreshCacheFromRuntime()
@@ -89,6 +71,33 @@ struct ProviderSettingsView: View {
             }
         } message: { connection in
             Text("历史会话会保留，但使用“\(connection.displayName)”模型的会话在重新选择模型前不能发送消息。")
+        }
+        .alert("错误", isPresented: .init(get: {
+            (errorMessage ?? "").isEmpty == false
+        }, set: { _ in
+            errorMessage = nil
+        })) {
+            Button("OK") {
+           
+            }
+        } message: {
+            if let errorMessage, errorMessage.contains("provider is referenced by default_model") {
+                Text("该提供商的模型是当前默认模型，请先在设置中切换默认模型，或手动编辑 settings.json 后再断开")
+                    .font(.caption2)
+            } else {
+                Text(errorMessage ?? "未知信息")
+                    .font(.caption2)
+            }
+        }
+        .onChange(of: store.lastSecretsPushError) { oldValue, newValue in
+            if let newValue, !newValue.isEmpty {
+                errorMessage = "模型凭据同步失败：\(newValue)"
+            }
+        }
+        .onChange(of: store.sharedSecretsFileError) { oldValue, newValue in
+            if let newValue, !newValue.isEmpty {
+                errorMessage = "共享凭据文件写入失败：\(newValue)"
+            }
         }
     }
 
@@ -163,7 +172,7 @@ struct ProviderSettingsView: View {
 
     private func connectedRow(_ connection: ProviderConnection) -> some View {
         HStack(spacing: 14) {
-            providerIcon(connection.providerID)
+            providerIcon(connection.id)
             VStack(alignment: .leading, spacing: 5) {
                 HStack(spacing: 7) {
                     Text(connection.displayName)
@@ -243,7 +252,7 @@ struct ProviderSettingsView: View {
                 }
             } label: {
                 Label(
-                    store.connections.contains(where: { $0.providerID == template.id })
+                    store.connections.contains(where: { $0.id == template.id })
                         ? "再连接"
                         : "连接",
                     systemImage: "plus"
@@ -308,7 +317,7 @@ private struct ProviderModelDraft: Identifiable {
     let id = UUID()
     var wireModelID: String = ""
     var runtimeAlias: String = ""
-    var api: String = ""
+    var transport: ProviderTransport? = nil
     var displayName: String = ""
     var contextWindow: String = ""
     var temperature: String = ""
@@ -319,11 +328,14 @@ private struct ProviderModelDraft: Identifiable {
     var outputPricePerM: String = ""
     var cacheInputPricePerM: String = ""
     var webSearch = false
+    var supportedReasoningEfforts: [ModelReasoningEffort]  = []
+    var canDisableReasoning: Bool = true
+    var reasoningEffort: ModelReasoningEffort?
 
     init(model: ProviderModel? = nil) {
         wireModelID = model?.id ?? ""
         runtimeAlias = model?.runtimeAlias ?? ""
-        api = model?.api ?? ""
+        transport = ProviderTransport(api: model?.api)
         displayName = model?.displayName ?? ""
         contextWindow = model?.contextWindow.map(String.init) ?? ""
         temperature = model?.temperature.map { String(format: "%.2f", $0) } ?? ""
@@ -334,13 +346,16 @@ private struct ProviderModelDraft: Identifiable {
         outputPricePerM = model?.outputPricePerMillion.map { String(format: "%.2f", $0) } ?? ""
         cacheInputPricePerM = model?.cacheInputPricePerMillion.map { String(format: "%.2f", $0) } ?? ""
         webSearch = model?.webSearch ?? false
+        supportedReasoningEfforts = model?.supportedReasoningEfforts ?? []
+        canDisableReasoning = model?.canDisableReasoning ?? true
+        reasoningEffort = model?.reasoningEffort ?? model?.supportedReasoningEfforts?.first
     }
 
     var providerModel: ProviderModel {
         ProviderModel(
             id: wireModelID.trimmingCharacters(in: .whitespacesAndNewlines),
             runtimeAlias: runtimeAlias.trimmingCharacters(in: .whitespacesAndNewlines).nilIfEmpty,
-            api: api.trimmingCharacters(in: .whitespacesAndNewlines).nilIfEmpty,
+            api: transport?.api,
             displayName: displayName.trimmingCharacters(in: .whitespacesAndNewlines).nilIfEmpty,
             contextWindow: Int(contextWindow),
             temperature: Double(temperature),
@@ -350,7 +365,10 @@ private struct ProviderModelDraft: Identifiable {
             inputPricePerMillion: Double(inputPricePerM),
             outputPricePerMillion: Double(outputPricePerM),
             cacheInputPricePerMillion: Double(cacheInputPricePerM),
-            webSearch: webSearch
+            webSearch: webSearch,
+            supportedReasoningEfforts: supportedReasoningEfforts,
+            canDisableReasoning: canDisableReasoning,
+            reasoningEffort: reasoningEffort
         )
     }
 }
@@ -360,9 +378,19 @@ struct ProviderEditorView: View {
 
     let request: ProviderEditorRequest
     let store: ProviderConnectionStore
+    var isCustomConnection: Bool {
+        switch request {
+        case .create(let talkifyProviderTemplate):
+            return talkifyProviderTemplate.kind == .custom || talkifyProviderTemplate.kind == .local
+        case .edit(let providerConnection):
+            let index = store.providerTemplates.firstIndex {
+                $0.id == providerConnection.id
+            }
+            return index == nil
+        }
+    }
 
     @State private var connectionID: String
-    @State private var providerID: String
     @State private var displayName: String
     @State private var baseURL: String
     @State private var transport: ProviderTransport
@@ -393,16 +421,16 @@ struct ProviderEditorView: View {
                 existing: Set(store.connections.map(\.id))
             )
             _connectionID = State(initialValue: id)
-            _providerID = State(initialValue: template.id)
             _displayName = State(initialValue: template.displayName)
             _baseURL = State(initialValue: template.baseURL?.absoluteString ?? "")
             _transport = State(initialValue: template.kind == .local ? .ollama : .openAIChatCompletions)
             _authentication = State(initialValue: template.kind == .local ? .none : .apiKey)
-            _models = State(initialValue: template.models.map { ProviderModelDraft(model: $0) })
+            _models = State(initialValue: template.models.map {
+                ProviderModelDraft(model: $0)
+            })
             _allowsInsecurePrivateNetworkHTTP = State(initialValue: false)
         case .edit(let connection):
             _connectionID = State(initialValue: connection.id)
-            _providerID = State(initialValue: connection.providerID)
             _displayName = State(initialValue: connection.displayName)
             _baseURL = State(initialValue: connection.baseURL.absoluteString)
             _transport = State(initialValue: connection.transport)
@@ -433,59 +461,95 @@ struct ProviderEditorView: View {
                     Text("连接")
                 }
 
-                Section {
-                    ForEach($models) { $model in
-                        VStack(alignment: .leading, spacing: 10) {
-                            HStack {
-                                TextField("Model ID", text: $model.wireModelID)
-                                Button(role: .destructive) {
-                                    models.removeAll { $0.id == model.id }
-                                } label: {
-                                    Image(systemName: "trash")
+                if isCustomConnection {
+                    Section {
+                        ForEach($models) { $model in
+                            VStack(alignment: .leading, spacing: 10) {
+                                HStack {
+                                    TextField("Model ID", text: $model.wireModelID)
+                                    Button(role: .destructive) {
+                                        models.removeAll { $0.id == model.id }
+                                    } label: {
+                                        Image(systemName: "trash")
+                                    }
+                                    .buttonStyle(.borderless)
                                 }
-                                .buttonStyle(.borderless)
+                                TextField("Runtime Alias（可选）", text: $model.runtimeAlias)
+                                TextField("显示名称（可选）", text: $model.displayName)
+                                TextField("Context Window（可选）", text: $model.contextWindow)
+                                    #if os(iOS)
+                                    .keyboardType(.numberPad)
+                                    #endif
+                                Toggle("Tool Calling", isOn: $model.supportsTools)
+                                Toggle("Reasoning", isOn: $model.supportsReasoning)
+                                if model.supportsReasoning {
+                                    VStack {
+                                        Toggle("Allow disabling reasoning", isOn: $model.canDisableReasoning)
+                                        HStack {
+                                            Text("Default reasoning effort")
+                                            Spacer()
+                                            Menu {
+                                                ForEach(ModelReasoningEffort.allCases, id: \.name) { item in
+                                                    Button {
+                                                        model.reasoningEffort = item
+                                                    } label: {
+                                                        Text(item.name)
+                                                    }
+                                                }
+                                            } label: {
+                                                Text(model.reasoningEffort?.name ?? "auto")
+                                            }
+                                            .menuStyle(.borderlessButton)
+                                            .fixedSize()
+                                        }
+                                        
+                                        ReasoningEffortView(selected: Binding(get: {
+                                            return Set(model.supportedReasoningEfforts)
+                                        }, set: { items in
+                                            model.supportedReasoningEfforts = Array(items)
+                                        }))
+                                    }
+                                    .padding(.leading, 12)
+                                }
+                                Toggle("Web Search", isOn: $model.webSearch)
+                                ModelCapSelectView(selectedCaps: $model.inputModalities)
+                                DisclosureGroup("高级") {
+//                                    TextField("协议（可选）", text: $model.transport)
+                                    Picker("协议", selection: $model.transport) {
+                                        Text("OpenAI-Chat-Completions").tag(ProviderTransport.openAIChatCompletions)
+                                        Text("OpenAI-Responses").tag(ProviderTransport.openAIResponses)
+                                        Text("Ollama").tag(ProviderTransport.ollama)
+                                    }
+                                    TextField("Temperature（可选）", text: $model.temperature)
+                                        #if os(iOS)
+                                        .keyboardType(.decimalPad)
+                                        #endif
+                                    TextField("Input Price/M（可选）", text: $model.inputPricePerM)
+                                        #if os(iOS)
+                                        .keyboardType(.decimalPad)
+                                        #endif
+                                    TextField("Output Price/M（可选）", text: $model.outputPricePerM)
+                                        #if os(iOS)
+                                        .keyboardType(.decimalPad)
+                                        #endif
+                                    TextField("Cache Input Price/M（可选）", text: $model.cacheInputPricePerM)
+                                        #if os(iOS)
+                                        .keyboardType(.decimalPad)
+                                        #endif
+                                }
                             }
-                            TextField("Runtime Alias（可选）", text: $model.runtimeAlias)
-                            TextField("显示名称（可选）", text: $model.displayName)
-                            TextField("Context Window（可选）", text: $model.contextWindow)
-                                #if os(iOS)
-                                .keyboardType(.numberPad)
-                                #endif
-                            Toggle("Tool Calling", isOn: $model.supportsTools)
-                            Toggle("Reasoning", isOn: $model.supportsReasoning)
-                            Toggle("Web Search", isOn: $model.webSearch)
-                            ModelCapSelectView(selectedCaps: $model.inputModalities)
-                            DisclosureGroup("高级") {
-                                TextField("API Override（可选）", text: $model.api)
-                                TextField("Temperature（可选）", text: $model.temperature)
-                                    #if os(iOS)
-                                    .keyboardType(.decimalPad)
-                                    #endif
-                                TextField("Input Price/M（可选）", text: $model.inputPricePerM)
-                                    #if os(iOS)
-                                    .keyboardType(.decimalPad)
-                                    #endif
-                                TextField("Output Price/M（可选）", text: $model.outputPricePerM)
-                                    #if os(iOS)
-                                    .keyboardType(.decimalPad)
-                                    #endif
-                                TextField("Cache Input Price/M（可选）", text: $model.cacheInputPricePerM)
-                                    #if os(iOS)
-                                    .keyboardType(.decimalPad)
-                                    #endif
-                            }
+                            .padding(.vertical, 6)
                         }
-                        .padding(.vertical, 6)
+                        Button {
+                            models.append(ProviderModelDraft())
+                        } label: {
+                            Label("添加模型", systemImage: "plus")
+                        }
+                    } header: {
+                        Text("模型")
+                    } footer: {
+                        Text("至少配置一个模型后才能在会话中发送消息。")
                     }
-                    Button {
-                        models.append(ProviderModelDraft())
-                    } label: {
-                        Label("添加模型", systemImage: "plus")
-                    }
-                } header: {
-                    Text("模型")
-                } footer: {
-                    Text("至少配置一个模型后才能在会话中发送消息。")
                 }
 
                 if let errorMessage {
@@ -515,23 +579,30 @@ struct ProviderEditorView: View {
     private func connectionFields(includeCredential: Bool) -> some View {
         TextField("Connection ID", text: $connectionID)
             .disabled(!isNew)
+            .allowsHitTesting(isCustomConnection)
         Text("只允许小写字母、数字、连字符和下划线；创建后不可修改。")
             .font(.caption)
             .foregroundStyle(.secondary)
+            .allowsHitTesting(isCustomConnection)
         TextField("显示名称", text: $displayName)
+            .allowsHitTesting(isCustomConnection)
         TextField("Base URL", text: $baseURL)
             #if os(iOS)
             .textInputAutocapitalization(.never)
             .keyboardType(.URL)
             #endif
+            .allowsHitTesting(isCustomConnection)
         Picker("协议", selection: $transport) {
-            Text("OpenAI-compatible").tag(ProviderTransport.openAIChatCompletions)
+            Text("OpenAI-Chat-Completions").tag(ProviderTransport.openAIChatCompletions)
+            Text("OpenAI-Responses").tag(ProviderTransport.openAIResponses)
             Text("Ollama").tag(ProviderTransport.ollama)
         }
+        .allowsHitTesting(isCustomConnection)
         Picker("认证", selection: $authentication) {
             Text("API 密钥").tag(ProviderAuthentication.apiKey)
             Text("无认证").tag(ProviderAuthentication.none)
         }
+        .allowsHitTesting(isCustomConnection)
         if includeCredential && authentication == .apiKey {
             SecureField(isNew ? "API 密钥" : "API 密钥（留空则保持不变）", text: $apiKey)
         }
@@ -571,17 +642,20 @@ struct ProviderEditorView: View {
             errorMessage = "Base URL 格式不正确。"
             return
         }
-        let providerModels = models
-            .map(\.providerModel)
-            .filter { !$0.id.isEmpty }
-        guard !providerModels.isEmpty else {
-            errorMessage = "请至少添加一个模型。"
-            return
+        
+        var providerModels = [ProviderModel]()
+        if isCustomConnection {
+            providerModels = models
+                .map(\.providerModel)
+                .filter { !$0.id.isEmpty }
+            guard !providerModels.isEmpty else {
+                errorMessage = "请至少添加一个模型。"
+                return
+            }
         }
-
+        
         let connection = ProviderConnection(
             id: normalizedID,
-            providerID: providerID,
             displayName: displayName.trimmingCharacters(in: .whitespacesAndNewlines),
             transport: transport,
             authentication: authentication,
@@ -745,3 +819,66 @@ struct ModelCapSelectView: View {
         }
     }
 }
+
+
+struct ReasoningEffortView: View {
+    let efforts = ModelReasoningEffort.allCases
+    @Binding var selected: Set<ModelReasoningEffort>
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 14) {
+            Text("Supported reasoning efforts")
+                .font(.headline)
+
+            let columns = [
+                GridItem(.flexible(), alignment: .leading),
+                GridItem(.flexible(), alignment: .leading)
+            ]
+            LazyVGrid(columns: columns, alignment: .leading, spacing: 14) {
+                ForEach(efforts, id: \.self) { effort in
+                    Toggle(effort.name, isOn: binding(for: effort))
+                        #if os(macOS)
+                        .toggleStyle(.checkbox)          // macOS 原生方形 checkbox
+                        #else
+                        .toggleStyle(CheckboxStyle())    // iOS 需自定义
+                        #endif
+                }
+            }
+        }
+        .padding()
+    }
+
+    private func binding(for effort: ModelReasoningEffort) -> Binding<Bool> {
+        Binding(
+            get: { selected.contains(effort) },
+            set: { isOn in
+                if isOn {
+                    selected.insert(effort)
+                } else {
+                    selected.remove(effort)
+                }
+            }
+        )
+    }
+}
+
+#if os(iOS)
+struct CheckboxStyle: ToggleStyle {
+    func makeBody(configuration: Configuration) -> some View {
+        Button {
+            configuration.isOn.toggle()
+        } label: {
+            HStack(spacing: 10) {
+                Image(systemName: configuration.isOn
+                      ? "checkmark.square.fill"
+                      : "square")
+                    .font(.system(size: 20))
+                    .foregroundStyle(configuration.isOn ? .accentColor : .secondary)
+                configuration.label
+            }
+        }
+        .buttonStyle(.plain) // 去掉 Button 默认高亮，只保留 Toggle 语义
+    }
+}
+
+#endif

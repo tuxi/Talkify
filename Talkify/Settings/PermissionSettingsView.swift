@@ -180,14 +180,9 @@ struct PermissionSettingsView: View {
     /// 惰性创建 active runtime client；无活跃服务时优雅降级。
     private func resolveClient() async throws -> any RuntimeClient {
         if let client { return client }
-        do {
-            let client = try container.makeAgentClient()
-            self.client = client
-            return client
-        } catch {
-            errorMessage = "无法连接 Agent 服务：\(error.localizedDescription)"
-            throw error
-        }
+        let client = container.makeAgentClient()
+        self.client = client
+        return client
     }
 
     private func displayName(_ path: String) -> String {

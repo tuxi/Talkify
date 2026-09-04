@@ -48,7 +48,10 @@ struct TalkifyProviderTemplate: Identifiable, Hashable {
                         }),
                         inputPricePerMillion: m.inputPricePerMillion,
                         outputPricePerMillion: m.outputPricePerMillion,
-                        webSearch: m.webSearch ?? false
+                        webSearch: m.webSearch ?? false,
+                        supportedReasoningEfforts: m.supportedReasoningEfforts,
+                        canDisableReasoning: m.canDisableReasoning ?? true,
+                        reasoningEffort: m.reasoningEffort,
                     )
                 }
             )

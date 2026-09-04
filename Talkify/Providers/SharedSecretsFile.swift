@@ -42,9 +42,12 @@ enum SharedSecretsFile {
         var entries: [String: RuntimeSecretEntry] = [:]
         for (credentialTarget, credential) in map.entries {
             guard credentialTarget.namespace == "llm",
-                  credential.kind == .bearer,
-                  !credential.secret.isEmpty else { continue }
-            if let target, credentialTarget != target { continue }
+                  credential.kind == .bearer else {
+                continue
+            }
+            if let target, credentialTarget != target {
+                continue
+            }
             entries["llm/\(credentialTarget.name)"] = RuntimeSecretEntry(
                 type: "bearer",
                 secret: credential.secret
@@ -90,7 +93,7 @@ enum SharedSecretsFile {
             [.posixPermissions: 0o600],
             ofItemAtPath: tempURL.path
         )
-        try FileManager.default.replaceItemAt(
+        _ = try FileManager.default.replaceItemAt(
             secretsFileURL,
             withItemAt: tempURL
         )
