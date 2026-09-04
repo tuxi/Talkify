@@ -390,7 +390,15 @@ public struct WorkspaceView: View {
         if let workspaceContext {
             ZStack(alignment: .bottom) {
                 WorkspaceHubView(
-                    selectedConversation: $store.selectedConversation,
+                    selectedConversation: .init(get: {
+                        store.selectedConversation
+                    }, set: { ref in
+                        if let ref {
+                            store.selectItem = .conversationDetail(conversation: ref)
+                        } else {
+                            store.selectItem = .draft
+                        }
+                    }),
                     searchText: searchText,
                     fileProvider: fileProvider,
                     workspaceContext: workspaceContext,

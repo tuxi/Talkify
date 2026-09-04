@@ -873,7 +873,7 @@ struct CheckboxStyle: ToggleStyle {
                       ? "checkmark.square.fill"
                       : "square")
                     .font(.system(size: 20))
-                    .foregroundStyle(configuration.isOn ? .accentColor : .secondary)
+                    .foregroundStyle(configuration.isOn ? Color.accentColor : .secondary)
                 configuration.label
             }
         }

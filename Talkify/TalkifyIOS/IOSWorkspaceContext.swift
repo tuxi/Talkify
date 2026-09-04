@@ -107,12 +107,16 @@ final class IOSWorkspaceContext {
         if isExternalServer {
             if let selectedConversation = store.selectedConversation,
                selectedConversation.workspaceGroupingID != selection.groupingID {
-                store.selectedConversation = nil
+                store.selectItem = .draft
             }
             return
         }
         guard let workspace = selection.workspace else {
-            store.selectedConversation = conversations(in: store).first
+            if let ref = conversations(in: store).first {
+                store.selectItem = .conversationDetail(conversation: ref)
+            } else {
+                store.selectItem = .draft
+            }
             return
         }
         store.beginDraft()

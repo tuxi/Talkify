@@ -61,7 +61,11 @@ final class WorkspaceHubViewController: UIViewController {
                 get: { [weak self] in self?.store.selectedConversation },
                 set: { [weak self] in
                     guard let self else { return }
-                    self.store.selectedConversation = $0
+                    if let item = $0 {
+                        self.store.selectItem = .conversationDetail(conversation: item)
+                    } else {
+                        self.store.selectItem = .draft
+                    }
                     self.workspaceContext.synchronize(with: $0, in: self.store)
                     self.onSelectedConversation?()
                 }
