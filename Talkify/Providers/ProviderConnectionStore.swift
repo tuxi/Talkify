@@ -121,7 +121,9 @@ final class ProviderConnectionStore {
         reloadCatalog()
     }
 
-    var connections: [ProviderConnection] { registry.connections }
+    var connections: [ProviderConnection] {
+        registry.connections
+    }
     var enabledModels: [UnifiedModelDescriptor] { catalog.models }
     var hasAvailableModels: Bool { !enabledModels.isEmpty }
     var gatewayConnection: ProviderConnection? {
@@ -206,7 +208,9 @@ final class ProviderConnectionStore {
             reloadCatalog()
         }
         if connection.authentication == .apiKey {
-            try await credentialStore.remove(.llm(connection.id))
+            try await credentialStore.set(Credential(kind: .bearer, secret: ""), for: .llm(connection.id))
+            await pushLLMCredentialsToDaemon(only: .llm(connection.id))
+            await writeSharedSecretsFile(only: .llm(connection.id))
         }
     }
 
@@ -387,7 +391,6 @@ final class ProviderConnectionStore {
     ) async throws {
         let connection = ProviderConnection(
             id: ProviderConnection.talkifyGatewayID,
-            providerID: ProviderConnection.talkifyGatewayID,
             displayName: "Talkify Gateway",
             transport: .openAIChatCompletions,
             authentication: .gatewayAccount,

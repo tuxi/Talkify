@@ -240,7 +240,6 @@ final class AppContainer {
         providerConnections.onRuntimeConfigurationApplied = { [weak self] in
             await self?.refreshActiveRuntimeContext()
         }
-        migrateLegacyProviderState()
         synchronizeGatewayConnectionWithIdentity()
         Task.detached(priority: .utility) { [userAssetFileStore] in
             userAssetFileStore.removeExpiredFiles()
@@ -526,7 +525,10 @@ final class AppContainer {
                     supportsTools: model.supportsTools,
                     supportsReasoning: model.supportsReasoning,
                     inputModalities: modalities.isEmpty ? [.text] : modalities,
-                    billingSource: connection.billingSource
+                    billingSource: connection.billingSource,
+                    supportedReasoningEfforts: model.supportedReasoningEfforts,
+                    canDisableReasoning: model.canDisableReasoning ?? false,
+                    reasoningEffort: model.reasoningEffort,
                 )
             }
         }
@@ -646,57 +648,6 @@ final class AppContainer {
             supportsTools: model.supportsToolCalls ?? true,
             supportsReasoning: category.contains("reason") || category.contains("think")
         )
-    }
-
-    private func migrateLegacyProviderState() {
-        if authManager.isRegistered, providerConnections.gatewayConnection == nil {
-            Task { [weak self] in
-                guard let self else { return }
-                try? await providerConnections.upsertGateway(
-                    baseURL: gatewayAgentBaseURL,
-                    models: [],
-                    allowsInsecurePrivateNetworkHTTP: allowsLocalGatewayHTTP
-                )
-            }
-        }
-
-        let migrationKey = "talkify.provider-connections.legacy-key.v2"
-        guard !UserDefaults.standard.bool(forKey: migrationKey),
-              providerConnections.registry.connection(id: "deepseek") == nil else {
-            return
-        }
-        let legacyKey = AgentSettings.apiKey.trimmingCharacters(in: .whitespacesAndNewlines)
-        guard !legacyKey.isEmpty else {
-            UserDefaults.standard.set(true, forKey: migrationKey)
-            return
-        }
-        let deepseekBaseURL = URL(string: "https://api.deepseek.com")!
-        let deepseekModels: [ProviderModel] = [
-            ProviderModel(id: "deepseek-v4-flash", runtimeAlias: "deepseek", contextWindow: 1_000_000, supportsTools: true, supportsReasoning: true, inputPricePerMillion: 0.16, outputPricePerMillion: 0.32, webSearch: true),
-            ProviderModel(id: "deepseek-v4-pro", runtimeAlias: "deepseek-pro", contextWindow: 1_000_000, supportsTools: true, supportsReasoning: true, inputPricePerMillion: 0.45, outputPricePerMillion: 0.90),
-        ]
-        let connection = ProviderConnection(
-            id: "deepseek",
-            providerID: "deepseek",
-            displayName: "DeepSeek",
-            transport: .openAIChatCompletions,
-            authentication: .apiKey,
-            baseURL: deepseekBaseURL,
-            models: deepseekModels
-        )
-        Task { [weak self] in
-            guard let self else { return }
-            do {
-                try await providerConnections.save(
-                    connection,
-                    apiKey: legacyKey,
-                    isNew: true
-                )
-                UserDefaults.standard.set(true, forKey: migrationKey)
-            } catch {
-                DLLog("⚠️ 旧 DeepSeek 凭证迁移失败：\(error)")
-            }
-        }
     }
 
     private var gatewayAgentBaseURL: URL {

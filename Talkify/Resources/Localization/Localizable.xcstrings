@@ -608,7 +608,7 @@
         }
       }
     },
-    "API Override（可选）" : {
+    "Allow disabling reasoning" : {
 
     },
     "API 密钥" : {
@@ -10125,6 +10125,9 @@
     "Context Window（可选）" : {
 
     },
+    "Default reasoning effort" : {
+
+    },
     "evidence.bundle_exported" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -11090,10 +11093,16 @@
     "Model ID" : {
 
     },
+    "OK" : {
+
+    },
     "Ollama" : {
 
     },
-    "OpenAI-compatible" : {
+    "OpenAI-Chat-Completions" : {
+
+    },
+    "OpenAI-Responses" : {
 
     },
     "Output Price/M（可选）" : {
@@ -19831,6 +19840,9 @@
         }
       }
     },
+    "Supported reasoning efforts" : {
+
+    },
     "Talkify Pro" : {
 
     },
@@ -25726,9 +25738,6 @@
     "允许通过局域网 HTTP 发送数据" : {
 
     },
-    "共享凭据文件写入失败：%@" : {
-
-    },
     "再连接" : {
 
     },
@@ -25903,9 +25912,6 @@
     "模型" : {
 
     },
-    "模型凭据同步失败：%@" : {
-
-    },
     "模型支持能力" : {
 
     },
@@ -25993,6 +25999,9 @@
     "该地址返回了不同的 Server ID。仅在你确认服务器已重建或更换后继续。" : {
 
     },
+    "该提供商的模型是当前默认模型，请先在设置中切换默认模型，或手动编辑 settings.json 后再断开" : {
+
+    },
     "请关闭后重新生成" : {
 
     },
@@ -26045,6 +26054,9 @@
 
     },
     "重新检查" : {
+
+    },
+    "错误" : {
 
     },
     "高级" : {
