@@ -28,6 +28,11 @@ final class CodeAgentDaemon: @unchecked Sendable {
 
     private var process: Process?
     private var portFileURL: URL?
+    private var startTask: Task<Void, Error>?
+    private var startTaskID: UUID?
+    private var startupProgress = "launching"
+    private var requiresIndexMigration = false
+    private var shellEnvironment: [String: String]?
 
     /// The runtime access token generated for this daemon session. A fresh
     /// 256-bit random token is created each time the daemon starts, matching
@@ -65,14 +70,38 @@ final class CodeAgentDaemon: @unchecked Sendable {
     // MARK: - Start / Stop
 
     /// Launch the daemon and wait for it to become ready.
-    func start() throws {
+    func start() async throws {
+        if let startTask {
+            try await startTask.value
+            return
+        }
+        if isRunning && port > 0 { return }
+        let taskID = UUID()
+        let task = Task { try await self.launch() }
+        startTask = task
+        startTaskID = taskID
+        defer {
+            if startTaskID == taskID {
+                startTask = nil
+                startTaskID = nil
+            }
+        }
+        try await task.value
+    }
+
+    private func launch() async throws {
+        let startedAt = ProcessInfo.processInfo.systemUptime
+        startupProgress = "preparing process"
+        requiresIndexMigration = false
+        usesTLS = false
         guard let daemonURL else {
             throw CodeAgentDaemonError.binaryNotFound
         }
 
         // Kill any stale daemon left over from a previous run.
-        stop()
-        killExistingDaemons()
+        stopRunningProcess()
+        await killExistingDaemons()
+        try Task.checkCancellation()
 
         // Generate fresh 256-bit access token
         accessToken = generateAccessToken()
@@ -91,7 +120,15 @@ final class CodeAgentDaemon: @unchecked Sendable {
         // Build the environment from the user's login shell. This picks up
         // API keys (DEEPSEEK_API_KEY, etc.) that codeagentd needs for
         // credential.source=env models, plus the full PATH.
-        var env = resolveUserShellEnvironment()
+        var env: [String: String]
+        if let shellEnvironment {
+            env = shellEnvironment
+        } else {
+            env = await resolveUserShellEnvironment()
+            shellEnvironment = env
+        }
+        try Task.checkCancellation()
+        traceStartup("environment ready", since: startedAt)
         env["HOME"] = FileManager.default.homeDirectoryForCurrentUser.path
         env["CODEAGENT_SERVER_ACCESS_TOKEN"] = accessToken
         env["CODEAGENT_MCP_INHERIT_CLAUDE"] = "1"
@@ -113,12 +150,23 @@ final class CodeAgentDaemon: @unchecked Sendable {
             guard data.count > 0,
                   let line = String(data: data, encoding: .utf8)?.trimmingCharacters(in: .whitespacesAndNewlines),
                   !line.isEmpty else { return }
-            self?.logger.debug("daemon: \(line, privacy: .public)")
+            Task { @MainActor [weak self] in
+                guard let self, self.process === process else { return }
+                if line.contains("[startup]") {
+                    self.startupProgress = line
+                    if line.contains("phase=sqlite_index"), line.contains("started") {
+                        self.requiresIndexMigration = true
+                    }
+                    self.logger.info("daemon: \(line, privacy: .public)")
+                } else {
+                    self.logger.debug("daemon: \(line, privacy: .public)")
+                }
+            }
         }
 
         process.terminationHandler = { [weak self] proc in
             DispatchQueue.main.async {
-                self?.handleTermination(status: proc.terminationStatus, reason: proc.terminationReason)
+                self?.handleTermination(pid: proc.processIdentifier, status: proc.terminationStatus, reason: proc.terminationReason)
             }
         }
 
@@ -128,22 +176,31 @@ final class CodeAgentDaemon: @unchecked Sendable {
         logger.info("Launched codeagentd (pid: \(process.processIdentifier))")
 
         // Wait for the port-file to be written by the daemon, or timeout
-        port = try waitForPortFile(at: portFile, timeout: 5.0)
-
-        logger.info("codeagentd ready on port \(self.port)")
-        
-        DLLog("codeagentd ready port=\(self.port) accessToken = \(accessToken)")
+        do {
+            port = try await waitForPortFile(at: portFile, timeout: 100)
+        } catch {
+            traceStartup("failed: \(startupProgress)", since: startedAt)
+            throw error
+        }
+        traceStartup("port ready: \(port)", since: startedAt)
     }
 
     /// Gracefully shut down the daemon. Sends SIGTERM, waits briefly, then
     /// escalates to SIGKILL if the process is still alive.
     func stop() {
+        startTask?.cancel()
+        startTask = nil
+        startTaskID = nil
+        stopRunningProcess()
+    }
+
+    private func stopRunningProcess() {
         guard let process else { return }
 
         logger.info("Stopping codeagentd (pid: \(process.processIdentifier))")
 
         process.terminationHandler = nil // Don't trigger crash recovery
-        process.terminate()              // SIGTERM
+        if process.isRunning { process.terminate() } // SIGTERM
 
         // Give it 3 seconds for graceful shutdown, then force-kill
         let pid = process.processIdentifier
@@ -157,7 +214,8 @@ final class CodeAgentDaemon: @unchecked Sendable {
                 self.logger.warning("codeagentd force-killed after timeout")
             }
         }
-        process.waitUntilExit()
+        // Process.waitUntilExit() blocks the MainActor and freezes the app.
+        // The captured Process above remains alive until the bounded cleanup.
         self.process = nil
         self.port = 0
 
@@ -229,6 +287,11 @@ final class CodeAgentDaemon: @unchecked Sendable {
 
     // MARK: - Private helpers
 
+    private func traceStartup(_ phase: String, since startedAt: TimeInterval) {
+        let milliseconds = Int((ProcessInfo.processInfo.systemUptime - startedAt) * 1000)
+        logger.info("[startup] \(phase, privacy: .public) elapsed_ms=\(milliseconds)")
+    }
+
     private func generateAccessToken() -> String {
         var bytes = Data(count: 32)
         bytes.withUnsafeMutableBytes { ptr in
@@ -250,17 +313,10 @@ final class CodeAgentDaemon: @unchecked Sendable {
     /// same-path daemons that can exist here are stale leftovers of this
     /// very app — killing them is safe and never touches another app's
     /// process (even one that happens to be named codeagentd).
-    private func killExistingDaemons() {
+    private func killExistingDaemons() async {
         guard let daemonURL else { return }
-        let task = Process()
-        task.executableURL = URL(fileURLWithPath: "/usr/bin/pkill")
-        task.arguments = ["-9", "-f", daemonURL.path]
-        task.standardOutput = FileHandle.nullDevice
-        task.standardError = FileHandle.nullDevice
-        try? task.run()
-        task.waitUntilExit()
-        // Brief pause to let the OS reap the killed processes.
-        Thread.sleep(forTimeInterval: 0.3)
+        await Self.runAndWait(executable: "/usr/bin/pkill", arguments: ["-9", "-f", daemonURL.path])
+        try? await Task.sleep(for: .milliseconds(300))
     }
 
     /// Resolve the user's full login-shell environment. Unlike
@@ -269,37 +325,24 @@ final class CodeAgentDaemon: @unchecked Sendable {
     /// PATH, and everything else defined in `~/.zshrc` / `~/.zprofile`.
     ///
     /// A few noise entries (`_`, `PWD`, `SHLVL`, `ZSH*`) are stripped.
-    private func resolveUserShellEnvironment() -> [String: String] {
-        let task = Process()
-        task.executableURL = URL(fileURLWithPath: "/bin/zsh")
+    private func resolveUserShellEnvironment() async -> [String: String] {
+        let output = await Self.runAndCapture(
+            executable: "/bin/zsh",
+            arguments: ["-c", "source \"$HOME/.zprofile\" 2>/dev/null; source \"$HOME/.zshrc\" 2>/dev/null; env"],
+            environment: ["HOME": NSHomeDirectory()]
+        )
         // Explicitly source the user's shell config files to pick up API keys
         // (DEEPSEEK_API_KEY, etc.) defined there, then dump the environment.
         // -l alone sources ~/.zprofile but NOT ~/.zshrc (needs -i, which
         // requires a TTY), so we source both explicitly. Errors are ignored
         // so the command succeeds even if a file is missing.
-        let shellCmd = "source \"$HOME/.zprofile\" 2>/dev/null; source \"$HOME/.zshrc\" 2>/dev/null; env"
-        task.environment = ["HOME": NSHomeDirectory()]
-        task.arguments = ["-c", shellCmd]
-        let pipe = Pipe()
-        task.standardOutput = pipe
-        task.standardError = FileHandle.nullDevice
-
         var env: [String: String] = [:]
-        do {
-            try task.run()
-            task.waitUntilExit()
-            let data = pipe.fileHandleForReading.readDataToEndOfFile()
-            let output = String(data: data, encoding: .utf8) ?? ""
-            for line in output.split(separator: "\n") {
-                let parts = line.split(separator: "=", maxSplits: 1, omittingEmptySubsequences: false)
-                guard parts.count == 2 else { continue }
-                let key = String(parts[0])
-                // Skip transient shell-internal vars.
-                if key == "_" || key == "PWD" || key == "SHLVL" || key.hasPrefix("ZSH") { continue }
-                env[key] = String(parts[1])
-            }
-        } catch {
-            logger.warning("Failed to resolve user shell environment: \(error.localizedDescription)")
+        for line in output.split(separator: "\n") {
+            let parts = line.split(separator: "=", maxSplits: 1, omittingEmptySubsequences: false)
+            guard parts.count == 2 else { continue }
+            let key = String(parts[0])
+            if key == "_" || key == "PWD" || key == "SHLVL" || key.hasPrefix("ZSH") { continue }
+            env[key] = String(parts[1])
         }
 
         // Fallback: at least ensure a usable PATH.
@@ -307,6 +350,49 @@ final class CodeAgentDaemon: @unchecked Sendable {
             env["PATH"] = "/opt/homebrew/bin:/usr/local/bin:\(NSHomeDirectory())/.local/bin:/usr/bin:/bin:/usr/sbin:/sbin"
         }
         return env
+    }
+
+    private nonisolated static func runAndWait(executable: String, arguments: [String]) async {
+        await withCheckedContinuation { continuation in
+            let task = Process()
+            task.executableURL = URL(fileURLWithPath: executable)
+            task.arguments = arguments
+            task.standardOutput = FileHandle.nullDevice
+            task.standardError = FileHandle.nullDevice
+            task.terminationHandler = { _ in continuation.resume() }
+            do { try task.run() } catch { continuation.resume() }
+        }
+    }
+
+    private nonisolated static func runAndCapture(
+        executable: String, arguments: [String], environment: [String: String]
+    ) async -> String {
+        await Task.detached(priority: .utility) {
+            let task = Process()
+            task.executableURL = URL(fileURLWithPath: executable)
+            task.arguments = arguments
+            task.environment = environment
+            let pipe = Pipe()
+            task.standardOutput = pipe
+            task.standardError = FileHandle.nullDevice
+            do {
+                try task.run()
+                // Shell profiles may call slow external tools. Bound this phase,
+                // and drain stdout while the shell is running to avoid pipe stalls.
+                DispatchQueue.global().asyncAfter(deadline: .now() + .seconds(5)) {
+                    guard task.isRunning else { return }
+                    task.terminate()
+                    DispatchQueue.global().asyncAfter(deadline: .now() + .milliseconds(500)) {
+                        if task.isRunning { _ = Darwin.kill(task.processIdentifier, SIGKILL) }
+                    }
+                }
+                let data = pipe.fileHandleForReading.readDataToEndOfFile()
+                task.waitUntilExit()
+                return String(data: data, encoding: .utf8) ?? ""
+            } catch {
+                return ""
+            }
+        }.value
     }
 
     /// Resolve the user's full shell PATH by sourcing a login shell.
@@ -354,9 +440,17 @@ final class CodeAgentDaemon: @unchecked Sendable {
     /// Read the port-file written by `codeagentd --port-file`. The file
     /// contains a single integer — the actual TCP port the daemon is
     /// listening on. Poll until the file appears or timeout.
-    private func waitForPortFile(at url: URL, timeout: TimeInterval) throws -> Int {
-        let deadline = Date().addingTimeInterval(timeout)
-        while Date() < deadline {
+    private func waitForPortFile(at url: URL, timeout: TimeInterval) async throws -> Int {
+        let startedAt = ProcessInfo.processInfo.systemUptime
+        var allowedWait = timeout
+        while ProcessInfo.processInfo.systemUptime - startedAt < allowedWait {
+            try Task.checkCancellation()
+            if requiresIndexMigration, allowedWait == timeout {
+                // One-time schema work must not be killed/restarted at the normal
+                // startup deadline. Subsequent opens skip this work entirely.
+                allowedWait = timeout * 3
+                logger.info("[startup] first-time index migration; deadline_seconds=\(Int(allowedWait))")
+            }
             if let data = try? Data(contentsOf: url),
                let content = String(data: data, encoding: .utf8)?
                    .trimmingCharacters(in: .whitespacesAndNewlines),
@@ -369,14 +463,15 @@ final class CodeAgentDaemon: @unchecked Sendable {
                     "Process exited with status \(process.terminationStatus) before port-file was written."
                 )
             }
-            Thread.sleep(forTimeInterval: 0.1)
+            try await Task.sleep(for: .milliseconds(100))
         }
-        throw CodeAgentDaemonError.portNotResolved
+        throw CodeAgentDaemonError.startupTimedOut(seconds: allowedWait, progress: startupProgress)
     }
 
     /// Called when the daemon process terminates. If it crashed (uncaught
     /// signal), attempt a one-shot restart.
-    private func handleTermination(status: Int32, reason: Process.TerminationReason) {
+    private func handleTermination(pid: Int32, status: Int32, reason: Process.TerminationReason) {
+        guard process?.processIdentifier == pid else { return }
         logger.info("codeagentd terminated (status: \(status), reason: \(String(describing: reason)))")
         process = nil
         port = 0
@@ -388,10 +483,12 @@ final class CodeAgentDaemon: @unchecked Sendable {
 
         if reason == .uncaughtSignal && status != 0 {
             logger.warning("codeagentd crashed — attempting restart")
-            do {
-                try start()
-            } catch {
-                logger.error("codeagentd restart failed: \(error.localizedDescription)")
+            Task { @MainActor [weak self] in
+                do {
+                    try await self?.start()
+                } catch {
+                    self?.logger.error("codeagentd restart failed: \(error.localizedDescription)")
+                }
             }
         }
     }

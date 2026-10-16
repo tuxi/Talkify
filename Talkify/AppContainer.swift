@@ -77,6 +77,8 @@ final class AppContainer {
     let runtimeServers: RuntimeServerCoordinator
     #if os(macOS)
     let sharingController: RuntimeSharingDaemonController
+    @ObservationIgnored private var daemonStartTask: Task<Void, Never>?
+    @ObservationIgnored private var daemonBootstrapTask: Task<Void, Never>?
     #endif
 
     private let baseHeaders: [String: String]
@@ -344,12 +346,24 @@ final class AppContainer {
     /// runtime is used as a last-resort fallback. The active connection is
     /// logged prominently so you always know which backend is serving requests.
     private func ensureDaemonStarted() async {
+        if let daemonStartTask {
+            await daemonStartTask.value
+            return
+        }
+        let task = Task { await self.startDaemon() }
+        daemonStartTask = task
+        defer { daemonStartTask = nil }
+        await task.value
+    }
+
+    private func startDaemon() async {
+        let startedAt = ProcessInfo.processInfo.systemUptime
         let daemon = CodeAgentDaemon.shared
         if !daemon.isRunning {
             // One-shot retry for transient failures (e.g. port-file race).
             for attempt in 1...2 {
                 do {
-                    try daemon.start()
+                    try await daemon.start()
                     try await daemon.waitForReady(timeout: 10.0)
 
                     guard let endpoint = daemon.endpoint else {
@@ -378,47 +392,22 @@ final class AppContainer {
                         for: connection.id,
                         token: daemon.accessToken
                     )
-                    sharingController.configure(
-                        endpoint: endpoint,
-                        managementToken: daemon.accessToken
-                    )
-                    _ = await sharingController.refreshStatus()
-                    _ = await sharingController.refreshDevices()
-
-                    DLLog("✅ [RUNTIME] 活跃后端：codeagentd daemon (port \(daemon.port), pid \(daemon.processID))")
-
-                    // Stage ③: install the desktop provider store via AgentKit.
-                    // On the desktop path the local registry becomes a read-only
-                    // cache and provider definitions are managed through the
-                    // runtime's /v1/providers API.
-                    if let providerStore = try? runtimeServers.makeProviderStore() {
-                        providerConnections.providerStore = providerStore
-                        // One-time migration: UserDefaults connections → runtime.
-                        await providerConnections.migrateToRuntimeProviderManagementIfNeeded(
-                            store: providerStore
-                        )
-                    }
-
-                    // A2 secrets push: push the Keychain llm credentials over
-                    // /v1/secrets so the runtime's injected resolver has them and
-                    // GET /v1/runtime/models reports available=true without restart.
-                    providerConnections.onSecretsPushed = { [weak self] in
-                        Task { await self?.refreshActiveRuntimeContext() }
-                    }
-                    await providerConnections.pushLLMCredentialsToDaemon()
-                    // Shared file: also write ~/.codeagent/secrets.json so
-                    // the runtime CLI/TUI (separate process) reuses the keys.
-                    await providerConnections.writeSharedSecretsFile()
-
-                    await refreshActiveRuntimeContext()
-                    // Bump activeRevision so WorkspaceView rebuilds with the
-                    // daemon client instead of the placeholder created at
-                    // view-construction time (before daemon was available).
+                    // Publish the authenticated connection as soon as it is ready.
+                    // Sharing/provider synchronization must not hold up the sidebar.
                     runtimeServers.signalActiveConnectionChanged()
+                    let elapsed = Int((ProcessInfo.processInfo.systemUptime - startedAt) * 1000)
+                    DLLog("[startup] authenticated daemon ready elapsed_ms=\(elapsed) port=\(daemon.port)")
+                    daemonBootstrapTask?.cancel()
+                    daemonBootstrapTask = Task { [weak self] in
+                        guard let self else { return }
+                        await self.finishDaemonBootstrap(endpoint: endpoint, token: daemon.accessToken)
+                        if !Task.isCancelled { self.daemonBootstrapTask = nil }
+                    }
                     return
                 } catch {
                     DLLog("⚠️ [RUNTIME] daemon 启动失败 (attempt \(attempt)/2): \(error)")
                     daemon.stop()
+                    if Task.isCancelled { return }
                     if attempt < 2 { try? await Task.sleep(for: .milliseconds(500)) }
                 }
             }
@@ -431,10 +420,39 @@ final class AppContainer {
             )
             return
         }
+        // Recreated Workspace views must not reintroduce a catalog refresh
+        // into the sidebar's readiness gate while bootstrap is still running.
+        if daemonBootstrapTask == nil {
+            daemonBootstrapTask = Task { [weak self] in
+                guard let self else { return }
+                await self.refreshActiveRuntimeContext()
+                if !Task.isCancelled { self.daemonBootstrapTask = nil }
+            }
+        }
+    }
+
+    private func finishDaemonBootstrap(endpoint: URL, token: String) async {
+        sharingController.configure(endpoint: endpoint, managementToken: token)
+        if let providerStore = try? runtimeServers.makeProviderStore() {
+            providerConnections.providerStore = providerStore
+            await providerConnections.migrateToRuntimeProviderManagementIfNeeded(store: providerStore)
+        }
+        guard !Task.isCancelled else { return }
+        providerConnections.onSecretsPushed = { [weak self] in
+            Task { await self?.refreshActiveRuntimeContext() }
+        }
+        await providerConnections.pushLLMCredentialsToDaemon()
+        guard !Task.isCancelled else { return }
         await refreshActiveRuntimeContext()
+        await providerConnections.writeSharedSecretsFile()
+        guard !Task.isCancelled else { return }
+        _ = await sharingController.refreshStatus()
+        _ = await sharingController.refreshDevices()
     }
 
     func stopDaemonIfNeeded() {
+        daemonStartTask?.cancel()
+        daemonBootstrapTask?.cancel()
         CodeAgentDaemon.shared.stop()
     }
     #endif

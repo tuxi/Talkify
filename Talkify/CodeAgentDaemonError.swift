@@ -5,6 +5,7 @@ enum CodeAgentDaemonError: Error, LocalizedError {
     case launchFailed(String)
     case notRunning
     case portNotResolved
+    case startupTimedOut(seconds: TimeInterval, progress: String)
     case healthCheckTimeout
 
     var errorDescription: String? {
@@ -17,6 +18,8 @@ enum CodeAgentDaemonError: Error, LocalizedError {
             "codeagentd is not running."
         case .portNotResolved:
             "Could not determine codeagentd listening port."
+        case .startupTimedOut(let seconds, let progress):
+            "codeagentd did not publish its port within \(Int(seconds))s. Last startup phase: \(progress)"
         case .healthCheckTimeout:
             "codeagentd did not become ready within the timeout."
         }

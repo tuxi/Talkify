@@ -3,12 +3,10 @@
 # build-codeagentd.sh — compile codeagentd as a macOS universal binary (arm64 + x86_64)
 #
 # Usage (standalone, when you need to build/update the daemon binary):
-#   ./scripts/build-codeagentd.sh [version]
+#   ./scripts/build-codeagentd.sh [version] [--native]
 #
-# This script is NOT called during Xcode builds. The Xcode Build Phase
-# in project.pbxproj simply copies a pre-built binary from build/codeagentd
-# into the app bundle. Run this script separately whenever codeagentd
-# needs to be updated.
+# Xcode's preparation phase invokes this script only when Go sources change.
+# Debug builds use --native; distribution builds keep both macOS architectures.
 #
 # Output: build/codeagentd (Mach-O universal binary: arm64 + x86_64)
 #
@@ -23,6 +21,7 @@ set -euo pipefail
 export PATH="/opt/homebrew/bin:/usr/local/bin:/usr/local/go/bin:$HOME/go/bin:$PATH"
 
 VERSION="${1:-dev}"
+BUILD_MODE="${2:-universal}"
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 ROOT="$(cd "${SCRIPT_DIR}/.." && pwd)"
 CODE_AGENT_DIR="${ROOT}/../code-agent"
@@ -49,6 +48,22 @@ echo "==> Building codeagentd for macOS universal (arm64 + x86_64) (version: ${V
 LDFLAGS_COMMON="-s -w -X code-agent/internal/buildinfo.Version=${VERSION} -linkmode=external"
 LDFLAGS_ARM64="${LDFLAGS_COMMON} -extldflags '-Wl,-no_fixup_chains,-image_base,0x100000000'"
 LDFLAGS_AMD64="${LDFLAGS_COMMON} -extldflags '-Wl,-image_base,0x100000000'"
+
+if [[ "$BUILD_MODE" == "--native" ]]; then
+  NATIVE_ARCH="$(uname -m)"
+  if [[ "$NATIVE_ARCH" == "arm64" ]]; then
+    FLAGS="$LDFLAGS_ARM64"
+    GO_ARCH="arm64"
+  else
+    FLAGS="$LDFLAGS_AMD64"
+    GO_ARCH="amd64"
+  fi
+  CGO_ENABLED=1 GOOS=darwin GOARCH="$GO_ARCH" CC="clang -arch $NATIVE_ARCH" go build \
+    -ldflags="$FLAGS" -o "${OUTPUT}.tmp" ./cmd/codeagentd
+  mv -f "${OUTPUT}.tmp" "$OUTPUT"
+  echo "==> Built native daemon: ${OUTPUT}"
+  exit 0
+fi
 
 CGO_ENABLED=1 GOOS=darwin GOARCH=arm64 CC="clang -arch arm64" go build \
     -ldflags="${LDFLAGS_ARM64}" \
