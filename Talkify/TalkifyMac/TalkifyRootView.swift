@@ -20,7 +20,33 @@ struct TalkifyRootView: View {
     private var hasCompletedProviderOnboarding = false
 
     var body: some View {
-        WorkspaceView(dependencies: container.makeAgentDependencies())
+        Group {
+            if container.needsLocalDaemonStartup {
+                VStack(spacing: 12) {
+                    if let error = container.localDaemonStartupError {
+                        Text("本地服务未能启动")
+                            .font(.headline)
+                        Text(error)
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                            .textSelection(.enabled)
+                        Button("重试") {
+                            Task { await container.ensureAgentRuntimeStarted() }
+                        }
+                    } else {
+                        ProgressView()
+                        Text("正在启动本地服务…")
+                            .foregroundStyle(.secondary)
+                    }
+                }
+                .padding(24)
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+                .task { await container.ensureAgentRuntimeStarted() }
+            } else {
+                WorkspaceView(dependencies: container.makeAgentDependencies())
+                    .id(container.runtimeServers.activeIdentityRevision)
+            }
+        }
             .background(Color(nsColor: colorScheme == .dark
                               ? NSColor.windowBackgroundColor
                               : NSColor(
@@ -29,7 +55,6 @@ struct TalkifyRootView: View {
                                 blue: 249.0 / 255.0,
                                 alpha: 1
                               )))
-            .id(container.runtimeServers.activeIdentityRevision)
             .sheet(isPresented: providerOnboardingBinding) {
                 ProviderOnboardingView(
                     hasCompletedOnboarding: $hasCompletedProviderOnboarding
@@ -47,6 +72,7 @@ struct TalkifyRootView: View {
         Binding(
             get: {
                 !hasCompletedProviderOnboarding
+                    && !container.needsLocalDaemonStartup
                     && container.runtimeServers.activeConnection?.kind == .embedded
                     && !container.providerConnections.hasAvailableModels
                     && !container.authManager.showLoginSheet

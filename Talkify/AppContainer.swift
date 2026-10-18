@@ -79,6 +79,15 @@ final class AppContainer {
     let sharingController: RuntimeSharingDaemonController
     @ObservationIgnored private var daemonStartTask: Task<Void, Never>?
     @ObservationIgnored private var daemonBootstrapTask: Task<Void, Never>?
+    private(set) var localDaemonReady = false
+    private(set) var localDaemonStartupError: String?
+
+    var needsLocalDaemonStartup: Bool {
+        let id = runtimeServers.activeConnectionID
+        return !localDaemonReady && (id == "talkify-local-daemon"
+            || runtimeServers.activeConnection == nil
+            || runtimeServers.activeConnection?.kind == .embedded)
+    }
     #endif
 
     private let baseHeaders: [String: String]
@@ -272,6 +281,13 @@ final class AppContainer {
     }
 
     func makeAgentClient() -> any RuntimeClient {
+        #if os(macOS)
+        // A persisted ephemeral port belongs to a previous process. Never let
+        // a newly created sidebar or socket use it before this launch is ready.
+        if needsLocalDaemonStartup {
+            return DefaultAgentClient(environment: .placeholder)
+        }
+        #endif
         #if os(iOS) || os(macOS)
         do {
             return try runtimeServers.makeActiveClient()
@@ -359,9 +375,19 @@ final class AppContainer {
     private func startDaemon() async {
         let startedAt = ProcessInfo.processInfo.systemUptime
         let daemon = CodeAgentDaemon.shared
-        if !daemon.isRunning {
+        daemon.onRestartNeeded = { [weak self] in
+            guard let self, self.localDaemonReady else { return }
+            self.daemonBootstrapTask?.cancel()
+            self.daemonBootstrapTask = nil
+            self.localDaemonReady = false
+            await self.ensureDaemonStarted()
+        }
+        if !daemon.isRunning || !localDaemonReady {
+            localDaemonReady = false
+            localDaemonStartupError = nil
             // One-shot retry for transient failures (e.g. port-file race).
             for attempt in 1...2 {
+                localDaemonStartupError = nil
                 do {
                     try await daemon.start()
                     try await daemon.waitForReady(timeout: 10.0)
@@ -392,6 +418,8 @@ final class AppContainer {
                         for: connection.id,
                         token: daemon.accessToken
                     )
+                    localDaemonReady = true
+                    localDaemonStartupError = nil
                     // Publish the authenticated connection as soon as it is ready.
                     // Sharing/provider synchronization must not hold up the sidebar.
                     runtimeServers.signalActiveConnectionChanged()
@@ -405,6 +433,7 @@ final class AppContainer {
                     }
                     return
                 } catch {
+                    if attempt == 2 { localDaemonStartupError = error.localizedDescription }
                     DLLog("⚠️ [RUNTIME] daemon 启动失败 (attempt \(attempt)/2): \(error)")
                     daemon.stop()
                     if Task.isCancelled { return }
@@ -451,6 +480,7 @@ final class AppContainer {
     }
 
     func stopDaemonIfNeeded() {
+        localDaemonReady = false
         daemonStartTask?.cancel()
         daemonBootstrapTask?.cancel()
         CodeAgentDaemon.shared.stop()

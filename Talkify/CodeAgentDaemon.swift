@@ -33,6 +33,9 @@ final class CodeAgentDaemon: @unchecked Sendable {
     private var startupProgress = "launching"
     private var requiresIndexMigration = false
     private var shellEnvironment: [String: String]?
+    /// The host must register the new ephemeral endpoint and access token after
+    /// a crash. Restarting just the child leaves clients on a dead connection.
+    var onRestartNeeded: (@MainActor () async -> Void)?
 
     /// The runtime access token generated for this daemon session. A fresh
     /// 256-bit random token is created each time the daemon starts, matching
@@ -484,6 +487,10 @@ final class CodeAgentDaemon: @unchecked Sendable {
         if reason == .uncaughtSignal && status != 0 {
             logger.warning("codeagentd crashed — attempting restart")
             Task { @MainActor [weak self] in
+                if let restart = self?.onRestartNeeded {
+                    await restart()
+                    return
+                }
                 do {
                     try await self?.start()
                 } catch {
