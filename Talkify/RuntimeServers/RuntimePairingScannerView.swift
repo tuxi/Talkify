@@ -19,6 +19,12 @@ struct RuntimePairingScannerView: View {
 
     let onPaired: (RuntimeServerConnection) -> Void
 
+    #if targetEnvironment(simulator)
+    @State private var usesManualInput = true
+    #else
+    @State private var usesManualInput = false
+    #endif
+    @State private var invitationText = ""
     @State private var scannerModel = ScannerModel()
     @State private var decodedInvitation: RuntimePairingInvitation?
     @State private var decodeError: String?
@@ -30,82 +36,151 @@ struct RuntimePairingScannerView: View {
     var body: some View {
         NavigationStack {
             ZStack {
-                // Camera preview always present — it connects to the session
-                // before startRunning() and lights up automatically when ready.
-                ScannerPreview(session: scannerModel.captureSession)
-                    .ignoresSafeArea()
-
-                if scannerModel.cameraNotAvailable {
-                    // Permission denied
-                    Color.black.opacity(0.9).ignoresSafeArea()
-                    VStack(spacing: 16) {
-                        Image(systemName: "video.slash")
-                            .font(.system(size: 48, weight: .light))
-                            .foregroundStyle(.white.opacity(0.6))
-                        Text("无法访问摄像头")
-                            .font(.system(size: 17, weight: .semibold))
-                            .foregroundStyle(.white)
-                        Text("请在「设置 > 隐私与安全性 > 相机」中允许 Talkify 访问摄像头")
-                            .font(.system(size: 13))
-                            .foregroundStyle(.white.opacity(0.7))
-                            .multilineTextAlignment(.center)
-                            .padding(.horizontal, 40)
-                        Button("打开设置") {
-                            if let url = URL(string: UIApplication.openSettingsURLString) {
-                                UIApplication.shared.open(url)
-                            }
-                        }
-                        .buttonStyle(.borderedProminent)
-                        .padding(.top, 8)
-                    }
-                } else if !scannerModel.isSessionReady {
-                    // Session configuring — spinner overlay on top of preview
-                    Color.black.opacity(0.92).ignoresSafeArea()
-                    VStack(spacing: 16) {
-                        ProgressView()
-                            .progressViewStyle(.circular)
-                            .tint(.white)
-                            .scaleEffect(1.2)
-                        Text("正在启动摄像头...")
-                            .font(.system(size: 15))
-                            .foregroundStyle(.white.opacity(0.7))
-                    }
+                if usesManualInput {
+                    manualInput
                 } else {
-                    // Scan targeting overlay (on top of live preview)
-                    VStack {
-                        Spacer()
-                        VStack(spacing: 12) {
-                            Image(systemName: "qrcode.viewfinder")
-                                .font(.system(size: 48, weight: .light))
-                                .foregroundStyle(.white)
-                            Text("将二维码置于取景框内")
-                                .font(.system(size: 15, weight: .medium))
-                                .foregroundStyle(.white)
-                            Text("扫描 Mac Talkify 上显示的配对二维码")
-                                .font(.system(size: 13))
-                                .foregroundStyle(.white.opacity(0.7))
-                        }
-                        .padding(.bottom, 80)
-                    }
+                    cameraScanner
+                }
+            }
+            .safeAreaInset(edge: .bottom) {
+                if let decodeError {
+                    Text(decodeError)
+                        .font(.callout)
+                        .foregroundStyle(.red)
+                        .padding()
+                        .frame(maxWidth: .infinity)
+                        .background(.regularMaterial)
                 }
             }
             .toolbar {
                 ToolbarItem(placement: .topBarLeading) {
                     Button("取消") { dismiss() }
-                        .foregroundStyle(.white)
+                        .foregroundStyle(usesManualInput ? Color.primary : .white)
+                }
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button(usesManualInput ? "扫码" : "手动输入") {
+                        usesManualInput.toggle()
+                        decodeError = nil
+                        if !usesManualInput { scannerModel.start() }
+                    }
+                    .foregroundStyle(usesManualInput ? Color.primary : .white)
                 }
             }
             .toolbarBackground(.ultraThinMaterial, for: .navigationBar)
             .onChange(of: scannerModel.scannedCode) { _, code in
-                guard let code, decodedInvitation == nil else { return }
+                guard !usesManualInput, let code, decodedInvitation == nil else { return }
                 handleScannedCode(code)
             }
         }
         .task {
-            scannerModel.start()
+            if !usesManualInput { scannerModel.start() }
         }
-        .sheet(item: $decodedInvitation) { invitation in
+        .sheet(item: $decodedInvitation, onDismiss: {
+            scannerModel.resetScanAfterDelay()
+        }) { invitation in
             pairConfirmationSheet(invitation: invitation)
+                .task(id: invitation.id) {
+                    await checkBonjourForInvitation(invitation)
+                }
+        }
+    }
+
+    private var manualInput: some View {
+        ScrollView {
+            VStack(alignment: .leading, spacing: 20) {
+                Label("手动配对 Mac Runtime", systemImage: "macbook.and.iphone")
+                    .font(.title2.bold())
+                Text("在 Mac Talkify 的配对二维码窗口中点击「复制配对信息」，然后在此粘贴。模拟器可使用 ⌘V 粘贴。")
+                    .foregroundStyle(.secondary)
+                TextEditor(text: $invitationText)
+                    .font(.body.monospaced())
+                    .textInputAutocapitalization(.never)
+                    .autocorrectionDisabled()
+                    .frame(height: 180)
+                    .padding(8)
+                    .overlay {
+                        RoundedRectangle(cornerRadius: 12)
+                            .stroke(.secondary.opacity(0.3))
+                    }
+                    .accessibilityLabel("配对信息")
+                HStack {
+                    PasteButton(payloadType: String.self) { values in
+                        invitationText = values.first ?? ""
+                        decodeError = nil
+                    }
+                    Spacer()
+                    Button("继续配对") {
+                        handleScannedCode(invitationText)
+                    }
+                    .buttonStyle(.borderedProminent)
+                    .disabled(invitationText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
+                }
+            }
+            .padding(24)
+        }
+        .background(Color.platformRuntimeEditorBackground)
+    }
+
+    private var cameraScanner: some View {
+        ZStack {
+            // Camera preview always present — it connects to the session
+            // before startRunning() and lights up automatically when ready.
+            ScannerPreview(session: scannerModel.captureSession)
+                .ignoresSafeArea()
+
+            if scannerModel.cameraNotAvailable {
+                // Permission denied
+                Color.black.opacity(0.9).ignoresSafeArea()
+                VStack(spacing: 16) {
+                    Image(systemName: "video.slash")
+                        .font(.system(size: 48, weight: .light))
+                        .foregroundStyle(.white.opacity(0.6))
+                    Text("无法访问摄像头")
+                        .font(.system(size: 17, weight: .semibold))
+                        .foregroundStyle(.white)
+                    Text("请在「设置 > 隐私与安全性 > 相机」中允许 Talkify 访问摄像头")
+                        .font(.system(size: 13))
+                        .foregroundStyle(.white.opacity(0.7))
+                        .multilineTextAlignment(.center)
+                        .padding(.horizontal, 40)
+                    Button("打开设置") {
+                        if let url = URL(string: UIApplication.openSettingsURLString) {
+                            UIApplication.shared.open(url)
+                        }
+                    }
+                    .buttonStyle(.borderedProminent)
+                    .padding(.top, 8)
+                }
+            } else if !scannerModel.isSessionReady {
+                // Session configuring — spinner overlay on top of preview
+                Color.black.opacity(0.92).ignoresSafeArea()
+                VStack(spacing: 16) {
+                    ProgressView()
+                        .progressViewStyle(.circular)
+                        .tint(.white)
+                        .scaleEffect(1.2)
+                    Text("正在启动摄像头...")
+                        .font(.system(size: 15))
+                        .foregroundStyle(.white.opacity(0.7))
+                }
+            } else {
+                // Scan targeting overlay (on top of live preview)
+                VStack {
+                    Spacer()
+                    VStack(spacing: 12) {
+                        Image(systemName: "qrcode.viewfinder")
+                            .font(.system(size: 48, weight: .light))
+                            .foregroundStyle(.white)
+                        Text("将二维码置于取景框内")
+                            .font(.system(size: 15, weight: .medium))
+                            .foregroundStyle(.white)
+                        Text("扫描 Mac Talkify 上显示的配对二维码")
+                            .font(.system(size: 13))
+                            .foregroundStyle(.white.opacity(0.7))
+                    }
+                    .padding(.bottom, 80)
+                }
+            }
         }
     }
 
@@ -114,17 +189,18 @@ struct RuntimePairingScannerView: View {
     private func handleScannedCode(_ code: String) {
         decodeError = nil
         do {
-            let invitation = try RuntimePairingInvitation.decode(payload: code)
+            let invitation = try RuntimePairingInvitation.decode(
+                payload: code.trimmingCharacters(in: .whitespacesAndNewlines)
+            )
             // Validate expiry
             guard invitation.bootstrapExpiresAt > Date() else {
-                decodeError = "此二维码已过期，请在 Mac 上重新生成。"
+                decodeError = "此配对信息已过期，请在 Mac 上重新生成。"
                 scannerModel.resetScanAfterDelay()
                 return
             }
+            resolvedEndpoint = nil
+            pairingError = nil
             decodedInvitation = invitation
-            // Start Bonjour discovery to resolve the endpoint
-            bonjourBrowser.start()
-            checkBonjourForInvitation(invitation)
         } catch {
             decodeError = error.localizedDescription
             scannerModel.resetScanAfterDelay()
@@ -133,20 +209,20 @@ struct RuntimePairingScannerView: View {
 
     private func checkBonjourForInvitation(
         _ invitation: RuntimePairingInvitation
-    ) {
-        Task {
-            // Give Bonjour a few seconds to discover
-            try? await Task.sleep(for: .seconds(3))
-            bonjourBrowser.stop()
-
-            // Try to find matching Bonjour service
-            if let match = bonjourBrowser.servers.first(where: {
-                $0.serviceName == invitation.serviceName
-                    && $0.port == invitation.port
-            }),
-            let endpoint = match.endpoint {
-                resolvedEndpoint = endpoint
-            }
+    ) async {
+        bonjourBrowser.start()
+        defer { bonjourBrowser.stop() }
+        do {
+            try await Task.sleep(for: .seconds(3))
+        } catch {
+            return
+        }
+        guard !Task.isCancelled, decodedInvitation?.id == invitation.id else { return }
+        if let match = bonjourBrowser.servers.first(where: {
+            $0.serviceName == invitation.serviceName
+                && $0.port == invitation.port
+        }), let endpoint = match.endpoint {
+            resolvedEndpoint = endpoint
         }
     }
 

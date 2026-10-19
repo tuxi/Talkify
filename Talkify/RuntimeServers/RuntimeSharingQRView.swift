@@ -8,6 +8,7 @@
 #if os(macOS)
 
 import SwiftUI
+import AppKit
 import Combine
 import AgentKit
 import CoreImage
@@ -20,6 +21,7 @@ struct RuntimeSharingQRView: View {
 
     @State private var timeRemaining: TimeInterval = 0
     @State private var qrImage: CGImage?
+    @State private var didCopyInvitation = false
 
     private let timer = Timer.publish(every: 1, on: .main, in: .common)
         .autoconnect()
@@ -88,7 +90,22 @@ struct RuntimeSharingQRView: View {
 
             serverInfo
 
+            Text("模拟器或无法扫码时，可复制配对信息，在 iPhone 配对页面选择「手动输入」。")
+                .font(.caption)
+                .foregroundStyle(.secondary)
+                .fixedSize(horizontal: false, vertical: true)
+
             HStack(spacing: 12) {
+                Button {
+                    NSPasteboard.general.clearContents()
+                    didCopyInvitation = NSPasteboard.general.setString(payload, forType: .string)
+                } label: {
+                    Label(didCopyInvitation ? "已复制" : "复制配对信息", systemImage: "doc.on.doc")
+                }
+                .buttonStyle(.bordered)
+                .controlSize(.large)
+                .disabled(timeRemaining <= 0)
+
                 Button {
                     onDismiss()
                 } label: {
