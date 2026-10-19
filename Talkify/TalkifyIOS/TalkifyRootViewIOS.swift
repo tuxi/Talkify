@@ -53,7 +53,12 @@ struct ChatDrawerWorkspace: View {
             .onChange(of: scenePhase) { _, newValue in
                 switch newValue {
                 case .active:
-                    Task { await store.handleAppBecameActive() }
+                    Task {
+                        #if os(iOS)
+                        await container.ensureAgentRuntimeStarted()
+                        #endif
+                        await store.handleAppBecameActive()
+                    }
                 case .background:
                     store.handleAppEnteredBackground()
                 case .inactive:
@@ -117,6 +122,7 @@ private struct ChatRootViewRepresentable: UIViewControllerRepresentable {
 struct TalkifyRootView: View {
 
     @Environment(AppContainer.self) private var container
+    @Environment(\.scenePhase) private var scenePhase
     @AppStorage("provider.onboarding.completed.v1")
     private var hasCompletedProviderOnboarding = false
 
@@ -133,6 +139,10 @@ struct TalkifyRootView: View {
             }
         }
         .id(container.runtimeServers.activeIdentityRevision)
+        .task(id: scenePhase) {
+            guard scenePhase == .active else { return }
+            await container.monitorActiveRuntimeConnection()
+        }
         .sheet(isPresented: providerOnboardingBinding) {
             ProviderOnboardingView(
                 hasCompletedOnboarding: $hasCompletedProviderOnboarding

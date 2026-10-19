@@ -115,7 +115,12 @@ public struct WorkspaceView: View {
             .onChange(of: scenePhase) { _, newValue in
                 switch newValue {
                 case .active:
-                    Task { await store.handleAppBecameActive() }
+                    Task {
+                        #if os(iOS)
+                        await container.ensureAgentRuntimeStarted()
+                        #endif
+                        await store.handleAppBecameActive()
+                    }
                 case .background:
                     store.handleAppEnteredBackground()
                 case .inactive:

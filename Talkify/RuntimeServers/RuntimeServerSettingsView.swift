@@ -176,7 +176,7 @@ struct RuntimeServerSettingsView: View {
             isSwitching = false
         }
         do {
-            let snapshot = try await container.makeAgentClient().activitySnapshot()
+            let snapshot = try await coordinator.activitySnapshotForSwitch()
             if ProviderRuntimeActivityPolicy.hasActiveRuntimeWork(snapshot) {
                 pendingSwitch = connection
             } else {

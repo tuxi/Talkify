@@ -75,6 +75,9 @@ final class AppContainer {
     private let agentCredentialStore: AppCredentialStore
     let providerConnections: ProviderConnectionStore
     let runtimeServers: RuntimeServerCoordinator
+    #if os(iOS)
+    @ObservationIgnored private var embeddedStartTask: Task<Void, Never>?
+    #endif
     #if os(macOS)
     let sharingController: RuntimeSharingDaemonController
     @ObservationIgnored private var daemonStartTask: Task<Void, Never>?
@@ -309,6 +312,7 @@ final class AppContainer {
         let serverConnectionID = runtimeServers.activeConnectionID
         return AgentDependencies(
             client: makeAgentClient(),
+            usesEmbeddedRuntime: runtimeServers.activeConnection?.kind == .embedded,
             toolRegistry: toolRegistry,
             timelineExtensions: timelineExtensions,
             conversationRendererMode: .web,
@@ -345,12 +349,10 @@ final class AppContainer {
         // inherits a login-shell PATH — no hardcoded PATH hacks needed.
         await ensureDaemonStarted()
         #elseif os(iOS)
-        // iOS: use the embedded gomobile runtime (only option on iOS).
-        guard runtimeServers.activeConnection?.kind == .embedded else {
-            await refreshActiveRuntimeContext()
-            return
-        }
+        // Keep the local fallback ready independently of the selected Mac.
+        // An unavailable external server must never gate embedded startup.
         await ensureEmbeddedRuntimeStarted()
+        await refreshActiveRuntimeContext()
         #endif
     }
 
@@ -489,6 +491,19 @@ final class AppContainer {
 
     private func ensureEmbeddedRuntimeStarted() async {
         #if os(iOS)
+        if let embeddedStartTask {
+            await embeddedStartTask.value
+            return
+        }
+        let task = Task { await self.startEmbeddedRuntime() }
+        embeddedStartTask = task
+        await task.value
+        embeddedStartTask = nil
+        #endif
+    }
+
+    #if os(iOS)
+    private func startEmbeddedRuntime() async {
         do {
             _ = try await AgentRuntime.shared.ensureStarted(
                 with: providerConnections.credentialStore
@@ -499,7 +514,14 @@ final class AppContainer {
             // Install the HTTP provider store (mirrors ensureDaemonStarted) and
             // migrate any pre-existing UserDefaults connections once.
             if providerConnections.providerStore == nil {
-                if let providerStore = try? runtimeServers.makeProviderStore() {
+                // Provider configuration belongs to this device's embedded
+                // runtime, even while a paired Mac is the active server.
+                if let embedded = runtimeServers.registry.connection(
+                    id: RuntimeServerConnection.embeddedID
+                ), let providerStore = try? ProviderStoreFactory.http(
+                    for: embedded,
+                    credentialStore: providerConnections.credentialStore
+                ) {
                     providerConnections.providerStore = providerStore
                     await providerConnections.migrateToRuntimeProviderManagementIfNeeded(
                         store: providerStore
@@ -517,19 +539,44 @@ final class AppContainer {
             // runtime's mutable resolver for the first model request.
             await providerConnections.pushGatewayCredentialToRuntime()
             runtimeServers.embeddedStatusMonitor.markConnected()
-            await refreshActiveRuntimeContext()
         } catch {
             DLLog("⚠️ Agent Runtime 启动失败：\(error)")
         }
-        #endif
+    }
+    #endif
+
+    /// Run only while the scene is active. Recovery must also work outside
+    /// Settings, including when Wi-Fi returns or the Mac restarts mid-session.
+    func monitorActiveRuntimeConnection() async {
+        while !Task.isCancelled {
+            let connectionID = runtimeServers.activeConnectionID
+            if runtimeServers.activeConnection?.kind != .embedded {
+                let wasConnected = (try? runtimeServers.externalStatusMonitor(
+                    connectionID: connectionID
+                ).status) == .connected
+                let healthy = (try? await runtimeServers.checkExternal(
+                    connectionID: connectionID
+                )) == true
+                if !Task.isCancelled, healthy,
+                   runtimeServers.activeConnectionID == connectionID,
+                   !wasConnected || runtimeServers.activeContext == nil {
+                    await refreshActiveRuntimeContext()
+                }
+            }
+            do { try await Task.sleep(for: .seconds(5)) }
+            catch { return }
+        }
     }
 
     func refreshActiveRuntimeContext() async {
+        let connectionID = runtimeServers.activeConnectionID
         do {
             await providerConnections.refreshCacheFromRuntime()
             let context = try await runtimeServers.refreshActiveContext()
+            guard runtimeServers.activeConnectionID == connectionID else { return }
             publishRuntimeServerModels(context)
         } catch {
+            guard runtimeServers.activeConnectionID == connectionID else { return }
             modelSettings.applyUnifiedCatalog([], defaultModelID: nil)
             DLLog("⚠️ 当前 Runtime Server 上下文刷新失败：\(error)")
         }
