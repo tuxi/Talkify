@@ -32,6 +32,10 @@ public struct SidebarView: View {
                 newTaskButton
                 automationButton
                 workflowButton
+                CodingTasksButton()
+                    .buttonStyle(.plain)
+                    .font(.system(size: 14))
+                    .padding(.horizontal, 20)
             }
             .padding(.vertical, 10)
 

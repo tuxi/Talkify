@@ -116,7 +116,9 @@ struct TalkifyApp: App {
                     return handleDeepLink(url)
                 }))
         }
-        
+        #if os(macOS) && TALKIFY_MAC_DIRECT
+        .commands { LocalMCPConnectionCommands(container: container) }
+        #endif
     }
     
     private func handleDeepLink(_ url: URL) -> OpenURLAction.Result {

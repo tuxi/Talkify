@@ -500,6 +500,10 @@ extension WorkspaceView {
         .padding(.horizontal, 12)
         .padding(.vertical, 10)
         #else
+        CodingTasksButton()
+            .buttonStyle(.plain)
+            .padding(.horizontal, 16)
+            .padding(.vertical, 10)
         if !authManager.isRegistered {
             Button {
                 openSettings()

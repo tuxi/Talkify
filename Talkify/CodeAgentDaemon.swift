@@ -28,6 +28,8 @@ final class CodeAgentDaemon: @unchecked Sendable {
 
     private var process: Process?
     private var portFileURL: URL?
+    private var mcpGrantURL: URL?
+    private var mcpInstanceID = UUID().uuidString
     private var startTask: Task<Void, Error>?
     private var startTaskID: UUID?
     private var startupProgress = "launching"
@@ -108,6 +110,7 @@ final class CodeAgentDaemon: @unchecked Sendable {
 
         // Generate fresh 256-bit access token
         accessToken = generateAccessToken()
+        mcpInstanceID = UUID().uuidString
 
         // Create a temporary port-file for the daemon to report its actual port
         let portFile = FileManager.default.temporaryDirectory
@@ -198,6 +201,7 @@ final class CodeAgentDaemon: @unchecked Sendable {
     }
 
     private func stopRunningProcess() {
+        try? revokeMCPConnection()
         guard let process else { return }
 
         logger.info("Stopping codeagentd (pid: \(process.processIdentifier))")
@@ -286,6 +290,40 @@ final class CodeAgentDaemon: @unchecked Sendable {
             try await Task.sleep(for: .milliseconds(200))
         }
         throw CodeAgentDaemonError.healthCheckTimeout
+    }
+
+    // MARK: - Explicit local MCP connection grant
+
+    func exportMCPConnection() async throws -> URL {
+        guard isRunning, let endpoint, !accessToken.isEmpty else {
+            throw LocalMCPGrantError.unavailable
+        }
+        let pid = processID
+        let instance = mcpInstanceID
+        let token = accessToken
+        let identity = try await LocalMCPConnectionGrant.identity(endpoint: endpoint, token: token)
+        guard isRunning, processID == pid, mcpInstanceID == instance,
+              self.endpoint == endpoint, accessToken == token else {
+            throw LocalMCPGrantError.unavailable
+        }
+        let grant = LocalMCPConnectionGrant(
+            schemaVersion: 1, endpoint: endpoint.absoluteString,
+            serverID: identity.serverID, storeID: identity.storeID,
+            instanceID: instance, daemonPID: pid,
+            expiresAt: ISO8601DateFormatter().string(from: Date().addingTimeInterval(12 * 3600)),
+            accessToken: token
+        )
+        let url = try grant.save()
+        mcpGrantURL = url
+        return url
+    }
+
+    func revokeMCPConnection() throws {
+        guard let url = mcpGrantURL else { return }
+        if FileManager.default.fileExists(atPath: url.path) {
+            try LocalMCPConnectionGrant.revoke(at: url, instanceID: mcpInstanceID)
+        }
+        mcpGrantURL = nil
     }
 
     // MARK: - Private helpers
@@ -475,6 +513,7 @@ final class CodeAgentDaemon: @unchecked Sendable {
     /// signal), attempt a one-shot restart.
     private func handleTermination(pid: Int32, status: Int32, reason: Process.TerminationReason) {
         guard process?.processIdentifier == pid else { return }
+        try? revokeMCPConnection()
         logger.info("codeagentd terminated (status: \(status), reason: \(String(describing: reason)))")
         process = nil
         port = 0

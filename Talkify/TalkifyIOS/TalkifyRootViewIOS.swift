@@ -45,6 +45,14 @@ struct ChatDrawerWorkspace: View {
     var body: some View {
         ChatRootViewRepresentable(store: store, dependencies: dependencies, container: container)
             .ignoresSafeArea()
+            .safeAreaInset(edge: .top, spacing: 0) {
+                CodingTasksButton()
+                    .buttonStyle(.borderless)
+                    .padding(.horizontal)
+                    .padding(.vertical, 6)
+                    .background(.regularMaterial)
+                    .environment(store)
+            }
             .task {
                 store.startLifecycleNetworkMonitor()
                 await container.ensureAgentRuntimeStarted()
