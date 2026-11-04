@@ -315,7 +315,6 @@ final class AppContainer {
             usesEmbeddedRuntime: runtimeServers.activeConnection?.kind == .embedded,
             toolRegistry: toolRegistry,
             timelineExtensions: timelineExtensions,
-            conversationRendererMode: .web,
             onAuthExpired: { [weak self] in
                 // The runtime resolves the gateway provider from the injected
                 // gateway/default credential. Re-push the refreshed token over
