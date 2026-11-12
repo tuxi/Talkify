@@ -1,6 +1,8 @@
 import AgentKit
 import ClientToolsKit
+import CoreKit
 import XCTest
+@testable import Talkify
 
 final class InspectUIImageRegistrationTests: XCTestCase {
     func testRegistryFindsInspectUIImageTool() async {
@@ -12,6 +14,27 @@ final class InspectUIImageRegistrationTests: XCTestCase {
 
         let names = await registry.registeredNames
         XCTAssertTrue(names.contains("inspect_ui_image"))
+    }
+
+    @MainActor
+    func testAppContainerRegistersInspectUIImageTool() async throws {
+        let authManager = AuthManager(refreshTokenHandler: { token in token })
+        let container = AppContainer(
+            authManager: authManager,
+            environmentManager: EnvironmentManager(),
+            deviceManager: DeviceManager()
+        )
+
+        var names: [String] = []
+        for _ in 0..<100 {
+            names = await container.toolRegistry.registeredNames
+            if names.contains("inspect_ui_image") { break }
+            try await Task.sleep(nanoseconds: 20_000_000)
+        }
+
+        XCTAssertTrue(names.contains("inspect_ui_image"), "registered tools: \(names)")
+        XCTAssertTrue(names.contains("analyze_local_image"), "registered tools: \(names)")
+        print("AppContainer registered tools: \(names.joined(separator: ", "))")
     }
 
     func testToolInfoRoundTripsDescriptionAndSchema() throws {

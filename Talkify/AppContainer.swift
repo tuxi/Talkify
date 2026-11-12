@@ -281,6 +281,10 @@ final class AppContainer {
 #if os(iOS)
             await toolRegistry.register(ScanDocumentTool())
 #endif
+#if DEBUG
+            let registeredNames = await toolRegistry.registeredNames
+            DLLog("client tools registered: \(registeredNames.joined(separator: ", "))")
+#endif
         }
     }
 
