@@ -22,6 +22,7 @@ public struct SettingsView: View {
     @Environment(AppContainer.self) private var container
     @Environment(\.horizontalSizeClass) private var horizontalSizeClass
     
+    private let sessionID: String?
     private let onClose: (() -> Void)?
     @State private var selection: SettingsSection
     @State private var searchText = ""
@@ -36,8 +37,10 @@ public struct SettingsView: View {
     
     init(
         initialSection: SettingsSection = .account,
+        sessionID: String? = nil,
         onClose: (() -> Void)? = nil
     ) {
+        self.sessionID = sessionID
         self.onClose = onClose
         self._selection = State(initialValue: initialSection)
     }
@@ -62,7 +65,11 @@ public struct SettingsView: View {
     private var compactLayout: some View {
         NavigationStack(path: $router.path) {
             settingsSidebar(navigateWithRouter: true)
-                .withSettingsNavigationDestinations(router: router, container: container)
+                .withSettingsNavigationDestinations(
+                    router: router,
+                    container: container,
+                    sessionID: sessionID
+                )
                 .toolbar {
 #if os(iOS)
                     ToolbarItem(placement: .topBarTrailing) {
@@ -96,8 +103,12 @@ public struct SettingsView: View {
                 .navigationSplitViewColumnWidth(min: 250, ideal: 300, max: 350)
         } detail: {
             NavigationStack(path: $router.path) {
-                SettingsDetailView(section: selection)
-                    .withSettingsNavigationDestinations(router: router, container: container)
+                SettingsDetailView(section: selection, sessionID: sessionID)
+                    .withSettingsNavigationDestinations(
+                        router: router,
+                        container: container,
+                        sessionID: sessionID
+                    )
             }
             .withSettingsSheetDestinations(sheetDestinations: $router.presentedSheet, container: container)
             .withSettingsCoverDestinations(coverDestinations: $router.presentedCover)

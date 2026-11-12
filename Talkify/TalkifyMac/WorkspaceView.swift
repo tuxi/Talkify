@@ -359,7 +359,10 @@ public struct WorkspaceView: View {
             .environment(store)
             
             if showSettings {
-                SettingsView(initialSection: settingsInitialSection) {
+                SettingsView(
+                    initialSection: settingsInitialSection,
+                    sessionID: store.selectedConversation?.id
+                ) {
                     showSettings = false
                 }
                 #if os(macOS)

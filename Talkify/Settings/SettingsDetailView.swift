@@ -26,6 +26,7 @@ struct SettingsDetailView: View {
     @Environment(AppContainer.self) private var container
     
     let section: SettingsSection
+    let sessionID: String?
     
     @AppStorage("settings.defaultPermission") private var defaultPermission = true
     @AppStorage("settings.autoApproval") private var autoApproval = true
@@ -101,6 +102,9 @@ struct SettingsDetailView: View {
                 case .servers:
                     RuntimeServerSettingsView()
                         .navigationTitle(Text(verbatim: "服务器"))
+                case .customize:
+                    customizeSettings
+                        .navigationTitle(Text(verbatim: "自定义"))
                 case .providers:
                     ProviderSettingsView()
                         .navigationTitle("提供商")
@@ -130,12 +134,97 @@ struct SettingsDetailView: View {
                         .navigationTitle(TalkifyLocalized.string("settings.item.about"))
                 }
             }
-            .frame(maxWidth: 780, alignment: .leading)
+            .frame(maxWidth: section == .customize ? 1120 : 780, alignment: .leading)
             .padding(.horizontal, 38)
             .padding(.top, 44)
             .padding(.bottom, 56)
         })
         .background(Color.primary.opacity(0.018))
+    }
+
+    @ViewBuilder
+    private var customizeSettings: some View {
+        if let client = container.makeAgentClient() as? any SkillPluginManaging {
+            SkillPluginManagementView(
+                client: client,
+                sessionID: sessionID,
+                runtimeDisplayName: container.runtimeServers.activeConnection?.displayName
+                    ?? "未连接 Runtime",
+                canInstallLocalPlugin: canInstallLocalPlugin,
+                localInstallDisabledReason: localInstallDisabledReason,
+                restartPrompt: runtimeRestartPrompt,
+                onRestartRuntime: runtimeRestartAction
+            )
+            .id(
+                "\(sessionID ?? "no-session"):"
+                    + "\(container.runtimeServers.activeConnectionID):"
+                    + "\(container.runtimeServers.activeIdentityRevision)"
+            )
+            .frame(minHeight: 640)
+        } else {
+            ContentUnavailableView(
+                "Runtime 客户端不可用",
+                systemImage: "puzzlepiece.extension",
+                description: Text("当前 Runtime 连接没有实现 Skill & Plugin Management v1。")
+            )
+            .frame(maxWidth: .infinity, minHeight: 360)
+        }
+    }
+
+    private var activeRuntimeKind: RuntimeServerKind? {
+        container.runtimeServers.activeConnection?.kind
+    }
+
+    private var canInstallLocalPlugin: Bool {
+        guard let activeRuntimeKind else { return false }
+        #if os(macOS)
+        return activeRuntimeKind == .embedded || activeRuntimeKind == .local
+        #else
+        // A paired Mac Runtime cannot read an absolute path selected on iPhone.
+        return activeRuntimeKind == .embedded
+        #endif
+    }
+
+    private var localInstallDisabledReason: String? {
+        guard let activeRuntimeKind else {
+            return "尚未连接 Runtime。连接本地 Runtime 后才能选择本地目录或 .zip。"
+        }
+        switch activeRuntimeKind {
+        case .embedded:
+            return nil
+        case .local:
+            #if os(macOS)
+            return nil
+            #else
+            return "当前连接的是另一台设备上的 Local Runtime。iPhone 的文件路径无法被该 Runtime 读取；请切换到设备内嵌 Runtime。"
+            #endif
+        case .remote:
+            return "远程 Runtime 禁止本地安装：托管 Runtime 不能访问此设备上的绝对路径。第一版也不提供远程 marketplace。"
+        }
+    }
+
+    private var runtimeRestartPrompt: String? {
+        switch activeRuntimeKind {
+        case .embedded:
+            return nil
+        case .local:
+            return "请在运行 codeagentd 的 Mac 上重启 Runtime，然后返回此页面刷新。"
+        case .remote:
+            return "请在远程主机重启 CodeAgent Runtime，然后返回此页面刷新。"
+        case nil:
+            return "连接 Runtime 后重试。"
+        }
+    }
+
+    private var runtimeRestartAction: (@MainActor @Sendable () async -> Bool)? {
+        guard activeRuntimeKind == .embedded else { return nil }
+        return {
+            let restarted = await container.runtimeServers.restartEmbedded()
+            if restarted {
+                await container.refreshActiveRuntimeContext()
+            }
+            return restarted
+        }
     }
 
     private var gatewayDisconnectedView: some View {

@@ -337,7 +337,10 @@ final class ChatRootViewController: UIViewController {
     private func handleSettingsTap(
         initialSection: SettingsSection = .account
     ) {
-        let settingsView = SettingsView(initialSection: initialSection)
+        let settingsView = SettingsView(
+            initialSection: initialSection,
+            sessionID: store.selectedConversation?.id
+        )
             .environment(container.authManager)
             .environment(container.agentManager)
             .environment(container.userManager)

@@ -721,7 +721,8 @@ struct WorkspaceHubView: View {
 private extension ConversationActivityState {
     var isActive: Bool {
         switch self {
-        case .running, .queued, .waitingForApproval, .waitingForClientTool, .connecting:
+        case .running, .queued, .waitingForApproval, .waitingForClientTool,
+             .waitingForBackground, .backgroundNeedsAttention, .connecting:
             return true
         case .idle, .succeeded, .failed, .cancelled, .paused:
             return false

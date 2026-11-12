@@ -14,12 +14,13 @@ extension View {
    
     func withSettingsNavigationDestinations(
             router: SettingsRouter,
-            container: AppContainer
+            container: AppContainer,
+            sessionID: String?
     ) -> some View {
         navigationDestination(for: SettingsNavigationDestination.self) { destination in
             switch destination {
             case .detail(let section):
-                SettingsDetailView(section: section)
+                SettingsDetailView(section: section, sessionID: sessionID)
             case .pointsCenter:
                 PointsCenterView(viewModel: PointsCenterViewModel(billingManager: container.billingManager, billingService: container.makeBillingService()))
                     .environment(router)
