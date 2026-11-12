@@ -266,6 +266,7 @@ final class AppContainer {
             await toolRegistry.register(CameraCaptureTool())
             await toolRegistry.register(DownloadFileTool())
             await toolRegistry.register(AnalyzeLocalImageTool())
+            await toolRegistry.register(InspectUIImageTool())
             await toolRegistry.register(ReadPDFTool())
             await toolRegistry.register(RenderPDFPagesTool())
             await toolRegistry.register(RecordAudioTool())
