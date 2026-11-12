@@ -324,6 +324,7 @@ private struct ProviderModelDraft: Identifiable {
     var supportsTools = true
     var supportsReasoning = false
     var inputModalities: Set<ProviderInputModality> = [.text]
+    var toolImageInput = false
     var inputPricePerM: String = ""
     var outputPricePerM: String = ""
     var cacheInputPricePerM: String = ""
@@ -342,6 +343,7 @@ private struct ProviderModelDraft: Identifiable {
         supportsTools = model?.supportsTools ?? true
         supportsReasoning = model?.supportsReasoning ?? false
         inputModalities = model?.inputModalities ?? [.text]
+        toolImageInput = model?.toolImageInput ?? false
         inputPricePerM = model?.inputPricePerMillion.map { String(format: "%.2f", $0) } ?? ""
         outputPricePerM = model?.outputPricePerMillion.map { String(format: "%.2f", $0) } ?? ""
         cacheInputPricePerM = model?.cacheInputPricePerMillion.map { String(format: "%.2f", $0) } ?? ""
@@ -362,6 +364,7 @@ private struct ProviderModelDraft: Identifiable {
             supportsTools: supportsTools,
             supportsReasoning: supportsReasoning,
             inputModalities: inputModalities,
+            toolImageInput: toolImageInput,
             inputPricePerMillion: Double(inputPricePerM),
             outputPricePerMillion: Double(outputPricePerM),
             cacheInputPricePerMillion: Double(cacheInputPricePerM),
@@ -513,6 +516,7 @@ struct ProviderEditorView: View {
                                 }
                                 Toggle("Web Search", isOn: $model.webSearch)
                                 ModelCapSelectView(selectedCaps: $model.inputModalities)
+                                Toggle("Tool-result image input", isOn: $model.toolImageInput)
                                 DisclosureGroup("高级") {
 //                                    TextField("协议（可选）", text: $model.transport)
                                     Picker("协议", selection: $model.transport) {
@@ -756,6 +760,7 @@ struct ModelCatalogSettingsView: View {
                     }
                     if model.supportsTools { Text("工具") }
                     if model.supportsReasoning { Text("推理") }
+                    if model.toolImageInput == true { Text("图片工具结果") }
                 }
                 .font(.caption)
                 .foregroundStyle(.secondary)

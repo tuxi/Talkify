@@ -46,6 +46,7 @@ struct TalkifyProviderTemplate: Identifiable, Hashable {
                         inputModalities: Set((m.inputModalities ?? []).compactMap {
                             ProviderInputModality(rawValue: $0)
                         }),
+                        toolImageInput: m.toolImageInput,
                         inputPricePerMillion: m.inputPricePerMillion,
                         outputPricePerMillion: m.outputPricePerMillion,
                         webSearch: m.webSearch ?? false,

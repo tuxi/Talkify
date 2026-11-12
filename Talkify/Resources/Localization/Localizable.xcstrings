@@ -19858,6 +19858,9 @@
     "Tool Calling" : {
 
     },
+    "Tool-result image input" : {
+
+    },
     "user-assets.error.dimensions" : {
 
     },
@@ -25775,6 +25778,9 @@
 
     },
     "只允许小写字母、数字、连字符和下划线；创建后不可修改。" : {
+
+    },
+    "图片工具结果" : {
 
     },
     "复制配对信息" : {
