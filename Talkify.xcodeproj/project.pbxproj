@@ -19,6 +19,9 @@
 		D0962065300B1D160005EBC6 /* AgentKit in Frameworks */ = {isa = PBXBuildFile; productRef = D0962064300B1D160005EBC6 /* AgentKit */; };
 		D0F9C4AB30146A5D00DD5013 /* DesignKit in Frameworks */ = {isa = PBXBuildFile; productRef = D0F9C21E3014645F00DD5013 /* DesignKit */; };
 		D0F9C7EA3016DE7000DD5013 /* CoreKit in Frameworks */ = {isa = PBXBuildFile; productRef = D096205D300B19610005EBC6 /* CoreKit */; };
+		E10000000000000000000004 /* ClientToolProtocol in Frameworks */ = {isa = PBXBuildFile; productRef = E10000000000000000000002 /* ClientToolProtocol */; };
+		E10000000000000000000005 /* ClientToolProtocol in Frameworks */ = {isa = PBXBuildFile; productRef = E10000000000000000000003 /* ClientToolProtocol */; };
+		E10000000000000000000007 /* InspectUIImageRegistrationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E10000000000000000000006 /* InspectUIImageRegistrationTests.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -60,6 +63,7 @@
 		C30000000000000000000002 /* TalkifyMacAppStore.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = TalkifyMacAppStore.xcconfig; sourceTree = "<group>"; };
 		C30000000000000000000003 /* TalkifyMacDirect.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = TalkifyMacDirect.xcconfig; sourceTree = "<group>"; };
 		C40000000000000000000002 /* ProviderTemplateTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProviderTemplateTests.swift; sourceTree = "<group>"; };
+		E10000000000000000000006 /* InspectUIImageRegistrationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InspectUIImageRegistrationTests.swift; sourceTree = "<group>"; };
 		D0962009300B17250005EBC6 /* Talkify.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Talkify.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
@@ -96,6 +100,7 @@
 			files = (
 				A10000000000000000000003 /* AgentKit in Frameworks */,
 				A1000000000000000000000F /* ClientToolsKit in Frameworks */,
+				E10000000000000000000005 /* ClientToolProtocol in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -117,6 +122,7 @@
 				D0935524300EEFCF006C3962 /* ClientToolsKit in Frameworks */,
 				D0962065300B1D160005EBC6 /* AgentKit in Frameworks */,
 				D093565A300F7080006C3962 /* FileViewerKit in Frameworks */,
+				E10000000000000000000004 /* ClientToolProtocol in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -128,6 +134,7 @@
 			children = (
 				A10000000000000000000002 /* UserAssetsTests.swift */,
 				C40000000000000000000002 /* ProviderTemplateTests.swift */,
+				E10000000000000000000006 /* InspectUIImageRegistrationTests.swift */,
 			);
 			path = TalkifyTests;
 			sourceTree = "<group>";
@@ -191,6 +198,7 @@
 			packageProductDependencies = (
 				D0962064300B1D160005EBC6 /* AgentKit */,
 				D0935523300EEFCF006C3962 /* ClientToolsKit */,
+				E10000000000000000000003 /* ClientToolProtocol */,
 			);
 			productName = TalkifyTests;
 			productReference = A10000000000000000000004 /* TalkifyTests.xctest */;
@@ -245,6 +253,7 @@
 				D0935523300EEFCF006C3962 /* ClientToolsKit */,
 				D0935659300F7080006C3962 /* FileViewerKit */,
 				D0F9C21E3014645F00DD5013 /* DesignKit */,
+				E10000000000000000000002 /* ClientToolProtocol */,
 			);
 			productName = Talkify;
 			productReference = D0962009300B17250005EBC6 /* Talkify.app */;
@@ -306,6 +315,7 @@
 				D0935521300EEF17006C3962 /* XCLocalSwiftPackageReference "../ClientToolsKit" */,
 				D093553C300F63FC006C3962 /* XCLocalSwiftPackageReference "../FileViewerKit" */,
 				D0F9C21D3014645F00DD5013 /* XCLocalSwiftPackageReference "Packages/DesignKit" */,
+				E10000000000000000000001 /* XCRemoteSwiftPackageReference "ClientToolProtocol" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = D096200A300B17250005EBC6 /* Products */;
@@ -367,6 +377,7 @@
 			files = (
 				A10000000000000000000001 /* UserAssetsTests.swift in Sources */,
 				C40000000000000000000001 /* ProviderTemplateTests.swift in Sources */,
+				E10000000000000000000007 /* InspectUIImageRegistrationTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -610,14 +621,38 @@
 		D057EB3A30190DF800CBD707 /* Debug-MacDirect */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = NKW67GFDHM;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 18;
+				MACOSX_DEPLOYMENT_TARGET = 15;
+				PRODUCT_BUNDLE_IDENTIFIER = com.objc.chatTests;
 				PRODUCT_NAME = TalkifyTests;
+				SDKROOT = auto;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator macosx";
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Talkify.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/Talkify";
 			};
 			name = "Debug-MacDirect";
 		};
 		D057EB3B30190DF800CBD707 /* Release-MacDirect */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = NKW67GFDHM;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 18;
+				MACOSX_DEPLOYMENT_TARGET = 15;
+				PRODUCT_BUNDLE_IDENTIFIER = com.objc.chatTests;
 				PRODUCT_NAME = TalkifyTests;
+				SDKROOT = auto;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator macosx";
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Talkify.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/Talkify";
 			};
 			name = "Release-MacDirect";
 		};
@@ -936,6 +971,17 @@
 		};
 /* End XCConfigurationList section */
 
+/* Begin XCRemoteSwiftPackageReference section */
+		E10000000000000000000001 /* XCRemoteSwiftPackageReference "ClientToolProtocol" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/tuxi/ClientToolProtocol";
+			requirement = {
+				kind = branch;
+				branch = main;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
 /* Begin XCLocalSwiftPackageReference section */
 		D0935521300EEF17006C3962 /* XCLocalSwiftPackageReference "../ClientToolsKit" */ = {
 			isa = XCLocalSwiftPackageReference;
@@ -991,6 +1037,16 @@
 			isa = XCSwiftPackageProductDependency;
 			package = D0F9C21D3014645F00DD5013 /* XCLocalSwiftPackageReference "Packages/DesignKit" */;
 			productName = DesignKit;
+		};
+		E10000000000000000000002 /* ClientToolProtocol */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = E10000000000000000000001 /* XCRemoteSwiftPackageReference "ClientToolProtocol" */;
+			productName = ClientToolProtocol;
+		};
+		E10000000000000000000003 /* ClientToolProtocol */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = E10000000000000000000001 /* XCRemoteSwiftPackageReference "ClientToolProtocol" */;
+			productName = ClientToolProtocol;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};
