@@ -266,7 +266,18 @@ final class AppContainer {
             await toolRegistry.register(CameraCaptureTool())
             await toolRegistry.register(DownloadFileTool())
             await toolRegistry.register(AnalyzeLocalImageTool())
-            await toolRegistry.register(InspectUIImageTool())
+            let inspectTool = InspectUIImageTool()
+            await toolRegistry.register(inspectTool)
+            // Move the one-time accurate-OCR model load off the first user turn.
+            inspectTool.warmUp()
+            // macOS unloads the accurate model after idle; refresh it so a
+            // later image call still gets accurate OCR.
+            Task.detached(priority: .utility) {
+                while !Task.isCancelled {
+                    try? await Task.sleep(nanoseconds: 120_000_000_000)
+                    InspectUIImageTool().warmUp()
+                }
+            }
             await toolRegistry.register(ReadPDFTool())
             await toolRegistry.register(RenderPDFPagesTool())
             await toolRegistry.register(RecordAudioTool())
