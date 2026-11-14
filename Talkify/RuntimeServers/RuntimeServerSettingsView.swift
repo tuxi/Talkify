@@ -1056,12 +1056,7 @@ private struct RuntimeServerEditorView: View {
         testedResult = nil
         defer { isTesting = false }
         do {
-            let result = try await container.runtimeServers.preflightExternal(
-                connectionID: request.connection?.id,
-                endpoint: endpoint,
-                authentication: authentication,
-                accessToken: accessToken.trimmed.nilIfEmpty
-            )
+            let result = try await preflight(endpoint: endpoint)
             testedResult = result
             do {
                 try await save(result, confirmIdentityChange: false)
@@ -1071,6 +1066,40 @@ private struct RuntimeServerEditorView: View {
         } catch {
             errorMessage = error.localizedDescription
         }
+    }
+
+    /// A loopback Runtime that accepts no credentials is a supported add
+    /// target. When the user leaves the token empty, try the no-auth path
+    /// instead of failing with "Access Token is required".
+    private func preflight(
+        endpoint: URL
+    ) async throws -> RuntimeServerPreflightResult {
+        let token = accessToken.trimmed.nilIfEmpty
+        if authentication == .bearer,
+           token == nil,
+           request.connection == nil,
+           RuntimeServerEndpointClassifier.isLoopback(endpoint) {
+            do {
+                let result = try await container.runtimeServers.preflightExternal(
+                    connectionID: request.connection?.id,
+                    endpoint: endpoint,
+                    authentication: .none,
+                    accessToken: nil
+                )
+                authentication = .none
+                return result
+            } catch RuntimeServerPreflightError.authenticationRequired,
+                    RuntimeServerPreflightError.authenticationInvalid {
+                // The loopback server does require a token; report that
+                // instead of silently downgrading the saved authentication.
+            }
+        }
+        return try await container.runtimeServers.preflightExternal(
+            connectionID: request.connection?.id,
+            endpoint: endpoint,
+            authentication: authentication,
+            accessToken: token
+        )
     }
 
     private func saveConfirmedIdentity() async {

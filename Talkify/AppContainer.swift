@@ -82,6 +82,8 @@ final class AppContainer {
     let sharingController: RuntimeSharingDaemonController
     @ObservationIgnored private var daemonStartTask: Task<Void, Never>?
     @ObservationIgnored private var daemonBootstrapTask: Task<Void, Never>?
+    @ObservationIgnored private var activeRuntimeMonitorTask: Task<Void, Never>?
+    @ObservationIgnored private var activeProviderStoreIdentity: String?
     private(set) var localDaemonReady = false
     private(set) var localDaemonStartupError: String?
 
@@ -363,6 +365,7 @@ final class AppContainer {
         // The daemon reads ~/.codeagent/settings.json (shared with CLI) and
         // inherits a login-shell PATH — no hardcoded PATH hacks needed.
         await ensureDaemonStarted()
+        startActiveRuntimeMonitorIfNeeded()
         #elseif os(iOS)
         // Keep the local fallback ready independently of the selected Mac.
         // An unavailable external server must never gate embedded startup.
@@ -372,6 +375,17 @@ final class AppContainer {
     }
 
     #if os(macOS)
+    /// Watch the active server for the whole app lifetime so a manually added
+    /// loopback/LAN Runtime reconnects after it restarts, not only while the
+    /// Runtime Server settings page is visible.
+    private func startActiveRuntimeMonitorIfNeeded() {
+        guard activeRuntimeMonitorTask == nil else { return }
+        activeRuntimeMonitorTask = Task { [weak self] in
+            guard let self else { return }
+            await self.monitorActiveRuntimeConnection()
+        }
+    }
+
     /// Launch codeagentd, register it as a local RuntimeServerConnection,
     /// and set it as the active server.
     ///
@@ -392,6 +406,16 @@ final class AppContainer {
     private func startDaemon() async {
         let startedAt = ProcessInfo.processInfo.systemUptime
         let daemon = CodeAgentDaemon.shared
+        // A user-selected external Runtime is authoritative across launches.
+        // Starting the managed daemon must never steal the active selection.
+        let preservedActiveExternalID: String? = {
+            guard let active = runtimeServers.activeConnection,
+                  active.kind != .embedded,
+                  active.id != "talkify-local-daemon" else {
+                return nil
+            }
+            return active.id
+        }()
         daemon.onRestartNeeded = { [weak self] in
             guard let self, self.localDaemonReady else { return }
             self.daemonBootstrapTask?.cancel()
@@ -419,9 +443,16 @@ final class AppContainer {
                         authentication: .bearer,
                         platform: .macOS
                     )
-                    // If a stale daemon record from an earlier launch is still
-                    // the active connection, switch away first so we can remove it.
-                    if runtimeServers.registry.activeConnectionID == connection.id {
+                    let preservesExternal: Bool = {
+                        guard let preservedActiveExternalID else { return false }
+                        return runtimeServers.registry.connection(
+                            id: preservedActiveExternalID
+                        )?.id == preservedActiveExternalID
+                    }()
+                    if !preservesExternal,
+                       runtimeServers.registry.activeConnectionID == connection.id {
+                        // Stale managed daemon record: switch away before
+                        // replacing it so remove() is allowed.
                         _ = try? runtimeServers.registry.setActive(
                             connectionID: RuntimeServerConnection.embeddedID
                         )
@@ -430,7 +461,9 @@ final class AppContainer {
                         connectionID: connection.id
                     )
                     try runtimeServers.registry.upsert(connection)
-                    try runtimeServers.registry.setActive(connectionID: connection.id)
+                    if !preservesExternal {
+                        try runtimeServers.registry.setActive(connectionID: connection.id)
+                    }
                     try await runtimeServers.injectBearerToken(
                         for: connection.id,
                         token: daemon.accessToken
@@ -439,9 +472,12 @@ final class AppContainer {
                     localDaemonStartupError = nil
                     // Publish the authenticated connection as soon as it is ready.
                     // Sharing/provider synchronization must not hold up the sidebar.
-                    runtimeServers.signalActiveConnectionChanged()
+                    if !preservesExternal {
+                        runtimeServers.signalActiveConnectionChanged()
+                    }
+                    syncProviderStoreWithActiveRuntime()
                     let elapsed = Int((ProcessInfo.processInfo.systemUptime - startedAt) * 1000)
-                    DLLog("[startup] authenticated daemon ready elapsed_ms=\(elapsed) port=\(daemon.port)")
+                    DLLog("[startup] authenticated daemon ready elapsed_ms=\(elapsed) port=\(daemon.port) active=\(runtimeServers.activeConnectionID)")
                     daemonBootstrapTask?.cancel()
                     daemonBootstrapTask = Task { [weak self] in
                         guard let self else { return }
@@ -458,12 +494,14 @@ final class AppContainer {
                 }
             }
 
-            // Daemon failed after retries — keep it set as active but
-            // mark it offline. The user can retry via Runtime Server settings.
+            // Daemon failed after retries. Keep a user-selected external
+            // Runtime active; only fall back to embedded when there is none.
             DLLog("⚠️ [RUNTIME] daemon 彻底失败，请在设置中重试或手动添加服务")
-            _ = try? runtimeServers.registry.setActive(
-                connectionID: RuntimeServerConnection.embeddedID
-            )
+            if preservedActiveExternalID == nil {
+                _ = try? runtimeServers.registry.setActive(
+                    connectionID: RuntimeServerConnection.embeddedID
+                )
+            }
             return
         }
         // Recreated Workspace views must not reintroduce a catalog refresh
@@ -481,6 +519,9 @@ final class AppContainer {
         sharingController.configure(endpoint: endpoint, managementToken: token)
         if let providerStore = try? runtimeServers.makeProviderStore() {
             providerConnections.providerStore = providerStore
+            if let connection = runtimeServers.activeConnection {
+                activeProviderStoreIdentity = Self.providerStoreIdentity(for: connection)
+            }
             await providerConnections.migrateToRuntimeProviderManagementIfNeeded(store: providerStore)
         }
         guard !Task.isCancelled else { return }
@@ -500,6 +541,8 @@ final class AppContainer {
         localDaemonReady = false
         daemonStartTask?.cancel()
         daemonBootstrapTask?.cancel()
+        activeRuntimeMonitorTask?.cancel()
+        activeRuntimeMonitorTask = nil
         CodeAgentDaemon.shared.stop()
     }
     #endif
@@ -585,6 +628,7 @@ final class AppContainer {
 
     func refreshActiveRuntimeContext() async {
         let connectionID = runtimeServers.activeConnectionID
+        syncProviderStoreWithActiveRuntime()
         do {
             await providerConnections.refreshCacheFromRuntime()
             let context = try await runtimeServers.refreshActiveContext()
@@ -595,6 +639,40 @@ final class AppContainer {
             modelSettings.applyUnifiedCatalog([], defaultModelID: nil)
             DLLog("⚠️ 当前 Runtime Server 上下文刷新失败：\(error)")
         }
+    }
+
+    /// Keep provider management pointed at the active Runtime Server. Without
+    /// this, switching from a managed daemon to a user-added server kept
+    /// reading and writing the previous server's `/v1/providers`.
+    private func syncProviderStoreWithActiveRuntime() {
+        #if os(macOS)
+        let connectionID = runtimeServers.activeConnectionID
+        guard !connectionID.isEmpty,
+              let connection = runtimeServers.activeConnection else {
+            return
+        }
+        let identity = Self.providerStoreIdentity(for: connection)
+        guard activeProviderStoreIdentity != identity,
+              let store = try? ProviderStoreFactory.http(
+                  for: connection,
+                  credentialStore: providerConnections.credentialStore
+              ) else {
+            return
+        }
+        providerConnections.providerStore = store
+        activeProviderStoreIdentity = identity
+        #endif
+    }
+
+    private static func providerStoreIdentity(
+        for connection: RuntimeServerConnection
+    ) -> String {
+        [
+            connection.id,
+            connection.endpoint?.absoluteString ?? "",
+            connection.authentication.rawValue,
+            String(connection.updatedAt.timeIntervalSince1970),
+        ].joined(separator: "|")
     }
 
     func activateRuntimeServer(
@@ -610,7 +688,9 @@ final class AppContainer {
             connectionID: connectionID,
             allowingActiveWorkInterruption: allowingActiveWorkInterruption
         )
+        syncProviderStoreWithActiveRuntime()
         publishRuntimeServerModels(context)
+        await providerConnections.refreshCacheFromRuntime()
     }
 
     private func publishRuntimeServerModels(
