@@ -68,6 +68,9 @@ struct MacWorkspaceLayout {
         func isSelected(_ panel: Panel) -> Bool { showsPanel && activePanel == panel }
     }
 
+    /// Keep the narrow workspace usable while retaining the floating rail layout.
+    static let windowMinimumWidth: CGFloat = 600
+    static let windowMinimumHeight: CGFloat = 700
     static let mainMinimum: CGFloat = 440
     static let compactMainMinimum: CGFloat = 280
     static let compactToolMinimum: CGFloat = 240

@@ -2,6 +2,7 @@
 import SwiftUI
 import AppKit
 import AgentKit
+import FileViewerKit
 
 /// macOS owns its pane geometry; the system inspector is only used on iOS/iPad.
 struct MacWorkspaceShell<Sidebar: View, Content: View, Inspector: View>: View {
@@ -20,6 +21,7 @@ struct MacWorkspaceShell<Sidebar: View, Content: View, Inspector: View>: View {
     @State private var hoverTask: Task<Void, Never>?
     @State private var panelDragWidth: CGFloat?
     @State private var sidebarDragWidth: CGFloat?
+    @State private var retainedTools: Set<MacWorkspaceLayout.Panel> = [.sessionRail]
 
     var body: some View {
         GeometryReader { geometry in
@@ -101,6 +103,7 @@ struct MacWorkspaceShell<Sidebar: View, Content: View, Inspector: View>: View {
             guard supportsInspector, selection != nil else { return }
             if layout.panel != .detail { layout.panelBeforeTool = layout.panel }
             layout.panel = .detail
+            retainedTools.insert(.detail)
             layout.isFocused = false
             layout.dismissFloatingRail()
         }
@@ -111,6 +114,7 @@ struct MacWorkspaceShell<Sidebar: View, Content: View, Inspector: View>: View {
                 if store.inspectorSelection != nil {
                     if layout.panel != .detail { layout.panelBeforeTool = layout.panel }
                     layout.panel = .detail
+                    retainedTools.insert(.detail)
                     layout.isFocused = false
                 } else if layout.panel == nil {
                     layout.panel = .sessionRail
@@ -190,19 +194,24 @@ struct MacWorkspaceShell<Sidebar: View, Content: View, Inspector: View>: View {
                         .clipped()
                         .allowsHitTesting(!projection.isFocused)
                         .accessibilityHidden(projection.isFocused)
-                    Group {
-                        if tool == .sessionRail {
-                            MacWorkspaceSessionRail { inspector(.sessionRail) }
-                        } else {
-                            inspector(tool)
+                    ForEach(MacWorkspaceLayout.Panel.allCases.filter { retainedTools.contains($0) }, id: \.self) { retained in
+                        MacInspectorContentSurface {
+                            if retained == .sessionRail {
+                                MacWorkspaceSessionRail { inspector(.sessionRail) }
+                            } else {
+                                inspector(retained)
+                            }
                         }
+                        .frame(width: retained == tool && docked ? projection.panelWidth : (layout.widths[retained] ?? retained.defaultWidth),
+                               height: bodyGeometry.size.height)
+                        .clipped()
+                        .offset(x: projection.isFocused ? 0 : projection.mainWidth + (docked ? 1 : 0))
+                        .opacity(retained == tool && docked ? 1 : 0)
+                        .allowsHitTesting(retained == tool && docked)
+                        .disabled(retained != tool || !docked)
+                        .accessibilityHidden(retained != tool || !docked)
+                        .accessibilityIdentifier("workspace.inspector.\(retained.rawValue)")
                     }
-                    .frame(width: docked ? projection.panelWidth : 0, height: bodyGeometry.size.height)
-                    .clipped()
-                    .offset(x: projection.isFocused ? 0 : projection.mainWidth + (docked ? 1 : 0))
-                    .allowsHitTesting(docked)
-                    .accessibilityHidden(!docked)
-                    .accessibilityIdentifier("workspace.inspector.\(tool.rawValue)")
                     resizeHandle(label: "调整\(tool.title)宽度", value: projection.panelWidth, reversesDrag: true) { translation, ended in
                         let initial = panelDragWidth ?? projection.panelWidth
                         panelDragWidth = initial
@@ -305,23 +314,69 @@ struct MacWorkspaceShell<Sidebar: View, Content: View, Inspector: View>: View {
     }
 
     private func toolHeader(_ panel: MacWorkspaceLayout.Panel, projection: MacWorkspaceLayout.Projection) -> some View {
-        let focused = projection.isFocused
-        return HStack(spacing: 8) {
-            if focused {
-                paneButton("显示侧栏", symbol: "sidebar.left") { showsSidebarOverlay.toggle() }
-            }
-            Text(panel.title).font(.system(size: 13, weight: .medium)).lineLimit(1)
-                .allowsHitTesting(false)
-            Spacer(minLength: 0)
-            paneButton(focused ? "还原对话布局" : "展开工具", symbol: focused ? "arrow.down.right.and.arrow.up.left" : "arrow.up.left.and.arrow.down.right") {
-                layout.isFocused.toggle()
-            }
-            paneButton("关闭\(panel.title)", symbol: "xmark") { closePanel() }
+        MacInspectorPaneHeader(
+            title: inspectorTitle(panel, width: projection.panelWidth),
+            paneTitle: panel.title,
+            backLabel: backLabel(panel, width: projection.panelWidth),
+            canReturnToRoot: panel == .detail && store.inspectorWorkspaceState.selectionPathState.path.count > 1,
+            isFocused: projection.isFocused,
+            leadingInset: projection.isFocused && !projection.showsSidebar ? 78 : 12,
+            onBack: { navigateBack(panel) },
+            onRoot: { store.inspectorWorkspaceState.selectionPathState.popToRoot() },
+            onShowSidebar: { showsSidebarOverlay.toggle() },
+            onToggleFocus: { layout.isFocused.toggle() },
+            onClose: { closePanel() },
+            onDrag: { dismissFloatingRail() }
+        )
+    }
+
+    private func tab(for panel: MacWorkspaceLayout.Panel) -> InspectorTabState? {
+        let entry: InspectorEntry
+        switch panel {
+        case .files: entry = .files
+        case .changes: entry = .review
+        default: return nil
         }
-        .padding(.leading, focused && !projection.showsSidebar ? 78 : 12)
-        .padding(.trailing, 12)
-        .frame(height: 46)
-        .background(MacWorkspaceHeaderDragArea(onMouseDown: { dismissFloatingRail() }))
+        return store.inspectorWorkspaceState.tabs.first { $0.entry == entry }
+    }
+
+    private func backLabel(_ panel: MacWorkspaceLayout.Panel, width: CGFloat) -> String? {
+        switch panel {
+        case .files where width < WorkspacePresentation.filesSplitMinimumWidth:
+            return tab(for: panel)?.session.selectedFilePath != nil ? "返回文件列表" : nil
+        case .changes where width < WorkspacePresentation.reviewSplitMinimumWidth:
+            return tab(for: panel)?.session.selectedReviewFilePath != nil ? "返回变更列表" : nil
+        case .detail:
+            return store.inspectorWorkspaceState.selectionPathState.path.isEmpty ? nil : "返回上一层"
+        default: return nil
+        }
+    }
+
+    private func inspectorTitle(_ panel: MacWorkspaceLayout.Panel, width: CGFloat) -> String {
+        if panel == .files, width < WorkspacePresentation.filesSplitMinimumWidth,
+           let path = tab(for: panel)?.session.selectedFilePath {
+            return (path as NSString).lastPathComponent
+        }
+        guard panel == .detail,
+              let destination = store.inspectorWorkspaceState.selectionPathState.path.last else { return panel.title }
+        switch destination {
+        case .toolResult: return "工具结果"
+        case .filePreview(let path), .diffPreview(let path, _): return (path as NSString).lastPathComponent
+        case .agentStateDetail: return "Agent 状态"
+        case .assetDetail: return "资源详情"
+        case .uiEvidence: return "界面证据"
+        case .uiLayout: return "界面布局"
+        case .uiPreview: return "界面预览"
+        }
+    }
+
+    private func navigateBack(_ panel: MacWorkspaceLayout.Panel) {
+        switch panel {
+        case .files: tab(for: panel)?.session.selectedFilePath = nil
+        case .changes: tab(for: panel)?.session.selectedReviewFilePath = nil
+        case .detail: store.inspectorWorkspaceState.selectionPathState.pop()
+        default: break
+        }
     }
 
     private func paneButton(_ title: String, symbol: String, action: @escaping () -> Void) -> some View {
@@ -363,6 +418,7 @@ struct MacWorkspaceShell<Sidebar: View, Content: View, Inspector: View>: View {
         dismissSidebar()
         if store.inspectorSelection != nil { store.dismissInspector() }
         layout.open(panel, availableWidth: width)
+        retainedTools.insert(panel)
         store.isInspectorPresented = layout.panel != nil
         switch panel {
         case .terminal: store.inspectorWorkspaceState.open(.terminal)

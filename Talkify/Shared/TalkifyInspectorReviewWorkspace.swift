@@ -16,11 +16,9 @@ struct TalkifyInspectorReviewWorkspace: View {
     }
 
     var body: some View {
-        VStack {
-            ReviewWorkspaceView(provider: provider, selectedPath: $selectedPath)
-                .id(rootURL.path)
-            Spacer()
-        }
+        ReviewWorkspaceView(provider: provider, selectedPath: $selectedPath)
+            .id(rootURL.path)
+            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
     }
 }
 #endif

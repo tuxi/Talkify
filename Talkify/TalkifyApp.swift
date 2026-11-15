@@ -91,6 +91,9 @@ struct TalkifyApp: App {
     var body: some Scene {
         WindowGroup {
             TalkifyRootView()
+                #if os(macOS)
+                .frame(minWidth: MacWorkspaceLayout.windowMinimumWidth, minHeight: MacWorkspaceLayout.windowMinimumHeight)
+                #endif
                 .environment(container)
                 .environment(container.agentManager)
                 .environment(container.modelSettings)
@@ -118,6 +121,7 @@ struct TalkifyApp: App {
         }
         #if os(macOS)
         .windowStyle(.hiddenTitleBar)
+        .windowResizability(.contentMinSize)
         #endif
         #if os(macOS) && TALKIFY_MAC_DIRECT
         .commands { LocalMCPConnectionCommands(container: container) }

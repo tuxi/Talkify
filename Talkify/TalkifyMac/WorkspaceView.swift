@@ -243,7 +243,14 @@ public struct WorkspaceView: View {
             Color.clear
                 .accessibilityLabel("会话辅助区域")
         case .detail:
-            inspectorContent
+            InspectorNavigationView(
+                initialSelection: store.inspectorSelection,
+                fileProvider: nil,
+                pathState: store.inspectorWorkspaceState.selectionPathState,
+                usesNavigationStack: false
+            )
+            .environment(\.workflowStore, store.workflowStore)
+            .environment(\.runtimeClient, store.client)
         case .files, .changes:
             if let root = macInspectorRoot,
                let tab = store.inspectorWorkspaceState.tabs.first(where: {
@@ -269,12 +276,10 @@ public struct WorkspaceView: View {
                     .id(root)
                 }
             } else {
-                ContentUnavailableView("请先选择项目", systemImage: "folder",
-                                       description: Text("选择工作目录后即可查看文件。"))
+                MacInspectorStatusView(.needsProject)
             }
         case .terminal, .browser:
-            ContentUnavailableView("\(panel.title) 正在接入", systemImage: panel.symbol,
-                                   description: Text("当前阶段先完成工作区布局。"))
+            MacInspectorStatusView(.unavailable(title: panel.title, symbol: panel.symbol))
         }
     }
 
