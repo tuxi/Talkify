@@ -14,7 +14,8 @@ import FileViewerKit
 
 /// 跨平台的三栏工作区外壳：
 ///
-/// - **macOS / iPad (regular)**：`NavigationSplitView` 并排二栏，右侧 inspector 可收起。
+/// - **macOS**：自定义 `MacWorkspaceShell`，会话辅助栏与工具面板独立管理。
+/// - **iPad (regular)**：`NavigationSplitView` 并排二栏，右侧 inspector 可收起。
 /// - **iPhone (compact)**：`NavigationStack` — 侧栏为根视图，选中会话/新建草稿时 push 到详情，
 ///   inspector 自动变为 sheet。这是 iOS 聊天应用的标准导航模式。
 ///
@@ -140,6 +141,9 @@ public struct WorkspaceView: View {
     
     @ViewBuilder
     private var content: some View {
+        #if os(macOS)
+        macLayout
+        #else
         if horizontalSizeClass == .compact {
             #if os(iOS)
             ChatDrawerWorkspace(dependencies: container.makeAgentDependencies())
@@ -149,8 +153,139 @@ public struct WorkspaceView: View {
         } else {
             standardLayout
         }
+        #endif
     }
     
+    #if os(macOS)
+    private var macPageID: String {
+        switch store.selectItem {
+        case .conversationDetail(let conversation): "conversation:\(conversation.id)"
+        case .draft: "draft:\(store.draftNavigationRevision)"
+        case .automation: "automation"
+        case .workflow: "workflow"
+        }
+    }
+
+    private var macIsConversation: Bool {
+        if case .conversationDetail = store.selectItem { return true }
+        return false
+    }
+
+    private var macSupportsInspector: Bool {
+        switch store.selectItem {
+        case .conversationDetail, .draft: true
+        case .automation, .workflow: false
+        }
+    }
+
+    private var macTitle: String {
+        switch store.selectItem {
+        case .conversationDetail: store.activeConversationViewModel?.conversation?.name ?? "对话"
+        case .draft: "新建对话"
+        case .automation: "自动化"
+        case .workflow: "工作流"
+        }
+    }
+
+    private var macLayout: some View {
+        ZStack {
+            MacWorkspaceShell(
+                title: macTitle,
+                pageID: macPageID,
+                isConversation: macIsConversation,
+                supportsInspector: macSupportsInspector
+            ) {
+                VStack(spacing: 0) {
+                    SidebarView(showSettings: $showSettings)
+                    Divider()
+                    footer
+                }
+            } content: {
+                NavigationStack(path: $router.path) {
+                    Group {
+                        switch store.selectItem {
+                        case .conversationDetail(let conversation):
+                            ConversationDetailView(conversation: conversation)
+                                .withAgentNavigationDestinations(router: router, dependencies: dependencies)
+                        case .draft:
+                            ConversationDetailView(conversation: nil)
+                        case .automation:
+                            AutomationDashboardView()
+                        case .workflow:
+                            WorkflowDashboardView()
+                        }
+                    }
+                    .navigationTitle("")
+                }
+            } inspector: { panel in
+                macInspectorPanel(panel)
+            }
+            .withAgentSheetDestinations(sheetDestinations: $router.presentedSheet, dependencies: dependencies)
+            .withAgentCoverDestinations(coverDestinations: $router.presentedCover, dependencies: dependencies)
+            .environment(router)
+            .environment(store)
+            .environment(\.conversationUsesWorkspaceHeader, true)
+            .ignoresSafeArea(.container, edges: .top)
+
+            if showSettings {
+                SettingsView(initialSection: settingsInitialSection, sessionID: store.selectedConversation?.id) {
+                    showSettings = false
+                }
+                .background(Color(nsColor: .windowBackgroundColor))
+            }
+        }
+    }
+
+    @ViewBuilder
+    private func macInspectorPanel(_ panel: MacWorkspaceLayout.Panel) -> some View {
+        switch panel {
+        case .sessionRail:
+            Color.clear
+                .accessibilityLabel("会话辅助区域")
+        case .detail:
+            inspectorContent
+        case .files, .changes:
+            if let root = macInspectorRoot,
+               let tab = store.inspectorWorkspaceState.tabs.first(where: {
+                   $0.entry == (panel == .files ? .files : .review)
+               }) {
+                if panel == .files {
+                    TalkifyInspectorFileWorkspace(
+                        rootURL: root,
+                        selectedPath: Binding(
+                            get: { tab.session.selectedFilePath },
+                            set: { tab.session.selectedFilePath = $0 }
+                        )
+                    )
+                    .id(root)
+                } else {
+                    TalkifyInspectorReviewWorkspace(
+                        rootURL: root,
+                        selectedPath: Binding(
+                            get: { tab.session.selectedReviewFilePath },
+                            set: { tab.session.selectedReviewFilePath = $0 }
+                        )
+                    )
+                    .id(root)
+                }
+            } else {
+                ContentUnavailableView("请先选择项目", systemImage: "folder",
+                                       description: Text("选择工作目录后即可查看文件。"))
+            }
+        case .terminal, .browser:
+            ContentUnavailableView("\(panel.title) 正在接入", systemImage: panel.symbol,
+                                   description: Text("当前阶段先完成工作区布局。"))
+        }
+    }
+
+    private var macInspectorRoot: URL? {
+        if macIsConversation, let conversation = store.selectedConversation {
+            return URL(fileURLWithPath: conversation.workspacePath, isDirectory: true)
+        }
+        return store.draft?.workspace?.url
+    }
+    #endif
+
     // MARK: - iPhone (compact) — NavigationStack
     
     @ViewBuilder

@@ -116,6 +116,9 @@ struct TalkifyApp: App {
                     return handleDeepLink(url)
                 }))
         }
+        #if os(macOS)
+        .windowStyle(.hiddenTitleBar)
+        #endif
         #if os(macOS) && TALKIFY_MAC_DIRECT
         .commands { LocalMCPConnectionCommands(container: container) }
         #endif

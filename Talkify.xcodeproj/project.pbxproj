@@ -22,6 +22,7 @@
 		E10000000000000000000004 /* ClientToolProtocol in Frameworks */ = {isa = PBXBuildFile; productRef = E10000000000000000000002 /* ClientToolProtocol */; };
 		E10000000000000000000005 /* ClientToolProtocol in Frameworks */ = {isa = PBXBuildFile; productRef = E10000000000000000000003 /* ClientToolProtocol */; };
 		E10000000000000000000007 /* InspectUIImageRegistrationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E10000000000000000000006 /* InspectUIImageRegistrationTests.swift */; };
+		F20000000000000000000001 /* MacWorkspaceLayoutTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F20000000000000000000002 /* MacWorkspaceLayoutTests.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -65,6 +66,7 @@
 		C40000000000000000000002 /* ProviderTemplateTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProviderTemplateTests.swift; sourceTree = "<group>"; };
 		E10000000000000000000006 /* InspectUIImageRegistrationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InspectUIImageRegistrationTests.swift; sourceTree = "<group>"; };
 		D0962009300B17250005EBC6 /* Talkify.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Talkify.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		F20000000000000000000002 /* MacWorkspaceLayoutTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MacWorkspaceLayoutTests.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
@@ -133,6 +135,7 @@
 			isa = PBXGroup;
 			children = (
 				A10000000000000000000002 /* UserAssetsTests.swift */,
+				F20000000000000000000002 /* MacWorkspaceLayoutTests.swift */,
 				C40000000000000000000002 /* ProviderTemplateTests.swift */,
 				E10000000000000000000006 /* InspectUIImageRegistrationTests.swift */,
 			);
@@ -376,6 +379,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				A10000000000000000000001 /* UserAssetsTests.swift in Sources */,
+				F20000000000000000000001 /* MacWorkspaceLayoutTests.swift in Sources */,
 				C40000000000000000000001 /* ProviderTemplateTests.swift in Sources */,
 				E10000000000000000000007 /* InspectUIImageRegistrationTests.swift in Sources */,
 			);
