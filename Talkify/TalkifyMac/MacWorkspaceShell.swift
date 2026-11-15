@@ -62,6 +62,7 @@ struct MacWorkspaceShell<Sidebar: View, Content: View, Inspector: View>: View {
                     ZStack(alignment: .topTrailing) {
                         // The header remains interactive; the popup never changes column widths.
                         MacWorkspaceSessionRail { inspector(.sessionRail) }
+                            .environment(\.sessionRailIsVisible, true)
                             .frame(width: projection.panelWidth)
                             .frame(maxHeight: .infinity)
                             .background(MacWorkspaceOutsideInteractionDismissal { dismissFloatingRail() })
@@ -211,6 +212,7 @@ struct MacWorkspaceShell<Sidebar: View, Content: View, Inspector: View>: View {
                         .disabled(retained != tool || !docked)
                         .accessibilityHidden(retained != tool || !docked)
                         .accessibilityIdentifier("workspace.inspector.\(retained.rawValue)")
+                        .environment(\.sessionRailIsVisible, retained == .sessionRail && retained == tool && docked)
                     }
                     resizeHandle(label: "调整\(tool.title)宽度", value: projection.panelWidth, reversesDrag: true) { translation, ended in
                         let initial = panelDragWidth ?? projection.panelWidth
@@ -311,6 +313,17 @@ struct MacWorkspaceShell<Sidebar: View, Content: View, Inspector: View>: View {
                         in: RoundedRectangle(cornerRadius: 6))
             .accessibilityAddTraits(projection.isSelected(panel) ? .isSelected : [])
             .accessibilityIdentifier("workspace.entry.\(panel.rawValue)")
+            .overlay(alignment: .topTrailing) {
+                if panel == .sessionRail, store.sessionRailActivityCount > 0 {
+                    Text(store.sessionRailActivityCount > 9 ? "9+" : String(store.sessionRailActivityCount))
+                        .font(.system(size: 9, weight: .medium))
+                        .padding(.horizontal, 3)
+                        .background(Color.accentColor, in: Capsule())
+                        .foregroundStyle(.white)
+                        .allowsHitTesting(false)
+                        .accessibilityLabel("有后台活动")
+                }
+            }
     }
 
     private func toolHeader(_ panel: MacWorkspaceLayout.Panel, projection: MacWorkspaceLayout.Projection) -> some View {

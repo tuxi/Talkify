@@ -225,6 +225,7 @@ public struct WorkspaceView: View {
             .environment(router)
             .environment(store)
             .environment(\.conversationUsesWorkspaceHeader, true)
+            .environment(\.conversationUsesSessionRail, store.sessionRail.hasTaskSurface(for: store.selectedConversation?.id))
             .ignoresSafeArea(.container, edges: .top)
 
             if showSettings {
@@ -240,8 +241,7 @@ public struct WorkspaceView: View {
     private func macInspectorPanel(_ panel: MacWorkspaceLayout.Panel) -> some View {
         switch panel {
         case .sessionRail:
-            Color.clear
-                .accessibilityLabel("会话辅助区域")
+            SessionRailView()
         case .detail:
             InspectorNavigationView(
                 initialSelection: store.inspectorSelection,
