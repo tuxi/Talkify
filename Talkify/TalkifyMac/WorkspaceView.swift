@@ -225,6 +225,10 @@ public struct WorkspaceView: View {
             .environment(router)
             .environment(store)
             .environment(\.conversationUsesWorkspaceHeader, true)
+            .environment(\.sessionRailOpenSettings, { destination in
+                settingsInitialSection = destination == .skills ? .customize : .servers
+                showSettings = true
+            })
             .environment(\.conversationUsesSessionRail, store.sessionRail.hasTaskSurface(for: store.selectedConversation?.id))
             .ignoresSafeArea(.container, edges: .top)
 
