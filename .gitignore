@@ -100,4 +100,5 @@ iOSInjectionProject/
 .claude
 .codeagent/settings.local.json
 /dist
-/.workbuddy
+.workbuddy/
+inspector-ui/
