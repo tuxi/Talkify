@@ -16,6 +16,8 @@ struct MacInspectorPaneHeader: View {
     let onToggleFocus: () -> Void
     let onClose: () -> Void
     let onDrag: () -> Void
+    var fileName: String? = nil
+    var onCloseFile: (() -> Void)? = nil
 
     var body: some View {
         HStack(spacing: 6) {
@@ -26,13 +28,20 @@ struct MacInspectorPaneHeader: View {
                 iconButton(backLabel, symbol: "chevron.left", action: onBack)
                     .accessibilityIdentifier("inspector.navigation.back")
             }
-            Text(title)
-                .font(.system(size: 13, weight: .medium))
-                .lineLimit(1)
-                .truncationMode(.middle)
-                .frame(maxWidth: .infinity, alignment: .leading)
-                .help(title)
-                .allowsHitTesting(false)
+            Group {
+                if let fileName, let onCloseFile {
+                    HStack(spacing: 8) {
+                        Text(fileName).font(.system(size: 13)).lineLimit(1).truncationMode(.middle).help(fileName)
+                        Button(action: onCloseFile) { Image(systemName: "xmark").font(.system(size: 11)).frame(width: 20, height: 24) }
+                            .buttonStyle(.plain).accessibilityLabel("关闭当前文件")
+                    }.padding(.horizontal, 8).padding(.vertical, 2)
+                        .background(Color.primary.opacity(0.07), in: RoundedRectangle(cornerRadius: 7))
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                } else {
+                    Text(title).font(.system(size: 13, weight: .medium)).lineLimit(1).truncationMode(.middle)
+                        .frame(maxWidth: .infinity, alignment: .leading).help(title).allowsHitTesting(false)
+                }
+            }
             if canReturnToRoot {
                 Menu {
                     Button("返回根视图", systemImage: "arrow.uturn.backward", action: onRoot)

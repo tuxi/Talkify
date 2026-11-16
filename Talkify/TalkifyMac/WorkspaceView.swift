@@ -8,9 +8,7 @@
 import SwiftUI
 import AgentKit
 import CoreKit
-#if os(iOS)
 import FileViewerKit
-#endif
 
 /// 跨平台的三栏工作区外壳：
 ///
@@ -38,6 +36,9 @@ public struct WorkspaceView: View {
     @State private var showSettings = false
     @State private var settingsInitialSection: SettingsSection = .account
     @State private var showAccountPopover = false
+    #if os(macOS)
+    @State private var macFileSessions: [String: FileWorkspaceSession] = [:]
+    #endif
     
 #if os(iOS)
     // MARK: iOS-specific state (SharedImport / DeepLink / AuthState)
@@ -102,6 +103,14 @@ public struct WorkspaceView: View {
     }
     
     
+    private func flushMacFileDrafts() {
+#if os(macOS)
+        for session in macFileSessions.values {
+            if let document = session.document { Task { _ = await document.flush() } }
+        }
+#endif
+    }
+
     public var body: some View {
         content
             .task {
@@ -123,14 +132,16 @@ public struct WorkspaceView: View {
                         await store.handleAppBecameActive()
                     }
                 case .background:
+                    flushMacFileDrafts()
                     store.handleAppEnteredBackground()
                 case .inactive:
-                    break
+                    flushMacFileDrafts()
                 @unknown default:
                     break
                 }
             }
             .onDisappear {
+                flushMacFileDrafts()
                 store.handleWorkspaceDisappeared()
             }
             .onChange(of: container.conversationNotifications.pendingConversation, initial: true) { _, identity in
@@ -193,7 +204,8 @@ public struct WorkspaceView: View {
                 title: macTitle,
                 pageID: macPageID,
                 isConversation: macIsConversation,
-                supportsInspector: macSupportsInspector
+                supportsInspector: macSupportsInspector,
+                fileWorkspace: macCurrentFileSession
             ) {
                 VStack(spacing: 0) {
                     SidebarView(showSettings: $showSettings)
@@ -230,6 +242,10 @@ public struct WorkspaceView: View {
                 showSettings = true
             })
             .environment(\.conversationUsesSessionRail, store.sessionRail.hasTaskSurface(for: store.selectedConversation?.id))
+            .task(id: macFileSessionKey) { prepareMacFileSession() }
+            .onChange(of: macFileSessionKey) { oldKey, _ in
+                if let previous = macFileSessions[oldKey]?.document { Task { _ = await previous.flush() } }
+            }
             .ignoresSafeArea(.container, edges: .top)
 
             if showSettings {
@@ -261,14 +277,12 @@ public struct WorkspaceView: View {
                    $0.entry == (panel == .files ? .files : .review)
                }) {
                 if panel == .files {
-                    TalkifyInspectorFileWorkspace(
-                        rootURL: root,
-                        selectedPath: Binding(
-                            get: { tab.session.selectedFilePath },
-                            set: { tab.session.selectedFilePath = $0 }
-                        )
-                    )
-                    .id(root)
+                    if let session = macCurrentFileSession {
+                        TalkifyInspectorFileWorkspace(session: session)
+                            .id(session.id)
+                    } else if !macFilesAreLocal {
+                        WorkspaceStatusView("当前运行环境不提供文件浏览与编辑", symbol: "folder.badge.questionmark", message: "文件需要由所属 Runtime 读取，不能使用本机同名路径。")
+                    } else { ProgressView().frame(maxWidth: .infinity, maxHeight: .infinity) }
                 } else {
                     TalkifyInspectorReviewWorkspace(
                         rootURL: root,
@@ -285,6 +299,25 @@ public struct WorkspaceView: View {
         case .terminal, .browser:
             MacInspectorStatusView(.unavailable(title: panel.title, symbol: panel.symbol))
         }
+    }
+
+    private var macFileSessionKey: String {
+        String(describing: container.runtimeServers.activeConnectionID) + "|" + macPageID + "|" + (macInspectorRoot?.path ?? "")
+    }
+    private var macFilesAreLocal: Bool {
+        guard let kind = container.runtimeServers.activeConnection?.kind else { return true }
+        return kind == .local || kind == .embedded
+    }
+    private var macCurrentFileSession: FileWorkspaceSession? { macFileSessions[macFileSessionKey] }
+    private func prepareMacFileSession() {
+        guard macFilesAreLocal, let root = macInspectorRoot, macFileSessions[macFileSessionKey] == nil else { return }
+        if macFileSessions.count >= 12 {
+            let removable = macFileSessions.keys.filter { $0 != macFileSessionKey && macFileSessions[$0]?.hasUnsavedChanges == false }
+            for key in removable.prefix(max(1, macFileSessions.count - 10)) { macFileSessions[key] = nil }
+        }
+        let provider = LocalFileContentProvider(rootURL: root, showsHiddenFiles: true)
+        let git = GitWorkingTreeReviewProvider(rootURL: root)
+        macFileSessions[macFileSessionKey] = FileWorkspaceSession(rootPath: root.path, provider: provider, statusLoader: { try await git.workingTreeStatuses() })
     }
 
     private var macInspectorRoot: URL? {

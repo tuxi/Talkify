@@ -18,6 +18,30 @@ final class GitWorkingTreeReviewProvider: FileReviewProvider, @unchecked Sendabl
         self.fileManager = fileManager
     }
 
+    /// File browsing needs only porcelain status, never full diff construction.
+    func workingTreeStatuses() async throws -> [String: ChangeStatus] {
+        try await Task.detached(priority: .utility) { [self] in
+            guard fileManager.fileExists(atPath: rootURL.appendingPathComponent(".git").path) else { return [:] }
+            let data = try Self.runGit(["status", "--porcelain=v1", "-z", "--untracked-files=all"], at: rootURL)
+            let records = data.split(separator: 0)
+            var result: [String: ChangeStatus] = [:]; var index = 0
+            while index < records.count {
+                let record = records[index]; index += 1
+                guard record.count >= 4, let path = String(bytes: record.dropFirst(3), encoding: .utf8) else { continue }
+                let flags = String(decoding: record.prefix(2), as: UTF8.self)
+                if flags.contains("R") || flags.contains("C") { index += 1 }
+                let status: ChangeStatus = flags.contains("D") ? .deleted : (flags.contains("?") || flags.contains("A")) ? .added : .modified
+                result[path] = status
+                var parent = (path as NSString).deletingLastPathComponent
+                while !parent.isEmpty && parent != "." {
+                    result[parent] = result[parent].map { $0 == status ? status : .modified } ?? status
+                    parent = (parent as NSString).deletingLastPathComponent
+                }
+            }
+            return result
+        }.value
+    }
+
     func workingTreeChanges() async throws -> [FileChange] {
         let statusData = try Self.runGit(
             ["status", "--porcelain=v1", "-z", "--untracked-files=all"],

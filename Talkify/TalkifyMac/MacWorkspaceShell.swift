@@ -12,6 +12,7 @@ struct MacWorkspaceShell<Sidebar: View, Content: View, Inspector: View>: View {
     let pageID: String
     let isConversation: Bool
     let supportsInspector: Bool
+    var fileWorkspace: FileWorkspaceSession? = nil
     @ViewBuilder let sidebar: () -> Sidebar
     @ViewBuilder let content: () -> Content
     @ViewBuilder let inspector: (MacWorkspaceLayout.Panel) -> Inspector
@@ -339,7 +340,9 @@ struct MacWorkspaceShell<Sidebar: View, Content: View, Inspector: View>: View {
             onShowSidebar: { showsSidebarOverlay.toggle() },
             onToggleFocus: { layout.isFocused.toggle() },
             onClose: { closePanel() },
-            onDrag: { dismissFloatingRail() }
+            onDrag: { dismissFloatingRail() },
+            fileName: panel == .files ? fileWorkspace?.fileName : nil,
+            onCloseFile: panel == .files ? { Task { await fileWorkspace?.closeFile() } } : nil
         )
     }
 
@@ -356,7 +359,7 @@ struct MacWorkspaceShell<Sidebar: View, Content: View, Inspector: View>: View {
     private func backLabel(_ panel: MacWorkspaceLayout.Panel, width: CGFloat) -> String? {
         switch panel {
         case .files where width < WorkspacePresentation.filesSplitMinimumWidth:
-            return tab(for: panel)?.session.selectedFilePath != nil ? "返回文件列表" : nil
+            return fileWorkspace?.selectedPath != nil && fileWorkspace?.compactShowsDirectory == false ? "返回目录" : nil
         case .changes where width < WorkspacePresentation.reviewSplitMinimumWidth:
             return tab(for: panel)?.session.selectedReviewFilePath != nil ? "返回变更列表" : nil
         case .detail:
@@ -367,7 +370,7 @@ struct MacWorkspaceShell<Sidebar: View, Content: View, Inspector: View>: View {
 
     private func inspectorTitle(_ panel: MacWorkspaceLayout.Panel, width: CGFloat) -> String {
         if panel == .files, width < WorkspacePresentation.filesSplitMinimumWidth,
-           let path = tab(for: panel)?.session.selectedFilePath {
+           let path = fileWorkspace?.selectedPath {
             return (path as NSString).lastPathComponent
         }
         guard panel == .detail,
@@ -385,7 +388,7 @@ struct MacWorkspaceShell<Sidebar: View, Content: View, Inspector: View>: View {
 
     private func navigateBack(_ panel: MacWorkspaceLayout.Panel) {
         switch panel {
-        case .files: tab(for: panel)?.session.selectedFilePath = nil
+        case .files: fileWorkspace?.showDirectory()
         case .changes: tab(for: panel)?.session.selectedReviewFilePath = nil
         case .detail: store.inspectorWorkspaceState.selectionPathState.pop()
         default: break
@@ -443,6 +446,7 @@ struct MacWorkspaceShell<Sidebar: View, Content: View, Inspector: View>: View {
     }
 
     private func closePanel() {
+        if layout.panel == .files, let document = fileWorkspace?.document { Task { _ = await document.flush() } }
         layout.closePanel()
         if store.inspectorSelection != nil { store.dismissInspector() }
         store.isInspectorPresented = layout.panel != nil
