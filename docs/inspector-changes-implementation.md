@@ -39,3 +39,9 @@ iOS 和仍使用旧 provider 初始化器的宿主继续使用原有浏览界面
 - GitWorkingTreeReviewProvider：12 项真实 Git 仓库测试。使用生产源文件与项目测试源文件的独立 Swift Package harness 运行，不启动 Talkify 主应用。
 - 原生临时示例窗口：连续 diff、360 点窄面板、已查看、修改后提示更新、仅变化文件失效、搜索跳转、全部收起及分批上下文展开。
 - 完整 macOS 与 iOS Simulator 构建；用户重新运行 Talkify 后验收主 Workspace 外壳中的视觉和操作。
+
+## Finder 入口补充
+
+每个变更文件的更多菜单与标题右键菜单提供 Finder 定位。删除项显示“在 Finder 中显示所在文件夹”，并对已不存在的路径回退到最近仍存在的父目录。旧审阅入口也保留此操作。定位读取当前文件系统，不修改 Git、审阅标记或文件内容。
+
+共享定位能力在 FileViewerKit 中实现，由本地文件与 Git 提供器使用；远程提供器未声明本机定位能力时不显示入口。Finder 补充后 FileViewerKit 74 项测试通过，其中 8 项覆盖路径定位和边界。macOS 与 iOS Simulator 构建验证兼容性。

@@ -48,3 +48,9 @@ Markdown 使用 swift-markdown 解析。原始 HTML 转义，禁止页面脚本�
 - 请求按 conversation 隔离并携带 Runtime/工作区上下文；切换上下文、关闭面板或打开明确的资源版本后，旧请求不能覆盖新选择。
 
 联通批验证：FileViewerKit 55 项测试；AgentKit 文件路由、Inspector、Session rail 与中文长命令 WebKit 渲染 26 项测试；生产 Workspace 布局代码及其测试在独立 harness 中运行 17 项测试。macOS 与 iOS Simulator 完整构建。主应用中从 Outputs 点击进入 Files 的整体视觉与操作体验，待重新运行 Talkify 验收。
+
+## Finder 定位
+
+macOS 的文件/目录右键菜单、文件搜索结果右键菜单和当前文件的更多菜单提供“在 Finder 中显示”。未选择文件时，可从更多菜单定位工作区目录。能力由本地文件 Provider 显式提供，不把远程 Runtime 路径映射成本机路径。
+
+定位保留文件选择和未保存编辑；文件已不存在时回退到工作区内最近仍存在的父文件夹。目录链接不用于越过工作区访问目标，链接本身可在 Finder 中选中。失败通过页面提示，菜单关闭后仍可显示错误。

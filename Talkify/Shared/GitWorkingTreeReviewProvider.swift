@@ -5,7 +5,7 @@ import FileViewerKit
 
 /// Git owns the comparison. Working bytes are captured once; per-file diff and
 /// omitted context always refer to that immutable observation.
-final class GitWorkingTreeReviewProvider: FileReviewSnapshotProvider, @unchecked Sendable {
+final class GitWorkingTreeReviewProvider: FileReviewSnapshotProvider, FileSystemRevealing, @unchecked Sendable {
     private let rootURL: URL
     private let fileManager: FileManager
     private let lock = NSLock()
@@ -46,6 +46,11 @@ final class GitWorkingTreeReviewProvider: FileReviewSnapshotProvider, @unchecked
     }
 
 
+    func fileRevealLocation(for path: String) async throws -> FileRevealLocation {
+        try await background { [rootURL] in
+            try LocalFileRevealResolver.resolve(path: path, rootURL: rootURL)
+        }
+    }
     func reviewSnapshot() async throws -> FileReviewSnapshot {
         try await background { [self] in
             let captured = try capture()
