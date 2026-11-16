@@ -37,6 +37,32 @@ final class MacWorkspaceLayoutTests: XCTestCase {
         XCTAssertEqual(layout.panel, .sessionRail)
     }
 
+    func testFileNavigationReusesWidthNeverTogglesAndOnlyExplicitExpandFocuses() {
+        var layout = MacWorkspaceLayout()
+        layout.selectPage(isConversation: true)
+        layout.open(.files, availableWidth: 1440)
+        layout.resizePanel(to: 580)
+        layout.isFocused = true
+        layout.showTool(.files)
+        XCTAssertEqual(layout.panel, .files)
+        XCTAssertFalse(layout.isFocused)
+        XCTAssertEqual(layout.widths[.files], 580)
+        layout.showTool(.files)
+        XCTAssertEqual(layout.panel, .files)
+        layout.closePanel()
+        XCTAssertEqual(layout.panel, .sessionRail)
+    }
+
+    func testOpeningFileFromTransientDetailDoesNotRestoreEmptyDetailWhenClosed() {
+        var layout = MacWorkspaceLayout()
+        layout.selectPage(isConversation: true)
+        layout.panelBeforeTool = .sessionRail
+        layout.panel = .detail
+        layout.showTool(.files)
+        layout.closePanel()
+        XCTAssertEqual(layout.panel, .sessionRail)
+    }
+
     func testToolsRestoreRailAndRememberSeparateWidths() {
         var layout = MacWorkspaceLayout()
         layout.selectPage(isConversation: true)

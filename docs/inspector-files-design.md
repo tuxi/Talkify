@@ -34,3 +34,17 @@ Markdown 使用 swift-markdown 解析。原始 HTML 转义，禁止页面脚本�
 - Talkify Debug iOS Simulator 完整构建，保留原有 iOS 页面。
 - 隔离临时文件的原生窗口验收：宽布局左右结构、410 点窄布局、返回目录保留选择、Markdown 源码/阅读切换、编辑后实际落盘、关闭当前文件。
 - 主应用外壳中的视觉和整体交互由用户重新运行 macOS Talkify 后验收。
+
+## Outputs、对话文件与 Files 联通
+
+统一入口为 AgentKit 的 `WorkspaceStore.openWorkspaceFile`，宿主消费带工作区上下文的 `WorkspaceFileOpenRequest`，由 FileViewerKit 的 `openLocation` 校验实际文件位置和类型。只有安装了 Files 导航的 macOS 宿主启用该路由；iOS 保留现有预览交互。
+
+- Outputs 的 `live_workspace` 项直接打开 Files；目录型项展开并定位目录，带行号的资源定位到对应行。
+- `immutable` 版本、远程下载地址和 MCP 资源保留原有资源/版本预览。已删除产物保留详情说明，不尝试读取当前同名文件。
+- 对话文件路径、文件型产物和 `file://` 链接使用同一打开入口；无法匹配到产物的路径也不再只是复制到剪贴板。
+- Changes 差异页和 Session rail 的变更详情提供“在 Files 中打开当前文件”。
+- 文件替换仍受自动保存和冲突保护约束。文件不存在或超出 Provider 根目录时显示错误，保留当前文件与草稿。目录定位保留当前文件，展开祖先节点并滚动到目标。
+- 普通打开复用 Files 宽度并显示对话，不会反复切换为关闭或自动进入聚焦模式。重复打开同一个文件可重新定位行号；关闭 Files 保留选择和浏览位置。
+- 请求按 conversation 隔离并携带 Runtime/工作区上下文；切换上下文、关闭面板或打开明确的资源版本后，旧请求不能覆盖新选择。
+
+联通批验证：FileViewerKit 55 项测试；AgentKit 文件路由、Inspector、Session rail 与中文长命令 WebKit 渲染 26 项测试；生产 Workspace 布局代码及其测试在独立 harness 中运行 17 项测试。macOS 与 iOS Simulator 完整构建。主应用中从 Outputs 点击进入 Files 的整体视觉与操作体验，待重新运行 Talkify 验收。

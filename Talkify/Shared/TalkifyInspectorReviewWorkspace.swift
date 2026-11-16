@@ -1,8 +1,10 @@
 #if os(macOS)
 import SwiftUI
 import FileViewerKit
+import AgentKit
 
 struct TalkifyInspectorReviewWorkspace: View {
+    @Environment(WorkspaceStore.self) private var store
     let rootURL: URL
     @Binding var selectedPath: String?
 
@@ -16,7 +18,9 @@ struct TalkifyInspectorReviewWorkspace: View {
     }
 
     var body: some View {
-        ReviewWorkspaceView(provider: provider, selectedPath: $selectedPath)
+        ReviewWorkspaceView(provider: provider, selectedPath: $selectedPath, onOpenFile: { path in
+            _ = store.openWorkspaceFile(path: path)
+        })
             .id(rootURL.path)
             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
     }

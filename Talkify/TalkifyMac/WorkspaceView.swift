@@ -242,7 +242,14 @@ public struct WorkspaceView: View {
                 showSettings = true
             })
             .environment(\.conversationUsesSessionRail, store.sessionRail.hasTaskSurface(for: store.selectedConversation?.id))
-            .task(id: macFileSessionKey) { prepareMacFileSession() }
+            .task(id: macFileSessionKey) {
+                store.workspaceFileNavigationContext = macFileSessionKey
+                store.workspaceFileNavigationEnabled = true
+                prepareMacFileSession()
+            }
+            .task(id: "\(macFileSessionKey)|\(store.inspectorWorkspaceState.fileOpenRequest?.id.uuidString ?? "")") {
+                await openMacFileRequest()
+            }
             .onChange(of: macFileSessionKey) { oldKey, _ in
                 if let previous = macFileSessions[oldKey]?.document { Task { _ = await previous.flush() } }
             }
@@ -299,6 +306,18 @@ public struct WorkspaceView: View {
         case .terminal, .browser:
             MacInspectorStatusView(.unavailable(title: panel.title, symbol: panel.symbol))
         }
+    }
+
+    private func openMacFileRequest() async {
+        let state = store.inspectorWorkspaceState
+        guard let request = state.fileOpenRequest else { return }
+        let key = macFileSessionKey
+        defer {
+            if state.fileOpenRequest?.id == request.id { state.fileOpenRequest = nil }
+        }
+        prepareMacFileSession()
+        guard request.contextID == key, let session = macCurrentFileSession else { return }
+        await session.openLocation(request.path, line: request.line, isDirectory: request.isDirectory)
     }
 
     private var macFileSessionKey: String {

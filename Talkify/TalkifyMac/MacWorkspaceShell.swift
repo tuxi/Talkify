@@ -101,6 +101,12 @@ struct MacWorkspaceShell<Sidebar: View, Content: View, Inspector: View>: View {
                 store.isInspectorPresented = layout.panel != nil
             }
         }
+        .onChange(of: store.inspectorWorkspaceState.fileOpenRequest?.id) { _, id in
+            guard supportsInspector, id != nil else { return }
+            layout.showTool(.files)
+            retainedTools.insert(.files)
+            store.isInspectorPresented = true
+        }
         .onChange(of: store.inspectorSelection) { _, selection in
             guard supportsInspector, selection != nil else { return }
             if layout.panel != .detail { layout.panelBeforeTool = layout.panel }

@@ -111,6 +111,11 @@ struct MacWorkspaceLayout {
             closePanel()
             return
         }
+        showTool(next)
+    }
+
+    /// Content navigation reveals a tool; repeated opens never toggle it closed.
+    mutating func showTool(_ next: Panel) {
         if panel == .sessionRail || panel == nil { panelBeforeTool = panel }
         panel = next
         isFocused = false
