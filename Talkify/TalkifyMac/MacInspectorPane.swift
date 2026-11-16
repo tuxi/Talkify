@@ -18,6 +18,7 @@ struct MacInspectorPaneHeader: View {
     let onDrag: () -> Void
     var fileName: String? = nil
     var onCloseFile: (() -> Void)? = nil
+    var reviewSession: FileReviewSession? = nil
 
     var body: some View {
         HStack(spacing: 6) {
@@ -42,6 +43,7 @@ struct MacInspectorPaneHeader: View {
                         .frame(maxWidth: .infinity, alignment: .leading).help(title).allowsHitTesting(false)
                 }
             }
+            if let reviewSession { FileReviewToolbar(session: reviewSession) }
             if canReturnToRoot {
                 Menu {
                     Button("返回根视图", systemImage: "arrow.uturn.backward", action: onRoot)

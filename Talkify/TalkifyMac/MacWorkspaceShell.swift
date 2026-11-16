@@ -13,6 +13,7 @@ struct MacWorkspaceShell<Sidebar: View, Content: View, Inspector: View>: View {
     let isConversation: Bool
     let supportsInspector: Bool
     var fileWorkspace: FileWorkspaceSession? = nil
+    var reviewWorkspace: FileReviewSession? = nil
     @ViewBuilder let sidebar: () -> Sidebar
     @ViewBuilder let content: () -> Content
     @ViewBuilder let inspector: (MacWorkspaceLayout.Panel) -> Inspector
@@ -105,6 +106,12 @@ struct MacWorkspaceShell<Sidebar: View, Content: View, Inspector: View>: View {
             guard supportsInspector, id != nil else { return }
             layout.showTool(.files)
             retainedTools.insert(.files)
+            store.isInspectorPresented = true
+        }
+        .onChange(of: store.inspectorWorkspaceState.reviewOpenRequest?.id) { _, id in
+            guard supportsInspector, id != nil else { return }
+            layout.showTool(.changes)
+            retainedTools.insert(.changes)
             store.isInspectorPresented = true
         }
         .onChange(of: store.inspectorSelection) { _, selection in
@@ -220,6 +227,7 @@ struct MacWorkspaceShell<Sidebar: View, Content: View, Inspector: View>: View {
                         .accessibilityHidden(retained != tool || !docked)
                         .accessibilityIdentifier("workspace.inspector.\(retained.rawValue)")
                         .environment(\.sessionRailIsVisible, retained == .sessionRail && retained == tool && docked)
+                        .environment(\.fileReviewIsVisible, retained == .changes && retained == tool && docked)
                     }
                     resizeHandle(label: "调整\(tool.title)宽度", value: projection.panelWidth, reversesDrag: true) { translation, ended in
                         let initial = panelDragWidth ?? projection.panelWidth
@@ -348,7 +356,8 @@ struct MacWorkspaceShell<Sidebar: View, Content: View, Inspector: View>: View {
             onClose: { closePanel() },
             onDrag: { dismissFloatingRail() },
             fileName: panel == .files ? fileWorkspace?.fileName : nil,
-            onCloseFile: panel == .files ? { Task { await fileWorkspace?.closeFile() } } : nil
+            onCloseFile: panel == .files ? { Task { await fileWorkspace?.closeFile() } } : nil,
+            reviewSession: panel == .changes ? reviewWorkspace : nil
         )
     }
 
@@ -366,8 +375,6 @@ struct MacWorkspaceShell<Sidebar: View, Content: View, Inspector: View>: View {
         switch panel {
         case .files where width < WorkspacePresentation.filesSplitMinimumWidth:
             return fileWorkspace?.selectedPath != nil && fileWorkspace?.compactShowsDirectory == false ? "返回目录" : nil
-        case .changes where width < WorkspacePresentation.reviewSplitMinimumWidth:
-            return tab(for: panel)?.session.selectedReviewFilePath != nil ? "返回变更列表" : nil
         case .detail:
             return store.inspectorWorkspaceState.selectionPathState.path.isEmpty ? nil : "返回上一层"
         default: return nil
@@ -375,6 +382,7 @@ struct MacWorkspaceShell<Sidebar: View, Content: View, Inspector: View>: View {
     }
 
     private func inspectorTitle(_ panel: MacWorkspaceLayout.Panel, width: CGFloat) -> String {
+        if panel == .changes { return reviewWorkspace?.title ?? "HEAD → 工作区" }
         if panel == .files, width < WorkspacePresentation.filesSplitMinimumWidth,
            let path = fileWorkspace?.selectedPath {
             return (path as NSString).lastPathComponent
@@ -440,6 +448,7 @@ struct MacWorkspaceShell<Sidebar: View, Content: View, Inspector: View>: View {
         dismissSidebar()
         if store.inspectorSelection != nil { store.dismissInspector() }
         layout.open(panel, availableWidth: width)
+        if layout.panel != .changes { store.inspectorWorkspaceState.reviewOpenRequest = nil }
         retainedTools.insert(panel)
         store.isInspectorPresented = layout.panel != nil
         switch panel {
@@ -452,6 +461,7 @@ struct MacWorkspaceShell<Sidebar: View, Content: View, Inspector: View>: View {
     }
 
     private func closePanel() {
+        if layout.panel == .changes { store.inspectorWorkspaceState.reviewOpenRequest = nil }
         if layout.panel == .files, let document = fileWorkspace?.document { Task { _ = await document.flush() } }
         layout.closePanel()
         if store.inspectorSelection != nil { store.dismissInspector() }

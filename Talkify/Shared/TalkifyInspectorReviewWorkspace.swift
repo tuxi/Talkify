@@ -5,24 +5,27 @@ import AgentKit
 
 struct TalkifyInspectorReviewWorkspace: View {
     @Environment(WorkspaceStore.self) private var store
-    let rootURL: URL
-    @Binding var selectedPath: String?
+    private let session: FileReviewSession?
+    private let selectedPath: Binding<String?>
+    @State private var legacyProvider: GitWorkingTreeReviewProvider?
 
-    @State private var provider: GitWorkingTreeReviewProvider
-
+    init(session: FileReviewSession) {
+        self.session = session; selectedPath = .constant(nil)
+        _legacyProvider = State(initialValue: nil)
+    }
     init(rootURL: URL, selectedPath: Binding<String?>) {
-        let normalizedRoot = rootURL.resolvingSymlinksInPath().standardizedFileURL
-        self.rootURL = normalizedRoot
-        self._selectedPath = selectedPath
-        self._provider = State(initialValue: GitWorkingTreeReviewProvider(rootURL: normalizedRoot))
+        session = nil; self.selectedPath = selectedPath
+        _legacyProvider = State(initialValue: GitWorkingTreeReviewProvider(rootURL: rootURL))
     }
-
     var body: some View {
-        ReviewWorkspaceView(provider: provider, selectedPath: $selectedPath, onOpenFile: { path in
-            _ = store.openWorkspaceFile(path: path)
-        })
-            .id(rootURL.path)
-            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+        Group {
+            if let session {
+                ReviewWorkspaceView(session: session, onOpenFile: openFile)
+            } else if let legacyProvider {
+                ReviewWorkspaceView(provider: legacyProvider, selectedPath: selectedPath, onOpenFile: openFile)
+            }
+        }.frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
     }
+    private func openFile(_ path: String) { _ = store.openWorkspaceFile(path: path) }
 }
 #endif
