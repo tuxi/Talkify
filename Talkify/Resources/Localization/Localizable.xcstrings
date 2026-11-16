@@ -26299,6 +26299,22 @@
     "只允许小写字母、数字、连字符和下划线；创建后不可修改。" : {
 
     },
+    "inspector.uiPreviewMatrix.title" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "UI Preview Matrix"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "界面预览矩阵"
+          }
+        }
+      }
+    },
     "图片工具结果" : {
 
     },
