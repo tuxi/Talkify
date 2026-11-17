@@ -95,11 +95,14 @@ struct MacWorkspaceShell<Sidebar: View, Content: View, Inspector: View>: View {
             }
         }
         .background(Color(nsColor: .windowBackgroundColor))
-        .onChange(of: pageID, initial: true) { _, _ in
+        // Conversation restoration and shell selection must settle before
+        // publishing visibility; do not close/reopen the inspector in onChange.
+        .task(id: pageID) {
+            guard !Task.isCancelled else { return }
             dismissSidebar()
             layout.selectPage(isConversation: isConversation)
             if supportsInspector {
-                store.dismissInspector()
+                store.clearInspectorSelection()
                 store.isInspectorPresented = layout.panel != nil
             }
         }
