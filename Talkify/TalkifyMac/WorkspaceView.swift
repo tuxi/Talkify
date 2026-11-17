@@ -238,6 +238,7 @@ public struct WorkspaceView: View {
                 pageID: macPageID,
                 isConversation: macIsConversation,
                 supportsInspector: macSupportsInspector,
+                allowsFinderReveal: container.runtimeServers.activeConnection?.kind == .local,
                 fileWorkspace: macCurrentFileSession,
                 reviewWorkspace: macCurrentReviewSession
             ) {

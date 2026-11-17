@@ -12,6 +12,7 @@ struct MacWorkspaceShell<Sidebar: View, Content: View, Inspector: View>: View {
     let pageID: String
     let isConversation: Bool
     let supportsInspector: Bool
+    var allowsFinderReveal = false
     var fileWorkspace: FileWorkspaceSession? = nil
     var reviewWorkspace: FileReviewSession? = nil
     @ViewBuilder let sidebar: () -> Sidebar
@@ -279,13 +280,22 @@ struct MacWorkspaceShell<Sidebar: View, Content: View, Inspector: View>: View {
                     } else { scheduleSidebarDismiss() }
                 }
             }
-            Text(title)
-                .font(.system(size: 13, weight: .medium))
-                .lineLimit(1)
-                .truncationMode(.tail)
-                .frame(minWidth: 60, maxWidth: .infinity, alignment: .leading)
-                .help(title)
-                .allowsHitTesting(false)
+            if isConversation, store.draft == nil, let conversation = store.selectedConversation {
+                MacConversationToolbarTitle(conversation: conversation, allowsFinderReveal: allowsFinderReveal) {
+                    dismissSidebar()
+                    dismissFloatingRail()
+                }
+                .id(conversation.id)
+            } else {
+                Text(title)
+                    .font(.system(size: 14))
+                    .foregroundStyle(pageID.hasPrefix("draft:") ? Color.secondary : Color.primary)
+                    .lineLimit(1)
+                    .truncationMode(.tail)
+                    .frame(minWidth: 60, maxWidth: .infinity, alignment: .leading)
+                    .help(title)
+                    .allowsHitTesting(false)
+            }
             if supportsInspector {
                 ForEach(visibleEntries(compact: compact, projection: projection), id: \.self) { panel in
                     entryButton(panel, projection: projection)
