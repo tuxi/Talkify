@@ -26,6 +26,10 @@ struct MacWorkspaceShell<Sidebar: View, Content: View, Inspector: View>: View {
     @State private var sidebarDragWidth: CGFloat?
     @State private var retainedTools: Set<MacWorkspaceLayout.Panel> = [.sessionRail]
 
+    private var inspectorState: MacWorkspaceLayout.InspectorState {
+        .init(pageID: pageID, isPresented: store.isInspectorPresented)
+    }
+
     var body: some View {
         GeometryReader { geometry in
             let projection = layout.project(width: geometry.size.width, supportsInspector: supportsInspector)
@@ -126,8 +130,12 @@ struct MacWorkspaceShell<Sidebar: View, Content: View, Inspector: View>: View {
             layout.isFocused = false
             layout.dismissFloatingRail()
         }
-        .onChange(of: store.isInspectorPresented) { _, presented in
-            guard supportsInspector else { return }
+        .onChange(of: inspectorState) { previous, current in
+            // A newly visited conversation restores false by default. It must
+            // not close the rail that selectPage has just opened for that page.
+            guard supportsInspector, current.isVisibilityChange(from: previous),
+                  current == inspectorState else { return }
+            let presented = current.isPresented
             if store.inspectorSelection == nil, presented == (layout.panel != nil) { return }
             if presented {
                 if store.inspectorSelection != nil {

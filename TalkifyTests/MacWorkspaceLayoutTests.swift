@@ -234,3 +234,30 @@ final class MacWorkspaceLayoutTests: XCTestCase {
         }
     }
 }
+
+
+extension MacWorkspaceLayoutTests {
+    func testFirstConversationVisitDoesNotTreatRestoredFalseAsClose() {
+        let previous = MacWorkspaceLayout.InspectorState(pageID: "conversation:A", isPresented: true)
+        let restored = MacWorkspaceLayout.InspectorState(pageID: "conversation:B", isPresented: false)
+        var layout = MacWorkspaceLayout()
+        layout.selectPage(isConversation: true)
+        if restored.isVisibilityChange(from: previous) { layout.closePanel() }
+        XCTAssertEqual(layout.panel, .sessionRail)
+        XCTAssertTrue(layout.project(width: 1440, supportsInspector: true).isSelected(.sessionRail))
+    }
+
+    func testReturningConversationDoesNotTreatRestoredTrueAsOpenCommand() {
+        let previous = MacWorkspaceLayout.InspectorState(pageID: "conversation:B", isPresented: false)
+        let restored = MacWorkspaceLayout.InspectorState(pageID: "conversation:A", isPresented: true)
+        XCTAssertFalse(restored.isVisibilityChange(from: previous))
+    }
+
+    func testExplicitVisibilityChangesWithinConversationStillApply() {
+        let open = MacWorkspaceLayout.InspectorState(pageID: "conversation:A", isPresented: true)
+        let closed = MacWorkspaceLayout.InspectorState(pageID: "conversation:A", isPresented: false)
+        XCTAssertTrue(closed.isVisibilityChange(from: open))
+        XCTAssertTrue(open.isVisibilityChange(from: closed))
+        XCTAssertFalse(open.isVisibilityChange(from: open))
+    }
+}

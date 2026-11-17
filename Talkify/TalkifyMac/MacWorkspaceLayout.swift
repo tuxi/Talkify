@@ -45,6 +45,17 @@ struct MacWorkspaceLayout {
         }
     }
 
+    /// Restoring another conversation's saved flag is not a close/open action
+    /// on the current page. Observe identity and visibility as a single value.
+    struct InspectorState: Equatable {
+        let pageID: String
+        let isPresented: Bool
+
+        func isVisibilityChange(from previous: Self) -> Bool {
+            pageID == previous.pageID && isPresented != previous.isPresented
+        }
+    }
+
     enum Presentation: Equatable {
         case hidden, docked, floatingRail, focused
     }
