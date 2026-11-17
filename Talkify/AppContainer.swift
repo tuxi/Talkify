@@ -267,7 +267,12 @@ final class AppContainer {
             await toolRegistry.register(DeviceInfoTool())
             await toolRegistry.register(CameraCaptureTool())
             await toolRegistry.register(DownloadFileTool())
-            await toolRegistry.register(AnalyzeLocalImageTool())
+            let externalInputAuthorizer: ClientToolExternalInputAuthorizer = { [userAssetLocalStateStore] url, context in
+                guard let root = context.workspaceRoot,
+                      let presentation = try? userAssetLocalStateStore.state(for: .session(context.sessionID))?.composerMessages[context.turnID] else { return false }
+                return ComposerReferencedFileAccess.allowsRead(url, workspaceRoot: root, references: presentation.fileReferences)
+            }
+            await toolRegistry.register(AnalyzeLocalImageTool(externalInputAuthorizer: externalInputAuthorizer))
             let inspectTool = InspectUIImageTool()
             await toolRegistry.register(inspectTool)
             // Move the one-time accurate-OCR model load off the first user turn.
@@ -289,7 +294,7 @@ final class AppContainer {
             await toolRegistry.register(CreatePDFTool())
             await toolRegistry.register(MergePDFsTool())
             await toolRegistry.register(SplitPDFTool())
-            await toolRegistry.register(ExtractVideoFramesTool())
+            await toolRegistry.register(ExtractVideoFramesTool(externalInputAuthorizer: externalInputAuthorizer))
             await toolRegistry.register(ScreenshotTool())
 #if os(iOS)
             await toolRegistry.register(ScanDocumentTool())

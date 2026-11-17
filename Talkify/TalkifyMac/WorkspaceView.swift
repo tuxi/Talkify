@@ -239,6 +239,8 @@ public struct WorkspaceView: View {
             .withAgentCoverDestinations(coverDestinations: $router.presentedCover, dependencies: dependencies)
             .environment(router)
             .environment(store)
+            .environment(\.composerEnvironmentName, container.runtimeServers.activeConnection?.displayName ?? "执行环境")
+            .environment(\.composerEnvironmentSymbol, container.runtimeServers.activeConnection?.kind == .remote ? "network" : "desktopcomputer")
             .environment(\.conversationUsesWorkspaceHeader, true)
             .environment(\.sessionRailOpenSettings, { destination in
                 settingsInitialSection = destination == .skills ? .customize : .servers

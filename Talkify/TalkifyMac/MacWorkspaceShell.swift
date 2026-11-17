@@ -397,7 +397,6 @@ struct MacWorkspaceShell<Sidebar: View, Content: View, Inspector: View>: View {
         case .uiEvidence: return "界面证据"
         case .uiLayout: return "界面布局"
         case .uiPreview: return "界面预览"
-        case .uiPreviewMatrix: return String(localized: "inspector.uiPreviewMatrix.title")
         }
     }
 
