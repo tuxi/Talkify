@@ -38,6 +38,8 @@ public struct WorkspaceView: View {
     @State private var settingsInitialSection: SettingsSection = .account
     @State private var showAccountPopover = false
     #if os(macOS)
+    @State private var macLastConnectionDiagnostic: ComposerDiagnostic?
+    @State private var macLastDiagnosticConnectionID: String?
     @State private var macFileSessions: [String: FileWorkspaceSession] = [:]
     @State private var macReviewSessions: [String: FileReviewSession] = [:]
     #endif
@@ -194,10 +196,39 @@ public struct WorkspaceView: View {
     private var macTitle: String {
         switch store.selectItem {
         case .conversationDetail: store.activeConversationViewModel?.conversation?.name ?? "对话"
-        case .draft: "新建对话"
+        case .draft: "新对话"
         case .automation: "自动化"
         case .workflow: "工作流"
         }
+    }
+
+    private var macConnectionDiagnostic: ComposerDiagnostic? {
+        guard let connection = container.runtimeServers.activeConnection,
+              let monitor = try? container.runtimeServers.externalStatusMonitor(connectionID: connection.id) else { return nil }
+        if let issue = ComposerDiagnostic.runtime(monitor.diagnosticSnapshot, name: connection.displayName) { return issue }
+        // A periodic probe changes offline → checking → offline. Keep the last
+        // failure until a successful check, so the banner does not flash/reopen.
+        if [.starting, .checking, .reconnecting].contains(monitor.status),
+           macLastDiagnosticConnectionID == connection.id {
+            return macLastConnectionDiagnostic
+        }
+        return nil
+    }
+
+    private var macComposerDiagnostic: ComposerDiagnostic? {
+        if let issue = macConnectionDiagnostic { return issue }
+        guard let connection = container.runtimeServers.activeConnection,
+              let context = container.runtimeServers.activeContext,
+              context.serverConnectionID == connection.id,
+              !context.modelCatalog.connections.contains(where: { $0.models.contains(where: \.available) }) else { return nil }
+        let missingCredentials = context.modelCatalog.connections.contains { $0.credential?.status == "missing" }
+        return ComposerDiagnostic(
+            id: "models:\(connection.id):\(context.modelCatalog.revision)",
+            title: missingCredentials ? "模型凭据尚未配置" : "当前没有可用模型",
+            message: "请打开模型设置，检查提供商、凭据与可用模型。",
+            details: "环境：\(connection.displayName)\n模型目录版本：\(context.modelCatalog.revision)\n提供商数量：\(context.modelCatalog.connections.count)\n可用模型：0",
+            destination: .models
+        )
     }
 
     private var macLayout: some View {
@@ -241,6 +272,23 @@ public struct WorkspaceView: View {
             .environment(store)
             .environment(\.composerEnvironmentName, container.runtimeServers.activeConnection?.displayName ?? "执行环境")
             .environment(\.composerEnvironmentSymbol, container.runtimeServers.activeConnection?.kind == .remote ? "network" : "desktopcomputer")
+            .environment(\.composerDiagnostic, macComposerDiagnostic)
+            .onChange(of: macConnectionDiagnostic, initial: true) { _, issue in
+                macLastDiagnosticConnectionID = container.runtimeServers.activeConnectionID
+                macLastConnectionDiagnostic = issue
+            }
+            .environment(\.composerRecheckEnvironment, {
+                let connectionID = container.runtimeServers.activeConnectionID
+                await container.ensureAgentRuntimeStarted()
+                guard container.runtimeServers.activeConnectionID == connectionID else { return }
+                let healthy = (try? await container.runtimeServers.checkExternal(connectionID: connectionID)) == true
+                guard healthy, container.runtimeServers.activeConnectionID == connectionID else { return }
+                await container.refreshActiveRuntimeContext()
+            })
+            .environment(\.composerOpenModelSettings, {
+                settingsInitialSection = .providers
+                showSettings = true
+            })
             .environment(\.conversationUsesWorkspaceHeader, true)
             .environment(\.sessionRailOpenSettings, { destination in
                 settingsInitialSection = destination == .skills ? .customize : .servers
