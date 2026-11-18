@@ -62,6 +62,13 @@
             ReferencedContainer = "container:Talkify.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
+      <EnvironmentVariables>
+         <EnvironmentVariable
+            key = "TALKIFY_DEBUG_TEXT_SUPPLEMENTS"
+            value = "1"
+            isEnabled = "YES">
+         </EnvironmentVariable>
+      </EnvironmentVariables>
    </LaunchAction>
    <ProfileAction
       buildConfiguration = "Release-MacDirect"
