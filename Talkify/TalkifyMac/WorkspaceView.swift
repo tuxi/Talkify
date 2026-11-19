@@ -300,8 +300,12 @@ public struct WorkspaceView: View {
                 store.workspaceFileNavigationContext = macFileSessionKey
                 store.workspaceFileNavigationEnabled = true
                 store.workspaceReviewNavigationEnabled = true
-                prepareMacFileSession()
-                prepareMacReviewSession()
+            }
+            .task(id: "\(macFileSessionKey)|\(hasMacFilesTab)") {
+                if hasMacFilesTab { await prepareMacFileSession() }
+            }
+            .task(id: "\(macFileSessionKey)|\(hasMacReviewTab)") {
+                if hasMacReviewTab { await prepareMacReviewSession() }
             }
             .task(id: "\(macFileSessionKey)|\(store.inspectorWorkspaceState.fileOpenRequest?.id.uuidString ?? "")") {
                 await openMacFileRequest()
@@ -371,8 +375,10 @@ public struct WorkspaceView: View {
         defer {
             if state.fileOpenRequest?.id == request.id { state.fileOpenRequest = nil }
         }
-        prepareMacFileSession()
-        guard request.contextID == key, let session = macCurrentFileSession else { return }
+        guard request.contextID == key else { return }
+        await prepareMacFileSession()
+        guard !Task.isCancelled, key == macFileSessionKey, state.fileOpenRequest?.id == request.id,
+              let session = macCurrentFileSession else { return }
         await session.openLocation(request.path, line: request.line, isDirectory: request.isDirectory)
     }
 
@@ -380,8 +386,11 @@ public struct WorkspaceView: View {
         let state = store.inspectorWorkspaceState
         guard let request = state.reviewOpenRequest else { return }
         defer { if state.reviewOpenRequest?.id == request.id { state.reviewOpenRequest = nil } }
-        prepareMacReviewSession()
-        guard request.contextID == macFileSessionKey, let session = macCurrentReviewSession else { return }
+        let key = macFileSessionKey
+        guard request.contextID == key else { return }
+        await prepareMacReviewSession()
+        guard !Task.isCancelled, key == macFileSessionKey, state.reviewOpenRequest?.id == request.id,
+              let session = macCurrentReviewSession else { return }
         await session.refresh()
         guard !Task.isCancelled, state.reviewOpenRequest?.id == request.id else { return }
         if let path = request.path { session.reveal(path) }
@@ -394,30 +403,47 @@ public struct WorkspaceView: View {
         guard let kind = container.runtimeServers.activeConnection?.kind else { return true }
         return kind == .local || kind == .embedded
     }
+    private var hasMacFilesTab: Bool {
+        store.inspectorWorkspaceState.tabs.contains { $0.entry == .files }
+    }
+    private var hasMacReviewTab: Bool {
+        store.inspectorWorkspaceState.tabs.contains { $0.entry == .review }
+    }
     private var macCurrentFileSession: FileWorkspaceSession? { macFileSessions[macFileSessionKey] }
-    private func prepareMacFileSession() {
-        guard macFilesAreLocal, let root = macInspectorRoot, macFileSessions[macFileSessionKey] == nil else { return }
+    private func prepareMacFileSession() async {
+        let key = macFileSessionKey
+        guard macFilesAreLocal, let root = macInspectorRoot, macFileSessions[key] == nil else { return }
+        let (provider, git) = await Task.detached(priority: .userInitiated) {
+            (LocalFileContentProvider(rootURL: root, showsHiddenFiles: true),
+             GitWorkingTreeReviewProvider(rootURL: root))
+        }.value
+        guard !Task.isCancelled, key == macFileSessionKey, macFileSessions[key] == nil else { return }
         if macFileSessions.count >= 12 {
-            let removable = macFileSessions.keys.filter { $0 != macFileSessionKey && macFileSessions[$0]?.hasUnsavedChanges == false }
+            let removable = macFileSessions.keys.filter { $0 != key && macFileSessions[$0]?.hasUnsavedChanges == false }
             for key in removable.prefix(max(1, macFileSessions.count - 10)) { macFileSessions[key] = nil }
         }
-        let provider = LocalFileContentProvider(rootURL: root, showsHiddenFiles: true)
-        let git = GitWorkingTreeReviewProvider(rootURL: root)
-        macFileSessions[macFileSessionKey] = FileWorkspaceSession(rootPath: root.path, provider: provider, statusLoader: { try await git.workingTreeStatuses() })
+        macFileSessions[key] = FileWorkspaceSession(rootPath: root.path, provider: provider, statusLoader: { try await git.workingTreeStatuses() })
     }
 
     private var macReviewSessionKey: String {
-        String(describing: container.runtimeServers.activeConnectionID) + "|" + (macInspectorRoot?.resolvingSymlinksInPath().path ?? "")
+        String(describing: container.runtimeServers.activeConnectionID) + "|" + (macInspectorRoot?.path ?? "")
     }
     private var macCurrentReviewSession: FileReviewSession? { macReviewSessions[macReviewSessionKey] }
-    private func prepareMacReviewSession() {
-        guard macFilesAreLocal, let root = macInspectorRoot, macCurrentReviewSession == nil else { return }
+    private func prepareMacReviewSession() async {
+        let key = macReviewSessionKey
+        guard macFilesAreLocal, let root = macInspectorRoot, macReviewSessions[key] == nil else { return }
+        let connection = String(describing: container.runtimeServers.activeConnectionID)
+        let (provider, digest) = await Task.detached(priority: .userInitiated) {
+            let canonicalRoot = root.resolvingSymlinksInPath()
+            let identity = connection + "|" + canonicalRoot.path
+            let digest = SHA256.hash(data: Data(identity.utf8)).map { String(format: "%02x", $0) }.joined()
+            return (GitWorkingTreeReviewProvider(rootURL: canonicalRoot), digest)
+        }.value
+        guard !Task.isCancelled, key == macReviewSessionKey, macReviewSessions[key] == nil else { return }
         if macReviewSessions.count >= 12 {
-            for key in macReviewSessions.keys.filter({ $0 != macReviewSessionKey }).prefix(2) { macReviewSessions[key] = nil }
+            for key in macReviewSessions.keys.filter({ $0 != key }).prefix(2) { macReviewSessions[key] = nil }
         }
-        let identity = String(describing: container.runtimeServers.activeConnectionID) + "|" + root.resolvingSymlinksInPath().path
-        let digest = SHA256.hash(data: Data(identity.utf8)).map { String(format: "%02x", $0) }.joined()
-        macReviewSessions[macReviewSessionKey] = FileReviewSession(provider: GitWorkingTreeReviewProvider(rootURL: root), persistenceKey: "talkify.changes.viewed." + digest)
+        macReviewSessions[key] = FileReviewSession(provider: provider, persistenceKey: "talkify.changes.viewed." + digest)
     }
 
     private var macInspectorRoot: URL? {
