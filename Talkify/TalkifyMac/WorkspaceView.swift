@@ -38,6 +38,9 @@ public struct WorkspaceView: View {
     @State private var settingsInitialSection: SettingsSection = .account
     @State private var showAccountPopover = false
     #if os(macOS)
+    @State private var macShowsCustomize = false
+    @State private var macShowsSessionSearch = false
+    @State private var macExpandedSidebarGroups: Set<String> = []
     @State private var macLastConnectionDiagnostic: ComposerDiagnostic?
     @State private var macLastDiagnosticConnectionID: String?
     @State private var macFileSessions: [String: FileWorkspaceSession] = [:]
@@ -173,7 +176,8 @@ public struct WorkspaceView: View {
     
     #if os(macOS)
     private var macPageID: String {
-        switch store.selectItem {
+        if macShowsCustomize { return "customize" }
+        return switch store.selectItem {
         case .conversationDetail(let conversation): "conversation:\(conversation.id)"
         case .draft: "draft:\(store.draftNavigationRevision)"
         case .automation: "automation"
@@ -187,17 +191,19 @@ public struct WorkspaceView: View {
     }
 
     private var macSupportsInspector: Bool {
-        switch store.selectItem {
+        if macShowsCustomize { return false }
+        return switch store.selectItem {
         case .conversationDetail, .draft: true
         case .automation, .workflow: false
         }
     }
 
     private var macTitle: String {
-        switch store.selectItem {
+        if macShowsCustomize { return "Customize" }
+        return switch store.selectItem {
         case .conversationDetail: store.activeConversationViewModel?.conversation?.name ?? "对话"
         case .draft: "新对话"
-        case .automation: "自动化"
+        case .automation: "Routines"
         case .workflow: "工作流"
         }
     }
@@ -231,6 +237,12 @@ public struct WorkspaceView: View {
         )
     }
 
+    private func macSelectSession(_ ref: ConversationRef) {
+        macShowsCustomize = false
+        router.path.removeAll()
+        store.selectItem = .conversationDetail(conversation: ref)
+    }
+
     private var macLayout: some View {
         ZStack {
             MacWorkspaceShell(
@@ -243,23 +255,33 @@ public struct WorkspaceView: View {
                 reviewWorkspace: macCurrentReviewSession
             ) {
                 VStack(spacing: 0) {
-                    SidebarView(showSettings: $showSettings)
+                    MacWorkspaceSidebar(
+                        showsCustomize: $macShowsCustomize,
+                        expandedGroups: $macExpandedSidebarGroups,
+                        allowsFinderReveal: container.runtimeServers.activeConnection?.kind == .local,
+                        onSearch: { macShowsSessionSearch = true },
+                        onSelectSession: macSelectSession
+                    )
                     Divider()
                     footer
                 }
             } content: {
                 NavigationStack(path: $router.path) {
                     Group {
-                        switch store.selectItem {
-                        case .conversationDetail(let conversation):
-                            ConversationDetailView(conversation: conversation)
-                                .withAgentNavigationDestinations(router: router, dependencies: dependencies)
-                        case .draft:
-                            ConversationDetailView(conversation: nil)
-                        case .automation:
-                            AutomationDashboardView()
-                        case .workflow:
-                            WorkflowDashboardView()
+                        if macShowsCustomize {
+                            MacWorkspaceCustomize()
+                        } else {
+                            switch store.selectItem {
+                            case .conversationDetail(let conversation):
+                                ConversationDetailView(conversation: conversation)
+                                    .withAgentNavigationDestinations(router: router, dependencies: dependencies)
+                            case .draft:
+                                ConversationDetailView(conversation: nil)
+                            case .automation:
+                                AutomationDashboardView()
+                            case .workflow:
+                                WorkflowDashboardView()
+                            }
                         }
                     }
                     .navigationTitle("")
@@ -267,6 +289,18 @@ public struct WorkspaceView: View {
             } inspector: { panel in
                 macInspectorPanel(panel)
             }
+            .sheet(isPresented: $macShowsSessionSearch) {
+                MacSessionSearchView(store: store) { ref in
+                    macShowsSessionSearch = false
+                    macSelectSession(ref)
+                }
+            }
+            .onChange(of: store.selectItem) { _, destination in
+                if destination != .draft { macShowsCustomize = false }
+                router.path.removeAll()
+            }
+            .onChange(of: macShowsCustomize) { _, _ in router.path.removeAll() }
+            .onChange(of: store.draftNavigationRevision) { _, _ in macShowsCustomize = false }
             .withAgentSheetDestinations(sheetDestinations: $router.presentedSheet, dependencies: dependencies)
             .withAgentCoverDestinations(coverDestinations: $router.presentedCover, dependencies: dependencies)
             .environment(router)
@@ -797,14 +831,25 @@ extension WorkspaceView {
     @ViewBuilder
     private var footer: some View {
         #if os(macOS)
-        HStack(spacing: 8) {
-            ActiveRuntimeServerIndicator(style: .chip) {
-                openSettings(.servers)
+        HStack(spacing: 6) {
+            if authManager.isRegistered {
+                macFooterIdentity
+            } else {
+                ActiveRuntimeServerIndicator(style: .footer) { openSettings(.servers) }
+                Spacer(minLength: 0)
             }
-            macFooterIdentity
+            Button { openSettings() } label: {
+                Image(systemName: "gearshape")
+                    .font(.system(size: 14))
+                    .frame(width: 27, height: 28)
+                    .contentShape(Rectangle())
+            }
+            .buttonStyle(.plain)
+            .help("设置")
+            .accessibilityLabel("设置")
         }
-        .padding(.horizontal, 12)
-        .padding(.vertical, 10)
+        .padding(.horizontal, 11)
+        .frame(height: 42)
         #else
         CodingTasksButton()
             .buttonStyle(.plain)
@@ -859,41 +904,30 @@ extension WorkspaceView {
     #if os(macOS)
     @ViewBuilder
     private var macFooterIdentity: some View {
-        if !authManager.isRegistered {
-            Button {
-                openSettings()
-            } label: {
-                Label(TalkifyLocalized.string("workspace.settings"), systemImage: "gearshape")
-                    .frame(maxWidth: .infinity, alignment: .leading)
-            }
-            .buttonStyle(.plain)
-            .frame(minHeight: 30)
-        } else {
-            AppMenu(
-                presentation: .fixedToTrigger(preferredEdge: .maxY)
-            ) { resizeMenu in
-                AccountMenuContent(
-                    accountName: accountName,
-                    accountInitial: accountInitial,
-                    usage: agentManager.usage,
-                    isRedeemingResetCard: agentManager.isRedeemingResetCard,
-                    usageError: agentManager.usageError,
-                    onContentSizeChange: resizeMenu,
-                    onRefreshUsage: { agentManager.fetchUsage() },
-                    onRefreshCards: { agentManager.refreshResetCards() },
-                    onRedeemResetCard: { agentManager.redeemResetCard($0) },
-                    onSettings: { openSettings() },
-                    onLogout: {
-                        Task { await container.disconnectGateway() }
-                    }
-                )
-            } label: {
-                accountLabel
-            }
-            .frame(maxWidth: .infinity)
-            .accessibilityLabel("\(TalkifyLocalized.string("workspace.account"))：\(accountName)")
-            .task { await loadAccountDataIfNeeded() }
+        AppMenu(
+            presentation: .fixedToTrigger(preferredEdge: .maxY)
+        ) { resizeMenu in
+            AccountMenuContent(
+                accountName: accountName,
+                accountInitial: accountInitial,
+                usage: agentManager.usage,
+                isRedeemingResetCard: agentManager.isRedeemingResetCard,
+                usageError: agentManager.usageError,
+                onContentSizeChange: resizeMenu,
+                onRefreshUsage: { agentManager.fetchUsage() },
+                onRefreshCards: { agentManager.refreshResetCards() },
+                onRedeemResetCard: { agentManager.redeemResetCard($0) },
+                onSettings: { openSettings() },
+                onLogout: {
+                    Task { await container.disconnectGateway() }
+                }
+            )
+        } label: {
+            accountLabel
         }
+        .frame(maxWidth: .infinity)
+        .accessibilityLabel("\(TalkifyLocalized.string("workspace.account"))：\(accountName)")
+        .task { await loadAccountDataIfNeeded() }
     }
     #endif
 

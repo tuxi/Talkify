@@ -21,6 +21,7 @@ struct MacWorkspaceShell<Sidebar: View, Content: View, Inspector: View>: View {
 
     @State private var layout = MacWorkspaceLayout()
     @State private var showsSidebarOverlay = false
+    @State private var sidebarOverlayPinned = false
     @State private var hoverTask: Task<Void, Never>?
     @State private var panelDragWidth: CGFloat?
     @State private var sidebarDragWidth: CGFloat?
@@ -60,6 +61,10 @@ struct MacWorkspaceShell<Sidebar: View, Content: View, Inspector: View>: View {
                             .onHover { hovering in
                                 if hovering { hoverTask?.cancel() } else { scheduleSidebarDismiss() }
                             }
+                            .simultaneousGesture(TapGesture().onEnded {
+                                hoverTask?.cancel()
+                                sidebarOverlayPinned = true
+                            })
                     }
                     .transition(.move(edge: .leading).combined(with: .opacity))
                 }
@@ -91,6 +96,9 @@ struct MacWorkspaceShell<Sidebar: View, Content: View, Inspector: View>: View {
             .animation(paneAnimation, value: projection.presentation)
             .animation(paneAnimation, value: projection.showsSidebar)
             .animation(paneAnimation, value: showsSidebarOverlay)
+            .onChange(of: projection.showsSidebar || showsSidebarOverlay, initial: true) { _, visible in
+                store.setConversationListVisible(visible)
+            }
             .onChange(of: projection.presentation) { _, presentation in
                 if presentation == .docked, layout.panel == .sessionRail { layout.didDockRail() }
             }
@@ -277,7 +285,13 @@ struct MacWorkspaceShell<Sidebar: View, Content: View, Inspector: View>: View {
                     if expanded.project(width: projection.windowWidth, supportsInspector: supportsInspector).showsSidebar {
                         layout.sidebarPreferred = true
                     } else {
-                        showsSidebarOverlay.toggle()
+                        if sidebarOverlayPinned {
+                            dismissSidebar()
+                        } else {
+                            hoverTask?.cancel()
+                            sidebarOverlayPinned = true
+                            showsSidebarOverlay = true
+                        }
                     }
                 }
                 .onHover { hovering in
@@ -496,9 +510,11 @@ struct MacWorkspaceShell<Sidebar: View, Content: View, Inspector: View>: View {
     private func dismissSidebar() {
         hoverTask?.cancel()
         showsSidebarOverlay = false
+        sidebarOverlayPinned = false
     }
 
     private func scheduleSidebarDismiss() {
+        guard !sidebarOverlayPinned else { return }
         hoverTask = Task { @MainActor in
             try? await Task.sleep(for: .milliseconds(300))
             guard !Task.isCancelled else { return }

@@ -1,4 +1,5 @@
 import XCTest
+import AgentKit
 @testable import Talkify
 
 final class MacWorkspaceLayoutTests: XCTestCase {
@@ -259,5 +260,49 @@ extension MacWorkspaceLayoutTests {
         XCTAssertTrue(closed.isVisibilityChange(from: open))
         XCTAssertTrue(open.isVisibilityChange(from: closed))
         XCTAssertFalse(open.isVisibilityChange(from: open))
+    }
+}
+
+final class MacSidebarWorkspaceTests: XCTestCase {
+    func testCollapsedGroupsKeepSelectedAndRunningSessionsWithoutDuplicates() {
+        let selected = ConversationRef(id: "selected", workspacePath: "/work/code-agent")
+        let idle = ConversationRef(id: "idle", workspacePath: "/work/code-agent")
+        let running = ConversationRef(id: "running", workspacePath: "/work/Dreamlog")
+        let worktree = ConversationRef(id: "checkout", workspacePath: "/work/code-agent/.codeagent/worktrees/feature",
+                                       baseWorkspaceID: "/work/code-agent")
+        let groups = MacSidebarWorkspace.grouped(
+            sessions: [selected, idle, running, worktree],
+            workspaces: [Workspace(url: URL(fileURLWithPath: "/work/code-agent"), branch: "main")]
+        )
+        let activity: (ConversationRef) -> ConversationActivityState = { $0 == running ? .running : .idle }
+        let collapsed = groups.flatMap { $0.visibleSessions(expanded: false, selectedID: selected.id, activity: activity) }
+        XCTAssertEqual(Set(collapsed.map(\.id)), [selected.id, running.id])
+        XCTAssertEqual(collapsed.count, 2)
+        let withoutSelection = groups.flatMap { $0.visibleSessions(expanded: false, selectedID: nil, activity: activity) }
+        XCTAssertEqual(withoutSelection.map(\.id), [running.id])
+        let expanded = groups.flatMap { $0.visibleSessions(expanded: true, selectedID: selected.id, activity: activity) }
+        XCTAssertEqual(expanded.count, 4)
+        XCTAssertEqual(groups.first { $0.title == "code-agent" }?.sessions.map(\.id), [selected.id, idle.id, worktree.id])
+    }
+}
+
+final class MacSessionSearchTests: XCTestCase {
+    func testEmptyQueryKeepsRuntimeOrder() {
+        let first = ConversationRef(id: "one", workspacePath: "/work/AgentKit", name: "Inspector")
+        let second = ConversationRef(id: "two", workspacePath: "/work/chater", name: "Matrix UI")
+        XCTAssertEqual(MacSessionSearchResult.matching([first, second], keyword: "").map(\.id), ["one", "two"])
+    }
+
+    func testMatchesTitleWorkspacePathAndSessionID() {
+        let pathMatch = ConversationRef(id: "path", workspacePath: "/work/chater/build/preview", name: "Preview")
+        let workspaceMatch = ConversationRef(id: "workspace", workspacePath: "/work/Chater", name: "Matrix UI")
+        let titleMatch = ConversationRef(id: "title", workspacePath: "/work/AgentKit", name: "Chater sidebar")
+        let idMatch = ConversationRef(id: "chater-session", workspacePath: "/work/Dreamlog", name: "UI")
+        let sessions = [pathMatch, workspaceMatch, idMatch, titleMatch]
+        let matches = MacSessionSearchResult.matching(sessions, keyword: "CHATER")
+
+        XCTAssertEqual(matches.map(\.id), ["title", "workspace", "path", "chater-session"])
+        XCTAssertEqual(matches.filter(\.showsPath).map(\.id), ["path"])
+        XCTAssertTrue(MacSessionSearchResult.matching(sessions, keyword: "missing").isEmpty)
     }
 }

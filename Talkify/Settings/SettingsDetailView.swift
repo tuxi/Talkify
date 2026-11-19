@@ -103,7 +103,8 @@ struct SettingsDetailView: View {
                     RuntimeServerSettingsView()
                         .navigationTitle(Text(verbatim: "服务器"))
                 case .customize:
-                    customizeSettings
+                    RuntimeCustomizeView(sessionID: sessionID)
+                        .frame(minHeight: 640)
                         .navigationTitle(Text(verbatim: "自定义"))
                 case .providers:
                     ProviderSettingsView()
@@ -140,91 +141,6 @@ struct SettingsDetailView: View {
             .padding(.bottom, 56)
         })
         .background(Color.primary.opacity(0.018))
-    }
-
-    @ViewBuilder
-    private var customizeSettings: some View {
-        if let client = container.makeAgentClient() as? any SkillPluginManaging {
-            SkillPluginManagementView(
-                client: client,
-                sessionID: sessionID,
-                runtimeDisplayName: container.runtimeServers.activeConnection?.displayName
-                    ?? "未连接 Runtime",
-                canInstallLocalPlugin: canInstallLocalPlugin,
-                localInstallDisabledReason: localInstallDisabledReason,
-                restartPrompt: runtimeRestartPrompt,
-                onRestartRuntime: runtimeRestartAction
-            )
-            .id(
-                "\(sessionID ?? "no-session"):"
-                    + "\(container.runtimeServers.activeConnectionID):"
-                    + "\(container.runtimeServers.activeIdentityRevision)"
-            )
-            .frame(minHeight: 640)
-        } else {
-            ContentUnavailableView(
-                "Runtime 客户端不可用",
-                systemImage: "puzzlepiece.extension",
-                description: Text("当前 Runtime 连接没有实现 Skill & Plugin Management v1。")
-            )
-            .frame(maxWidth: .infinity, minHeight: 360)
-        }
-    }
-
-    private var activeRuntimeKind: RuntimeServerKind? {
-        container.runtimeServers.activeConnection?.kind
-    }
-
-    private var canInstallLocalPlugin: Bool {
-        guard let activeRuntimeKind else { return false }
-        #if os(macOS)
-        return activeRuntimeKind == .embedded || activeRuntimeKind == .local
-        #else
-        // A paired Mac Runtime cannot read an absolute path selected on iPhone.
-        return activeRuntimeKind == .embedded
-        #endif
-    }
-
-    private var localInstallDisabledReason: String? {
-        guard let activeRuntimeKind else {
-            return "尚未连接 Runtime。连接本地 Runtime 后才能选择本地目录或 .zip。"
-        }
-        switch activeRuntimeKind {
-        case .embedded:
-            return nil
-        case .local:
-            #if os(macOS)
-            return nil
-            #else
-            return "当前连接的是另一台设备上的 Local Runtime。iPhone 的文件路径无法被该 Runtime 读取；请切换到设备内嵌 Runtime。"
-            #endif
-        case .remote:
-            return "远程 Runtime 禁止本地安装：托管 Runtime 不能访问此设备上的绝对路径。第一版也不提供远程 marketplace。"
-        }
-    }
-
-    private var runtimeRestartPrompt: String? {
-        switch activeRuntimeKind {
-        case .embedded:
-            return nil
-        case .local:
-            return "请在运行 codeagentd 的 Mac 上重启 Runtime，然后返回此页面刷新。"
-        case .remote:
-            return "请在远程主机重启 CodeAgent Runtime，然后返回此页面刷新。"
-        case nil:
-            return "连接 Runtime 后重试。"
-        }
-    }
-
-    private var runtimeRestartAction: (@MainActor @Sendable () async -> Bool)? {
-        guard activeRuntimeKind == .embedded else { return nil }
-        return {
-            let restarted = await container.runtimeServers.restartEmbedded()
-            if restarted {
-                await container.refreshActiveRuntimeContext()
-            }
-            return restarted
-        }
     }
 
     private var gatewayDisconnectedView: some View {
@@ -1398,3 +1314,188 @@ private extension View {
         .overlay { Capsule().stroke(Color.primary.opacity(0.10), lineWidth: 1) }
     }
 }
+
+/// Shared runtime customization for Settings and the macOS workspace.
+struct RuntimeCustomizeView: View {
+    @Environment(AppContainer.self) private var container
+    let sessionID: String?
+
+    @ViewBuilder
+    var body: some View {
+        if let client = container.makeAgentClient() as? any SkillPluginManaging {
+            SkillPluginManagementView(
+                client: client,
+                sessionID: sessionID,
+                runtimeDisplayName: container.runtimeServers.activeConnection?.displayName
+                    ?? "未连接 Runtime",
+                canInstallLocalPlugin: canInstallLocalPlugin,
+                localInstallDisabledReason: localInstallDisabledReason,
+                restartPrompt: runtimeRestartPrompt,
+                onRestartRuntime: runtimeRestartAction
+            )
+            .id(
+                "\(sessionID ?? "no-session"):"
+                    + "\(container.runtimeServers.activeConnectionID):"
+                    + "\(container.runtimeServers.activeIdentityRevision)"
+            )
+        } else {
+            ContentUnavailableView(
+                "Runtime 客户端不可用",
+                systemImage: "puzzlepiece.extension",
+                description: Text("当前 Runtime 连接没有实现 Skill & Plugin Management v1。")
+            )
+            .frame(maxWidth: .infinity, minHeight: 360)
+        }
+    }
+
+    private var activeRuntimeKind: RuntimeServerKind? {
+        container.runtimeServers.activeConnection?.kind
+    }
+
+    private var canInstallLocalPlugin: Bool {
+        guard let activeRuntimeKind else { return false }
+        #if os(macOS)
+        return activeRuntimeKind == .embedded || activeRuntimeKind == .local
+        #else
+        // A paired Mac Runtime cannot read an absolute path selected on iPhone.
+        return activeRuntimeKind == .embedded
+        #endif
+    }
+
+    private var localInstallDisabledReason: String? {
+        guard let activeRuntimeKind else {
+            return "尚未连接 Runtime。连接本地 Runtime 后才能选择本地目录或 .zip。"
+        }
+        switch activeRuntimeKind {
+        case .embedded:
+            return nil
+        case .local:
+            #if os(macOS)
+            return nil
+            #else
+            return "当前连接的是另一台设备上的 Local Runtime。iPhone 的文件路径无法被该 Runtime 读取；请切换到设备内嵌 Runtime。"
+            #endif
+        case .remote:
+            return "远程 Runtime 禁止本地安装：托管 Runtime 不能访问此设备上的绝对路径。第一版也不提供远程 marketplace。"
+        }
+    }
+
+    private var runtimeRestartPrompt: String? {
+        switch activeRuntimeKind {
+        case .embedded:
+            return nil
+        case .local:
+            return "请在运行 codeagentd 的 Mac 上重启 Runtime，然后返回此页面刷新。"
+        case .remote:
+            return "请在远程主机重启 CodeAgent Runtime，然后返回此页面刷新。"
+        case nil:
+            return "连接 Runtime 后重试。"
+        }
+    }
+
+    private var runtimeRestartAction: (@MainActor @Sendable () async -> Bool)? {
+        guard activeRuntimeKind == .embedded else { return nil }
+        return {
+            let restarted = await container.runtimeServers.restartEmbedded()
+            if restarted {
+                await container.refreshActiveRuntimeContext()
+            }
+            return restarted
+        }
+    }
+}
+
+#if os(macOS)
+struct MacWorkspaceCustomize: View {
+    @Environment(AppContainer.self) private var container
+    @State private var showsMCP = false
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            HStack {
+                Spacer()
+                if showsMCP {
+                    Button("Skills & Plugins", systemImage: "chevron.left") { showsMCP = false }
+                } else {
+                    Button("MCP", systemImage: "point.3.connected.trianglepath.dotted") { showsMCP = true }
+                }
+            }
+            .buttonStyle(.borderless)
+            .padding(.horizontal, 16)
+
+            if showsMCP, let client = container.makeAgentClient() as? any SkillPluginManaging {
+                RuntimePluginMCPList(client: client)
+                    .id(container.runtimeServers.activeIdentityRevision)
+            } else {
+                RuntimeCustomizeView(sessionID: nil)
+                    .environment(\.horizontalSizeClass, .compact)
+            }
+        }
+        .frame(maxWidth: 1040, maxHeight: .infinity, alignment: .topLeading)
+        .padding(.horizontal, 20)
+        .padding(.top, 12)
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
+    }
+}
+
+private struct RuntimePluginMCPList: View {
+    let client: any SkillPluginManaging
+    @State private var plugins: [RuntimePluginItem]?
+    @State private var errorMessage: String?
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            HStack {
+                Text("MCP").font(.system(size: 18, weight: .semibold))
+                Spacer()
+                Button { Task { await load() } } label: {
+                    Image(systemName: "arrow.clockwise")
+                }
+                .buttonStyle(.borderless)
+                .help("刷新")
+                .accessibilityLabel("刷新 MCP")
+            }
+            if let errorMessage {
+                ContentUnavailableView("无法加载 MCP", systemImage: "exclamationmark.triangle", description: Text(errorMessage))
+            } else if let plugins {
+                if plugins.isEmpty {
+                    ContentUnavailableView("没有插件提供 MCP 服务器", systemImage: "puzzlepiece.extension")
+                } else {
+                    List {
+                        ForEach(plugins) { plugin in
+                            Section {
+                                ForEach(plugin.mcpServers, id: \.self) { server in
+                                    Label(server, systemImage: "server.rack")
+                                }
+                            } header: {
+                                HStack {
+                                    Text(plugin.displayName ?? plugin.name)
+                                    Spacer()
+                                    Text(plugin.enabled ? "插件已启用" : "插件已停用")
+                                        .foregroundStyle(.secondary)
+                                }
+                            }
+                        }
+                    }
+                    .listStyle(.inset)
+                }
+            } else {
+                ProgressView().controlSize(.small)
+            }
+        }
+        .padding(16)
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+        .task { await load() }
+    }
+
+    private func load() async {
+        do {
+            plugins = try await client.pluginInventory().items.filter { !$0.mcpServers.isEmpty }
+            errorMessage = nil
+        } catch is CancellationError {
+        } catch {
+            errorMessage = error.localizedDescription
+        }
+    }
+}
+#endif

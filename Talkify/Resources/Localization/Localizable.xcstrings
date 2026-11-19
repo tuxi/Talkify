@@ -617,6 +617,9 @@
     "API 密钥（留空则保持不变）" : {
 
     },
+    "Archive" : {
+
+    },
     "auth.agreement_joiner" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -9591,7 +9594,23 @@
     "Cache Input Price/M（可选）" : {
 
     },
+    "Choose which items appear in your sidebar." : {
+
+    },
+    "Close search" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "关闭搜索"
+          }
+        }
+      }
+    },
     "Code-Agent MCP" : {
+
+    },
+    "Collapse all" : {
 
     },
     "common.action.cancel" : {
@@ -10128,7 +10147,32 @@
     "Context Window（可选）" : {
 
     },
+    "Couldn’t load sessions. Retry" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "对话加载失败，点击重试"
+          }
+        }
+      }
+    },
+    "Customize" : {
+
+    },
     "Default reasoning effort" : {
+
+    },
+    "Delete…" : {
+
+    },
+    "Done" : {
+
+    },
+    "Edit sidebar" : {
+
+    },
+    "Edit sidebar…" : {
 
     },
     "evidence.bundle_exported" : {
@@ -10308,7 +10352,13 @@
         }
       }
     },
+    "Expand all" : {
+
+    },
     "Finder" : {
+
+    },
+    "Fork" : {
 
     },
     "Full reset" : {
@@ -11104,14 +11154,53 @@
         }
       }
     },
+    "Loading sessions…" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "正在加载对话…"
+          }
+        }
+      }
+    },
     "Loading..." : {
 
     },
     "Markdown" : {
 
     },
+    "MCP" : {
+
+    },
     "Model ID" : {
 
+    },
+    "More" : {
+
+    },
+    "New session" : {
+
+    },
+    "No matching sessions" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "没有匹配的对话"
+          }
+        }
+      }
+    },
+    "No sessions yet" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "暂无对话"
+          }
+        }
+      }
     },
     "OK" : {
 
@@ -11131,6 +11220,15 @@
     "Reasoning" : {
 
     },
+    "Rename" : {
+
+    },
+    "Restore" : {
+
+    },
+    "Routines" : {
+
+    },
     "Runtime Alias（可选）" : {
 
     },
@@ -11145,6 +11243,26 @@
     },
     "Runtime 诊断" : {
 
+    },
+    "Search results" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "搜索结果"
+          }
+        }
+      }
+    },
+    "Search sessions and projects" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "搜索对话和工作区"
+          }
+        }
+      }
     },
     "Session rail" : {
 
@@ -19866,6 +19984,12 @@
         }
       }
     },
+    "Show in Finder" : {
+
+    },
+    "Skills & Plugins" : {
+
+    },
     "Supported reasoning efforts" : {
 
     },
@@ -20652,6 +20776,9 @@
       }
     },
     "Web Search" : {
+
+    },
+    "Workflows" : {
 
     },
     "workspace.account" : {
@@ -26259,6 +26386,9 @@
         }
       }
     },
+    "Worktree 包含未保存的更改" : {
+
+    },
     "一次只连接一台服务器。切换不会停止旧服务器上的任务，也不会迁移会话或模型。" : {
 
     },
@@ -26275,6 +26405,9 @@
 
     },
     "允许通过局域网 HTTP 发送数据" : {
+
+    },
+    "关闭" : {
 
     },
     "关闭当前文件" : {
@@ -26301,7 +26434,31 @@
     "删除" : {
 
     },
+    "删除对话" : {
+
+    },
+    "删除对话？" : {
+
+    },
+    "删除对话和 Worktree" : {
+
+    },
     "删除服务器？" : {
+
+    },
+    "刷新" : {
+
+    },
+    "刷新 MCP" : {
+
+    },
+    "加载失败，点击重试" : {
+
+    },
+    "加载更多归档" : {
+
+    },
+    "加载更早对话" : {
 
     },
     "协议" : {
@@ -26316,10 +26473,19 @@
     "只允许小写字母、数字、连字符和下划线；创建后不可修改。" : {
 
     },
+    "名称" : {
+
+    },
     "图片工具结果" : {
 
     },
+    "在 %@ 中新建对话" : {
+
+    },
     "复制配对信息" : {
+
+    },
+    "好" : {
 
     },
     "完成" : {
@@ -26328,7 +26494,16 @@
     "对比不同订阅档位的权益差异，选择最适合你的 Plus 方案。" : {
 
     },
+    "对话历史将永久删除。" : {
+
+    },
+    "对话历史将永久删除。你可以保留 Worktree，或同时移除它。" : {
+
+    },
     "对话所属工作区的审批档位。档位影响该工作区的所有对话：请求批准（ask，每次询问）、帮我批准（auto，工作区内自动、网络命令与 MCP 工具询问）、完全访问（full，全部自动）。" : {
+
+    },
+    "对话操作" : {
 
     },
     "将删除“%@”的本地连接记录和 Access Token，不会删除服务器上的会话或数据。" : {
@@ -26355,6 +26530,12 @@
     "已复制" : {
 
     },
+    "已展开" : {
+
+    },
+    "已收起" : {
+
+    },
     "已过期" : {
 
     },
@@ -26368,6 +26549,12 @@
 
     },
     "开始使用 Talkify" : {
+
+    },
+    "强制删除 Worktree 和对话" : {
+
+    },
+    "强制删除会永久移除 Worktree 及其中的未保存更改，Git 分支会保留。" : {
 
     },
     "当前 Runtime Server 没有发布可用模型。" : {
@@ -26412,6 +26599,12 @@
     "提供商由外部服务器管理" : {
 
     },
+    "插件已停用" : {
+
+    },
+    "插件已启用" : {
+
+    },
     "撤销" : {
 
     },
@@ -26424,10 +26617,16 @@
     "撤销设备会立即断开其连接。已撤销的设备可以保留记录以供审计。" : {
 
     },
+    "操作失败" : {
+
+    },
     "断开提供商？" : {
 
     },
     "断开连接" : {
+
+    },
+    "无法加载 MCP" : {
 
     },
     "无认证" : {
@@ -26478,6 +26677,16 @@
     "查看诊断" : {
 
     },
+    "检测到 %lld 个已修改文件、%lld 个未跟踪文件和 %lld 个新提交。强制删除会永久移除 Worktree，Git 分支会保留。" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "检测到 %1$lld 个已修改文件、%2$lld 个未跟踪文件和 %3$lld 个新提交。强制删除会永久移除 Worktree，Git 分支会保留。"
+          }
+        }
+      }
+    },
     "模型" : {
 
     },
@@ -26493,6 +26702,9 @@
     "正在保存…" : {
 
     },
+    "正在加载对话…" : {
+
+    },
     "正在加载工作区权限…" : {
 
     },
@@ -26506,6 +26718,12 @@
 
     },
     "正在测试连接…" : {
+
+    },
+    "正在连接 Runtime…" : {
+
+    },
+    "没有插件提供 MCP 服务器" : {
 
     },
     "测试连接并保存" : {
@@ -26571,6 +26789,9 @@
     "设为默认" : {
 
     },
+    "设置" : {
+
+    },
     "该地址返回了不同的 Server ID。仅在你确认服务器已重建或更换后继续。" : {
 
     },
@@ -26632,6 +26853,9 @@
 
     },
     "重启内置 Runtime？" : {
+
+    },
+    "重命名对话" : {
 
     },
     "重新检查" : {

@@ -5,6 +5,7 @@ struct ActiveRuntimeServerIndicator: View {
     enum Style {
         case chip
         case sidebar
+        case footer
     }
 
     @Environment(AppContainer.self) private var container
@@ -24,14 +25,16 @@ struct ActiveRuntimeServerIndicator: View {
     }
 
     var body: some View {
-        if let connection, connection.kind != .embedded {
+        if let connection, connection.kind != .embedded || style == .footer {
             Button(action: onOpenServers) {
                 HStack(spacing: 8) {
-                    Circle()
-                        .fill(statusPresentation.color)
-                        .frame(width: 7, height: 7)
+                    if connection.kind != .embedded {
+                        Circle()
+                            .fill(statusPresentation.color)
+                            .frame(width: 6, height: 6)
+                    }
 
-                    Image(systemName: connection.kind == .local ? "desktopcomputer" : "network")
+                    Image(systemName: connection.kind == .remote ? "network" : "desktopcomputer")
                         .font(.system(size: 12, weight: .medium))
                         .foregroundStyle(.secondary)
 
@@ -47,26 +50,20 @@ struct ActiveRuntimeServerIndicator: View {
                     }
                 }
                 .foregroundStyle(.primary)
-                .padding(.horizontal, style == .chip ? 11 : 12)
+                .padding(.horizontal, style == .footer ? 0 : style == .chip ? 11 : 12)
                 .frame(
                     maxWidth: style == .sidebar ? .infinity : nil,
-                    minHeight: style == .chip ? 30 : 38,
+                    minHeight: style == .sidebar ? 38 : 30,
                     alignment: .leading
                 )
-                .background(
-                    .regularMaterial,
-                    in: RoundedRectangle(
-                        cornerRadius: style == .chip ? 9 : 11,
-                        style: .continuous
-                    )
-                )
-                .overlay {
-                    RoundedRectangle(
-                        cornerRadius: style == .chip ? 9 : 11,
-                        style: .continuous
-                    )
-                    .stroke(Color.primary.opacity(0.10), lineWidth: 1)
+                .background {
+                    if style != .footer {
+                        RoundedRectangle(cornerRadius: style == .chip ? 9 : 11)
+                            .fill(.regularMaterial)
+                            .strokeBorder(Color.primary.opacity(0.10), lineWidth: 1)
+                    }
                 }
+                .contentShape(Rectangle())
             }
             .buttonStyle(.plain)
             .help("打开服务器设置")
@@ -80,7 +77,7 @@ struct ActiveRuntimeServerIndicator: View {
     private var statusPresentation: (title: String, color: Color) {
         let name = connection?.displayName ?? ""
         guard let monitor else {
-            return (name, .orange)
+            return (name, connection?.kind == .embedded ? .secondary : .orange)
         }
         switch monitor.status {
         case .connected:
@@ -99,7 +96,7 @@ struct ActiveRuntimeServerIndicator: View {
     }
 
     private func monitorActiveServer() async {
-        guard let connection else { return }
+        guard let connection, connection.kind != .embedded else { return }
         while !Task.isCancelled,
               container.runtimeServers.activeConnectionID == connection.id {
             _ = try? await container.runtimeServers.checkExternal(
