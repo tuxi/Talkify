@@ -18,6 +18,9 @@ enum SettingsSection: String, CaseIterable, Identifiable {
         }
     }
     case profile, usage, account
+    #if os(macOS)
+    case dataManagement
+    #endif
     case servers, customize, providers, models, permissions, settings
     case support, about
 
@@ -25,6 +28,9 @@ enum SettingsSection: String, CaseIterable, Identifiable {
     var group: Group {
         switch self {
         case .profile, .usage, .account: .personal
+        #if os(macOS)
+        case .dataManagement: .personal
+        #endif
         case .servers, .customize, .providers, .models, .permissions, .settings: .integrations
         case .support, .about: .personal
         }
@@ -34,6 +40,9 @@ enum SettingsSection: String, CaseIterable, Identifiable {
         case .profile: TalkifyLocalized.string("settings.item.profile")
         case .usage: TalkifyLocalized.string("settings.item.usage")
         case .account: TalkifyLocalized.string("settings.item.account")
+        #if os(macOS)
+        case .dataManagement: String(localized: "数据管理")
+        #endif
         case .servers: "服务器"
         case .customize: "自定义"
         case .providers: "提供商"
@@ -49,6 +58,9 @@ enum SettingsSection: String, CaseIterable, Identifiable {
         case .profile: "person.crop.circle"
         case .usage: "chart.bar"
         case .account: "person.badge.key"
+        #if os(macOS)
+        case .dataManagement: "externaldrive"
+        #endif
         case .servers: "server.rack"
         case .customize: "sparkles.rectangle.stack"
         case .providers: "cpu"

@@ -99,6 +99,15 @@ struct SettingsDetailView: View {
                         gatewayDisconnectedView
                             .navigationTitle(TalkifyLocalized.string("settings.item.account"))
                     }
+                #if os(macOS)
+                case .dataManagement:
+                    settingsTitle(section.title, bottomSpacing: 34)
+                    settingsCard {
+                        MacDataManagementSettings(
+                            allowsFinderReveal: container.runtimeServers.activeConnection?.kind == .local
+                        )
+                    }
+                #endif
                 case .servers:
                     RuntimeServerSettingsView()
                         .navigationTitle(Text(verbatim: "服务器"))
@@ -818,10 +827,10 @@ struct SettingsDetailView: View {
     
     // MARK: - Shared UI helpers
     
-    private func settingsTitle(_ title: String) -> some View {
+    private func settingsTitle(_ title: String, bottomSpacing: CGFloat = 58) -> some View {
         Text(title)
             .font(.system(size: 34, weight: .semibold))
-            .padding(.bottom, 58)
+            .padding(.bottom, bottomSpacing)
     }
     
     private func sectionTitle(_ title: String) -> some View {

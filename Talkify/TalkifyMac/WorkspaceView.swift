@@ -40,6 +40,7 @@ public struct WorkspaceView: View {
     #if os(macOS)
     @State private var macShowsCustomize = false
     @State private var macShowsSessionSearch = false
+    @State private var macShowsCodingTasks = false
     @State private var macExpandedSidebarGroups: Set<String> = []
     @State private var macLastConnectionDiagnostic: ComposerDiagnostic?
     @State private var macLastDiagnosticConnectionID: String?
@@ -260,6 +261,7 @@ public struct WorkspaceView: View {
                         expandedGroups: $macExpandedSidebarGroups,
                         allowsFinderReveal: container.runtimeServers.activeConnection?.kind == .local,
                         onSearch: { macShowsSessionSearch = true },
+                        onOpenCodingTasks: { macShowsCodingTasks = true },
                         onSelectSession: macSelectSession
                     )
                     Divider()
@@ -294,6 +296,17 @@ public struct WorkspaceView: View {
                     macShowsSessionSearch = false
                     macSelectSession(ref)
                 }
+            }
+            .sheet(isPresented: $macShowsCodingTasks) {
+                NavigationStack {
+                    CodingTasksWorkspaceView()
+                        .toolbar {
+                            ToolbarItem {
+                                Button("关闭") { macShowsCodingTasks = false }
+                            }
+                        }
+                }
+                .frame(minWidth: 320, idealWidth: 840, minHeight: 480, idealHeight: 680)
             }
             .onChange(of: store.selectItem) { _, destination in
                 if destination != .draft { macShowsCustomize = false }
@@ -356,6 +369,11 @@ public struct WorkspaceView: View {
                 SettingsView(initialSection: settingsInitialSection, sessionID: store.selectedConversation?.id) {
                     showSettings = false
                 }
+                .environment(store)
+                .environment(\.openArchivedConversation, { ref in
+                    macSelectSession(ref)
+                    showSettings = false
+                })
                 .background(Color(nsColor: .windowBackgroundColor))
             }
         }

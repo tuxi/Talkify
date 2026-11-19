@@ -12,6 +12,7 @@ struct MacWorkspaceSidebar: View {
     @Binding var expandedGroups: Set<String>
     let allowsFinderReveal: Bool
     let onSearch: () -> Void
+    let onOpenCodingTasks: () -> Void
     let onSelectSession: (ConversationRef) -> Void
 
     @State private var groups: [MacSidebarWorkspace] = []
@@ -20,11 +21,9 @@ struct MacWorkspaceSidebar: View {
     @State private var showsEditor = false
     @State private var editRoutines = false
     @State private var editCustomize = true
-    @State private var showsArchive = false
     @State private var renameTarget: ConversationRef?
     @State private var renameText = ""
     @State private var deletionTarget: ConversationRef?
-    @State private var dirtyWorktree: (ref: ConversationRef, summary: ManagedWorktreeDirtySummary?)?
     @State private var actionError: String?
 
     private var list: ConversationListViewModel { store.listViewModel }
@@ -44,8 +43,7 @@ struct MacWorkspaceSidebar: View {
                         ForEach(groups) { group in
                             workspaceRows(group)
                         }
-                        if list.hasMoreConversations { loadMore(archived: false) }
-                        if store.supportsConversationArchive { archiveRows }
+                        if list.hasMoreConversations { loadMore }
                     }
                     .padding(.bottom, 10)
                 }
@@ -72,61 +70,12 @@ struct MacWorkspaceSidebar: View {
         .onChange(of: store.selectedConversation?.presentationID, initial: true) { _, _ in
             // A directly opened session may be outside the loaded page.
             rebuildGroups()
-            if store.selectedConversation?.isArchived == true { openArchive() }
-        }
-        .onChange(of: store.supportsConversationArchive) { _, supported in
-            if !supported {
-                showsArchive = false
-                list.clearArchived()
-            }
         }
         .sheet(isPresented: $showsEditor) { editor }
-        .alert("重命名对话", isPresented: presented($renameTarget)) {
-            TextField("名称", text: $renameText)
-            Button("取消", role: .cancel) {}
-            Button("保存") {
-                guard let target = renameTarget else { return }
-                let name = renameText.trimmingCharacters(in: .whitespacesAndNewlines)
-                guard !name.isEmpty else { return }
-                Task {
-                    if await store.renameConversation(target, name: name) == nil {
-                        actionError = list.errorMessage ?? "名称保存失败。"
-                    }
-                }
-            }
-            .disabled(renameText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
-            .keyboardShortcut(.defaultAction)
-        }
-        .alert("删除对话？", isPresented: presented($deletionTarget), presenting: deletionTarget) { target in
-            Button("取消", role: .cancel) {}
-            Button("删除对话", role: .destructive) {
-                delete(target, disposition: .keep)
-            }
-            if target.worktree?.managed == true {
-                Button("删除对话和 Worktree", role: .destructive) {
-                    delete(target, disposition: .remove)
-                }
-            }
-        } message: { target in
-            Text(target.worktree?.managed == true
-                 ? "对话历史将永久删除。你可以保留 Worktree，或同时移除它。"
-                 : "对话历史将永久删除。")
-        }
-        .alert("Worktree 包含未保存的更改", isPresented: presented($dirtyWorktree), presenting: dirtyWorktree) { item in
-            Button("取消", role: .cancel) {}
-            Button("强制删除 Worktree 和对话", role: .destructive) {
-                delete(item.ref, disposition: .remove, force: true)
-            }
-        } message: { item in
-            if let summary = item.summary {
-                Text("检测到 \(summary.modifiedFiles) 个已修改文件、\(summary.untrackedFiles) 个未跟踪文件和 \(summary.newCommits) 个新提交。强制删除会永久移除 Worktree，Git 分支会保留。")
-            } else {
-                Text("强制删除会永久移除 Worktree 及其中的未保存更改，Git 分支会保留。")
-            }
-        }
-        .alert("操作失败", isPresented: presented($actionError), presenting: actionError) { _ in
-            Button("好", role: .cancel) {}
-        } message: { Text($0) }
+        .modifier(MacSessionActionDialogs(
+            renameTarget: $renameTarget, renameText: $renameText,
+            deletionTarget: $deletionTarget, actionError: $actionError
+        ))
     }
 
     private var shortcuts: some View {
@@ -168,7 +117,7 @@ struct MacWorkspaceSidebar: View {
                 showsCustomize = false
                 store.selectItem = .workflow
             }
-            CodingTasksButton()
+            Button("协作任务", systemImage: "person.3.sequence", action: onOpenCodingTasks)
         }
     }
 
@@ -290,53 +239,23 @@ struct MacWorkspaceSidebar: View {
             Button("Show in Finder") { reveal(ref.workspacePath) }
         }
         Button("Rename") {
-            let current = (ref.isArchived ? list.archivedConversations : list.conversations)
-                .first { $0.id == ref.id } ?? ref
+            let current = list.conversations.first { $0.id == ref.id } ?? ref
             renameTarget = current
             renameText = current.name ?? ""
         }
-        if store.supportsConversationForkThroughTurn && !ref.isArchived {
+        if store.supportsConversationForkThroughTurn {
             Button("Fork") { perform { _ = try await store.forkConversation(from: ref, throughTurnID: nil) } }
         }
         if store.supportsConversationArchive {
             Divider()
-            if ref.isArchived {
-                Button("Restore") { perform { _ = try await store.restoreConversation(ref) } }
-                    .disabled(list.restoringConversationIDs.contains(ref.id))
-            } else {
-                Button("Archive") {
-                    perform {
-                        _ = try await store.archiveConversation(ref)
-                        if ref.id == selectedID { showsArchive = true }
-                    }
-                }
-                    .disabled(!store.canArchiveConversation(ref) || list.archivingConversationIDs.contains(ref.id))
+            Button("Archive") {
+                perform { _ = try await store.archiveConversation(ref) }
             }
+            .disabled(!store.canArchiveConversation(ref) || list.archivingConversationIDs.contains(ref.id))
         }
         Divider()
         Button("Delete…", role: .destructive) { deletionTarget = ref }
             .disabled(!store.canDeleteConversation(ref) || list.deletingConversationIDs.contains(ref.id))
-    }
-
-    private var archiveRows: some View {
-        Group {
-            shortcut("Archived", symbol: showsArchive ? "chevron.down" : "chevron.right") {
-                if showsArchive { showsArchive = false }
-                else { openArchive() }
-            }
-            .foregroundStyle(.secondary)
-            if showsArchive {
-                ForEach(list.archivedConversations) { sessionRow($0).id($0.id) }
-                if list.isLoadingArchived { ProgressView().controlSize(.small) }
-                if list.hasMoreArchivedConversations { loadMore(archived: true) }
-            }
-        }
-    }
-
-    private func openArchive() {
-        guard store.supportsConversationArchive else { return }
-        showsArchive = true
-        Task { await list.refreshArchived() }
     }
 
     @ViewBuilder
@@ -364,21 +283,20 @@ struct MacWorkspaceSidebar: View {
         }
     }
 
-    private func loadMore(archived: Bool) -> some View {
-        let loading = archived ? list.isLoadingMoreArchived : list.isLoadingMore
-        return Button {
-            Task { await list.loadMoreConversations(archived: archived) }
+    private var loadMore: some View {
+        Button {
+            Task { await list.loadMoreConversations() }
         } label: {
             HStack {
-                if loading { ProgressView().controlSize(.mini) }
-                Text(archived ? "加载更多归档" : "加载更早对话")
+                if list.isLoadingMore { ProgressView().controlSize(.mini) }
+                Text("加载更早对话")
             }
         }
         .buttonStyle(.plain)
         .font(.caption)
         .foregroundStyle(.secondary)
         .padding(8)
-        .disabled(loading)
+        .disabled(list.isLoadingMore)
     }
 
     private func rebuildGroups() {
@@ -406,25 +324,11 @@ struct MacWorkspaceSidebar: View {
         NSWorkspace.shared.activateFileViewerSelecting([URL(fileURLWithPath: path, isDirectory: true)])
     }
 
-    private func delete(_ ref: ConversationRef, disposition: ConversationWorktreeDisposition, force: Bool = false) {
-        perform {
-            do {
-                try await store.deleteConversation(ref, worktreeDisposition: disposition, forceWorktreeRemoval: force)
-            } catch let error as ManagedWorktreeRemovalError where error.isDirtyConflict && !force {
-                dirtyWorktree = (ref, error.summary)
-            }
-        }
-    }
-
     private func perform(_ operation: @escaping @MainActor () async throws -> Void) {
         Task {
             do { try await operation() }
             catch { actionError = error.localizedDescription }
         }
-    }
-
-    private func presented<Value>(_ value: Binding<Value?>) -> Binding<Bool> {
-        Binding(get: { value.wrappedValue != nil }, set: { if !$0 { value.wrappedValue = nil } })
     }
 }
 
