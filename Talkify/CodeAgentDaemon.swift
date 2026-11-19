@@ -142,6 +142,10 @@ final class CodeAgentDaemon: @unchecked Sendable {
         // The GUI's Xcode environment is separate from the login shell used
         // above. One debug opt-in enables both the panel and its child runtime.
         let debugEnvironment = ProcessInfo.processInfo.environment
+        if debugEnvironment["TALKIFY_DEBUG_USER_QUEUE"] == "1" {
+            env["CODEAGENT_EXPERIMENTAL_USER_QUEUE"] = "1"
+        }
+
         if debugEnvironment["TALKIFY_DEBUG_TEXT_SUPPLEMENTS"] == "1" {
             env["CODEAGENT_EXPERIMENTAL_TEXT_SUPPLEMENTS"] = "1"
         } else if let value = debugEnvironment["CODEAGENT_EXPERIMENTAL_TEXT_SUPPLEMENTS"] {
