@@ -138,20 +138,13 @@ final class CodeAgentDaemon: @unchecked Sendable {
         env["HOME"] = FileManager.default.homeDirectoryForCurrentUser.path
         env["CODEAGENT_SERVER_ACCESS_TOKEN"] = accessToken
         env["CODEAGENT_MCP_INHERIT_CLAUDE"] = "1"
-#if DEBUG
-        // The GUI's Xcode environment is separate from the login shell used
-        // above. One debug opt-in enables both the panel and its child runtime.
-        let debugEnvironment = ProcessInfo.processInfo.environment
-        if debugEnvironment["TALKIFY_DEBUG_USER_QUEUE"] == "1" {
-            env["CODEAGENT_EXPERIMENTAL_USER_QUEUE"] = "1"
-        }
-
-        if debugEnvironment["TALKIFY_DEBUG_TEXT_SUPPLEMENTS"] == "1" {
-            env["CODEAGENT_EXPERIMENTAL_TEXT_SUPPLEMENTS"] = "1"
-        } else if let value = debugEnvironment["CODEAGENT_EXPERIMENTAL_TEXT_SUPPLEMENTS"] {
-            env["CODEAGENT_EXPERIMENTAL_TEXT_SUPPLEMENTS"] = value
-        }
-#endif
+        // macOS Direct bundles an authenticated local runtime. Explicit
+        // overrides remain available for compatibility and rollback.
+        let appEnvironment = ProcessInfo.processInfo.environment
+        env["CODEAGENT_EXPERIMENTAL_USER_QUEUE"] = appEnvironment["TALKIFY_DEBUG_USER_QUEUE"]
+            ?? appEnvironment["CODEAGENT_EXPERIMENTAL_USER_QUEUE"] ?? env["CODEAGENT_EXPERIMENTAL_USER_QUEUE"] ?? "1"
+        env["CODEAGENT_EXPERIMENTAL_TEXT_SUPPLEMENTS"] = appEnvironment["TALKIFY_DEBUG_TEXT_SUPPLEMENTS"]
+            ?? appEnvironment["CODEAGENT_EXPERIMENTAL_TEXT_SUPPLEMENTS"] ?? env["CODEAGENT_EXPERIMENTAL_TEXT_SUPPLEMENTS"] ?? "1"
         process.environment = env
 
         // Request an ephemeral port so we never collide.
