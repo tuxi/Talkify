@@ -57,7 +57,8 @@ final class ProviderConnectionStore {
     let registry: ProviderConnectionRegistry
     let catalog: UnifiedModelCatalogStore
     let credentialStore: CompositeCredentialStore
-    let directCredentialStore: KeychainCredentialStore
+    /// 单条条目承载全部 llm/* 凭证（ACL 逐条目授权，合并后只弹一次）。
+    let directCredentialStore: ConsolidatedCredentialVault
 
     private let modelSettings: ModelSettingsStore
     /// Invoked when a provider definition was persisted but needs a runtime
@@ -109,8 +110,11 @@ final class ProviderConnectionStore {
         self.modelSettings = modelSettings
         self.registry = ProviderConnectionRegistry(defaults: defaults)
         self.catalog = UnifiedModelCatalogStore(defaults: defaults)
-        self.directCredentialStore = KeychainCredentialStore(
-            service: "com.objc.talkify.provider-credentials"
+        self.directCredentialStore = ConsolidatedCredentialVault(
+            service: "com.objc.talkify.provider-credentials.v2",
+            account: "llm-credentials/v1",
+            namespace: "llm",
+            legacyService: "com.objc.talkify.provider-credentials"
         )
         self.credentialStore = CompositeCredentialStore(
             storesByNamespace: [

@@ -62,6 +62,12 @@ struct TalkifyApp: App {
         }
         #endif
 
+        // 钥匙串诊断：记录当前二进制的签名身份（bundle id / cdhash / team），
+        // 用于解释 login.keychain 里逐条目的 ACL 为什么匹配或不匹配。
+        KeychainDiagnostics.logProcessIdentity(trigger: "app.init")
+        // 仅 TALKIFY_KEYCHAIN_PROBE=1 时执行；自建自删假条目，不碰真实数据。
+        KeychainDiagnostics.probeDataProtectionKeychainIfRequested()
+
         let environmentManager = EnvironmentManager()
         #if DEBUG
         environmentManager.saveCurrentEnvironment(.local)
@@ -69,6 +75,24 @@ struct TalkifyApp: App {
         environmentManager.saveCurrentEnvironment(.prod)
         #endif
         self.environmentManager = environmentManager
+
+        // 条目数量直接决定“最多会弹几次”：ACL 授权是逐条目的。
+        // 只读属性，不解密，不会触发弹窗。
+        KeychainDiagnostics.logInventory(
+            services: [
+                "com.objc.talkify.provider-credentials.v2",
+                "com.agentkit.runtime-server-access.v2",
+                "com.objc.talkify.provider-credentials",
+                "com.agentkit.runtime-server-access",
+                "com.agentkit.runtime-sharing",
+                "com.codeagent.device",
+                "com.codeagent.runtime",
+            ],
+            accounts: [
+                "com.objc.talkify.v2.deviceId",
+                "com.objc.talkify.v2.authKey.\(environmentManager.currentEnvironmentSnapshot.rawValue)",
+            ]
+        )
 
         let manager = AuthManager(
             environment: environmentManager.currentEnvironmentSnapshot,

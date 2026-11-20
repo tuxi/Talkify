@@ -153,11 +153,22 @@ public struct AuthTokenStore: @unchecked Sendable {
         query[kSecReturnData] = kCFBooleanTrue!
         query[kSecMatchLimit] = kSecMatchLimitOne
 
-        var result: AnyObject?
-        guard SecItemCopyMatching(query as CFDictionary, &result) == errSecSuccess,
-              let data = result as? Data else {
-            return nil
+        let account = keychainKey(for: environment)
+        let outcome: (status: OSStatus, value: Data?) = KeychainDiagnostics.measureRead(
+            "auth_token.read",
+            service: nil,
+            account: account,
+            details: [
+                "access_group": keychainGroupId ?? "<none>",
+                "environment": environment.rawValue,
+            ]
+        ) {
+            var result: AnyObject?
+            let status = SecItemCopyMatching(query as CFDictionary, &result)
+            return (status: status, value: result as? Data)
         }
+
+        guard let data = outcome.value else { return nil }
         return try? JSONDecoder().decode(AuthToken.self, from: data)
     }
 
@@ -168,7 +179,16 @@ public struct AuthTokenStore: @unchecked Sendable {
         query[kSecValueData] = try JSONEncoder().encode(token)
         query[kSecAttrAccessible] = kSecAttrAccessibleAfterFirstUnlock
 
+        let started = CFAbsoluteTimeGetCurrent()
         let status = SecItemAdd(query as CFDictionary, nil)
+        KeychainDiagnostics.record(
+            "auth_token.save",
+            service: nil,
+            account: keychainKey(for: environment),
+            status: status,
+            durationMilliseconds: (CFAbsoluteTimeGetCurrent() - started) * 1000,
+            details: ["access_group": keychainGroupId ?? "<none>"]
+        )
         guard status == errSecSuccess else {
             throw NSError(domain: "AuthTokenStore", code: Int(status))
         }
@@ -176,7 +196,16 @@ public struct AuthTokenStore: @unchecked Sendable {
 
     private func deleteFromKeychain(environment: AppEnvironment) {
         let query = keychainQuery(environment: environment)
-        SecItemDelete(query as CFDictionary)
+        let started = CFAbsoluteTimeGetCurrent()
+        let status = SecItemDelete(query as CFDictionary)
+        KeychainDiagnostics.record(
+            "auth_token.delete",
+            service: nil,
+            account: keychainKey(for: environment),
+            status: status,
+            durationMilliseconds: (CFAbsoluteTimeGetCurrent() - started) * 1000,
+            details: ["access_group": keychainGroupId ?? "<none>"]
+        )
     }
 
     private func keychainKey(for environment: AppEnvironment) -> String {

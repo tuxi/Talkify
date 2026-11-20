@@ -16,8 +16,10 @@ public final class DeviceManager {
     
     // MARK: - 常量定义
     private enum Constants {
-        /// Keychain中存储device_id的key
+        /// Keychain中存储device_id的key（旧版本；macOS 仅用于一次性迁移）
         static let keychainDeviceIdKey = "com.objc.talkify.v2.deviceId"
+        /// UserDefaults 中的 device_id（macOS 主存储）
+        static let defaultsDeviceIdKey = "com.objc.talkify.v2.deviceId"
     }
     
     // MARK: - 私有属性
@@ -33,7 +35,11 @@ public final class DeviceManager {
     
     // MARK: - 核心API
     
-    /// 初始化device_id：优先从Keychain读取，无则生成新的并存储
+    /// 初始化device_id：优先读本地存储，无则生成新的并存储
+    ///
+    /// macOS 上 device_id 存在 UserDefaults：它不是机密，而 login.keychain 的
+    /// 授权是逐条目的，放在钥匙串会让每次匹配失败都弹一次密码框。旧版本写入的
+    /// keychain 值只读一次用于迁移，之后不再访问钥匙串。
     /// - Returns: 设备唯一标识device_id
     /// - Throws: 生成或读取失败时抛出异常
     public func initializeDeviceId() throws -> String {
@@ -42,21 +48,40 @@ public final class DeviceManager {
             if let cachedDeviceId = deviceId, !cachedDeviceId.isEmpty {
                 return cachedDeviceId
             }
-            
+
+            #if os(macOS)
+            // 2. UserDefaults（主存储）
+            if let stored = UserDefaults.standard.string(forKey: Constants.defaultsDeviceIdKey),
+               !stored.isEmpty {
+                self.deviceId = stored
+                return stored
+            }
+
+            // 3. 旧版本 keychain 值：读一次并迁到 UserDefaults
+            if let legacyDeviceId = readDeviceIdFromKeychain(), !legacyDeviceId.isEmpty {
+                UserDefaults.standard.set(legacyDeviceId, forKey: Constants.defaultsDeviceIdKey)
+                self.deviceId = legacyDeviceId
+                return legacyDeviceId
+            }
+
+            // 4. 生成并持久化
+            let newDeviceId = generateDeviceId()
+            UserDefaults.standard.set(newDeviceId, forKey: Constants.defaultsDeviceIdKey)
+            self.deviceId = newDeviceId
+            return newDeviceId
+            #else
             // 2. 从系统Keychain读取
             if let existingDeviceId = readDeviceIdFromKeychain(), !existingDeviceId.isEmpty {
                 self.deviceId = existingDeviceId
                 return existingDeviceId
             }
-            
+
             // 3. 生成新的device_id并存储
             let newDeviceId = generateDeviceId()
-            // 存储到系统Keychain
             try saveDeviceIdToKeychain(deviceId: newDeviceId)
-            // 更新缓存
             self.deviceId = newDeviceId
-            
             return newDeviceId
+            #endif
         }
     }
     
@@ -65,6 +90,17 @@ public final class DeviceManager {
     /// - Throws: 生成或存储失败时抛出异常
     public func resetDeviceId() throws -> String {
         try queue.sync {
+            #if os(macOS)
+            // 清空 UserDefaults 与旧版 keychain 值（尽力而为）
+            UserDefaults.standard.removeObject(forKey: Constants.defaultsDeviceIdKey)
+            deleteDeviceIdFromKeychain()
+            self.deviceId = nil
+
+            let newDeviceId = generateDeviceId()
+            UserDefaults.standard.set(newDeviceId, forKey: Constants.defaultsDeviceIdKey)
+            self.deviceId = newDeviceId
+            return newDeviceId
+            #else
             // 1. 清空Keychain和缓存
             deleteDeviceIdFromKeychain()
             self.deviceId = nil
@@ -76,6 +112,7 @@ public final class DeviceManager {
             self.deviceId = newDeviceId
             
             return newDeviceId
+            #endif
         }
     }
     
@@ -120,7 +157,16 @@ public final class DeviceManager {
         }
         
         // 3. 写入Keychain
+        let started = CFAbsoluteTimeGetCurrent()
         let status = SecItemAdd(query as CFDictionary, nil)
+        KeychainDiagnostics.record(
+            "device_manager.save",
+            service: nil,
+            account: Constants.keychainDeviceIdKey,
+            status: status,
+            durationMilliseconds: (CFAbsoluteTimeGetCurrent() - started) * 1000,
+            details: ["access_group": keychainGroupId ?? "<none>"]
+        )
         guard status == errSecSuccess else {
             throw NSError(domain: "DeviceManager", code: Int(status), userInfo: [
                 NSLocalizedDescriptionKey: "存储device_id到Keychain失败，状态码：\(status)"
@@ -140,17 +186,24 @@ public final class DeviceManager {
         ]
         
         // 2. 执行查询
-        var result: AnyObject?
-        let status = SecItemCopyMatching(query as CFDictionary, &result)
-        
-        // 3. 处理结果
-        guard status == errSecSuccess,
-              let data = result as? Data,
-              let deviceId = String(data: data, encoding: .utf8) else {
-            return nil
+        let outcome: (status: OSStatus, value: String?) = KeychainDiagnostics.measureRead(
+            "device_manager.read",
+            service: nil,
+            account: Constants.keychainDeviceIdKey,
+            details: ["access_group": keychainGroupId ?? "<none>"]
+        ) {
+            var result: AnyObject?
+            let status = SecItemCopyMatching(query as CFDictionary, &result)
+            guard status == errSecSuccess,
+                  let data = result as? Data,
+                  let deviceId = String(data: data, encoding: .utf8) else {
+                return (status: status, value: nil)
+            }
+            return (status: status, value: deviceId)
         }
-        
-        return deviceId
+
+        // 3. 返回结果
+        return outcome.value
     }
     
     /// 从系统Keychain删除device_id
@@ -162,7 +215,15 @@ public final class DeviceManager {
         ]
         
         // 2. 执行删除
-        let _ = SecItemDelete(query as CFDictionary)
+        let started = CFAbsoluteTimeGetCurrent()
+        let status = SecItemDelete(query as CFDictionary)
+        KeychainDiagnostics.record(
+            "device_manager.delete",
+            service: nil,
+            account: Constants.keychainDeviceIdKey,
+            status: status,
+            durationMilliseconds: (CFAbsoluteTimeGetCurrent() - started) * 1000
+        )
     }
     
     /// 生成稳定的device_id（基于UUID）

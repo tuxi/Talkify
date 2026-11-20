@@ -7,6 +7,7 @@
 
 import Foundation
 import AgentKit
+import CoreKit
 
 /// AuthClientProtocol 的 URLSession 实现。
 ///
@@ -109,8 +110,33 @@ public final class URLSessionAuthClient: AuthClientProtocol, Sendable {
         request.httpMethod = method
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
         request.timeoutInterval = 30
+        let deviceContextStarted = CFAbsoluteTimeGetCurrent()
         DeviceContext.apply(to: &request)
+        Self.logDeviceContextRead(path: path, started: deviceContextStarted)
         return request
+    }
+
+    /// `DeviceContext.apply` 会计算 `DeviceContext.deviceID`，而该值每次都会查
+    /// `com.codeagent.device` 钥匙串条目（没有缓存）。这里记录首次调用与耗时
+    /// 异常的调用：>= 20ms 基本就是被 ACL 密码框阻塞了。
+    private static let deviceContextLogLock = NSLock()
+    nonisolated(unsafe) private static var deviceContextReadCount = 0
+
+    private static func logDeviceContextRead(path: String, started: CFAbsoluteTime) {
+        let duration = (CFAbsoluteTimeGetCurrent() - started) * 1000
+        deviceContextLogLock.lock()
+        deviceContextReadCount += 1
+        let count = deviceContextReadCount
+        deviceContextLogLock.unlock()
+
+        guard count == 1 || duration >= 20 else { return }
+        KeychainDiagnostics.record(
+            "device_context.apply",
+            service: "com.codeagent.device",
+            account: "device_id",
+            durationMilliseconds: duration,
+            details: ["path": path, "call_index": String(count)]
+        )
     }
 
     private func post<T: Encodable>(_ path: String, body: T?) async throws -> AuthResponse {

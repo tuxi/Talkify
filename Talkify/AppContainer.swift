@@ -139,11 +139,22 @@ final class AppContainer {
         self.agentCredentialStore = AppCredentialStore(authManager: authManager)
         
         // 缓存基础头（仅创建一次，提升性能）
+        let deviceInfoStarted = CFAbsoluteTimeGetCurrent()
         do {
             let deviceInfo = try deviceManager.getDeviceInfo()
             self.baseHeaders = BaseHeader(deviceInfo: deviceInfo).toDictionary() ?? [:]
+            KeychainDiagnostics.record(
+                "startup.device_info",
+                durationMilliseconds: (CFAbsoluteTimeGetCurrent() - deviceInfoStarted) * 1000,
+                details: ["result": "ok"]
+            )
         } catch {
             self.baseHeaders = ["Content-Type": "application/json"]
+            KeychainDiagnostics.record(
+                "startup.device_info",
+                durationMilliseconds: (CFAbsoluteTimeGetCurrent() - deviceInfoStarted) * 1000,
+                details: ["result": "failed", "error": error.localizedDescription]
+            )
             DLLog("⚠️ 设备信息获取失败：\(error)")
         }
         
@@ -208,7 +219,16 @@ final class AppContainer {
             modelSettings: modelSettings,
             gatewayCredentialStore: agentCredentialStore
         )
-        self.runtimeServers = RuntimeServerCoordinator()
+        // 外部 Runtime Server 的 access token 也合并成单条条目：ACL 授权按条目
+        // 计费，历史实现是每个 server 一条 `runtime_access/<id>`。
+        self.runtimeServers = RuntimeServerCoordinator(
+            runtimeCredentialStore: ConsolidatedCredentialVault(
+                service: "com.agentkit.runtime-server-access.v2",
+                account: "runtime-access/v1",
+                namespace: "runtime_access",
+                legacyService: "com.agentkit.runtime-server-access"
+            )
+        )
         #if os(macOS)
         self.sharingController = RuntimeSharingDaemonController()
         #endif
@@ -533,13 +553,23 @@ final class AppContainer {
         providerConnections.onSecretsPushed = { [weak self] in
             Task { await self?.refreshActiveRuntimeContext() }
         }
-        await providerConnections.pushLLMCredentialsToDaemon()
+        await timedStage("startup.push_llm_credentials") {
+            await providerConnections.pushLLMCredentialsToDaemon()
+        }
         guard !Task.isCancelled else { return }
-        await refreshActiveRuntimeContext()
-        await providerConnections.writeSharedSecretsFile()
+        await timedStage("startup.refresh_runtime_context") {
+            await refreshActiveRuntimeContext()
+        }
+        await timedStage("startup.write_shared_secrets_file") {
+            await providerConnections.writeSharedSecretsFile()
+        }
         guard !Task.isCancelled else { return }
-        _ = await sharingController.refreshStatus()
-        _ = await sharingController.refreshDevices()
+        await timedStage("startup.sharing_status") {
+            _ = await sharingController.refreshStatus()
+        }
+        await timedStage("startup.sharing_devices") {
+            _ = await sharingController.refreshDevices()
+        }
     }
 
     func stopDaemonIfNeeded() {
@@ -607,6 +637,20 @@ final class AppContainer {
         }
     }
     #endif
+
+    /// Runs a startup stage and records how long it took. The duration reveals
+    /// whether the stage blocked on a Keychain ACL password prompt: interactive
+    /// waits show up as multi-second (or minutes) values, programmatic reads as
+    /// single-digit milliseconds.
+    private func timedStage<T>(_ name: String, _ body: () async -> T) async -> T {
+        let started = CFAbsoluteTimeGetCurrent()
+        let value = await body()
+        KeychainDiagnostics.record(
+            name,
+            durationMilliseconds: (CFAbsoluteTimeGetCurrent() - started) * 1000
+        )
+        return value
+    }
 
     /// Run only while the scene is active. Recovery must also work outside
     /// Settings, including when Wi-Fi returns or the Mac restarts mid-session.
