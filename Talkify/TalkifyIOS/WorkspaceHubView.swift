@@ -1361,7 +1361,7 @@ private struct WorkspaceConversationRow: View {
                 .frame(width: 7, height: 7)
             VStack(alignment: .leading, spacing: 3) {
                 
-                Text(conversation.ref.name ?? conversation.id)
+                Text(conversation.ref.displayTitle)
                     .font(.system(size: 15, weight: .medium))
                     .foregroundStyle(.primary)
                     .lineLimit(1)
@@ -1456,7 +1456,7 @@ private struct ArchivedWorkspaceConversationsView: View {
                 } else {
                     List(conversations, id: \.id) { conversation in
                         HStack {
-                            Text(conversation.name ?? conversation.id).lineLimit(1)
+                            Text(conversation.displayTitle).lineLimit(1)
                             Spacer()
                             Button("恢复") { restore(conversation) }
                                 .buttonStyle(.borderless)
@@ -1840,7 +1840,7 @@ private struct GlobalSearchView: View {
         let q = query.trimmingCharacters(in: .whitespaces)
         guard !q.isEmpty else { return [] }
         return workspaceContext.conversations(in: store).filter { ref in
-            (ref.name ?? "").localizedCaseInsensitiveContains(q) ||
+            ref.displayTitle.localizedCaseInsensitiveContains(q) ||
             ref.id.localizedCaseInsensitiveContains(q)
         }
     }
@@ -1887,7 +1887,7 @@ private struct GlobalSearchView: View {
                                     HStack(spacing: 8) {
                                         Image(systemName: "bubble.left")
                                             .foregroundStyle(.secondary)
-                                        Text(ref.name ?? ref.id)
+                                        Text(ref.displayTitle)
                                             .lineLimit(1)
                                             .foregroundStyle(.primary)
                                         Spacer()

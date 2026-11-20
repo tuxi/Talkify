@@ -458,7 +458,7 @@ private struct MacSidebarSessionRow<Actions: View>: View {
     @ViewBuilder let actions: () -> Actions
     @State private var hovering = false
 
-    private var title: String { ref.name.flatMap { $0.isEmpty ? nil : $0 } ?? ref.id }
+    private var title: String { ref.displayTitle }
 
     var body: some View {
         HStack(spacing: 2) {

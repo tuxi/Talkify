@@ -202,8 +202,8 @@ public struct WorkspaceView: View {
     private var macTitle: String {
         if macShowsCustomize { return "Customize" }
         return switch store.selectItem {
-        case .conversationDetail: store.activeConversationViewModel?.conversation?.name ?? "对话"
-        case .draft: "新对话"
+        case .conversationDetail: store.selectedConversation?.displayTitle ?? "对话"
+        case .draft: store.draft?.submissionPreview ?? "新对话"
         case .automation: "Routines"
         case .workflow: "工作流"
         }
@@ -626,7 +626,7 @@ public struct WorkspaceView: View {
     #if os(macOS)
                             .frame(minWidth: 80, idealWidth: 280, maxWidth: 650)
     #endif
-                            .navigationTitle(store.activeConversationViewModel?.conversation?.name ?? "")
+                            .navigationTitle(store.selectedConversation?.displayTitle ?? "对话")
                     case .draft:
                         ConversationDetailView(conversation: nil)
                             .frame(minWidth: 80, idealWidth: 280, maxWidth: 650)
